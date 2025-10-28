@@ -1,0 +1,368 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-0.1" v="1.0">
+  <metadata>
+    <epicId>0</epicId>
+    <storyId>0.1</storyId>
+    <title>Create Android project structure with Kotlin and Jetpack Compose</title>
+    <status>Draft</status>
+    <generatedAt>2025-10-28</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/stories/story-0.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a developer</asA>
+    <iWant>to create the Android project structure with Kotlin and Jetpack Compose</iWant>
+    <soThat>I have a modern foundation for building the Phone Manager application</soThat>
+    <tasks>
+      - Initialize Android project structure
+      - Configure Jetpack Compose and Material 3
+      - Set up Single Activity architecture
+      - Implement basic UI theme
+      - Create empty home screen
+      - Configure AndroidManifest.xml
+      - Verify build and run
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1">Android project created with Kotlin 1.9.22</criterion>
+    <criterion id="2">Jetpack Compose 1.6.0 configured with Material 3</criterion>
+    <criterion id="3">Gradle build scripts set up with Kotlin DSL</criterion>
+    <criterion id="4">Target SDK 34, minimum SDK 26</criterion>
+    <criterion id="5">Single Activity architecture with Compose Navigation</criterion>
+    <criterion id="6">App compiles and runs with empty home screen</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/solution-architecture.md</path>
+        <title>Phone Manager Solution Architecture</title>
+        <section>1.1 Technology and Library Decision Table</section>
+        <snippet>
+Language: Kotlin 1.9.22 - Modern, concise, Android-first language with coroutines support
+Build System: Gradle (Kotlin DSL) 8.2.0 - Standard Android build system with type-safe configuration
+Minimum SDK: Android 8.0 (Oreo) API 26 - Balance of feature support and market coverage (~95% devices)
+Target SDK: Android 14 API 34 - Latest stable Android version for modern features
+Compile SDK: Android 14 API 34 - Latest APIs and build tools
+UI Framework: Jetpack Compose 1.6.0 - Modern declarative UI, less boilerplate than XML views
+Compose BOM: androidx.compose 2024.02.00 - Bill of Materials for consistent Compose versions
+Material Design: Material 3 (Compose) 1.2.0 - Modern Material Design with dynamic theming support
+Navigation: Compose Navigation 2.7.6 - Type-safe navigation for Compose screens
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/solution-architecture.md</path>
+        <title>Phone Manager Solution Architecture</title>
+        <section>6.1 Build Configuration</section>
+        <snippet>
+Project-level build.gradle.kts:
+plugins {
+    id("com.android.application") version "8.2.0" apply false
+    id("org.jetbrains.kotlin.android") version "1.9.22" apply false
+    id("com.google.devtools.ksp") version "1.9.22-1.0.17" apply false
+    id("org.jetbrains.kotlin.plugin.serialization") version "1.9.22" apply false
+}
+
+App-level build.gradle.kts:
+plugins {
+    id("com.android.application")
+    id("org.jetbrains.kotlin.android")
+    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.plugin.serialization")
+}
+
+android {
+    namespace = "com.phonemanager"
+    compileSdk = 34
+
+    defaultConfig {
+        applicationId = "com.phonemanager"
+        minSdk = 26
+        targetSdk = 34
+        versionCode = 1
+        versionName = "1.0.0"
+    }
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    buildFeatures {
+        compose = true
+    }
+
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.8"
+    }
+}
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/solution-architecture.md</path>
+        <title>Phone Manager Solution Architecture</title>
+        <section>7. Proposed Source Tree</section>
+        <snippet>
+phone-manager/
+├── app/
+│   ├── src/
+│   │   ├── main/
+│   │   │   ├── AndroidManifest.xml
+│   │   │   ├── java/com/phonemanager/
+│   │   │   │   ├── PhoneManagerApp.kt
+│   │   │   │   ├── MainActivity.kt
+│   │   │   │   ├── ui/
+│   │   │   │   │   ├── theme/
+│   │   │   │   │   │   ├── Color.kt
+│   │   │   │   │   │   ├── Theme.kt
+│   │   │   │   │   │   └── Type.kt
+│   │   │   │   │   ├── navigation/
+│   │   │   │   │   │   └── PhoneManagerNavHost.kt
+│   │   │   │   │   └── home/
+│   │   │   │   │       └── HomeScreen.kt
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/solution-architecture.md</path>
+        <title>Phone Manager Solution Architecture</title>
+        <section>ADR-002: Jetpack Compose over XML Views</section>
+        <snippet>
+Decision: Use Jetpack Compose for all UI
+Rationale:
+  - Modern declarative UI paradigm (less boilerplate)
+  - Easier state management
+  - Better tooling and preview support
+  - Future-proof (Android's recommended UI toolkit)
+Trade-offs: Smaller community resources than XML Views, slightly larger APK size
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/solution-architecture.md</path>
+        <title>Phone Manager Solution Architecture</title>
+        <section>ADR-010: Single Activity Architecture</section>
+        <snippet>
+Decision: Use Single Activity with Compose Navigation instead of multi-activity
+Rationale:
+  - Compose Navigation is designed for single-activity
+  - Simpler state management and navigation
+  - Better animation transitions
+  - Android best practice for modern apps
+Trade-offs: All screens share same lifecycle (acceptable for simple two-screen app)
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/PRD.md</path>
+        <title>Product Requirements Document</title>
+        <section>Epic 0: Project Setup and Infrastructure</section>
+        <snippet>
+Story 0.1: As a developer, I want to create the Android project structure with Kotlin and Jetpack Compose so I have a modern foundation
+Acceptance Criteria:
+  - Android project created with Kotlin 1.9.22
+  - Jetpack Compose 1.6.0 configured with Material 3
+  - Gradle build scripts set up with Kotlin DSL
+  - Target SDK 34, minimum SDK 26
+  - Single Activity architecture with Compose Navigation
+  - App compiles and runs with empty home screen
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <!-- No existing code yet - this is the initial project setup story -->
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="androidx.compose:compose-bom" version="2024.02.00" />
+        <package name="androidx.compose.material3:material3" version="from BOM" />
+        <package name="androidx.compose.ui:ui" version="from BOM" />
+        <package name="androidx.compose.ui:ui-tooling-preview" version="from BOM" />
+        <package name="androidx.navigation:navigation-compose" version="2.7.6" />
+        <package name="androidx.activity:activity-compose" version="1.8.2" />
+        <package name="androidx.core:core-ktx" version="1.12.0" />
+        <package name="androidx.lifecycle:lifecycle-runtime-ktx" version="2.7.0" />
+      </android>
+      <gradle>
+        <plugin name="com.android.application" version="8.2.0" />
+        <plugin name="org.jetbrains.kotlin.android" version="1.9.22" />
+        <plugin name="com.google.devtools.ksp" version="1.9.22-1.0.17" />
+        <plugin name="org.jetbrains.kotlin.plugin.serialization" version="1.9.22" />
+      </gradle>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use Kotlin 1.9.22 as the primary language for all Android code</constraint>
+    <constraint>Use Jetpack Compose (not XML layouts) for all UI implementation</constraint>
+    <constraint>Follow Single Activity architecture pattern with Compose Navigation</constraint>
+    <constraint>Use Gradle Kotlin DSL (build.gradle.kts) not Groovy for build scripts</constraint>
+    <constraint>Set compileSdk and targetSdk to 34 (Android 14)</constraint>
+    <constraint>Set minSdk to 26 (Android 8.0 Oreo)</constraint>
+    <constraint>Use Java 17 for compilation (jvmTarget and sourceCompatibility)</constraint>
+    <constraint>Package structure must be com.phonemanager</constraint>
+    <constraint>Use Material 3 design system (not Material 2)</constraint>
+    <constraint>Use Compose BOM for version management of Compose dependencies</constraint>
+    <constraint>Enable Compose in buildFeatures and set kotlinCompilerExtensionVersion to 1.5.8</constraint>
+    <constraint>Application namespace must be "com.phonemanager"</constraint>
+    <constraint>Version code starts at 1, version name at "1.0.0"</constraint>
+  </constraints>
+
+  <interfaces>
+    <!-- No existing interfaces yet - this is the initial project setup -->
+    <note>This story creates the foundation. Future stories will implement interfaces for:</note>
+    <future>LocationRepository, NetworkRepository, ConfigRepository</future>
+    <future>ViewModels (HomeViewModel, SettingsViewModel)</future>
+    <future>Use Cases (LocationTrackingUseCase)</future>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests are not required for this infrastructure setup story. Focus on manual verification:
+- Project compiles without errors
+- App builds and generates APK/AAB successfully
+- App runs on emulator or physical device
+- Empty home screen displays correctly
+- No crashes on launch
+
+Testing strategy from architecture:
+- Target 80% unit test coverage for business logic (future stories)
+- Use JUnit 5 + MockK + Coroutines Test for unit tests
+- Use AndroidX Test + Compose UI Test for instrumentation tests
+- Manual testing for UI and integration verification
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/ - Unit tests (future stories)</location>
+      <location>app/src/androidTest/java/com/phonemanager/ - Instrumentation tests (future stories)</location>
+    </locations>
+
+    <ideas>
+      <idea ac="1">Verify build.gradle.kts contains kotlin("android") version "1.9.22"</idea>
+      <idea ac="2">Check Compose BOM 2024.02.00 is declared and Material 3 dependency is included</idea>
+      <idea ac="3">Confirm build scripts use Kotlin DSL (.kts extension) not Groovy</idea>
+      <idea ac="4">Verify android.compileSdk = 34, android.defaultConfig.targetSdk = 34, android.defaultConfig.minSdk = 26</idea>
+      <idea ac="5">Check MainActivity extends ComponentActivity and uses setContent with NavHost</idea>
+      <idea ac="6">Run ./gradlew build and verify success, then run app on emulator and confirm home screen appears</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Initialize Project Structure</title>
+      <description>Create the Android project with proper Gradle configuration</description>
+      <actions>
+        - Create project root directory: phone-manager/
+        - Create app module directory structure
+        - Create build.gradle.kts files (project-level and app-level)
+        - Create settings.gradle.kts
+        - Create gradle.properties with Android Gradle Plugin settings
+        - Create gradlew scripts for Gradle wrapper
+        - Create .gitignore for Android project
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Configure Build Scripts</title>
+      <description>Set up Gradle build configuration with Kotlin DSL</description>
+      <actions>
+        - Configure project-level build.gradle.kts with plugins
+        - Configure app-level build.gradle.kts with Android settings
+        - Add Compose dependencies using BOM
+        - Set SDK versions (compile 34, target 34, min 26)
+        - Configure Kotlin options (jvmTarget 17)
+        - Enable Compose buildFeatures
+        - Set kotlinCompilerExtensionVersion to 1.5.8
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Create Application Structure</title>
+      <description>Set up the main application class and activity</description>
+      <actions>
+        - Create com.phonemanager package structure
+        - Implement PhoneManagerApp.kt (Application class)
+        - Implement MainActivity.kt with ComponentActivity and setContent
+        - Create AndroidManifest.xml with application and activity declarations
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Implement Theme System</title>
+      <description>Create Material 3 theme for the app</description>
+      <actions>
+        - Create ui/theme package
+        - Implement Color.kt with Material 3 color scheme
+        - Implement Type.kt with Material 3 typography
+        - Implement Theme.kt with PhoneManagerTheme composable
+        - Use MaterialTheme with Material 3 components
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Create Navigation Structure</title>
+      <description>Set up Compose Navigation with home screen</description>
+      <actions>
+        - Create ui/navigation package
+        - Implement PhoneManagerNavHost.kt with NavHost
+        - Create ui/home package
+        - Implement HomeScreen.kt as a simple @Composable with Text
+        - Set HomeScreen as start destination in NavHost
+        - Wire up navigation in MainActivity
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Build and Verify</title>
+      <description>Ensure the project compiles and runs</description>
+      <actions>
+        - Run ./gradlew clean build
+        - Fix any compilation errors
+        - Run ./gradlew assembleDebug
+        - Install on emulator or device
+        - Launch app and verify home screen displays
+        - Check for any runtime crashes
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>Compose version mismatch errors</issue>
+      <solution>Always use Compose BOM to manage versions. Don't specify individual Compose dependency versions - let BOM handle it.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>kotlinCompilerExtensionVersion incompatibility</issue>
+      <solution>Use version 1.5.8 which matches Kotlin 1.9.22. Check Compose-Kotlin compatibility matrix if issues arise.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Java version mismatch between Kotlin and Android</issue>
+      <solution>Set both kotlinOptions.jvmTarget and compileOptions to JavaVersion.VERSION_17 for consistency.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Missing activity declaration in AndroidManifest.xml</issue>
+      <solution>Ensure MainActivity is registered with proper intent-filter for launcher activity.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Application class not registered</issue>
+      <solution>Add android:name=".PhoneManagerApp" to the application tag in AndroidManifest.xml.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Namespace conflicts with applicationId</issue>
+      <solution>Set both android.namespace and defaultConfig.applicationId to "com.phonemanager" for consistency.</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="prd" path="docs/PRD.md" section="Epic 0: Project Setup and Infrastructure" />
+    <reference type="architecture" path="docs/solution-architecture.md" section="Technology Stack and Decisions" />
+    <reference type="architecture" path="docs/solution-architecture.md" section="Build Configuration" />
+    <reference type="architecture" path="docs/solution-architecture.md" section="Proposed Source Tree" />
+    <reference type="adr" path="docs/solution-architecture.md" section="ADR-002: Jetpack Compose over XML Views" />
+    <reference type="adr" path="docs/solution-architecture.md" section="ADR-010: Single Activity Architecture" />
+  </references>
+</story-context>
