@@ -104,6 +104,68 @@ Create a reliable, battery-efficient location tracking solution that runs seamle
 
 ## Epics and User Stories
 
+### Epic 0: Project Setup and Infrastructure (Enabler)
+
+**Priority:** Critical (Prerequisite)
+**Estimated Effort:** Medium (1 week)
+**Type:** Technical Enabler
+
+**Purpose:** Establish the foundational architecture, build configuration, and infrastructure required for all subsequent feature development. This epic has no direct user-facing value but is essential for implementing all other epics.
+
+#### Stories:
+1. **Story 0.1**: As a developer, I want to create the Android project structure with Kotlin and Jetpack Compose so I have a modern foundation
+   - **Acceptance Criteria:**
+     - Android project created with Kotlin 1.9.22
+     - Jetpack Compose 1.6.0 configured with Material 3
+     - Gradle build scripts set up with Kotlin DSL
+     - Target SDK 34, minimum SDK 26
+     - Single Activity architecture with Compose Navigation
+     - App compiles and runs with empty home screen
+
+2. **Story 0.2**: As a developer, I want to configure Koin dependency injection so I have clean separation of concerns
+   - **Acceptance Criteria:**
+     - Koin 3.5.3 integrated
+     - DI modules created (AppModule, DataModule, DomainModule, ViewModelModule)
+     - Application class configured with Koin initialization
+     - Sample ViewModel injection working
+
+3. **Story 0.3**: As a developer, I want to set up Room database infrastructure so I can queue failed transmissions
+   - **Acceptance Criteria:**
+     - Room 2.6.1 configured with KSP
+     - PhoneManagerDatabase created
+     - TransmissionQueueDao and entity defined
+     - Database migration strategy established
+     - Basic CRUD operations tested
+
+4. **Story 0.4**: As a developer, I want to configure WorkManager so I can schedule background tasks reliably
+   - **Acceptance Criteria:**
+     - WorkManager 2.9.0 integrated
+     - WorkerFactory configured with Koin
+     - Sample periodic worker created and tested
+     - Doze mode constraints configured
+
+5. **Story 0.5**: As a developer, I want to implement base architecture patterns so I have consistent structure
+   - **Acceptance Criteria:**
+     - Repository pattern base classes/interfaces
+     - ViewModel base setup with StateFlow
+     - Navigation graph structure
+     - Data models package structure
+     - Use case pattern established
+
+6. **Story 0.6**: As a developer, I want to configure build variants and ProGuard so I have optimized releases
+   - **Acceptance Criteria:**
+     - Debug and Release build types configured
+     - ProGuard rules defined for Koin, Retrofit, Room
+     - Signing configuration prepared (without committing keys)
+     - Build successfully generates minified release APK
+     - Timber logging configured (debug vs release trees)
+
+**Dependencies:** None (first epic to implement)
+
+**Blocks:** Epic 1, Epic 2, Epic 3, Epic 4 (all feature epics require this foundation)
+
+---
+
 ### Epic 1: Location Tracking Core
 
 **Priority:** Critical
@@ -205,13 +267,15 @@ Create a reliable, battery-efficient location tracking solution that runs seamle
 
 1. **Platform**: Android 8.0 (API 26) minimum, target Android 14 (API 34)
 2. **Language**: Kotlin (preferred for Android development)
-3. **Architecture**: MVVM with Repository pattern
-4. **Dependency Injection**: Hilt (Dagger)
-5. **Background Work**: WorkManager API
-6. **Location**: Google Play Services Location API (Fused Location Provider)
-7. **Encryption**: Android Crypto API (AES/CBC/PKCS7Padding)
-8. **Networking**: Retrofit 2 + OkHttp 3
-9. **Storage**: EncryptedSharedPreferences, Room Database (for queue)
+3. **UI Framework**: Jetpack Compose with Material 3
+4. **Architecture**: MVVM with Clean Architecture (simplified), Repository pattern
+5. **Dependency Injection**: Koin (lightweight, minimal boilerplate)
+6. **Background Work**: WorkManager API
+7. **Location**: Google Play Services Location API (Fused Location Provider)
+8. **Encryption**: Android Crypto API (AES/CBC/PKCS7Padding)
+9. **Networking**: Retrofit 2 + OkHttp 3
+10. **Storage**: EncryptedSharedPreferences, Room Database (for queue)
+11. **Build System**: Gradle with Kotlin DSL
 
 ---
 
@@ -318,10 +382,18 @@ Create a reliable, battery-efficient location tracking solution that runs seamle
 
 ## Approval
 
-**Status**: Draft
-**PRD Version**: 1.0
-**Next Phase**: Solution Architecture
+**Status**: Updated
+**PRD Version**: 1.1
+**Last Updated**: 2025-10-15
+**Next Phase**: Tech Spec Generation
+
+**Changelog (v1.1):**
+- Added Epic 0: Project Setup and Infrastructure (enabler epic)
+- Updated Technical Constraints (Koin instead of Hilt, added Jetpack Compose)
+- Added 6 technical stories for foundational setup
+- Total epics: 5 (1 enabler + 4 feature epics)
+- Total stories: 17 (6 technical + 11 user-facing)
 
 ---
 
-_This PRD was created as part of the BMAD solution architecture workflow._
+_This PRD was created and updated as part of the BMAD solution architecture workflow._
