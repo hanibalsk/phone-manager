@@ -33,10 +33,18 @@ so that I can identify issues and optimize performance.
    - [ ] Service uptime displayed
 
 4. **Performance Optimization:**
-   - [ ] Battery usage <5% per day achieved
+   - [ ] Battery usage tracked and visible to user in settings
+   - [ ] App ranks below top 5 battery consumers in system settings
    - [ ] Memory leaks identified and fixed
    - [ ] Query performance optimized
    - [ ] Network efficiency improved
+
+5. **Data Retention Policy:**
+   - [ ] Location data older than 30 days automatically deleted
+   - [ ] Failed upload attempts older than 7 days deleted
+   - [ ] Maximum queue size of 10,000 location records enforced
+   - [ ] Storage usage monitored and logged
+   - [ ] User notified if storage quota exceeded
 
 ## Tasks / Subtasks
 

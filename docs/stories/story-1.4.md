@@ -57,6 +57,13 @@ so that location data can be reliably sent to the configured server endpoint wit
    - [ ] Test various network conditions
    - [ ] Test server error scenarios
 
+8. **URL Security Validation:**
+   - [ ] Server URL must use HTTPS protocol (reject HTTP)
+   - [ ] URL format validation before saving configuration
+   - [ ] Certificate pinning optional but recommended for production
+   - [ ] Invalid SSL certificates rejected (no insecure bypass)
+   - [ ] Clear error message when HTTP URL provided: "HTTPS required for security"
+
 ## Tasks / Subtasks
 
 ### Task 1: Add Dependencies

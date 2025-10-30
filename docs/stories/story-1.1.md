@@ -40,6 +40,24 @@ so that the app can properly request location permissions and has a solid archit
    - [ ] Instrumentation tests for permission dialog flows
    - [ ] Tested on Android 10, 12, and 14
 
+5. **Android 11+ Two-Step Permission Flow:**
+   - [ ] Fine location requested first on Android 11+
+   - [ ] Background location requested separately after fine location granted
+   - [ ] Clear explanation shown before background permission request
+   - [ ] App functions gracefully if only foreground permission granted
+
+6. **Permission Rationale Display:**
+   - [ ] Rationale dialog shown before any permission request
+   - [ ] Explanation includes specific use case (background location tracking)
+   - [ ] User can proceed or cancel from rationale dialog
+   - [ ] Rationale shown again if user denies but hasn't selected "Don't ask again"
+
+7. **Permission Denial Handling:**
+   - [ ] When background permission denied: show limitation message
+   - [ ] When permanently denied: show settings navigation button
+   - [ ] App continues to function with degraded capability (foreground only)
+   - [ ] Clear status indicator shows permission state in settings
+
 ## Tasks / Subtasks
 
 ### Task 1: Configure Hilt Dependency Injection
