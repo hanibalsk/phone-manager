@@ -487,8 +487,8 @@ so that location data is buffered for upload and the app can operate offline wit
           return try {
               val retentionDays = inputData.getInt(KEY_RETENTION_DAYS, 30)
               val deletedCount = when (val result = locationRepository.deleteOldLocations(retentionDays)) {
-                  is com.phonemanager.core.Result.Success -> result.data
-                  is com.phonemanager.core.Result.Error -> return Result.failure()
+                  is three.two.bit.phone.manager.core.Result.Success -> result.data
+                  is three.two.bit.phone.manager.core.Result.Error -> return Result.failure()
               }
 
               Log.i(TAG, "Deleted $deletedCount old locations")

@@ -82,16 +82,16 @@ class LocationUploadWorker @AssistedInject constructor(
             }
 
             when (val result = locationRepository.uploadLocations(locations)) {
-                is com.phonemanager.core.Result.Success -> {
+                is three.two.bit.phone.manager.core.Result.Success -> {
                     val locationIds = locations.map { /* extract IDs */ }
                     locationRepository.markLocationsSynced(locationIds)
-                    
+
                     val output = workDataOf(
                         KEY_UPLOADED_COUNT to result.data
                     )
                     Result.success(output)
                 }
-                is com.phonemanager.core.Result.Error -> {
+                is three.two.bit.phone.manager.core.Result.Error -> {
                     if (runAttemptCount < MAX_RETRIES) {
                         Result.retry()
                     } else {

@@ -49,21 +49,21 @@ so that the app can properly request location permissions and has a solid archit
   - `androidx.hilt:hilt-navigation-compose:1.2.0`
 - [ ] Apply Hilt plugins to app module
 - [ ] Annotate PhoneManagerApp with `@HiltAndroidApp`
-- [ ] Create base Hilt modules structure in `com.phonemanager.di` package
+- [ ] Create base Hilt modules structure in `three.two.bit.phone.manager.di` package
 
 ### Task 2: Establish Clean Architecture Package Structure
 - [ ] Create domain layer packages:
-  - `com.phonemanager.feature.location.domain.model`
-  - `com.phonemanager.feature.location.domain.repository`
-  - `com.phonemanager.feature.location.domain.usecase`
+  - `three.two.bit.phone.manager.feature.location.domain.model`
+  - `three.two.bit.phone.manager.feature.location.domain.repository`
+  - `three.two.bit.phone.manager.feature.location.domain.usecase`
 - [ ] Create data layer packages:
-  - `com.phonemanager.feature.location.data.repository`
-  - `com.phonemanager.feature.location.data.source`
-  - `com.phonemanager.feature.location.data.model`
+  - `three.two.bit.phone.manager.feature.location.data.repository`
+  - `three.two.bit.phone.manager.feature.location.data.source`
+  - `three.two.bit.phone.manager.feature.location.data.model`
 - [ ] Create presentation layer packages:
-  - `com.phonemanager.feature.location.presentation.ui`
-  - `com.phonemanager.feature.location.presentation.viewmodel`
-  - `com.phonemanager.feature.location.presentation.model`
+  - `three.two.bit.phone.manager.feature.location.presentation.ui`
+  - `three.two.bit.phone.manager.feature.location.presentation.viewmodel`
+  - `three.two.bit.phone.manager.feature.location.presentation.model`
 
 ### Task 3: Implement Permission Management
 - [ ] Add permission declarations to AndroidManifest.xml:
@@ -72,7 +72,7 @@ so that the app can properly request location permissions and has a solid archit
   <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
   <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
   ```
-- [ ] Create `PermissionManager` class in `com.phonemanager.core.permission`
+- [ ] Create `PermissionManager` class in `three.two.bit.phone.manager.core.permission`
 - [ ] Implement permission state data classes:
   - `PermissionState` sealed interface
   - `LocationPermissionStatus` data class
