@@ -1,4 +1,4 @@
-package com.phonemanager
+package three.two.bit.phone.manager
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -7,8 +7,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.phonemanager.ui.navigation.PhoneManagerNavHost
-import com.phonemanager.ui.theme.PhoneManagerTheme
+import three.two.bit.phone.manager.ui.navigation.PhoneManagerNavHost
+import three.two.bit.phone.manager.ui.theme.PhoneManagerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

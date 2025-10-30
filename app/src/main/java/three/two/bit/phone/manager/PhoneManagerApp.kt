@@ -1,4 +1,4 @@
-package com.phonemanager
+package three.two.bit.phone.manager
 
 import android.app.Application
 

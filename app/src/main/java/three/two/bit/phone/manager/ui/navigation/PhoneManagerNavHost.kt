@@ -1,10 +1,10 @@
-package com.phonemanager.ui.navigation
+package three.two.bit.phone.manager.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.phonemanager.ui.home.HomeScreen
+import three.two.bit.phone.manager.ui.home.HomeScreen
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
