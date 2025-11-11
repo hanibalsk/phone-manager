@@ -1,0 +1,360 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-1.1" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.1</storyId>
+    <title>Location Tracking Toggle</title>
+    <status>Ready for Development</status>
+    <generatedAt>2025-01-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/product/Story-1.1-Tracking-Toggle.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to easily enable or disable location tracking with a single toggle</iWant>
+    <soThat>I have clear control over when my location is being collected</soThat>
+    <tasks>
+      - Implement LocationTrackingViewModel with state management
+      - Create LocationTrackingToggle Composable with Material 3 Switch
+      - Implement PreferencesRepository using DataStore
+      - Create LocationServiceController for service lifecycle
+      - Persist toggle state across app restarts
+      - Handle permission-denied state with disabled toggle
+      - Implement loading states during service transitions
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1.1.1">Material 3 Switch component displayed with "Location Tracking" label</criterion>
+    <criterion id="1.1.2">Toggle state persists across app restarts, loads within 100ms</criterion>
+    <criterion id="1.1.3">Service starts within 500ms when toggle enabled, foreground notification appears</criterion>
+    <criterion id="1.1.4">Service stops immediately when toggle disabled, notification disappears</criterion>
+    <criterion id="1.1.5">Toggle disabled when permissions not granted, shows "Location permissions required" text</criterion>
+    <criterion id="1.1.6">Visual feedback within 200ms of toggle interaction, UI remains responsive</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/product/Epic-1-Location-Tracking-Core.md</path>
+        <title>Epic 1: Location Tracking Core (UI Layer)</title>
+        <section>Story 1.1: Location Tracking Toggle</section>
+        <snippet>
+Duration: 3-5 days (5 story points)
+Value: Core UI control for tracking feature
+
+Implements Material 3 toggle switch that:
+- Starts/stops LocationTrackingService
+- Persists state using DataStore
+- Provides visual feedback on service status
+- Disables when permissions not granted
+
+Performance Targets:
+- Toggle response: &lt; 200ms
+- Service start: &lt; 500ms
+- State load: &lt; 100ms
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/product/Story-1.1-Tracking-Toggle.md</path>
+        <title>Story 1.1: Location Tracking Toggle</title>
+        <section>Technical Details - Architecture</section>
+        <snippet>
+Pattern: MVVM with Repository
+
+Components:
+LocationTrackingViewModel ──► PreferencesRepository
+           │                           │
+           │                     DataStore
+           │
+           └──► LocationServiceController ──► LocationTrackingService (Epic 0.2.4)
+
+Data Flow:
+User toggles switch → ViewModel.toggleTracking() → ServiceController.startTracking()
+→ startForegroundService() → LocationTrackingService.onStartCommand()
+→ Service starts, notification appears
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="app/src/main/java/com/phonemanager/ui/main/LocationTrackingViewModel.kt">
+        <snippet>
+@HiltViewModel
+class LocationTrackingViewModel @Inject constructor(
+    private val preferencesRepository: PreferencesRepository,
+    private val serviceController: LocationServiceController,
+    private val permissionManager: PermissionManager
+) : ViewModel() {
+
+    private val _trackingState = MutableStateFlow(TrackingState.Stopped)
+    val trackingState: StateFlow&lt;TrackingState&gt; = _trackingState.asStateFlow()
+
+    private val _permissionState = MutableStateFlow&lt;PermissionState&gt;(PermissionState.Checking)
+    val permissionState: StateFlow&lt;PermissionState&gt; = _permissionState.asStateFlow()
+
+    fun toggleTracking() {
+        viewModelScope.launch {
+            when (_trackingState.value) {
+                is TrackingState.Stopped -> startTracking()
+                is TrackingState.Active -> stopTracking()
+                is TrackingState.Starting, is TrackingState.Stopping -> {
+                    // Ignore rapid taps during transition
+                }
+            }
+        }
+    }
+
+    private suspend fun startTracking() {
+        if (!permissionManager.hasAllPermissions()) return
+
+        _trackingState.value = TrackingState.Starting
+        serviceController.startTracking()
+            .onSuccess {
+                preferencesRepository.setTrackingEnabled(true)
+                _trackingState.value = TrackingState.Active
+            }
+            .onFailure { error ->
+                _trackingState.value = TrackingState.Error(error.message ?: "Failed to start")
+            }
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/data/preferences/PreferencesRepository.kt">
+        <snippet>
+@Singleton
+class PreferencesRepositoryImpl @Inject constructor(
+    @ApplicationContext private val context: Context
+) : PreferencesRepository {
+
+    private val Context.dataStore: DataStore&lt;Preferences&gt; by preferencesDataStore(name = "settings")
+
+    private object PreferencesKeys {
+        val TRACKING_ENABLED = booleanPreferencesKey("tracking_enabled")
+        val TRACKING_INTERVAL = intPreferencesKey("tracking_interval_minutes")
+    }
+
+    override val isTrackingEnabled: Flow&lt;Boolean&gt; = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRACKING_ENABLED] ?: false
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading tracking enabled preference")
+                emit(false)
+            } else {
+                throw exception
+            }
+        }
+}
+        </snippet>
+      </file>
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="androidx.datastore:datastore-preferences" version="1.0.0" />
+        <package name="androidx.lifecycle:lifecycle-viewmodel-compose" version="2.7.0" />
+        <package name="androidx.compose.material3:material3" version="1.2.0" />
+        <package name="com.google.dagger:hilt-android" version="2.48.1" />
+      </android>
+      <internal>
+        <dependency story="0.2.3">LocationRepository interface</dependency>
+        <dependency story="0.2.4">LocationTrackingService</dependency>
+        <dependency story="0.1">Hilt DI configuration</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use Material 3 Switch component (not Material 2 or custom)</constraint>
+    <constraint>Use DataStore for preferences (not SharedPreferences)</constraint>
+    <constraint>Follow MVVM pattern with StateFlow for state management</constraint>
+    <constraint>Inject dependencies via Hilt @HiltViewModel</constraint>
+    <constraint>Toggle response must be &lt; 200ms for visual feedback</constraint>
+    <constraint>Service start must complete within 500ms</constraint>
+    <constraint>State persistence load time &lt; 100ms</constraint>
+    <constraint>Use Result&lt;T&gt; for service controller operations</constraint>
+    <constraint>Handle all TrackingState transitions (Stopped, Starting, Active, Stopping, Error)</constraint>
+    <constraint>Disable toggle when permissions not granted (Story 1.2 dependency)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="PreferencesRepository">
+      <method>val isTrackingEnabled: Flow&lt;Boolean&gt;</method>
+      <method>suspend fun setTrackingEnabled(enabled: Boolean)</method>
+      <method>val trackingInterval: Flow&lt;Int&gt;</method>
+      <method>suspend fun setTrackingInterval(minutes: Int)</method>
+    </interface>
+
+    <interface name="LocationServiceController">
+      <method>suspend fun startTracking(): Result&lt;Unit&gt;</method>
+      <method>suspend fun stopTracking(): Result&lt;Unit&gt;</method>
+      <method>fun observeServiceState(): Flow&lt;ServiceState&gt;</method>
+    </interface>
+
+    <interface name="PermissionManager">
+      <method>fun hasAllPermissions(): Boolean</method>
+      <method>fun observePermissionState(): Flow&lt;PermissionState&gt;</method>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests required:
+- LocationTrackingViewModel state transitions
+- PreferencesRepository DataStore operations
+- ServiceController start/stop logic
+
+Integration tests required:
+- Toggle → Service lifecycle coordination
+- State persistence across app restarts
+
+UI tests required:
+- Toggle interaction and visual states
+- Permission-denied disabled state
+
+Performance tests:
+- Toggle response &lt; 200ms
+- Service start &lt; 500ms
+- State load &lt; 100ms
+
+Target coverage: &gt; 80% for ViewModel and Repository
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/ui/main/LocationTrackingViewModelTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/data/preferences/PreferencesRepositoryTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/ui/main/LocationTrackingToggleTest.kt</location>
+    </locations>
+
+    <ideas>
+      <idea ac="1.1.1">Verify Switch composable renders with correct label and Material 3 styling</idea>
+      <idea ac="1.1.2">Test DataStore persistence by setting state, force-closing app, relaunching, and verifying state retained</idea>
+      <idea ac="1.1.3">Mock serviceController.startTracking() to verify service start intent and notification appearance</idea>
+      <idea ac="1.1.4">Mock serviceController.stopTracking() and verify service stops and notification removed</idea>
+      <idea ac="1.1.5">Mock permissionManager.hasAllPermissions() = false and verify toggle is disabled</idea>
+      <idea ac="1.1.6">Use performance profiling to measure toggle tap to UI update latency</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Create PreferencesRepository with DataStore</title>
+      <description>Implement preferences storage for toggle state persistence</description>
+      <actions>
+        - Create PreferencesRepository interface in data/preferences package
+        - Implement PreferencesRepositoryImpl with DataStore
+        - Define PreferencesKeys for TRACKING_ENABLED and TRACKING_INTERVAL
+        - Expose isTrackingEnabled as Flow&lt;Boolean&gt;
+        - Implement setTrackingEnabled(Boolean) with error handling
+        - Add Hilt @Singleton binding
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Create LocationServiceController</title>
+      <description>Abstract service lifecycle management</description>
+      <actions>
+        - Create LocationServiceController interface in service package
+        - Implement startTracking() using startForegroundService()
+        - Implement stopTracking() using stopService()
+        - Return Result&lt;Unit&gt; for error handling
+        - Handle Android 8+ (API 26+) foreground service requirements
+        - Add Timber logging for debugging
+        - Add Hilt @Singleton binding
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Implement LocationTrackingViewModel</title>
+      <description>Manage toggle state and coordinate service operations</description>
+      <actions>
+        - Create @HiltViewModel with @Inject constructor
+        - Define TrackingState sealed class (Stopped, Starting, Active, Stopping, Error)
+        - Create _trackingState MutableStateFlow and expose as StateFlow
+        - Implement toggleTracking() with state transitions
+        - Implement startTracking() with permission check
+        - Implement stopTracking()
+        - Observe preferencesRepository.isTrackingEnabled in init block
+        - Handle error states with user-friendly messages
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Create LocationTrackingToggle Composable</title>
+      <description>Build UI component with Material 3 Switch</description>
+      <actions>
+        - Create LocationTrackingToggle @Composable in ui/main package
+        - Use hiltViewModel() to get LocationTrackingViewModel
+        - Collect trackingState and permissionState as State
+        - Render Card with Material 3 elevation
+        - Display "Location Tracking" label with titleMedium typography
+        - Show status text (Inactive, Starting..., Active, Stopping..., Error)
+        - Render Switch or CircularProgressIndicator based on state
+        - Disable switch when permissions not granted
+        - Add semantics for accessibility (contentDescription)
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Wire Up Dependencies</title>
+      <description>Configure Hilt modules and integrate with MainActivity</description>
+      <actions>
+        - Create DataModule for PreferencesRepository binding
+        - Create ServiceModule for LocationServiceController binding
+        - Add LocationTrackingToggle to MainActivity or HomeScreen
+        - Verify Hilt code generation runs successfully
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Test and Verify</title>
+      <description>Ensure toggle works end-to-end</description>
+      <actions>
+        - Write unit tests for ViewModel state machine
+        - Write unit tests for PreferencesRepository
+        - Write integration test for toggle → service flow
+        - Manual test: Toggle ON → Verify service starts and notification shows
+        - Manual test: Force close app → Relaunch → Verify state persists
+        - Manual test: Toggle OFF → Verify service stops and notification disappears
+        - Profile performance to confirm &lt; 200ms response time
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>DataStore not initialized causing crashes</issue>
+      <solution>Ensure Context.dataStore is defined with `by preferencesDataStore(name = "settings")` at top-level of PreferencesRepositoryImpl</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Service fails to start on Android 8+ (API 26+)</issue>
+      <solution>Use startForegroundService() instead of startService() for Android 8+, and service must call startForeground() within 5 seconds</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Toggle state desynchronized from service state</issue>
+      <solution>Implement health check on app resume to reconcile DataStore state with actual service running state</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Rapid toggle taps causing race conditions</issue>
+      <solution>Ignore toggle taps when state is Starting or Stopping (already in transition)</solution>
+    </gotcha>
+    <gotcha>
+      <issue>StateFlow not updating UI</issue>
+      <solution>Use collectAsState() in Composable to properly observe StateFlow, ensure Flow is exposed as StateFlow not just Flow</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Hilt ViewModel not injecting dependencies</issue>
+      <solution>Ensure @HiltViewModel annotation is present, MainActivity has @AndroidEntryPoint, and hiltViewModel() is used (not viewModel())</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="prd" path="docs/PRD.md" section="Epic 1: Location Tracking Core" />
+    <reference type="epic" path="docs/product/Epic-1-Location-Tracking-Core.md" section="Story 1.1" />
+    <reference type="story" path="docs/product/Story-1.1-Tracking-Toggle.md" section="All sections" />
+    <reference type="dependency" path="docs/product/Epic-0.2-Location-Tracking-Service.md" section="Story 0.2.4: LocationTrackingService" />
+  </references>
+</story-context>

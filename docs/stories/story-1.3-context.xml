@@ -1,0 +1,533 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-1.3" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.3</storyId>
+    <title>UI-Service Integration</title>
+    <status>Ready for Development</status>
+    <generatedAt>2025-01-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/product/Story-1.3-UI-Service-Integration.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to see real-time updates of my location tracking status and collected locations</iWant>
+    <soThat>I know the feature is working correctly and have confidence in the system</soThat>
+    <tasks>
+      - Create ServiceState data models for service health and status
+      - Implement enhanced LocationServiceController with real-time state observation
+      - Enhance LocationTrackingViewModel to observe service state and location stats
+      - Build ServiceStatusCard to display service health indicators
+      - Build LocationStatsCard to show location count and last update
+      - Integrate real-time updates via Kotlin Flow
+      - Implement foreground notification content updates
+      - Handle state synchronization after app kill and device reboot
+      - Support configuration changes without service restart
+      - Implement error handling and display
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1.3.1">UI communicates with service exclusively through Repository pattern, no direct service binding</criterion>
+    <criterion id="1.3.2">Location count updates within 1 second of new location collection</criterion>
+    <criterion id="1.3.3">Last update timestamp displays and auto-refreshes every minute (e.g., "2 min ago" → "3 min ago")</criterion>
+    <criterion id="1.3.4">ServiceStatusCard displays: Tracking Active (green), GPS Acquiring (yellow), Stopped (red), GPS Unavailable (orange), Service Error (red)</criterion>
+    <criterion id="1.3.5">Foreground notification appears within 1s of service start with location count and last update, "Stop Tracking" action works</criterion>
+    <criterion id="1.3.6">After force-kill, service continues, app reopens with correct toggle state, location count, and service health within 100ms</criterion>
+    <criterion id="1.3.7">After device reboot, UI reflects correct tracking state matching actual service state</criterion>
+    <criterion id="1.3.8">Tracking interval change applied to running service within 500ms without service restart (no notification blink)</criterion>
+    <criterion id="1.3.9">LocationStatsCard shows total count, today count, last update, tracking interval, average accuracy in real-time</criterion>
+    <criterion id="1.3.10">Service errors displayed within 1s with user-friendly actionable messages (GPS lost, storage full, location disabled)</criterion>
+    <criterion id="1.3.11">All UI components receive real-time updates via Kotlin Flow within 1s, no manual refresh or polling required</criterion>
+    <criterion id="1.3.12">Notification content updates in real-time without sound/vibration, reflects current location count and last update</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/product/Story-1.3-UI-Service-Integration.md</path>
+        <title>Story 1.3: UI-Service Integration</title>
+        <section>Architecture - Data Flow</section>
+        <snippet>
+Pattern: MVVM + Repository + Service Controller Abstraction
+
+Data Flow:
+UI Layer: Compose UI → ViewModel (StateFlow)
+Domain Layer: ViewModel → ServiceController → Repository
+Data Layer: Repository → Service → Database
+
+Real-time updates flow:
+Service captures location → Saves to DB → Repository observes DB
+→ Emits Flow update → ViewModel collects → StateFlow updates
+→ UI recomposes
+
+No direct service binding. All communication through Repository pattern.
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/product/Epic-1-Location-Tracking-Core.md</path>
+        <title>Epic 1: Location Tracking Core</title>
+        <section>Story 1.3: UI-Service Integration</section>
+        <snippet>
+Duration: 5-7 days (8 story points)
+Value: Connects UI to backend service with real-time updates
+
+Performance Targets:
+- Location update latency: &lt; 1 second
+- Configuration change application: &lt; 500ms
+- Repository cache hit rate: &gt; 90%
+- Memory usage: &lt; 10MB for state management
+
+Integration Points with Epic 0.2:
+- LocationEntity and LocationDao (data source)
+- LocationRepository interface (data access)
+- LocationTrackingService (service lifecycle)
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="app/src/main/java/com/phonemanager/domain/model/ServiceState.kt">
+        <snippet>
+data class ServiceState(
+    val isRunning: Boolean,
+    val status: ServiceStatus,
+    val lastUpdate: Instant?,
+    val locationCount: Int,
+    val currentInterval: Duration,
+    val healthStatus: HealthStatus,
+    val errorMessage: String? = null
+)
+
+enum class ServiceStatus {
+    STOPPED,
+    STARTING,
+    RUNNING,
+    GPS_ACQUIRING,
+    STOPPING,
+    ERROR
+}
+
+enum class HealthStatus {
+    HEALTHY,           // Service running, locations collected
+    GPS_UNAVAILABLE,   // Location services disabled
+    NO_GPS_SIGNAL,     // Service running but no GPS fix
+    ERROR              // Service error state
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/service/LocationServiceController.kt">
+        <snippet>
+@Singleton
+class LocationServiceControllerImpl @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val locationRepository: LocationRepository,
+    private val preferencesRepository: PreferencesRepository
+) : LocationServiceController {
+
+    private val _serviceState = MutableStateFlow(ServiceState(...))
+
+    init {
+        // Observe repository updates and update service state
+        CoroutineScope(Dispatchers.Default + SupervisorJob()).launch {
+            combine(
+                locationRepository.observeServiceHealth(),
+                locationRepository.observeLocationCount(),
+                locationRepository.observeLastLocation(),
+                preferencesRepository.trackingInterval
+            ) { health, count, lastLocation, interval -&gt;
+                ServiceState(
+                    isRunning = health.isRunning,
+                    status = mapHealthToStatus(health),
+                    lastUpdate = lastLocation?.timestamp?.let { Instant.ofEpochMilli(it) },
+                    locationCount = count,
+                    currentInterval = Duration.ofMinutes(interval.toLong()),
+                    healthStatus = health.healthStatus
+                )
+            }.collect { state -&gt;
+                _serviceState.value = state
+            }
+        }
+    }
+
+    override fun observeServiceState(): Flow&lt;ServiceState&gt; = _serviceState.asStateFlow()
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/ui/components/ServiceStatusCard.kt">
+        <snippet>
+@Composable
+fun ServiceStatusCard(
+    serviceState: ServiceState,
+    modifier: Modifier = Modifier,
+    onCardClick: () -&gt; Unit = {}
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = when (serviceState.status) {
+                ServiceStatus.RUNNING -&gt; MaterialTheme.colorScheme.primaryContainer
+                ServiceStatus.GPS_ACQUIRING -&gt; MaterialTheme.colorScheme.tertiaryContainer
+                ServiceStatus.ERROR -&gt; MaterialTheme.colorScheme.errorContainer
+                else -&gt; MaterialTheme.colorScheme.surfaceVariant
+            }
+        )
+    ) {
+        Row {
+            // Status indicator dot
+            Box(
+                modifier = Modifier.size(12.dp).background(
+                    color = when (serviceState.healthStatus) {
+                        HealthStatus.HEALTHY -&gt; Color.Green
+                        HealthStatus.GPS_ACQUIRING -&gt; Color.Yellow
+                        HealthStatus.GPS_UNAVAILABLE -&gt; Color(0xFFFF9800)
+                        HealthStatus.ERROR -&gt; Color.Red
+                    },
+                    shape = CircleShape
+                )
+            )
+            Text(when (serviceState.status) {
+                ServiceStatus.RUNNING -&gt; "Tracking Active"
+                ServiceStatus.GPS_ACQUIRING -&gt; "GPS Acquiring..."
+                ServiceStatus.ERROR -&gt; "Service Error"
+                else -&gt; "Tracking Stopped"
+            })
+        }
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/ui/components/LocationStatsCard.kt">
+        <snippet>
+@Composable
+fun LocationStatsCard(
+    locationStats: LocationStats,
+    modifier: Modifier = Modifier
+) {
+    Card {
+        Column {
+            Text("Location Statistics", style = MaterialTheme.typography.titleMedium)
+
+            Row(horizontalArrangement = Arrangement.SpaceBetween) {
+                Column {
+                    Text("Today", style = MaterialTheme.typography.labelSmall)
+                    Text("${locationStats.todayCount}", style = MaterialTheme.typography.headlineSmall)
+                }
+                Column {
+                    Text("All Time", style = MaterialTheme.typography.labelSmall)
+                    Text("${locationStats.totalCount}", style = MaterialTheme.typography.headlineSmall)
+                }
+                Column {
+                    Text("Interval", style = MaterialTheme.typography.labelSmall)
+                    Text("${locationStats.trackingInterval.toMinutes()} min")
+                }
+            }
+
+            Text("Last Update: ${formatTimestamp(locationStats.lastLocation?.timestamp)}")
+        }
+    }
+}
+        </snippet>
+      </file>
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="org.jetbrains.kotlinx:kotlinx-coroutines-android" version="1.7.3" />
+        <package name="androidx.lifecycle:lifecycle-runtime-compose" version="2.7.0" />
+        <package name="androidx.compose.material:material-icons-extended" version="1.6.0" />
+        <package name="com.jakewharton.timber:timber" version="5.0.1" />
+      </android>
+      <internal>
+        <dependency story="1.1">LocationTrackingViewModel base (extended here)</dependency>
+        <dependency story="1.2">PermissionManager (for permission checks)</dependency>
+        <dependency story="0.2.2">LocationEntity and LocationDao</dependency>
+        <dependency story="0.2.3">LocationRepository interface</dependency>
+        <dependency story="0.2.4">LocationTrackingService</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>CRITICAL: UI must communicate with service ONLY through Repository pattern - no direct service binding</constraint>
+    <constraint>Use Kotlin Flow for all real-time updates from repository to ViewModel</constraint>
+    <constraint>Use StateFlow in ViewModel to expose state to UI</constraint>
+    <constraint>Use combine() to merge multiple Flows into single ServiceState</constraint>
+    <constraint>Location count updates must appear in UI within 1 second of DB write</constraint>
+    <constraint>Service health updates within 500ms of state change</constraint>
+    <constraint>Notification updates must NOT trigger sound or vibration (use IMPORTANCE_LOW channel)</constraint>
+    <constraint>Configuration changes must NOT restart service</constraint>
+    <constraint>State synchronization after app kill must complete within 100ms</constraint>
+    <constraint>All Flow collectors must be lifecycle-aware (stop when UI destroyed)</constraint>
+    <constraint>Use stateIn() with WhileSubscribed(5000) for SharedFlow optimization</constraint>
+    <constraint>Memory usage for state management must be &lt; 10MB</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="LocationServiceController">
+      <method>suspend fun startTracking(): Result&lt;Unit&gt;</method>
+      <method>suspend fun stopTracking(): Result&lt;Unit&gt;</method>
+      <method>suspend fun updateInterval(intervalMinutes: Int): Result&lt;Unit&gt;</method>
+      <method>fun observeServiceState(): Flow&lt;ServiceState&gt;</method>
+      <method>fun isServiceRunning(): Boolean</method>
+    </interface>
+
+    <interface name="LocationRepository (from Epic 0.2.3)">
+      <method>fun observeLocationCount(): Flow&lt;Int&gt;</method>
+      <method>fun observeTodayLocationCount(): Flow&lt;Int&gt;</method>
+      <method>fun observeLastLocation(): Flow&lt;LocationEntity?&gt;</method>
+      <method>fun observeAverageAccuracy(): Flow&lt;Float?&gt;</method>
+      <method>fun observeServiceHealth(): Flow&lt;ServiceHealth&gt;</method>
+    </interface>
+
+    <interface name="LocationTrackingService (from Epic 0.2.4)">
+      <action>ACTION_START_TRACKING</action>
+      <action>ACTION_STOP_TRACKING</action>
+      <action>ACTION_UPDATE_INTERVAL</action>
+      <extra>EXTRA_INTERVAL_MINUTES</extra>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests required:
+- LocationServiceController state management
+- Flow combination logic for ServiceState
+- Timestamp formatting functions
+- State synchronization logic
+
+Integration tests required:
+- Toggle → Service → Database → UI complete flow
+- Real-time location count updates
+- Configuration change without service restart
+- App kill and reopen state synchronization
+
+UI tests required:
+- ServiceStatusCard displays all states correctly
+- LocationStatsCard shows real-time updates
+- Notification lifecycle with service state
+
+Performance tests:
+- Location update latency &lt; 1s
+- Service health update &lt; 500ms
+- State load after app kill &lt; 100ms
+- Memory usage &lt; 10MB
+
+Manual testing:
+- GPS disabled scenario
+- GPS weak signal scenario
+- Storage full scenario
+- Multiple service restarts
+- Device reboot with tracking active
+
+Target coverage: &gt; 80% for ServiceController and ViewModel
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/service/LocationServiceControllerTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/ui/main/LocationTrackingViewModelTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/ui/main/LocationTrackingIntegrationTest.kt</location>
+    </locations>
+
+    <ideas>
+      <idea ac="1.3.1">Code review confirms no direct service binding - all communication via Repository</idea>
+      <idea ac="1.3.2">Enable tracking, capture location, verify UI count updates within 1s using composeTestRule.waitUntil()</idea>
+      <idea ac="1.3.3">Observe timestamp auto-updating from "2 min ago" to "3 min ago" without manual refresh</idea>
+      <idea ac="1.3.4">Test all service states (Running, GPS Acquiring, Stopped, Error) and verify correct colors and icons</idea>
+      <idea ac="1.3.5">Start tracking, verify notification appears within 1s, tap "Stop Tracking", verify service stops</idea>
+      <idea ac="1.3.6">Start tracking, force-kill app, verify service continues, relaunch app, verify state correct within 100ms</idea>
+      <idea ac="1.3.7">Start tracking, reboot device, verify UI reflects actual service state (if auto-start implemented)</idea>
+      <idea ac="1.3.8">Change interval while tracking, verify no notification blink, verify new interval applied</idea>
+      <idea ac="1.3.9">Observe LocationStatsCard updating in real-time as new locations collected</idea>
+      <idea ac="1.3.10">Disable GPS, verify "GPS Unavailable" error shown within 1s with helpful message</idea>
+      <idea ac="1.3.11">Use Flow testing to verify all UI components receive updates via StateFlow</idea>
+      <idea ac="1.3.12">Observe notification updating without sound - verify IMPORTANCE_LOW channel and setOnlyAlertOnce(true)</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Create ServiceState Data Models</title>
+      <description>Define data models for service state and statistics</description>
+      <actions>
+        - Create ServiceState data class in domain/model package
+        - Define ServiceStatus enum (STOPPED, STARTING, RUNNING, GPS_ACQUIRING, STOPPING, ERROR)
+        - Define HealthStatus enum (HEALTHY, GPS_UNAVAILABLE, NO_GPS_SIGNAL, ERROR)
+        - Create LocationStats data class with totalCount, todayCount, lastLocation, averageAccuracy, trackingInterval
+        - Ensure all models are immutable (val properties only)
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Enhance LocationRepository (Epic 0.2.3)</title>
+      <description>Add observation methods to repository</description>
+      <actions>
+        - Add observeLocationCount(): Flow&lt;Int&gt; to LocationRepository interface
+        - Add observeTodayLocationCount(): Flow&lt;Int&gt;
+        - Add observeLastLocation(): Flow&lt;LocationEntity?&gt;
+        - Add observeAverageAccuracy(): Flow&lt;Float?&gt;
+        - Add observeServiceHealth(): Flow&lt;ServiceHealth&gt;
+        - Implement using Room Flow queries
+        - Ensure all Flows emit on database changes
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Implement Enhanced LocationServiceController</title>
+      <description>Add real-time state observation and interval updates</description>
+      <actions>
+        - Add updateInterval(intervalMinutes: Int): Result&lt;Unit&gt; method
+        - Create _serviceState MutableStateFlow
+        - In init block, combine repository Flows into ServiceState
+        - Use combine(health, count, lastLocation, interval) to create ServiceState
+        - Implement mapHealthToStatus() helper function
+        - Add ACTION_UPDATE_INTERVAL intent handling to service
+        - Implement isServiceRunning() using ActivityManager
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Enhance LocationTrackingViewModel</title>
+      <description>Add service state and location stats observation</description>
+      <actions>
+        - Add serviceState: StateFlow&lt;ServiceState&gt; by observing serviceController
+        - Add locationStats: StateFlow&lt;LocationStats&gt; by combining repository Flows
+        - Use stateIn() with WhileSubscribed(5000) for SharedFlow optimization
+        - Implement state reconciliation logic in init block
+        - Compare DataStore toggle state with actual service running state
+        - Log warning if state desynchronization detected
+        - Add updateTrackingInterval(Int) method to update interval
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Create ServiceStatusCard Composable</title>
+      <description>Build service health display card</description>
+      <actions>
+        - Create ServiceStatusCard @Composable in ui/components package
+        - Accept serviceState parameter
+        - Render Card with dynamic color based on status
+        - Display status indicator dot (colored circle)
+        - Show status text ("Tracking Active", "GPS Acquiring...", etc.)
+        - Display explanation text based on health status
+        - Add icon based on status (GpsFixed, GpsNotFixed, GpsOff, Error)
+        - Make card clickable to show detailed service info
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Create LocationStatsCard Composable</title>
+      <description>Build statistics display card</description>
+      <actions>
+        - Create LocationStatsCard @Composable in ui/components package
+        - Accept locationStats parameter
+        - Display "Location Statistics" title
+        - Show today count, all-time count, interval in Row
+        - Display last update timestamp with formatTimestamp() helper
+        - Show average accuracy with color coding (green &lt; 10m, yellow &lt; 50m, red &gt; 50m)
+        - Create formatTimestamp() helper for relative time ("2 min ago") and absolute time
+      </actions>
+    </step>
+
+    <step order="7">
+      <title>Enhance LocationTrackingService Notification</title>
+      <description>Add real-time notification content updates</description>
+      <actions>
+        - In LocationTrackingService, observe locationRepository.observeLocationCount()
+        - Observe locationRepository.observeLastLocation()
+        - Create updateNotification() method
+        - Update notification content with current location count and last update time
+        - Call notificationManager.notify() to update notification
+        - Ensure notification channel has IMPORTANCE_LOW to prevent sound
+        - Add "Stop Tracking" action with PendingIntent
+        - Implement ACTION_UPDATE_INTERVAL handler to change interval without restart
+      </actions>
+    </step>
+
+    <step order="8">
+      <title>Integrate UI Components</title>
+      <description>Add new components to main screen</description>
+      <actions>
+        - Add ServiceStatusCard to main screen composable
+        - Add LocationStatsCard below toggle
+        - Observe viewModel.serviceState.collectAsState()
+        - Observe viewModel.locationStats.collectAsState()
+        - Pass states to respective cards
+        - Verify real-time updates work
+      </actions>
+    </step>
+
+    <step order="9">
+      <title>Test State Synchronization</title>
+      <description>Verify state persists across app lifecycle events</description>
+      <actions>
+        - Start tracking
+        - Force-kill app (swipe from recents)
+        - Verify service continues running (check notification)
+        - Reopen app
+        - Verify toggle shows ON state
+        - Verify location count is accurate
+        - Verify ServiceStatusCard shows "Tracking Active"
+        - Time state load - verify &lt; 100ms
+      </actions>
+    </step>
+
+    <step order="10">
+      <title>Performance Testing and Optimization</title>
+      <description>Verify all performance targets met</description>
+      <actions>
+        - Profile location update latency (DB write to UI update)
+        - Profile service health update latency
+        - Profile state load time after app kill
+        - Check memory usage with Android Profiler
+        - Optimize if any targets not met
+        - Add performance tests to CI
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>StateFlow not updating UI even though Flow emits</issue>
+      <solution>Use collectAsState() in Composable, not collectAsStateWithLifecycle() unless needed. Ensure StateFlow is exposed from ViewModel, not just Flow. Use stateIn() to convert Flow to StateFlow.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Notification updates trigger sound and vibration</issue>
+      <solution>Create notification channel with IMPORTANCE_LOW. Use NotificationCompat.setOnlyAlertOnce(true) when updating notification content.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Service state desynchronized after app kill</issue>
+      <solution>Implement reconciliation logic in ViewModel init: compare DataStore toggle state with actual service running state via ActivityManager. Update UI to match actual service state.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Configuration change restarts service</issue>
+      <solution>Use Intent actions (ACTION_UPDATE_INTERVAL) to send configuration to running service instead of restarting. Service should handle action and update internal state.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Room Flow doesn't emit on background thread</issue>
+      <solution>Room Flows emit on background dispatcher by default. No need to add flowOn(Dispatchers.IO). Collect in ViewModel using viewModelScope which uses Dispatchers.Main.immediate.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>combine() creates backpressure when Flows emit at different rates</issue>
+      <solution>Use combine() not zip(). combine() emits whenever ANY source Flow emits with latest value from all sources. This is correct for combining service state from multiple sources.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Memory leak from uncancelled Flow collection</issue>
+      <solution>Use stateIn() with WhileSubscribed(5000) to automatically cancel after 5 seconds of no subscribers. Collect Flows in viewModelScope which cancels when ViewModel cleared.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>formatTimestamp() shows incorrect time zone</issue>
+      <solution>Use ZoneId.systemDefault() when formatting Instant to ZonedDateTime. Instant is always UTC, ZonedDateTime respects user's time zone.</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="prd" path="docs/PRD.md" section="Epic 1: Location Tracking Core" />
+    <reference type="epic" path="docs/product/Epic-1-Location-Tracking-Core.md" section="Story 1.3" />
+    <reference type="story" path="docs/product/Story-1.3-UI-Service-Integration.md" section="All sections" />
+    <reference type="dependency" path="docs/product/Epic-0.2-Location-Tracking-Service.md" section="Story 0.2.2: LocationEntity and LocationDao" />
+    <reference type="dependency" path="docs/product/Epic-0.2-Location-Tracking-Service.md" section="Story 0.2.3: LocationRepository" />
+    <reference type="dependency" path="docs/product/Epic-0.2-Location-Tracking-Service.md" section="Story 0.2.4: LocationTrackingService" />
+    <reference type="external" url="https://developer.android.com/kotlin/flow">Kotlin Flow Documentation</reference>
+    <reference type="external" url="https://developer.android.com/kotlin/flow/stateflow-and-sharedflow">StateFlow and SharedFlow</reference>
+  </references>
+</story-context>
