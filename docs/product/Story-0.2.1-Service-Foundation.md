@@ -55,6 +55,11 @@ SO THAT I have the foundation for continuous background location tracking
 - [ ] Service runs in foreground mode (not background)
 - [ ] Service logs lifecycle events for debugging
 - [ ] Unit tests for service lifecycle methods
+- [ ] **Android 14+**: `FOREGROUND_SERVICE_LOCATION` permission declared in manifest
+- [ ] **Android 14+**: `foregroundServiceType="location"` attribute set on service
+- [ ] **Android 13+**: `POST_NOTIFICATIONS` permission declared in manifest
+- [ ] **Android 13+**: Runtime notification permission request implemented
+- [ ] Service tested on Android 8, 10, 12, 13, and 14
 
 #### Technical Details
 
@@ -96,9 +101,16 @@ class LocationTrackingService : Service() {
 **Manifest Entry**: `app/src/main/AndroidManifest.xml`
 
 ```xml
-<manifest>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Foreground service permissions -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
+    <!-- Android 14+ (API 34+) requires explicit foreground service type permission -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+
+    <!-- Android 13+ (API 33+) requires notification permission -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application>
         <service
@@ -106,8 +118,42 @@ class LocationTrackingService : Service() {
             android:enabled="true"
             android:exported="false"
             android:foregroundServiceType="location" />
+            <!-- CRITICAL for Android 14+: foregroundServiceType MUST be declared -->
+            <!-- This matches the FOREGROUND_SERVICE_LOCATION permission above -->
     </application>
 </manifest>
+```
+
+**Android Version Specific Requirements**:
+
+| Android Version | API Level | Required Permissions | Notes |
+|----------------|-----------|----------------------|-------|
+| Android 8.0+ | 26+ | FOREGROUND_SERVICE | Service must call startForeground() within 5 seconds |
+| Android 13+ | 33+ | POST_NOTIFICATIONS | Must request at runtime for notification display |
+| Android 14+ | 34+ | FOREGROUND_SERVICE_LOCATION | Required for location-based foreground services |
+
+**Runtime Permission Handling for POST_NOTIFICATIONS** (Android 13+):
+
+```kotlin
+// Add to TestActivity or permission handler
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+private fun requestNotificationPermission() {
+    if (ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        ActivityCompat.requestPermissions(
+            this,
+            arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+            NOTIFICATION_PERMISSION_REQUEST_CODE
+        )
+    }
+}
+
+companion object {
+    private const val NOTIFICATION_PERMISSION_REQUEST_CODE = 1002
+}
 ```
 
 #### Dependencies

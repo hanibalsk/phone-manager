@@ -54,9 +54,14 @@ SO THAT I can store locations when offline and ensure no data loss
 - [ ] Database class created with proper configuration
 - [ ] LocationQueue entity defined with all required fields
 - [ ] DAO interface created with necessary operations
-- [ ] Database migration strategy defined
+- [ ] **CRITICAL**: Database migration strategy defined and documented
+- [ ] **CRITICAL**: Schema export enabled (`exportSchema = true`)
+- [ ] **CRITICAL**: Example migrations provided (1→2, 2→3)
+- [ ] **CRITICAL**: Production build crashes if migration missing (no fallbackToDestructiveMigration)
+- [ ] **CRITICAL**: Schema files exported to `app/schemas/` and committed to VCS
 - [ ] Database singleton properly implemented
 - [ ] Database operations tested
+- [ ] Migration testing helper method provided
 
 #### Technical Details
 
@@ -215,7 +220,7 @@ interface LocationQueueDao {
 @Database(
     entities = [LocationQueueEntity::class],
     version = 1,
-    exportSchema = true
+    exportSchema = true  // CRITICAL: Export schema for migration testing
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -227,6 +232,40 @@ abstract class AppDatabase : RoomDatabase() {
         @Volatile
         private var INSTANCE: AppDatabase? = null
 
+        /**
+         * CRITICAL: Database Migration Strategy
+         *
+         * Room requires explicit migration paths for schema changes.
+         * Without migrations, all data is lost on app updates.
+         *
+         * Migration Path for Future Versions:
+         * - Version 1: Initial schema (location_queue table)
+         * - Version 2: (Example) Add index on timestamp
+         * - Version 3: (Example) Add new column for sync status
+         */
+
+        // Example Migration 1→2: Add index for performance
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add index on timestamp for faster queries
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_location_queue_timestamp " +
+                    "ON location_queue(timestamp)"
+                )
+            }
+        }
+
+        // Example Migration 2→3: Add new column
+        val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                // Add new column with default value
+                database.execSQL(
+                    "ALTER TABLE location_queue " +
+                    "ADD COLUMN sync_status TEXT NOT NULL DEFAULT 'pending'"
+                )
+            }
+        }
+
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
@@ -234,15 +273,57 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DATABASE_NAME
                 )
-                    .fallbackToDestructiveMigration() // For development only
+                    // DEVELOPMENT: Use fallbackToDestructiveMigration() for rapid iteration
+                    // PRODUCTION: Remove this and add proper migrations
+                    .apply {
+                        if (BuildConfig.DEBUG) {
+                            fallbackToDestructiveMigration() // Development only - loses data!
+                        } else {
+                            // Production: Add migration paths as they are defined
+                            // addMigrations(MIGRATION_1_2, MIGRATION_2_3, ...)
+                            // If no migration exists, app will crash (better than data loss)
+                        }
+                    }
                     .build()
 
                 INSTANCE = instance
                 instance
             }
         }
+
+        /**
+         * For testing migrations, use this method
+         */
+        fun getTestInstance(context: Context, vararg migrations: Migration): AppDatabase {
+            return Room.inMemoryDatabaseBuilder(
+                context.applicationContext,
+                AppDatabase::class.java
+            )
+                .addMigrations(*migrations)
+                .build()
+        }
     }
 }
+
+/**
+ * Schema Export Configuration
+ *
+ * Add to app/build.gradle.kts:
+ *
+ * android {
+ *     defaultConfig {
+ *         // Export schema for migration testing
+ *         javaCompileOptions {
+ *             annotationProcessorOptions {
+ *                 arguments["room.schemaLocation"] = "$projectDir/schemas"
+ *             }
+ *         }
+ *     }
+ * }
+ *
+ * This exports JSON schema files to app/schemas/ for each database version.
+ * These files should be committed to version control for migration testing.
+ */
 ```
 
 #### Testing Strategy
@@ -935,6 +1016,12 @@ SO THAT queued locations are transmitted without user intervention
 - [ ] Successful items removed from queue
 - [ ] Failed items marked for retry
 - [ ] Processing statistics logged
+- [ ] WorkManager worker implemented with proper constraints
+- [ ] Network connectivity constraint configured
+- [ ] Battery not low constraint configured
+- [ ] Maximum retry attempts limited (3 attempts)
+- [ ] Exponential backoff configured for retries
+- [ ] Periodic queue processing scheduled (hourly)
 
 #### Technical Details
 
@@ -1088,13 +1175,180 @@ class LocationTrackingService : Service() {
 }
 ```
 
+**WorkManager Backup**: `app/src/main/java/com/phonemanager/worker/QueueProcessingWorker.kt`
+
+For reliability, implement a WorkManager worker as a backup mechanism to process the queue even when the service isn't running or as a periodic health check.
+
+```kotlin
+import androidx.work.*
+import java.util.concurrent.TimeUnit
+
+class QueueProcessingWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    companion object {
+        const val WORK_NAME = "queue_processing_worker"
+        const val TAG = "QueueProcessingWorker"
+
+        private const val MAX_RETRY_ATTEMPTS = 3
+        private const val PERIODIC_INTERVAL_HOURS = 1L
+    }
+
+    override suspend fun doWork(): Result {
+        Timber.d("WorkManager: Starting queue processing")
+
+        // Check if we have network connectivity (constraint should handle this, but double-check)
+        val connectivityManager = applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork
+        if (network == null) {
+            Timber.w("WorkManager: No network available, will retry")
+            return Result.retry()
+        }
+
+        return try {
+            val queueManager = QueueManager.getInstance(applicationContext)
+            val networkManager = NetworkManager(applicationContext)
+            val queueProcessor = QueueProcessor(queueManager, networkManager)
+
+            val result = queueProcessor.processQueue()
+
+            Timber.i("WorkManager: Queue processed - $result")
+
+            // If there are failures and we haven't exceeded max retries, retry
+            if (result.failureCount > 0 && runAttemptCount < MAX_RETRY_ATTEMPTS) {
+                Timber.w("WorkManager: ${result.failureCount} failures, retrying (attempt ${runAttemptCount + 1}/$MAX_RETRY_ATTEMPTS)")
+                Result.retry()
+            } else {
+                Result.success()
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "WorkManager: Error processing queue")
+
+            if (runAttemptCount < MAX_RETRY_ATTEMPTS) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
+        }
+    }
+}
+```
+
+**WorkManager Enqueue with Constraints**:
+
+```kotlin
+object QueueWorkManager {
+
+    fun schedulePeriodicQueueProcessing(context: Context) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED) // Only run when network available
+            .setRequiresBatteryNotLow(true) // Don't drain battery
+            .build()
+
+        val periodicWorkRequest = PeriodicWorkRequestBuilder<QueueProcessingWorker>(
+            QueueProcessingWorker.PERIODIC_INTERVAL_HOURS,
+            TimeUnit.HOURS
+        )
+            .setConstraints(constraints)
+            .setBackoffCriteria(
+                BackoffPolicy.EXPONENTIAL,
+                WorkRequest.MIN_BACKOFF_MILLIS,
+                TimeUnit.MILLISECONDS
+            )
+            .addTag(QueueProcessingWorker.TAG)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            QueueProcessingWorker.WORK_NAME,
+            ExistingPeriodicWorkPolicy.KEEP, // Don't replace if already scheduled
+            periodicWorkRequest
+        )
+
+        Timber.i("Scheduled periodic queue processing with WorkManager")
+    }
+
+    fun scheduleOneTimeQueueProcessing(context: Context) {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val oneTimeWorkRequest = OneTimeWorkRequestBuilder<QueueProcessingWorker>()
+            .setConstraints(constraints)
+            .setBackoffCriteria(
+                BackoffPolicy.EXPONENTIAL,
+                WorkRequest.MIN_BACKOFF_MILLIS,
+                TimeUnit.MILLISECONDS
+            )
+            .addTag(QueueProcessingWorker.TAG)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "${QueueProcessingWorker.WORK_NAME}_onetime",
+            ExistingWorkPolicy.KEEP,
+            oneTimeWorkRequest
+        )
+
+        Timber.d("Scheduled one-time queue processing with WorkManager")
+    }
+
+    fun cancelQueueProcessing(context: Context) {
+        WorkManager.getInstance(context).cancelUniqueWork(QueueProcessingWorker.WORK_NAME)
+        Timber.i("Cancelled queue processing WorkManager tasks")
+    }
+}
+```
+
+**Scheduling in Application**:
+
+```kotlin
+class PhoneManagerApplication : Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+
+        // Initialize WorkManager for queue processing as backup
+        QueueWorkManager.schedulePeriodicQueueProcessing(this)
+    }
+}
+```
+
+**WorkManager Dependencies** (add to `app/build.gradle.kts`):
+
+```kotlin
+dependencies {
+    // WorkManager
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+}
+```
+
+**Key WorkManager Features**:
+- **Network Constraint**: Only runs when device has network connectivity
+- **Battery Constraint**: Won't run when battery is low (< 15%)
+- **Exponential Backoff**: Built-in retry with exponential delays
+- **Max Retry Attempts**: Limits retries to 3 attempts to avoid infinite loops
+- **Periodic Scheduling**: Runs every hour as a health check
+- **One-Time Scheduling**: Can be triggered on-demand (e.g., after adding items to queue)
+- **Unique Work**: Prevents duplicate workers from running
+
+**Why Both Service and WorkManager?**
+- **Service**: Immediate processing when connectivity changes while service is running
+- **WorkManager**: Backup mechanism for when service isn't running, and periodic health checks
+- This dual approach ensures queue is processed reliably under all conditions
+
 #### Testing Strategy
 - Unit tests for QueueProcessor
+- Unit tests for QueueProcessingWorker
+- Test WorkManager constraints (network, battery)
+- Test WorkManager retry logic and backoff
 - Integration test: queue multiple locations, go offline, go online
 - Test batch processing
 - Test throttling delays
 - Test concurrent processing prevention
 - Stress test: 500+ queued locations
+- Test WorkManager periodic execution
 
 #### Definition of Done
 - [ ] Code reviewed and approved
@@ -1105,6 +1359,10 @@ class LocationTrackingService : Service() {
 - [ ] Throttling prevents overload
 - [ ] Handles large queues (500+ items)
 - [ ] No blocking of location capture
+- [ ] WorkManager constraints properly configured
+- [ ] WorkManager retry logic tested
+- [ ] Periodic queue processing verified
+- [ ] Dual approach (Service + WorkManager) working reliably
 
 ---
 

@@ -58,6 +58,11 @@ SO THAT tracking resumes without user intervention after device restart
 - [ ] Permission state validated before starting service
 - [ ] Boot receiver works on Android 8-14
 - [ ] Proper logging for debugging
+- [ ] **CRITICAL**: Battery optimization status checked on boot
+- [ ] **CRITICAL**: User notified if battery optimization is enabled
+- [ ] **CRITICAL**: User guided to disable battery optimization
+- [ ] REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission declared
+- [ ] Battery exemption guidance activity created
 
 #### Technical Details
 
@@ -89,6 +94,20 @@ class BootReceiver : BroadcastReceiver() {
             return
         }
 
+        // CRITICAL: Check battery optimization status
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(context.packageName)) {
+                Timber.w("Battery optimization is enabled - service may be killed by system")
+
+                // Show notification to user about battery optimization
+                showBatteryOptimizationNotification(context)
+
+                // Service can still start, but with reduced reliability
+                // User should be prompted to disable optimization
+            }
+        }
+
         // Start the service
         try {
             val serviceIntent = Intent(context, LocationTrackingService::class.java)
@@ -104,6 +123,58 @@ class BootReceiver : BroadcastReceiver() {
             Timber.e(e, "Failed to start service after boot")
         }
     }
+
+    private fun showBatteryOptimizationNotification(context: Context) {
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+        // Create notification channel for warnings
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "battery_warning",
+                "Battery Optimization Warnings",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Alerts when battery optimization may affect location tracking"
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Create intent to open battery optimization settings
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                data = Uri.parse("package:${context.packageName}")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+        } else {
+            null
+        }
+
+        val pendingIntent = intent?.let {
+            PendingIntent.getActivity(
+                context,
+                0,
+                it,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
+
+        // Build notification
+        val notification = NotificationCompat.Builder(context, "battery_warning")
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentTitle("Location Tracking Reliability")
+            .setContentText("Battery optimization may stop location tracking. Tap to fix.")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("Battery optimization is enabled for this app. " +
+                        "This may cause the location tracking service to stop unexpectedly. " +
+                        "Tap here to disable battery optimization for reliable tracking."))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        notificationManager.notify(9001, notification)
+        Timber.i("Showed battery optimization warning notification")
+    }
 }
 ```
 
@@ -114,12 +185,18 @@ class BootReceiver : BroadcastReceiver() {
     <!-- Permission to receive boot completed broadcast -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
+    <!-- CRITICAL: Permission to request battery optimization exemption -->
+    <!-- This allows the app to direct users to disable battery optimization -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+
     <application>
         <!-- Boot receiver -->
         <receiver
             android:name=".receiver.BootReceiver"
             android:enabled="true"
-            android:exported="true">
+            android:exported="true"
+            android:directBootAware="false">
+            <!-- IMPORTANT: exported="true" required for system to call on boot -->
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
@@ -130,6 +207,25 @@ class BootReceiver : BroadcastReceiver() {
     </application>
 </manifest>
 ```
+
+**CRITICAL NOTE ON BATTERY OPTIMIZATION**:
+
+Google Play has strict policies about REQUEST_IGNORE_BATTERY_OPTIMIZATIONS:
+- Can ONLY be used if core functionality breaks without exemption
+- Location tracking qualifies as valid use case
+- Must show clear explanation to users why exemption is needed
+- Cannot automatically enable - must direct user to settings
+
+**Manufacturer-Specific Battery Management** (Post-MVP - Epic 0.2.5):
+
+Some manufacturers have additional battery management:
+- **Xiaomi**: MIUI Power Management
+- **Huawei**: Protected Apps
+- **OnePlus**: Battery Optimization
+- **Samsung**: App Power Management
+- **Oppo**: Battery Optimization
+
+These require OEM-specific workarounds beyond standard Android APIs.
 
 **Service State Management**: Enhance `LocationTrackingService`
 

@@ -400,6 +400,10 @@ SO THAT I can transmit location data
 - [ ] Network error handling implemented
 - [ ] Request/response logging for debugging
 - [ ] Connection pooling configured
+- [ ] **SECURITY**: API key retrieved from secure storage (BuildConfig or EncryptedSharedPreferences)
+- [ ] **SECURITY**: API key NOT hardcoded in source code
+- [ ] **SECURITY**: gradle.properties added to .gitignore
+- [ ] Security crypto dependency added for EncryptedSharedPreferences
 
 #### Technical Details
 
@@ -415,6 +419,35 @@ dependencies {
 
     // JSON serialization
     implementation("com.google.code.gson:gson:2.10.1")
+
+    // Secure credential storage
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+}
+```
+
+**Security Configuration**: Add to `gradle.properties` (DO NOT commit to VCS, add to .gitignore)
+
+```properties
+# API Key for development (NEVER commit this file)
+API_KEY=your-development-api-key-here
+```
+
+**Build Config**: Add to `app/build.gradle.kts`
+
+```kotlin
+android {
+    // ... existing config ...
+
+    buildFeatures {
+        buildConfig = true  // Enable BuildConfig generation
+    }
+
+    defaultConfig {
+        // ... existing config ...
+
+        // Read API key from gradle.properties (not committed to VCS)
+        buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY") ?: ""}\"")
+    }
 }
 ```
 
@@ -428,13 +461,13 @@ object NetworkModule {
     private const val READ_TIMEOUT = 30L // seconds
     private const val WRITE_TIMEOUT = 30L // seconds
 
-    fun provideOkHttpClient(): OkHttpClient {
+    fun provideOkHttpClient(context: Context): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
             .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
             .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
             .addInterceptor(createLoggingInterceptor())
-            .addInterceptor(createAuthInterceptor())
+            .addInterceptor(createAuthInterceptor(context))
             .connectionPool(ConnectionPool(5, 5, TimeUnit.MINUTES))
             .retryOnConnectionFailure(false) // We'll handle retries manually in Epic 0.2.3
             .build()
@@ -452,19 +485,57 @@ object NetworkModule {
         }
     }
 
-    private fun createAuthInterceptor(): Interceptor {
+    private fun createAuthInterceptor(context: Context): Interceptor {
         return Interceptor { chain ->
             val original = chain.request()
 
-            // Add authentication header
-            // TODO: Get API key from configuration (Epic 0.2.6)
+            // SECURITY: NEVER hardcode API keys!
+            // Get API key from secure storage
+            val apiKey = getApiKeySecurely(context)
+
             val request = original.newBuilder()
-                .header("Authorization", "Bearer YOUR_API_KEY_HERE")
+                .header("Authorization", "Bearer $apiKey")
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
                 .build()
 
             chain.proceed(request)
+        }
+    }
+
+    /**
+     * Retrieve API key from secure storage
+     *
+     * Option 1: Use BuildConfig for compile-time injection (recommended for development)
+     * Add to gradle.properties (NOT committed to VCS):
+     *   API_KEY=your-actual-api-key
+     *
+     * Add to app/build.gradle.kts:
+     *   buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY")}\"")
+     *
+     * Option 2: Use EncryptedSharedPreferences for runtime storage (recommended for production)
+     */
+    private fun getApiKeySecurely(context: Context): String {
+        // For MVP: Use BuildConfig (set via gradle.properties, NOT committed)
+        // WARNING: Never commit API keys to version control!
+        return if (BuildConfig.DEBUG) {
+            // Development: Load from BuildConfig
+            BuildConfig.API_KEY
+        } else {
+            // Production: Load from EncryptedSharedPreferences
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val encryptedPrefs = EncryptedSharedPreferences.create(
+                context,
+                "secure_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            encryptedPrefs.getString("api_key", "") ?: ""
         }
     }
 
