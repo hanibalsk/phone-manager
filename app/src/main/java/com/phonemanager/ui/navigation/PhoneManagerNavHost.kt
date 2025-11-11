@@ -5,6 +5,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.phonemanager.ui.home.HomeScreen
+import com.phonemanager.ui.permissions.PermissionViewModel
 
 sealed class Screen(val route: String) {
     object Home : Screen("home")
@@ -12,7 +13,12 @@ sealed class Screen(val route: String) {
 }
 
 @Composable
-fun PhoneManagerNavHost() {
+fun PhoneManagerNavHost(
+    permissionViewModel: PermissionViewModel,
+    onRequestLocationPermission: () -> Unit,
+    onRequestBackgroundPermission: () -> Unit,
+    onRequestNotificationPermission: () -> Unit
+) {
     val navController = rememberNavController()
 
     NavHost(
@@ -20,7 +26,12 @@ fun PhoneManagerNavHost() {
         startDestination = Screen.Home.route
     ) {
         composable(Screen.Home.route) {
-            HomeScreen()
+            HomeScreen(
+                permissionViewModel = permissionViewModel,
+                onRequestLocationPermission = onRequestLocationPermission,
+                onRequestBackgroundPermission = onRequestBackgroundPermission,
+                onRequestNotificationPermission = onRequestNotificationPermission
+            )
         }
         // Future: Add Settings screen route
     }
