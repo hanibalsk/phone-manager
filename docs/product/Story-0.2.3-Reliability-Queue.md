@@ -998,7 +998,16 @@ class NetworkManager(private val context: Context) {
 **Priority**: Critical
 **Estimate**: 1.5 days
 **Assigned To**: TBD
-**Depends On**: 0.2.3.2, 0.2.3.3, 0.2.3.4
+**Depends On**:
+- **Story 0.2.3.2** - Network Monitoring & Connectivity
+  - File: `docs/product/Story-0.2.3-Reliability-Queue.md#story-0232`
+  - Provides: Network state change detection for automatic sync
+- **Story 0.2.3.3** - Queue Manager Implementation
+  - File: `docs/product/Story-0.2.3-Reliability-Queue.md#story-0233`
+  - Provides: Queue read/write operations for processing
+- **Story 0.2.3.4** - Exponential Backoff Retry Logic
+  - File: `docs/product/Story-0.2.3-Reliability-Queue.md#story-0234`
+  - Provides: Retry mechanism for failed transmissions
 
 #### User Story
 ```

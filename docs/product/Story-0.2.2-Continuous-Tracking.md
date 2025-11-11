@@ -183,12 +183,187 @@ class LocationTrackingService : Service() {
 }
 ```
 
+**Memory Management Strategy**:
+
+For long-running location tracking services, proper memory management is critical to prevent out-of-memory errors and ensure stable 24/7 operation.
+
+```kotlin
+class LocationManager(private val context: Context) {
+
+    companion object {
+        private const val MAX_PENDING_LOCATIONS = 100
+        private const val CLEANUP_THRESHOLD = 80 // Clean when 80% full
+        private const val MAX_CACHE_AGE_HOURS = 24L
+    }
+
+    private val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
+
+    private var locationCallback: LocationCallback? = null
+    private var isTracking = false
+
+    /**
+     * In-memory buffer for pending locations (before transmission/persistence)
+     * Uses ConcurrentLinkedQueue for thread-safe operations
+     */
+    private val pendingLocations = ConcurrentLinkedQueue<LocationData>()
+
+    /**
+     * Track memory usage and trigger cleanup when needed
+     */
+    private fun handleLocationUpdate(locationData: LocationData) {
+        // Add to pending queue
+        pendingLocations.offer(locationData)
+
+        // Check if cleanup needed
+        if (pendingLocations.size >= MAX_PENDING_LOCATIONS * CLEANUP_THRESHOLD / 100) {
+            Timber.w("Pending locations buffer at ${pendingLocations.size}/${MAX_PENDING_LOCATIONS}, triggering cleanup")
+            cleanupOldLocations()
+        }
+
+        // If queue is full, remove oldest to prevent memory overflow
+        while (pendingLocations.size > MAX_PENDING_LOCATIONS) {
+            val removed = pendingLocations.poll()
+            Timber.w("Buffer overflow: Removed oldest location from ${removed?.timestamp}")
+        }
+    }
+
+    /**
+     * Clean up old cached locations based on age
+     */
+    private fun cleanupOldLocations() {
+        val cutoffTime = System.currentTimeMillis() - (MAX_CACHE_AGE_HOURS * 60 * 60 * 1000)
+        val iterator = pendingLocations.iterator()
+        var removedCount = 0
+
+        while (iterator.hasNext()) {
+            val location = iterator.next()
+            if (location.timestamp < cutoffTime) {
+                iterator.remove()
+                removedCount++
+            }
+        }
+
+        if (removedCount > 0) {
+            Timber.i("Cleaned up $removedCount old locations from memory buffer")
+        }
+    }
+
+    /**
+     * Clear all in-memory buffers (called on service destroy or memory pressure)
+     */
+    fun clearMemoryBuffers() {
+        pendingLocations.clear()
+        Timber.i("Cleared all in-memory location buffers")
+    }
+
+    /**
+     * Handle system memory pressure
+     */
+    fun onLowMemory() {
+        Timber.w("Low memory detected - performing emergency cleanup")
+
+        // Keep only most recent locations
+        val recentCount = 10
+        val recentLocations = pendingLocations.toList().takeLast(recentCount)
+
+        pendingLocations.clear()
+        pendingLocations.addAll(recentLocations)
+
+        Timber.i("Reduced memory buffer from ${pendingLocations.size} to $recentCount locations")
+
+        // Suggest garbage collection (hint only)
+        System.gc()
+    }
+}
+```
+
+**Service Memory Management**:
+
+```kotlin
+class LocationTrackingService : Service() {
+
+    private lateinit var locationManager: LocationManager
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    override fun onCreate() {
+        super.onCreate()
+        locationManager = LocationManager(this)
+
+        // Register for memory pressure callbacks
+        registerComponentCallbacks(object : ComponentCallbacks2 {
+            override fun onTrimMemory(level: Int) {
+                when (level) {
+                    ComponentCallbacks2.TRIM_MEMORY_RUNNING_LOW,
+                    ComponentCallbacks2.TRIM_MEMORY_RUNNING_CRITICAL -> {
+                        Timber.w("Memory pressure detected (level: $level)")
+                        locationManager.onLowMemory()
+                    }
+                }
+            }
+
+            override fun onConfigurationChanged(newConfig: Configuration) {}
+            override fun onLowMemory() {
+                Timber.w("System low memory callback")
+                locationManager.onLowMemory()
+            }
+        })
+    }
+
+    override fun onDestroy() {
+        // Ensure proper cleanup to prevent memory leaks
+        locationManager.stopLocationUpdates()
+        locationManager.clearMemoryBuffers()
+        serviceScope.cancel()
+        super.onDestroy()
+    }
+}
+```
+
+**Memory Management Best Practices**:
+
+1. **Buffer Size Limits**: Never allow unbounded growth of in-memory collections
+2. **Automatic Cleanup**: Trigger cleanup at 80% capacity to prevent overflow
+3. **Oldest-First Eviction**: When buffer is full, remove oldest items first
+4. **Age-Based Cleanup**: Remove items older than configured threshold (24 hours)
+5. **Memory Pressure Handling**: Respond to system callbacks (onTrimMemory, onLowMemory)
+6. **Proper Lifecycle Management**: Clear all buffers in onDestroy()
+7. **Garbage Collection Hints**: Suggest GC after major cleanup operations
+8. **Thread-Safe Collections**: Use ConcurrentLinkedQueue for multi-threaded access
+
+**Memory Profiling Requirements**:
+
+```kotlin
+@Test
+fun testLongRunningServiceMemoryUsage() {
+    // Test requirements:
+    // 1. Run service for 24+ hours
+    // 2. Monitor memory usage every hour using Android Profiler
+    // 3. Verify memory growth stays within acceptable bounds (<50MB increase over 24h)
+    // 4. Verify no memory leaks detected by LeakCanary
+    // 5. Verify buffer cleanup occurs at expected thresholds
+    // 6. Test behavior under low memory conditions
+}
+```
+
+**Monitoring and Alerts**:
+
+- **Buffer Size**: Log warning when buffer exceeds 80% capacity
+- **Cleanup Events**: Log all cleanup operations with count removed
+- **Memory Pressure**: Log all memory pressure callbacks received
+- **Leak Detection**: Use LeakCanary in debug builds to detect memory leaks
+
 #### Testing Strategy
 - Unit tests for LocationCallback registration/unregistration
 - Integration test for continuous updates over 15 minutes
 - Manual test: Verify updates continue with screen off
 - Manual test: Verify updates at correct interval
 - Memory leak test using LeakCanary
+- **24-hour memory profiling test**
+- **Test buffer cleanup at 80% threshold**
+- **Test memory pressure callback handling**
+- **Test oldest-first eviction when buffer full**
+- **Verify memory growth stays under 50MB over 24 hours**
 
 #### Definition of Done
 - [ ] Code reviewed and approved
@@ -198,6 +373,10 @@ class LocationTrackingService : Service() {
 - [ ] Works with screen off
 - [ ] No memory leaks detected
 - [ ] Proper cleanup on service destroy
+- [ ] **Memory buffer limits enforced (max 100 locations)**
+- [ ] **Automatic cleanup triggers at 80% capacity**
+- [ ] **Memory pressure callbacks properly handled**
+- [ ] **24-hour profiling shows stable memory usage**
 
 ---
 
@@ -609,6 +788,122 @@ class NetworkManager(context: Context) {
 class NetworkException(message: String) : Exception(message)
 ```
 
+**Network Security Configuration**: `app/src/main/res/xml/network_security_config.xml`
+
+To enhance API security with certificate pinning, create a Network Security Configuration file:
+
+```xml
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Base configuration for all connections -->
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+
+    <!-- Domain-specific configuration with certificate pinning -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">your-api-domain.com</domain>
+
+        <!-- Certificate pinning with backup pins -->
+        <pin-set expiration="2026-12-31">
+            <!-- Primary certificate SHA-256 hash -->
+            <pin digest="SHA-256">base64EncodedPrimaryPublicKeyHash==</pin>
+            <!-- Backup certificate SHA-256 hash -->
+            <pin digest="SHA-256">base64EncodedBackupPublicKeyHash==</pin>
+        </pin-set>
+
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </domain-config>
+
+    <!-- Debug configuration (for local testing) -->
+    <debug-overrides>
+        <trust-anchors>
+            <!-- Trust user-added certificates for debugging -->
+            <certificates src="user" />
+            <certificates src="system" />
+        </trust-anchors>
+    </debug-overrides>
+</network-security-config>
+```
+
+**Generating Certificate Hashes**:
+
+To generate the SHA-256 public key hash for certificate pinning:
+
+```bash
+# Option 1: From server certificate
+echo | openssl s_client -servername your-api-domain.com -connect your-api-domain.com:443 2>/dev/null \
+  | openssl x509 -pubkey -noout \
+  | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary \
+  | openssl enc -base64
+
+# Option 2: From PEM certificate file
+openssl x509 -in certificate.pem -pubkey -noout \
+  | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary \
+  | openssl enc -base64
+```
+
+**Add to AndroidManifest.xml**:
+
+```xml
+<application
+    android:name=".PhoneManagerApplication"
+    android:networkSecurityConfig="@xml/network_security_config"
+    ...>
+    ...
+</application>
+```
+
+**Certificate Pinning Best Practices**:
+
+1. **Always include backup pins**: Include at least 2 pins (primary + backup) to prevent app lockout during certificate rotation
+2. **Set appropriate expiration**: Set expiration date to match your certificate rotation schedule
+3. **Monitor expiration**: Set up alerts 30 days before pin expiration
+4. **Test thoroughly**: Test certificate pinning in debug builds before production
+5. **Plan for rotation**: Document certificate rotation procedures
+6. **Emergency bypass**: Have a plan for updating app if certificates change unexpectedly
+
+**Certificate Rotation Strategy**:
+
+```kotlin
+/**
+ * Certificate rotation checklist:
+ *
+ * 1. Generate new certificate on server
+ * 2. Add new certificate hash as backup pin in app
+ * 3. Release app update with both old (primary) and new (backup) pins
+ * 4. Wait for majority of users to update (monitor analytics)
+ * 5. Rotate certificate on server
+ * 6. In next app release, promote backup pin to primary
+ * 7. Add new backup pin for future rotation
+ *
+ * Timeline: Minimum 4-6 weeks between adding backup pin and server rotation
+ */
+```
+
+**Testing Certificate Pinning**:
+
+```kotlin
+// Test that certificate pinning is working
+@Test
+fun testCertificatePinningRejectsInvalidCertificate() {
+    // Use OkHttp MockWebServer with self-signed certificate
+    val mockServer = MockWebServer()
+    mockServer.useHttps(selfSignedCertificate, false)
+
+    // Attempt connection should fail due to pinning
+    assertThrows<SSLPeerUnverifiedException> {
+        networkManager.sendLocation(testLocationData)
+    }
+}
+```
+
 #### Testing Strategy
 - Unit tests for network module configuration
 - Mock server tests for API service
@@ -616,6 +911,9 @@ class NetworkException(message: String) : Exception(message)
 - Test timeout handling
 - Test HTTPS enforcement
 - Test authentication header injection
+- **Test certificate pinning with invalid certificates**
+- **Verify NetworkSecurityConfig.xml is properly configured**
+- **Test certificate rotation procedure**
 
 #### Definition of Done
 - [ ] Code reviewed and approved
@@ -625,6 +923,10 @@ class NetworkException(message: String) : Exception(message)
 - [ ] Timeouts configured appropriately
 - [ ] Logging works in debug mode
 - [ ] Authentication header added
+- [ ] **NetworkSecurityConfig.xml created with certificate pinning**
+- [ ] **Certificate hashes generated and configured**
+- [ ] **Backup certificate pins included**
+- [ ] **Certificate pinning tested with invalid certificates**
 - [ ] Integration test with test server successful
 
 ---
@@ -820,7 +1122,16 @@ class NetworkManager(private val context: Context) {
 **Priority**: Critical
 **Estimate**: 1 day
 **Assigned To**: TBD
-**Depends On**: 0.2.2.1, 0.2.2.3, 0.2.2.4
+**Depends On**:
+- **Story 0.2.2.1** - Continuous Location Callback
+  - File: `docs/product/Story-0.2.2-Continuous-Tracking.md#story-0221`
+  - Provides: Location update callback mechanism
+- **Story 0.2.2.3** - Network Layer Setup
+  - File: `docs/product/Story-0.2.2-Continuous-Tracking.md#story-0223`
+  - Provides: HTTP client and API infrastructure
+- **Story 0.2.2.4** - Location Payload Model
+  - File: `docs/product/Story-0.2.2-Continuous-Tracking.md#story-0224`
+  - Provides: Data model for transmission
 
 #### User Story
 ```
@@ -964,7 +1275,11 @@ class LocationTrackingService : Service() {
 **Priority**: High
 **Estimate**: 1 day
 **Assigned To**: TBD
-**Depends On**: All previous stories in Epic 0.2.2
+**Depends On**:
+- **All previous stories in Epic 0.2.2**
+  - Story 0.2.2.1 through 0.2.2.5
+  - File: `docs/product/Story-0.2.2-Continuous-Tracking.md`
+  - Requires: Complete end-to-end location tracking flow
 
 #### User Story
 ```
@@ -1122,12 +1437,274 @@ class PerformanceMetrics {
 }
 ```
 
+**Edge Case Testing Requirements**:
+
+In addition to the standard extended runtime testing, the following edge cases must be explicitly tested to ensure robust service operation:
+
+## Network Transition Tests
+
+### Airplane Mode Scenarios
+```
+Test 1: Airplane Mode Toggle During Active Tracking
+- Start location tracking with network available
+- Enable airplane mode
+- Verify service continues tracking (locations queued)
+- Wait 5 minutes with airplane mode ON
+- Disable airplane mode
+- Verify service reconnects and transmits queued locations
+- Success: All locations transmitted after reconnection
+```
+
+### Network Type Transitions
+```
+Test 2: WiFi to Cellular Handoff
+- Start tracking on WiFi network
+- Move out of WiFi range to trigger cellular fallback
+- Verify service continues operating on cellular
+- Verify no data loss during transition
+- Success: Continuous operation without service restart
+
+Test 3: Complete Network Loss for Extended Period
+- Start tracking with network available
+- Disable all network connectivity (airplane mode or no signal)
+- Wait 60+ minutes with no connectivity
+- Re-enable network connectivity
+- Verify service resumes transmission
+- Verify queued locations transmitted
+- Success: Service recovers without manual intervention
+```
+
+### Roaming Scenarios
+```
+Test 4: Network Roaming
+- Simulate roaming scenario (use roaming SIM or test tool)
+- Verify service respects roaming preferences
+- Verify data transmission over roaming network
+- Success: Service adapts to roaming state appropriately
+```
+
+## Device State Tests
+
+### SIM Card Operations
+```
+Test 5: SIM Card Removal During Tracking
+- Start location tracking
+- Remove SIM card while service running
+- Verify service continues (using WiFi if available)
+- Verify device ID remains consistent
+- Insert SIM card
+- Verify service continues normally
+- Success: Service resilient to SIM changes
+
+Test 6: Dual SIM Switching
+- Start tracking on device with dual SIM
+- Switch active data SIM
+- Verify service continues without interruption
+- Success: No service restart required
+```
+
+### Time and Timezone Tests
+```
+Test 7: Timezone Change During Tracking
+- Start location tracking in timezone A (e.g., PST)
+- Change device timezone to timezone B (e.g., EST)
+- Verify timestamps use UTC or correctly adjusted
+- Verify location tracking continues
+- Success: Timestamps remain consistent and accurate
+
+Test 8: System Clock Manual Adjustment
+- Start location tracking
+- Manually adjust system clock forward 1 hour
+- Verify service handles time jump gracefully
+- Manually adjust system clock backward 1 hour
+- Verify no duplicate timestamps or errors
+- Success: Service tolerates clock changes
+
+Test 9: Automatic Time Toggle
+- Disable "Automatic date & time" setting
+- Set manual time (slightly different from actual)
+- Start location tracking
+- Enable "Automatic date & time" (time jumps to correct value)
+- Verify service handles time correction
+- Success: No crashes or timestamp inconsistencies
+```
+
+### Storage Tests
+```
+Test 10: Low Storage Conditions
+- Fill device storage to <100MB free
+- Start location tracking
+- Verify service handles storage errors gracefully
+- Verify appropriate error logging
+- Verify service doesn't crash
+- Free up storage
+- Verify service resumes normal operation
+- Success: Degraded but stable operation under low storage
+```
+
+### Thermal Tests
+```
+Test 11: Thermal Throttling Simulation
+- Run intensive app to heat up device (gaming, video processing)
+- Monitor location tracking service behavior
+- Verify service continues under thermal throttling
+- Verify location accuracy impacts documented
+- Success: Service remains stable under thermal stress
+```
+
+## Security and Permission Tests
+
+### Mock Location Detection
+```
+Test 12: Mock Location App Detection
+- Enable Developer Options → "Allow mock locations"
+- Install mock location app (e.g., Fake GPS)
+- Start location tracking
+- Attempt to send mock locations
+- Verify service detects mock locations (if required)
+- Document behavior with mock locations
+- Success: Service behavior with mock locations is defined and tested
+```
+
+### Developer Options Spoofing
+```
+Test 13: Location Spoofing via Developer Tools
+- Enable Developer Options
+- Use "Select mock location app" setting
+- Test various mock locations
+- Verify service handles spoofed data appropriately
+- Success: Service behavior documented and tested
+```
+
+### GPS Jamming Simulation
+```
+Test 14: GPS Signal Loss
+- Start tracking outdoors (strong GPS signal)
+- Move indoors to location with no GPS (deep basement, tunnel)
+- Verify service handles signal loss gracefully
+- Verify fallback to network/WiFi location
+- Move back outdoors
+- Verify service resumes GPS location
+- Success: Graceful degradation and recovery
+```
+
+## Permission Revocation Tests
+
+```
+Test 15: Runtime Permission Revocation
+- Start location tracking
+- Revoke location permission while service running (via Settings)
+- Verify service stops gracefully or requests permission
+- Verify no crashes
+- Re-grant permission
+- Verify service can resume tracking
+- Success: Handles permission changes without crashes
+
+Test 16: Background Location Permission Revocation
+- Start tracking with background permission granted
+- Revoke background location permission (Settings → App → Permissions)
+- Keep foreground permission granted
+- Verify service behavior (may continue with limitations)
+- Success: Defined behavior when background permission revoked
+```
+
+## Concurrency and Race Condition Tests
+
+```
+Test 17: Rapid Service Start/Stop Cycles
+- Start service
+- Immediately stop service (<1 second)
+- Repeat 10 times rapidly
+- Verify no race conditions
+- Verify proper cleanup each time
+- Success: No crashes, no leaked resources
+
+Test 18: Multiple Simultaneous Location Callbacks
+- Configure very short update interval (e.g., 1 second)
+- Simulate GPS updates coming faster than processing
+- Verify service handles concurrent callbacks
+- Verify no location data loss
+- Success: Thread-safe operation confirmed
+```
+
+## Power Management Edge Cases
+
+```
+Test 19: Battery Saver Mode Activation
+- Start location tracking
+- Enable Battery Saver mode
+- Verify service continues (possibly with reduced accuracy)
+- Verify behavior is acceptable and documented
+- Disable Battery Saver mode
+- Verify service returns to normal operation
+- Success: Service adapts to battery saver constraints
+
+Test 20: Extreme Battery Saver (Some OEMs)
+- On devices with aggressive battery management (Xiaomi, Huawei, etc.)
+- Enable manufacturer's "Ultra Battery Saver" mode
+- Verify service behavior
+- Document limitations
+- Success: Behavior under OEM battery modes documented
+```
+
+## System Resource Pressure
+
+```
+Test 21: High CPU Load
+- Run CPU-intensive task in background
+- Monitor location tracking service performance
+- Verify service continues receiving updates
+- Verify update intervals remain consistent
+- Success: Service maintains performance under CPU pressure
+
+Test 22: Memory Pressure from Other Apps
+- Open multiple memory-intensive apps
+- Monitor location service memory usage
+- Verify service handles memory pressure callbacks
+- Verify service not killed by system
+- Success: Service remains running under memory pressure
+```
+
+## Edge Case Test Execution Checklist
+
+- [ ] All 22 edge case scenarios tested
+- [ ] Results documented for each test
+- [ ] Failures analyzed and bugs filed
+- [ ] Known limitations documented
+- [ ] Workarounds identified where applicable
+- [ ] Edge case test report generated
+- [ ] Product team informed of any limitations
+
+## Expected Outcomes
+
+For each edge case test, document:
+1. **Expected Behavior**: What should happen
+2. **Actual Behavior**: What actually happened
+3. **Pass/Fail Status**: Did it meet expectations
+4. **Issues Found**: Any bugs discovered
+5. **Risk Level**: Low/Medium/High if edge case fails
+6. **Mitigation**: How to handle the edge case in production
+
+## Edge Case Priority Levels
+
+**CRITICAL (Must Pass)**:
+- Tests 1, 3, 7, 12, 15, 17, 19
+
+**HIGH (Should Pass)**:
+- Tests 2, 5, 8, 10, 11, 16, 18, 21
+
+**MEDIUM (Nice to Pass)**:
+- Tests 4, 6, 9, 13, 14, 20, 22
+
 #### Testing Strategy
 - Execute complete 6-hour test
 - Run on multiple devices (Google Pixel, Samsung, Xiaomi)
 - Test on multiple Android versions (10, 12, 14)
 - Collect performance metrics
 - Generate test report
+- **Execute all CRITICAL edge case tests**
+- **Execute HIGH priority edge case tests**
+- **Document results of all edge case tests**
 
 #### Definition of Done
 - [ ] 6-hour test completed successfully
@@ -1137,6 +1714,9 @@ class PerformanceMetrics {
 - [ ] No critical or high bugs found
 - [ ] Service ready for Epic 0.2.3 (offline queue)
 - [ ] Known issues documented
+- [ ] **All CRITICAL edge case tests passed (Tests 1, 3, 7, 12, 15, 17, 19)**
+- [ ] **All HIGH priority edge case tests executed and documented**
+- [ ] **Edge case test report completed with pass/fail status for all tests**
 
 ---
 

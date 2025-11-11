@@ -41,6 +41,89 @@ An Android background service that:
 - **Battery Impact**: <5% daily drain
 - **Auto-start Reliability**: >98% after device boot
 
+### Performance Benchmarks
+
+To ensure optimal service performance, the following quantitative benchmarks must be met:
+
+#### Processing Performance
+- **Location Update Processing Time**: <50ms per location update (from callback to processing complete)
+- **Database Write Operations**: <100ms per batch write (up to 50 records)
+- **Database Read Operations**: <50ms for queue status queries
+- **API Sync Operations**: <5s for batch of 50 location records (network latency excluded)
+- **Service Startup Time**:
+  - Cold start (service not running): <1s from startService() to foreground notification displayed
+  - Warm start (service in background): <200ms to resume tracking
+
+#### Memory Usage
+- **Baseline Memory Footprint**: <30MB when idle (service running, no active processing)
+- **Peak Memory Usage**: <80MB during queue processing (batch sync of 100+ records)
+- **Memory Growth Over 24h**: <50MB increase (must remain stable long-term)
+- **Memory Leak Test**: 0 leaks detected by LeakCanary after 24-hour run
+- **In-Memory Buffer Size**: Maximum 100 pending locations (enforced limit)
+
+#### Battery Impact
+- **Location Tracking (GPS)**: <3% battery per hour (5-minute update interval)
+- **Location Tracking (Network)**: <1% battery per hour (fallback mode)
+- **Idle Service (No Tracking)**: <0.5% battery per hour
+- **Queue Processing**: <1% battery per sync operation (50 records)
+- **24-Hour Battery Drain**: <5% total (with default 5-minute tracking interval)
+
+#### Network Performance
+- **HTTP Request Timeout**: 30 seconds (configurable)
+- **Connection Timeout**: 10 seconds
+- **Read/Write Timeout**: 20 seconds each
+- **Retry Delay (Exponential Backoff)**:
+  - 1st retry: 1 second
+  - 2nd retry: 2 seconds
+  - 3rd retry: 4 seconds
+  - 4th retry: 8 seconds
+  - 5th retry: 16 seconds (maximum retry attempts: 5)
+- **Queue Sync Batch Size**: 50 records per batch
+- **Queue Sync Delay Between Batches**: 1 second (throttling to avoid server overload)
+
+#### Location Accuracy
+- **GPS Mode**: ±10 meters accuracy for 95% of readings
+- **Network Mode**: ±50 meters accuracy for 90% of readings
+- **Minimum Accuracy Threshold**: 50 meters (readings less accurate are flagged)
+- **Location Update Frequency**: 5 minutes default (configurable from 1 minute to 60 minutes)
+
+#### Responsiveness
+- **Service Stop Time**: <500ms from stopService() to complete shutdown
+- **Permission Revocation Response**: <1s to gracefully stop tracking
+- **Network State Change Detection**: <5s to detect connectivity change and trigger sync
+- **Boot Receiver Execution**: <3s from BOOT_COMPLETED to service start attempt
+
+#### Reliability Under Load
+- **Concurrent Location Callbacks**: Handle up to 10 rapid callbacks without data loss
+- **Queue Size Handling**: Support queue of 1000+ locations without performance degradation
+- **Database Operations Under Pressure**: Maintain <200ms write time even with 500+ queued records
+- **Memory Pressure Response**: Reduce buffer to 10 locations within 2s of onTrimMemory callback
+
+#### Monitoring and Logging
+- **Log Entry Processing**: <5ms per log entry (Timber)
+- **Performance Metrics Collection**: <1ms per metric update
+- **Crash Report Generation**: <100ms (should not impact user experience)
+
+#### Benchmark Validation
+
+All benchmarks must be validated through:
+1. **Automated Performance Tests**: JUnit tests with performance assertions
+2. **Android Profiler Analysis**: 24-hour profiling sessions capturing CPU, memory, network, battery
+3. **Real Device Testing**: Tested on minimum 3 different device models (low/mid/high-end)
+4. **Multiple Android Versions**: Tested on Android 10, 12, and 14 minimum
+5. **Continuous Monitoring**: Performance regression tests in CI/CD pipeline
+
+#### Acceptance Thresholds
+
+| Benchmark Category | Target | Minimum Acceptable | Test Method |
+|-------------------|--------|-------------------|-------------|
+| Processing Time | <50ms | <100ms | JUnit with timing assertions |
+| Memory Footprint | <30MB | <50MB | Android Profiler |
+| Battery (24h) | <5% | <8% | Real device battery stats |
+| Service Uptime | 99.9% | 99.5% | 24h+ extended tests |
+| API Sync Time | <5s | <10s | Integration tests |
+| Cold Start | <1s | <2s | Manual testing with stopwatch |
+
 ---
 
 ## Requirements Summary
