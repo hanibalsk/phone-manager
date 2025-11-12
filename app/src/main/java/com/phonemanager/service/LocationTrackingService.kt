@@ -18,6 +18,7 @@ import com.phonemanager.data.repository.LocationRepositoryImpl
 import com.phonemanager.location.LocationManager
 import com.phonemanager.queue.QueueManager
 import com.phonemanager.queue.WorkManagerScheduler
+import com.phonemanager.watchdog.WatchdogManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -32,10 +33,11 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Story 0.2.1/0.2.3: LocationTrackingService - Foreground service for location tracking
+ * Story 0.2.1/0.2.3/0.2.4: LocationTrackingService - Foreground service for location tracking
  *
  * Story 0.2.1: Implements periodic location capture
  * Story 0.2.3: Integrates upload queue and WorkManager
+ * Story 0.2.4: Integrates service health watchdog
  * Epic 1: Provides service infrastructure for UI layer
  */
 @AndroidEntryPoint
@@ -52,6 +54,9 @@ class LocationTrackingService : Service() {
 
     @Inject
     lateinit var workManagerScheduler: WorkManagerScheduler
+
+    @Inject
+    lateinit var watchdogManager: WatchdogManager
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -125,6 +130,9 @@ class LocationTrackingService : Service() {
 
         // Story 0.2.3: Schedule periodic queue processing
         workManagerScheduler.scheduleQueueProcessing(intervalMinutes = 15)
+
+        // Story 0.2.4: Start service health watchdog
+        watchdogManager.startWatchdog(intervalMinutes = 15)
 
         Timber.i("Foreground tracking started")
     }
@@ -211,6 +219,9 @@ class LocationTrackingService : Service() {
 
         // Story 0.2.3: Cancel queue processing
         workManagerScheduler.cancelQueueProcessing()
+
+        // Story 0.2.4: Stop service health watchdog
+        watchdogManager.stopWatchdog()
 
         // Update service health
         locationRepository.updateServiceHealth(
