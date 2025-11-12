@@ -15,20 +15,25 @@ import com.phonemanager.R
 import com.phonemanager.data.model.HealthStatus
 import com.phonemanager.data.model.ServiceHealth
 import com.phonemanager.data.repository.LocationRepositoryImpl
+import com.phonemanager.location.LocationManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Epic 0.2.4: LocationTrackingService - Foreground service for location tracking
- * Stub implementation for Epic 1 development
- * Full implementation with actual location collection will be in Epic 0.2
+ * Story 0.2.1: LocationTrackingService - Foreground service for location tracking
+ *
+ * Story 0.2.1: Implements periodic location capture
+ * Epic 1: Provides service infrastructure for UI layer
  */
 @AndroidEntryPoint
 class LocationTrackingService : Service() {
@@ -36,10 +41,14 @@ class LocationTrackingService : Service() {
     @Inject
     lateinit var locationRepository: LocationRepositoryImpl
 
+    @Inject
+    lateinit var locationManager: LocationManager
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var currentLocationCount = 0
     private var currentInterval = 5 // minutes
+    private var trackingJob: Job? = null
 
     companion object {
         const val ACTION_START_TRACKING = "com.phonemanager.action.START_TRACKING"
@@ -102,11 +111,88 @@ class LocationTrackingService : Service() {
             }
         }
 
+        // Story 0.2.1: Start periodic location capture
+        startLocationCapture()
+
         Timber.i("Foreground tracking started")
+    }
+
+    /**
+     * Story 0.2.1: Periodically capture location and store to database
+     */
+    private fun startLocationCapture() {
+        trackingJob?.cancel()
+
+        trackingJob = serviceScope.launch {
+            Timber.d("Starting location capture loop with interval $currentInterval minutes")
+
+            while (isActive) {
+                try {
+                    // Update service health to GPS_ACQUIRING
+                    locationRepository.updateServiceHealth(
+                        ServiceHealth(
+                            isRunning = true,
+                            healthStatus = HealthStatus.GPS_ACQUIRING,
+                            locationCount = currentLocationCount
+                        )
+                    )
+
+                    // Get current location
+                    val result = locationManager.getCurrentLocation()
+
+                    result.onSuccess { locationEntity ->
+                        if (locationEntity != null) {
+                            // Store location to database
+                            val id = locationRepository.insertLocation(locationEntity)
+                            Timber.i("Location captured and stored: id=$id, lat=${locationEntity.latitude}, lon=${locationEntity.longitude}, accuracy=${locationEntity.accuracy}m")
+
+                            // Update service health to HEALTHY
+                            locationRepository.updateServiceHealth(
+                                ServiceHealth(
+                                    isRunning = true,
+                                    lastLocationUpdate = locationEntity.timestamp,
+                                    locationCount = currentLocationCount + 1,
+                                    healthStatus = HealthStatus.HEALTHY
+                                )
+                            )
+                        } else {
+                            Timber.w("Location is null - GPS may be unavailable")
+                            locationRepository.updateServiceHealth(
+                                ServiceHealth(
+                                    isRunning = true,
+                                    healthStatus = HealthStatus.NO_GPS_SIGNAL,
+                                    locationCount = currentLocationCount,
+                                    errorMessage = "No GPS signal"
+                                )
+                            )
+                        }
+                    }.onFailure { error ->
+                        Timber.e(error, "Failed to capture location")
+                        locationRepository.updateServiceHealth(
+                            ServiceHealth(
+                                isRunning = true,
+                                healthStatus = HealthStatus.ERROR,
+                                locationCount = currentLocationCount,
+                                errorMessage = error.message ?: "Location capture failed"
+                            )
+                        )
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e, "Exception in location capture loop")
+                }
+
+                // Wait for next interval
+                delay(currentInterval * 60 * 1000L)
+            }
+        }
     }
 
     private fun stopTracking() {
         Timber.d("Stopping tracking")
+
+        // Cancel location capture
+        trackingJob?.cancel()
+        trackingJob = null
 
         // Update service health
         locationRepository.updateServiceHealth(
@@ -123,7 +209,12 @@ class LocationTrackingService : Service() {
     private fun updateTrackingInterval(intervalMinutes: Int) {
         Timber.d("Updating tracking interval to $intervalMinutes minutes")
         currentInterval = intervalMinutes
-        // In full implementation, this would update the location request interval
+
+        // Restart location capture with new interval if already tracking
+        if (trackingJob?.isActive == true) {
+            startLocationCapture()
+        }
+
         updateNotification()
     }
 
@@ -190,7 +281,14 @@ class LocationTrackingService : Service() {
 
     override fun onDestroy() {
         Timber.d("LocationTrackingService destroyed")
+
+        // Cancel location capture
+        trackingJob?.cancel()
+        trackingJob = null
+
+        // Cancel service scope
         serviceScope.cancel()
+
         super.onDestroy()
     }
 
