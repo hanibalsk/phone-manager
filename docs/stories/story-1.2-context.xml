@@ -1,0 +1,451 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-1.2" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.2</storyId>
+    <title>Permission Request Flow</title>
+    <status>Ready for Development</status>
+    <generatedAt>2025-01-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/product/Story-1.2-Permission-Flow.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to understand why location permissions are needed and grant them confidently</iWant>
+    <soThat>I can use location tracking features without privacy concerns</soThat>
+    <tasks>
+      - Implement PermissionManager for checking all permission types
+      - Create PermissionViewModel for permission state and flow management
+      - Build PermissionRationaleDialog for foreground, background, and notification permissions
+      - Create PermissionStatusCard to display current permission state
+      - Implement two-step permission flow for Android 10+ (foreground then background)
+      - Handle notification permission for Android 13+
+      - Implement settings deep link for permanently denied permissions
+      - Track permission grant rates via analytics
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="1.2.1">Rationale dialog shown before system prompt for ACCESS_FINE_LOCATION with clear explanation and privacy statement</criterion>
+    <criterion id="1.2.2">Separate rationale for ACCESS_BACKGROUND_LOCATION on Android 10+, requested after foreground granted</criterion>
+    <criterion id="1.2.3">Notification permission rationale shown on Android 13+ before POST_NOTIFICATIONS prompt</criterion>
+    <criterion id="1.2.4">PermissionRationaleDialog follows Material 3 design with icon, title, body, Continue and Not Now buttons</criterion>
+    <criterion id="1.2.5">PermissionStatusCard displays: All Granted (green), Foreground Only (yellow), Denied (red), with appropriate actions</criterion>
+    <criterion id="1.2.6">"Open Settings" deep link works when permissions permanently denied, opens app permission settings</criterion>
+    <criterion id="1.2.7">Complete permission flow (all permissions granted) completes in &lt; 60 seconds</criterion>
+    <criterion id="1.2.8">Zero crashes on Android 8, 9, 10, 11, 12, 13, 14</criterion>
+    <criterion id="1.2.9">Permission denial handled gracefully with helpful message and retry/settings options</criterion>
+    <criterion id="1.2.10">Permission state correctly reflected after force-close and relaunch</criterion>
+    <criterion id="1.2.11">Android 10+ enforces sequential flow: foreground FIRST, background SECOND only after foreground granted</criterion>
+    <criterion id="1.2.12">Analytics events logged for permission_rationale_shown, permission_granted, permission_denied, permission_permanently_denied</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/product/Story-1.2-Permission-Flow.md</path>
+        <title>Story 1.2: Permission Request Flow</title>
+        <section>Android Version Compatibility Matrix</section>
+        <snippet>
+Android 8-9 (API 26-28): ACCESS_FINE_LOCATION only
+Android 10 (API 29): Two-step flow - Foreground then Background
+Android 11 (API 30): Enforced sequential - Must grant foreground first
+Android 12 (API 31): Approximate location option available
+Android 13 (API 33): POST_NOTIFICATIONS permission required
+Android 14 (API 34): FOREGROUND_SERVICE_LOCATION permission required
+
+Key requirement: Background permission MUST be requested separately after foreground granted on Android 10+
+        </snippet>
+      </doc>
+      <doc>
+        <path>docs/product/Epic-1-Location-Tracking-Core.md</path>
+        <title>Epic 1: Location Tracking Core</title>
+        <section>Story 1.2: Permission Request Flow</section>
+        <snippet>
+Duration: 5-7 days (8 story points)
+Value: Compliant permission handling increases grant rate
+
+Target: &gt; 70% permission grant rate through clear rationale and user-friendly flow
+
+Implements comprehensive permission flow:
+- Foreground location permission (ACCESS_FINE_LOCATION)
+- Background location permission (ACCESS_BACKGROUND_LOCATION for Android 10+)
+- Notification permission (POST_NOTIFICATIONS for Android 13+)
+- Clear rationale dialogs before system prompts
+- Permission status display
+- Settings deep link for permanently denied
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="app/src/main/java/com/phonemanager/permission/PermissionManager.kt">
+        <snippet>
+@Singleton
+class PermissionManagerImpl @Inject constructor(
+    @ApplicationContext private val context: Context
+) : PermissionManager {
+
+    override fun hasLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun hasBackgroundLocationPermission(): Boolean {
+        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.Q) {
+            return true // Not required on Android 9 and below
+        }
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun hasNotificationPermission(): Boolean {
+        if (Build.VERSION.SDK_INT &lt; Build.VERSION_CODES.TIRAMISU) {
+            return true // Not required on Android 12 and below
+        }
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    override fun hasAllRequiredPermissions(): Boolean {
+        return hasLocationPermission() &amp;&amp;
+               hasBackgroundLocationPermission() &amp;&amp;
+               hasNotificationPermission()
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/ui/permissions/PermissionViewModel.kt">
+        <snippet>
+@HiltViewModel
+class PermissionViewModel @Inject constructor(
+    private val permissionManager: PermissionManager
+) : ViewModel() {
+
+    private val _permissionState = MutableStateFlow&lt;PermissionState&gt;(PermissionState.Checking)
+    val permissionState: StateFlow&lt;PermissionState&gt; = _permissionState.asStateFlow()
+
+    private val _showLocationRationale = MutableStateFlow(false)
+    val showLocationRationale: StateFlow&lt;Boolean&gt; = _showLocationRationale.asStateFlow()
+
+    fun onLocationPermissionResult(granted: Boolean, shouldShowRationale: Boolean) {
+        if (granted) {
+            permissionManager.updatePermissionState()
+            // Check if background permission needed
+            if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) {
+                _showBackgroundRationale.value = true
+            }
+        } else {
+            if (!shouldShowRationale) {
+                // Permanently denied
+                _permissionState.value = PermissionState.PermanentlyDenied(
+                    Manifest.permission.ACCESS_FINE_LOCATION
+                )
+                _showSettingsDialog.value = true
+            } else {
+                _permissionState.value = PermissionState.LocationDenied
+            }
+        }
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/ui/permissions/PermissionRationaleDialog.kt">
+        <snippet>
+@Composable
+fun PermissionRationaleDialog(
+    type: PermissionType,
+    onAccept: () -&gt; Unit,
+    onDismiss: () -&gt; Unit,
+    modifier: Modifier = Modifier
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = when (type) {
+                    PermissionType.LOCATION -&gt; Icons.Default.LocationOn
+                    PermissionType.BACKGROUND -&gt; Icons.Default.MyLocation
+                    PermissionType.NOTIFICATION -&gt; Icons.Default.Notifications
+                },
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary
+            )
+        },
+        title = {
+            Text(
+                text = when (type) {
+                    PermissionType.LOCATION -&gt; "Location Permission Required"
+                    PermissionType.BACKGROUND -&gt; "Background Location Access"
+                    PermissionType.NOTIFICATION -&gt; "Notification Permission"
+                }
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    text = when (type) {
+                        PermissionType.LOCATION -&gt;
+                            "Phone Manager needs access to your location to track your device's position."
+                        PermissionType.BACKGROUND -&gt;
+                            "To continue tracking your location when the app is closed, " +
+                            "please allow location access \"All the time\"."
+                        PermissionType.NOTIFICATION -&gt;
+                            "A notification is required while tracking is active."
+                    }
+                )
+                Text(
+                    text = "Your privacy: Location data is stored on your device.",
+                    style = MaterialTheme.typography.bodySmall,
+                    fontStyle = FontStyle.Italic
+                )
+            }
+        },
+        confirmButton = { Button(onClick = onAccept) { Text("Continue") } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text("Not Now") } }
+    )
+}
+        </snippet>
+      </file>
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="androidx.compose.material:material-icons-extended" version="1.6.0" />
+        <package name="androidx.activity:activity-compose" version="1.8.2" />
+        <package name="com.google.dagger:hilt-android" version="2.48.1" />
+      </android>
+      <internal>
+        <dependency story="1.1">Uses PermissionManager to enable/disable toggle</dependency>
+        <dependency story="0.1">Hilt DI configuration</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>CRITICAL: Background location MUST be requested AFTER foreground granted on Android 10+</constraint>
+    <constraint>Use Material 3 AlertDialog for all rationale dialogs</constraint>
+    <constraint>Show custom rationale BEFORE system permission prompt (not after)</constraint>
+    <constraint>Use ActivityResultContracts.RequestMultiplePermissions for foreground permissions</constraint>
+    <constraint>Use ActivityResultContracts.RequestPermission for background permission</constraint>
+    <constraint>Detect "Don't ask again" using shouldShowRequestPermissionRationale() == false</constraint>
+    <constraint>Deep link to settings using Settings.ACTION_APPLICATION_DETAILS_SETTINGS</constraint>
+    <constraint>Complete permission flow must complete in &lt; 60 seconds</constraint>
+    <constraint>Permission state updates within 500ms of grant/deny</constraint>
+    <constraint>Support Android API 26-34 (Android 8-14)</constraint>
+    <constraint>Handle notification permission only on Android 13+ (API 33+)</constraint>
+    <constraint>Never request permissions not declared in AndroidManifest.xml</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="PermissionManager">
+      <method>fun hasLocationPermission(): Boolean</method>
+      <method>fun hasBackgroundLocationPermission(): Boolean</method>
+      <method>fun hasNotificationPermission(): Boolean</method>
+      <method>fun hasAllRequiredPermissions(): Boolean</method>
+      <method>fun shouldShowLocationRationale(activity: Activity): Boolean</method>
+      <method>fun shouldShowBackgroundRationale(activity: Activity): Boolean</method>
+      <method>fun observePermissionState(): Flow&lt;PermissionState&gt;</method>
+    </interface>
+
+    <interface name="PermissionViewModel">
+      <method>val permissionState: StateFlow&lt;PermissionState&gt;</method>
+      <method>val showLocationRationale: StateFlow&lt;Boolean&gt;</method>
+      <method>val showBackgroundRationale: StateFlow&lt;Boolean&gt;</method>
+      <method>val showNotificationRationale: StateFlow&lt;Boolean&gt;</method>
+      <method>val showSettingsDialog: StateFlow&lt;Boolean&gt;</method>
+      <method>fun requestLocationPermission(activity: Activity)</method>
+      <method>fun onLocationPermissionResult(granted: Boolean, shouldShowRationale: Boolean)</method>
+      <method>fun onBackgroundPermissionResult(granted: Boolean, shouldShowRationale: Boolean)</method>
+      <method>fun onNotificationPermissionResult(granted: Boolean)</method>
+      <method>fun openAppSettings(context: Context)</method>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests required:
+- PermissionManager permission checking logic for all API levels
+- PermissionViewModel state transitions for all permission scenarios
+- shouldShowRequestPermissionRationale() handling
+
+Integration tests required:
+- Complete permission flow end-to-end
+- Two-step background permission flow on Android 10+
+- Settings deep link navigation
+
+UI tests required:
+- Rationale dialog interactions
+- Permission status card display states
+- Permanently denied → Settings flow
+
+Manual testing platforms:
+- Android 8 (API 26), 9 (API 28), 10 (API 29), 11 (API 30), 12 (API 31), 13 (API 33), 14 (API 34)
+
+Target coverage: &gt; 80% for permission logic
+Grant rate target: &gt; 70% (tracked via analytics)
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/permission/PermissionManagerTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/ui/permissions/PermissionViewModelTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/ui/permissions/PermissionFlowTest.kt</location>
+    </locations>
+
+    <ideas>
+      <idea ac="1.2.1">Mock rationale dialog shown before system prompt - verify dialog appears before permission launcher invoked</idea>
+      <idea ac="1.2.2">On Android 10 emulator, verify foreground granted triggers background rationale dialog automatically</idea>
+      <idea ac="1.2.3">On Android 13 emulator, verify notification rationale shown and system prompt triggered</idea>
+      <idea ac="1.2.4">Visual inspection of dialog against Material 3 design specs</idea>
+      <idea ac="1.2.5">Grant/deny different permissions and verify PermissionStatusCard shows correct state and color</idea>
+      <idea ac="1.2.6">Deny with "Don't ask again", tap "Open Settings" button, verify app settings page opens</idea>
+      <idea ac="1.2.7">Time complete flow from start to all permissions granted - verify &lt; 60s</idea>
+      <idea ac="1.2.8">Run permission flow on all Android versions 8-14 - verify zero crashes</idea>
+      <idea ac="1.2.9">Deny permission, verify UI shows helpful message and "Retry" or "Open Settings" button</idea>
+      <idea ac="1.2.10">Grant permissions, force close app, relaunch, verify permission state correct</idea>
+      <idea ac="1.2.11">On Android 10+, verify background cannot be requested before foreground granted</idea>
+      <idea ac="1.2.12">Check analytics logs for permission_granted, permission_denied events with correct properties</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Create PermissionManager</title>
+      <description>Implement permission checking abstraction</description>
+      <actions>
+        - Create PermissionManager interface in permission package
+        - Implement hasLocationPermission() using ContextCompat.checkSelfPermission()
+        - Implement hasBackgroundLocationPermission() with Android 10+ check
+        - Implement hasNotificationPermission() with Android 13+ check
+        - Implement shouldShowLocationRationale() wrapper
+        - Add observePermissionState() returning Flow&lt;PermissionState&gt;
+        - Add Hilt @Singleton binding
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Create PermissionState Model</title>
+      <description>Define sealed class for permission states</description>
+      <actions>
+        - Create PermissionState sealed class
+        - Define states: Checking, AllGranted, LocationDenied, BackgroundDenied(foregroundGranted: Boolean), NotificationDenied, PermanentlyDenied(permission: String)
+        - Ensure each state has clear semantics for UI rendering
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Implement PermissionViewModel</title>
+      <description>Manage permission flow and state</description>
+      <actions>
+        - Create @HiltViewModel with PermissionManager injection
+        - Add StateFlows for permissionState, showLocationRationale, showBackgroundRationale, showNotificationRationale, showSettingsDialog
+        - Implement requestLocationPermission() to show rationale first
+        - Implement onLocationPermissionResult() with two-step flow logic
+        - Implement onBackgroundPermissionResult() to update state
+        - Implement onNotificationPermissionResult()
+        - Implement openAppSettings() with Settings.ACTION_APPLICATION_DETAILS_SETTINGS intent
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Create PermissionRationaleDialog</title>
+      <description>Build Material 3 rationale dialog composable</description>
+      <actions>
+        - Create PermissionType enum (LOCATION, BACKGROUND, NOTIFICATION)
+        - Create PermissionRationaleDialog @Composable
+        - Use AlertDialog from Material 3 with icon, title, text, confirmButton, dismissButton
+        - Define permission-specific copy for each PermissionType
+        - Include privacy assurance statement in all dialogs
+        - Add "Continue" primary button and "Not Now" secondary button
+        - Make dialog dismissible by tapping outside or back button
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Create PermissionStatusCard</title>
+      <description>Build status display card</description>
+      <actions>
+        - Create PermissionStatusCard @Composable
+        - Accept permissionState, onGrantPermissions, onOpenSettings callbacks
+        - Render Card with dynamic colors based on state (green for granted, red for denied, yellow for partial)
+        - Display icon (CheckCircle, Cancel, Warning, Block) based on state
+        - Show status text and explanation
+        - Add "Grant" or "Open Settings" button based on state
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Integrate with MainActivity</title>
+      <description>Wire up permission launchers and dialogs</description>
+      <actions>
+        - Create locationPermissionLauncher using registerForActivityResult(RequestMultiplePermissions())
+        - Create backgroundPermissionLauncher using registerForActivityResult(RequestPermission())
+        - Create notificationPermissionLauncher using registerForActivityResult(RequestPermission())
+        - Observe showLocationRationale and render PermissionRationaleDialog
+        - Observe showBackgroundRationale and render dialog
+        - Observe showNotificationRationale and render dialog
+        - Launch appropriate permission launcher when rationale accepted
+        - Call viewModel.onLocationPermissionResult() with grant status and shouldShowRationale
+        - Add PermissionStatusCard to main screen
+      </actions>
+    </step>
+
+    <step order="7">
+      <title>Test Across Android Versions</title>
+      <description>Comprehensive manual testing</description>
+      <actions>
+        - Test on Android 8 emulator (only foreground location)
+        - Test on Android 10 emulator (two-step flow)
+        - Test on Android 13 emulator (with notification permission)
+        - Test on Android 14 emulator (all permissions)
+        - Test "Don't ask again" → Settings flow
+        - Test permission denial scenarios
+        - Write unit tests for PermissionManager
+        - Write unit tests for PermissionViewModel
+        - Write integration test for complete flow
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>Background permission requested before foreground granted on Android 10+</issue>
+      <solution>Always check hasLocationPermission() == true before showing background rationale. Android 10+ enforces sequential flow.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>shouldShowRequestPermissionRationale() returns false before first request</issue>
+      <solution>Show custom rationale for first-time users even if shouldShowRequestPermissionRationale() is false. Only treat it as "permanently denied" if permission was denied AND shouldShowRequestPermissionRationale() is false.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Settings deep link doesn't open on some manufacturers</issue>
+      <solution>Use Settings.ACTION_APPLICATION_DETAILS_SETTINGS with proper package URI format. Test on Samsung, Xiaomi, OnePlus devices.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Permission state not updating after granted in Settings</issue>
+      <solution>Call permissionManager.updatePermissionState() in onResume() to refresh state when returning from Settings.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Notification permission crashes on Android 12 and below</issue>
+      <solution>Always check Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.TIRAMISU before requesting POST_NOTIFICATIONS.</solution>
+    </gotcha>
+    <gotcha>
+      <issue>ActivityResultLauncher called before Activity created</issue>
+      <solution>Register permission launchers in onCreate() before setContent(), not inside Composables.</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="prd" path="docs/PRD.md" section="Epic 1: Location Tracking Core" />
+    <reference type="epic" path="docs/product/Epic-1-Location-Tracking-Core.md" section="Story 1.2" />
+    <reference type="story" path="docs/product/Story-1.2-Permission-Flow.md" section="All sections" />
+    <reference type="external" url="https://developer.android.com/training/location/permissions">Android Location Permissions Best Practices</reference>
+    <reference type="external" url="https://developer.android.com/about/versions/10/privacy/changes#background-location">Android 10 Background Location Changes</reference>
+    <reference type="external" url="https://developer.android.com/about/versions/13/changes/notification-permission">Android 13 Notification Permission</reference>
+  </references>
+</story-context>
