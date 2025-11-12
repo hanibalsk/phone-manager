@@ -1,0 +1,572 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-0.2.2" v="1.0">
+  <metadata>
+    <epicId>0.2</epicId>
+    <storyId>0.2.2</storyId>
+    <title>Continuous Tracking & Network Integration</title>
+    <status>Blocked by Epic 0.2.1</status>
+    <generatedAt>2025-01-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/stories/story-0.2.2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>location tracking service</asA>
+    <iWant>to implement continuous location tracking with configurable update intervals and establish network integration to transmit location data to a remote server</iWant>
+    <soThat>I can track device movement over time and successfully transmit location data end-to-end from service to remote server</soThat>
+    <tasks>
+      - Implement continuous location updates using LocationCallback
+      - Handle background location permission (Android 10+)
+      - Setup HTTP client with Retrofit and OkHttp
+      - Implement secure API key management
+      - Define location payload model with JSON serialization
+      - Transmit location data to remote server via HTTPS
+      - Extended runtime testing (6+ hours)
+      - Memory management for long-running service
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="0.2.2.1">LocationCallback implemented for continuous updates</criterion>
+    <criterion id="0.2.2.2">LocationRequest configured with 5-minute update interval</criterion>
+    <criterion id="0.2.2.3">Location updates continue with screen off</criterion>
+    <criterion id="0.2.2.4">Callback properly unregistered on service destroy</criterion>
+    <criterion id="0.2.2.5">Memory leaks prevented with proper callback lifecycle</criterion>
+    <criterion id="0.2.2.6">Memory buffer limits enforced (max 100 locations in-memory)</criterion>
+    <criterion id="0.2.2.7">Automatic cleanup triggers at 80% buffer capacity</criterion>
+    <criterion id="0.2.2.8">Background location permission declared for Android 10+</criterion>
+    <criterion id="0.2.2.9">Two-step permission flow implemented (foreground then background)</criterion>
+    <criterion id="0.2.2.10">Educational rationale shown before background permission request</criterion>
+    <criterion id="0.2.2.11">Retrofit and OkHttp dependencies added and configured</criterion>
+    <criterion id="0.2.2.12">HTTP client configured with timeouts and interceptors</criterion>
+    <criterion id="0.2.2.13">HTTPS enforced for all network communication</criterion>
+    <criterion id="0.2.2.14">API key stored securely (BuildConfig or EncryptedSharedPreferences)</criterion>
+    <criterion id="0.2.2.15">Certificate pinning implemented with NetworkSecurityConfig</criterion>
+    <criterion id="0.2.2.16">LocationPayload data class defined with JSON serialization</criterion>
+    <criterion id="0.2.2.17">Device ID generated and persisted across restarts</criterion>
+    <criterion id="0.2.2.18">Timestamp in ISO 8601 format</criterion>
+    <criterion id="0.2.2.19">Location data transmitted via HTTP POST</criterion>
+    <criterion id="0.2.2.20">Network connectivity checked before transmission</criterion>
+    <criterion id="0.2.2.21">Service runs continuously for 6+ hours without issues</criterion>
+    <criterion id="0.2.2.22">24-hour memory profiling shows stable memory usage (&lt;50MB growth)</criterion>
+    <criterion id="0.2.2.23">Memory pressure callbacks properly handled</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/story-0.2.2.md</path>
+        <title>Epic 0.2.2: Continuous Tracking &amp; Network Integration</title>
+        <section>Epic Goal</section>
+        <snippet>
+Implement continuous location tracking with configurable update intervals and establish
+network integration to transmit location data to a remote server via HTTP/HTTPS. This epic
+completes the end-to-end value chain: service captures location continuously and
+successfully transmits it to the remote server.
+
+Stories:
+- 0.2.2.1: Implement Continuous Location Callback
+- 0.2.2.2: Add Background Location Permission
+- 0.2.2.3: Setup Network Layer
+- 0.2.2.4: Define Location Payload Model
+- 0.2.2.5: Implement Location Transmission
+- 0.2.2.6: Integration &amp; Extended Runtime Testing
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="app/src/main/java/com/phonemanager/location/LocationManager.kt">
+        <snippet>
+class LocationManager(private val context: Context) {
+
+    private val fusedLocationClient = LocationServices.getFusedLocationProviderClient(context)
+    private var locationCallback: LocationCallback? = null
+    private var isTracking = false
+
+    // Memory management for long-running service
+    private val pendingLocations = ConcurrentLinkedQueue&lt;LocationData&gt;()
+    companion object {
+        private const val MAX_PENDING_LOCATIONS = 100
+        private const val CLEANUP_THRESHOLD = 80
+    }
+
+    fun startLocationUpdates(
+        intervalMillis: Long = 5 * 60 * 1000,
+        onLocationUpdate: (LocationData) -&gt; Unit
+    ) {
+        if (!PermissionUtil.hasLocationPermission(context)) return
+        if (isTracking) return
+
+        val locationRequest = LocationRequest.Builder(
+            Priority.PRIORITY_HIGH_ACCURACY,
+            intervalMillis
+        ).apply {
+            setMinUpdateIntervalMillis(intervalMillis / 2)
+            setMaxUpdateDelayMillis(intervalMillis * 2)
+            setWaitForAccurateLocation(true)
+        }.build()
+
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                result.lastLocation?.let { location -&gt;
+                    val locationData = LocationData.fromLocation(location)
+                    if (locationData.isAccurate(threshold = 50f)) {
+                        handleLocationUpdate(locationData)
+                        onLocationUpdate(locationData)
+                    }
+                }
+            }
+        }
+
+        fusedLocationClient.requestLocationUpdates(
+            locationRequest,
+            locationCallback!!,
+            Looper.getMainLooper()
+        )
+        isTracking = true
+    }
+
+    private fun handleLocationUpdate(locationData: LocationData) {
+        pendingLocations.offer(locationData)
+
+        // Check if cleanup needed
+        if (pendingLocations.size &gt;= MAX_PENDING_LOCATIONS * CLEANUP_THRESHOLD / 100) {
+            cleanupOldLocations()
+        }
+
+        // Prevent overflow
+        while (pendingLocations.size &gt; MAX_PENDING_LOCATIONS) {
+            pendingLocations.poll()
+        }
+    }
+
+    fun stopLocationUpdates() {
+        locationCallback?.let {
+            fusedLocationClient.removeLocationUpdates(it)
+            locationCallback = null
+            isTracking = false
+        }
+    }
+
+    fun onLowMemory() {
+        val recentLocations = pendingLocations.toList().takeLast(10)
+        pendingLocations.clear()
+        pendingLocations.addAll(recentLocations)
+        System.gc()
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/network/NetworkModule.kt">
+        <snippet>
+object NetworkModule {
+
+    private const val BASE_URL = "https://api.example.com/"
+    private const val CONNECT_TIMEOUT = 30L
+    private const val READ_TIMEOUT = 30L
+    private const val WRITE_TIMEOUT = 30L
+
+    fun provideOkHttpClient(context: Context): OkHttpClient {
+        return OkHttpClient.Builder()
+            .connectTimeout(CONNECT_TIMEOUT, TimeUnit.SECONDS)
+            .readTimeout(READ_TIMEOUT, TimeUnit.SECONDS)
+            .writeTimeout(WRITE_TIMEOUT, TimeUnit.SECONDS)
+            .addInterceptor(createLoggingInterceptor())
+            .addInterceptor(createAuthInterceptor(context))
+            .connectionPool(ConnectionPool(5, 5, TimeUnit.MINUTES))
+            .retryOnConnectionFailure(false)
+            .build()
+    }
+
+    private fun createAuthInterceptor(context: Context): Interceptor {
+        return Interceptor { chain -&gt;
+            val original = chain.request()
+            val apiKey = getApiKeySecurely(context)
+
+            val request = original.newBuilder()
+                .header("Authorization", "Bearer $apiKey")
+                .header("Content-Type", "application/json")
+                .build()
+
+            chain.proceed(request)
+        }
+    }
+
+    private fun getApiKeySecurely(context: Context): String {
+        return if (BuildConfig.DEBUG) {
+            BuildConfig.API_KEY
+        } else {
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            val encryptedPrefs = EncryptedSharedPreferences.create(
+                context,
+                "secure_prefs",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+
+            encryptedPrefs.getString("api_key", "") ?: ""
+        }
+    }
+
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+        return Retrofit.Builder()
+            .baseUrl(BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/network/model/LocationPayload.kt">
+        <snippet>
+data class LocationPayload(
+    @SerializedName("device_id")
+    val deviceId: String,
+
+    @SerializedName("latitude")
+    val latitude: Double,
+
+    @SerializedName("longitude")
+    val longitude: Double,
+
+    @SerializedName("timestamp")
+    val timestamp: String, // ISO 8601 format
+
+    @SerializedName("accuracy")
+    val accuracy: Float,
+
+    @SerializedName("altitude")
+    val altitude: Double? = null,
+
+    @SerializedName("bearing")
+    val bearing: Float? = null,
+
+    @SerializedName("speed")
+    val speed: Float? = null,
+
+    @SerializedName("provider")
+    val provider: String? = null
+) {
+    companion object {
+        fun fromLocationData(locationData: LocationData, deviceId: String): LocationPayload {
+            return LocationPayload(
+                deviceId = deviceId,
+                latitude = locationData.latitude,
+                longitude = locationData.longitude,
+                timestamp = locationData.capturedAt,
+                accuracy = locationData.accuracy,
+                altitude = locationData.altitude,
+                bearing = locationData.bearing,
+                speed = locationData.speed,
+                provider = locationData.provider
+            )
+        }
+    }
+
+    fun validate(): Boolean {
+        return latitude in -90.0..90.0 &amp;&amp;
+               longitude in -180.0..180.0 &amp;&amp;
+               accuracy &gt;= 0 &amp;&amp;
+               deviceId.isNotBlank()
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/res/xml/network_security_config.xml">
+        <snippet>
+&lt;?xml version="1.0" encoding="utf-8"?&gt;
+&lt;network-security-config&gt;
+    &lt;base-config cleartextTrafficPermitted="false"&gt;
+        &lt;trust-anchors&gt;
+            &lt;certificates src="system" /&gt;
+        &lt;/trust-anchors&gt;
+    &lt;/base-config&gt;
+
+    &lt;domain-config cleartextTrafficPermitted="false"&gt;
+        &lt;domain includeSubdomains="true"&gt;your-api-domain.com&lt;/domain&gt;
+
+        &lt;pin-set expiration="2026-12-31"&gt;
+            &lt;pin digest="SHA-256"&gt;base64EncodedPrimaryPublicKeyHash==&lt;/pin&gt;
+            &lt;pin digest="SHA-256"&gt;base64EncodedBackupPublicKeyHash==&lt;/pin&gt;
+        &lt;/pin-set&gt;
+    &lt;/domain-config&gt;
+&lt;/network-security-config&gt;
+        </snippet>
+      </file>
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="com.squareup.retrofit2:retrofit" version="2.9.0" />
+        <package name="com.squareup.retrofit2:converter-gson" version="2.9.0" />
+        <package name="com.squareup.okhttp3:okhttp" version="4.12.0" />
+        <package name="com.squareup.okhttp3:logging-interceptor" version="4.12.0" />
+        <package name="com.google.code.gson:gson" version="2.10.1" />
+        <package name="androidx.security:security-crypto" version="1.1.0-alpha06" />
+      </android>
+      <internal>
+        <dependency story="0.2.1">LocationTrackingService foundation</dependency>
+        <dependency story="0.2.1">LocationData model</dependency>
+        <dependency story="0.2.1">PermissionUtil</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use LocationCallback (not deprecated LocationListener)</constraint>
+    <constraint>Default update interval: 5 minutes (300000ms)</constraint>
+    <constraint>Minimum update interval: 2.5 minutes (half of default)</constraint>
+    <constraint>Maximum update delay: 10 minutes (2x default) for batching</constraint>
+    <constraint>Location accuracy threshold: 50 meters</constraint>
+    <constraint>Memory buffer: maximum 100 pending locations</constraint>
+    <constraint>Cleanup trigger: 80% buffer capacity</constraint>
+    <constraint>HTTPS enforced for all network requests</constraint>
+    <constraint>API key MUST NOT be hardcoded in source code</constraint>
+    <constraint>Use BuildConfig for development, EncryptedSharedPreferences for production</constraint>
+    <constraint>Certificate pinning required with backup pins</constraint>
+    <constraint>Connection timeout: 30 seconds</constraint>
+    <constraint>Read/write timeout: 30 seconds</constraint>
+    <constraint>No automatic retry (handled in Epic 0.2.3)</constraint>
+    <constraint>Network connectivity check before transmission</constraint>
+    <constraint>24-hour memory growth: &lt;50MB maximum</constraint>
+    <constraint>Memory pressure callbacks must be implemented</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="LocationManager">
+      <method>fun startLocationUpdates(intervalMillis: Long, onLocationUpdate: (LocationData) -&gt; Unit)</method>
+      <method>fun stopLocationUpdates()</method>
+      <method>fun isTracking(): Boolean</method>
+      <method>fun onLowMemory()</method>
+      <method>fun clearMemoryBuffers()</method>
+    </interface>
+
+    <interface name="NetworkManager">
+      <method>suspend fun sendLocation(locationData: LocationData): Result&lt;Boolean&gt;</method>
+    </interface>
+
+    <interface name="LocationApiService">
+      <method>suspend fun sendLocation(@Body locationPayload: LocationPayload): Response&lt;LocationResponse&gt;</method>
+      <method>suspend fun sendLocationBatch(@Body locations: List&lt;LocationPayload&gt;): Response&lt;BatchLocationResponse&gt;</method>
+    </interface>
+
+    <interface name="DeviceUtil">
+      <method>fun getDeviceId(context: Context): String</method>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests required:
+- LocationCallback registration/unregistration
+- Memory buffer management and cleanup
+- Background permission checking
+- Network client configuration
+- LocationPayload serialization/deserialization
+- Payload validation logic
+- Device ID generation and persistence
+
+Integration tests required:
+- Continuous location updates over 15 minutes
+- Screen off location tracking
+- Background permission request flow
+- HTTP request/response with mock server
+- End-to-end: capture → serialize → transmit
+
+Manual tests required:
+- 6-hour extended runtime test
+- 24-hour memory profiling
+- Network transitions (WiFi &lt;-&gt; cellular)
+- Airplane mode scenarios
+- Low memory conditions
+
+Performance tests:
+- Memory usage monitoring (target: &lt;60MB average)
+- Memory growth measurement (target: &lt;50MB over 24h)
+- Buffer cleanup timing
+- Network request timing
+- Certificate pinning validation
+
+Target coverage: &gt; 70% for network and location components
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/location/LocationManagerTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/network/NetworkModuleTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/network/model/LocationPayloadTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/util/DeviceUtilTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/ContinuousTrackingIntegrationTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/NetworkTransmissionIntegrationTest.kt</location>
+    </locations>
+
+    <ideas>
+      <idea ac="0.2.2.3">Turn off device screen for 10 minutes, verify location updates continue in logs</idea>
+      <idea ac="0.2.2.6">Fill memory buffer to 100 items, verify oldest entries are evicted</idea>
+      <idea ac="0.2.2.7">Fill buffer to 80 items, verify cleanup triggers automatically</idea>
+      <idea ac="0.2.2.10">Test permission rationale dialog shows appropriate message</idea>
+      <idea ac="0.2.2.14">Verify API key is not present in decompiled APK</idea>
+      <idea ac="0.2.2.15">Attempt connection with invalid certificate, verify rejection</idea>
+      <idea ac="0.2.2.17">Clear app data, restart, verify new device ID generated and persisted</idea>
+      <idea ac="0.2.2.20">Enable airplane mode, attempt transmission, verify graceful handling</idea>
+      <idea ac="0.2.2.22">Run Android Profiler for 24 hours, verify memory stays stable</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Implement Continuous Location Callback</title>
+      <description>Setup LocationCallback for continuous location updates</description>
+      <actions>
+        - Create LocationCallback anonymous class in LocationManager
+        - Override onLocationResult() to process location updates
+        - Configure LocationRequest with 5-minute interval
+        - Set min interval to 2.5 minutes, max delay to 10 minutes
+        - Add accuracy validation before processing location
+        - Implement memory buffer management (max 100 locations)
+        - Add automatic cleanup at 80% capacity
+        - Register callback with FusedLocationProviderClient
+        - Properly unregister callback in stopLocationUpdates()
+        - Add memory pressure handling (onLowMemory callback)
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Add Background Location Permission</title>
+      <description>Handle Android 10+ background location permission</description>
+      <actions>
+        - Verify ACCESS_BACKGROUND_LOCATION declared in manifest
+        - Update PermissionUtil with background permission check
+        - Implement two-step permission flow in test activity
+        - Create educational rationale dialog
+        - Show rationale before requesting background permission
+        - Handle permission denial with settings redirect
+        - Test on Android 10, 11, 12, 13, 14
+        - Verify Android 9 doesn't require background permission
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Setup Network Layer</title>
+      <description>Configure Retrofit, OkHttp, and security</description>
+      <actions>
+        - Add Retrofit and OkHttp dependencies to build.gradle.kts
+        - Add security-crypto dependency for EncryptedSharedPreferences
+        - Create NetworkModule with OkHttp configuration
+        - Set connection, read, and write timeouts to 30 seconds
+        - Implement logging interceptor (debug builds only)
+        - Implement auth interceptor with API key injection
+        - Configure secure API key storage (BuildConfig for dev, EncryptedSharedPreferences for prod)
+        - Add gradle.properties to .gitignore
+        - Create network_security_config.xml with certificate pinning
+        - Generate certificate hashes for pinning
+        - Add NetworkSecurityConfig to AndroidManifest
+        - Create LocationApiService interface
+        - Test HTTPS enforcement and certificate pinning
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Define Location Payload Model</title>
+      <description>Create JSON serialization model for network transmission</description>
+      <actions>
+        - Create LocationPayload data class with @SerializedName annotations
+        - Implement fromLocationData() factory method
+        - Add validate() method for payload validation
+        - Create DeviceUtil for device ID generation
+        - Generate UUID on first launch, persist in SharedPreferences
+        - Add LocationResponse and BatchLocationResponse models
+        - Test JSON serialization/deserialization
+        - Verify all fields map correctly
+        - Test validation logic with edge cases
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Implement Location Transmission</title>
+      <description>Send location data to remote server</description>
+      <actions>
+        - Create NetworkManager class
+        - Implement sendLocation() method with Result return type
+        - Check network connectivity before transmission
+        - Create LocationPayload from LocationData
+        - Validate payload before sending
+        - Make HTTP POST request via Retrofit
+        - Handle success and error responses
+        - Log transmission results
+        - Update service to transmit on each location update
+        - Queue failed transmissions (placeholder for Epic 0.2.3)
+        - Update notification with last transmission time
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Extended Runtime Testing</title>
+      <description>Validate continuous operation and memory stability</description>
+      <actions>
+        - Execute 6-hour continuous operation test
+        - Monitor memory usage every 30 minutes
+        - Profile memory for 24 hours with Android Profiler
+        - Test screen off/on cycles
+        - Test network transitions (WiFi, cellular, airplane mode)
+        - Test low memory scenarios
+        - Verify buffer cleanup occurs at 80% threshold
+        - Verify memory pressure callbacks work
+        - Measure location capture rate (&gt;95% target)
+        - Measure transmission success rate (&gt;95% target)
+        - Document memory growth over time (&lt;50MB/24h target)
+        - Test on multiple devices and Android versions
+        - Generate comprehensive test report
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>Location updates stop when screen turns off</issue>
+      <solution>This is expected on some devices with aggressive battery optimization. Ensure service is foreground service with ongoing notification. Request battery optimization exemption if needed</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Memory leak - location callback not released</issue>
+      <solution>Always call removeLocationUpdates() in onDestroy() and set locationCallback to null. Use LeakCanary to detect leaks during development</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Background permission request immediately after foreground</issue>
+      <solution>Android requires delay between foreground and background permission requests. Show rationale dialog between the two requests as a natural pause</solution>
+    </gotcha>
+    <gotcha>
+      <issue>API key visible in APK decompiled code</issue>
+      <solution>Never hardcode API keys. Use BuildConfig for development (with gradle.properties in .gitignore) or EncryptedSharedPreferences for production. Consider backend proxy for additional security</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Certificate pinning causes app to break after server cert rotation</issue>
+      <solution>Always include backup certificate pins. Plan certificate rotation strategy with 4-6 week notice before server changes. Monitor pin expiration dates</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Network calls crash with NetworkOnMainThreadException</issue>
+      <solution>Always use suspend functions or coroutines for network calls. Retrofit suspend functions automatically run on IO dispatcher. Never block main thread</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Memory buffer grows unbounded causing OutOfMemoryError</issue>
+      <solution>Implement strict buffer size limits (100 items). Add cleanup at 80% threshold. Handle memory pressure callbacks. Clear buffer in onLowMemory()</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Location updates arrive faster than network transmission can handle</issue>
+      <solution>This is expected. Queue failed/pending transmissions for later processing. Don't block location capture thread. Process queue asynchronously (Epic 0.2.3)</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="epic" path="docs/stories/story-0.2.2.md" section="All sections" />
+    <reference type="dependency" path="docs/stories/story-0.2.1.md" section="Depends on Epic 0.2.1" />
+    <reference type="dependency" path="docs/stories/story-0.2.3.md" section="Blocks Epic 0.2.3" />
+    <reference type="documentation" url="https://developer.android.com/training/location/receive-location-updates" />
+    <reference type="documentation" url="https://developer.android.com/training/articles/security-config" />
+    <reference type="documentation" url="https://square.github.io/retrofit/" />
+    <reference type="documentation" url="https://square.github.io/okhttp/" />
+  </references>
+</story-context>

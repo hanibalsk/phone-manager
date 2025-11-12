@@ -1,0 +1,487 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-0.2.1" v="1.0">
+  <metadata>
+    <epicId>0.2</epicId>
+    <storyId>0.2.1</storyId>
+    <title>Service Foundation & Location Permissions</title>
+    <status>Ready for Development</status>
+    <generatedAt>2025-01-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/stories/story-0.2.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>system developer</asA>
+    <iWant>to establish foundational Android Service infrastructure and obtain device location through proper permission handling</iWant>
+    <soThat>I can run a background service and access location data - the core technical prerequisites for the entire location tracking system</soThat>
+    <tasks>
+      - Create Android foreground service (LocationTrackingService)
+      - Implement persistent foreground notification
+      - Add location permission handling (foreground, background, notification)
+      - Integrate Google Play Services Location API
+      - Implement single location capture with accuracy validation
+      - Comprehensive testing and validation
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="0.2.1.1">Service class LocationTrackingService created extending Android Service</criterion>
+    <criterion id="0.2.1.2">Service registered in AndroidManifest.xml with required permissions</criterion>
+    <criterion id="0.2.1.3">Service lifecycle methods (onCreate, onStartCommand, onDestroy) implemented</criterion>
+    <criterion id="0.2.1.4">Service runs in foreground mode with persistent notification</criterion>
+    <criterion id="0.2.1.5">Android 14+ FOREGROUND_SERVICE_LOCATION permission declared</criterion>
+    <criterion id="0.2.1.6">Android 13+ POST_NOTIFICATIONS permission declared and requested at runtime</criterion>
+    <criterion id="0.2.1.7">Notification channel created with appropriate importance level</criterion>
+    <criterion id="0.2.1.8">Notification cannot be dismissed by user (ongoing)</criterion>
+    <criterion id="0.2.1.9">Location permissions (FINE, COARSE, BACKGROUND) declared in manifest</criterion>
+    <criterion id="0.2.1.10">Permission checking utility created (PermissionUtil)</criterion>
+    <criterion id="0.2.1.11">Runtime permission request mechanism implemented</criterion>
+    <criterion id="0.2.1.12">Background location permission handled for Android 10+</criterion>
+    <criterion id="0.2.1.13">FusedLocationProviderClient initialized and integrated</criterion>
+    <criterion id="0.2.1.14">Last known location retrieved successfully</criterion>
+    <criterion id="0.2.1.15">LocationData model defined with all required fields</criterion>
+    <criterion id="0.2.1.16">Single location capture with timestamp in UTC implemented</criterion>
+    <criterion id="0.2.1.17">Location accuracy validation (threshold: 50m) implemented</criterion>
+    <criterion id="0.2.1.18">Service tested on Android 8, 10, 12, 13, and 14</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/story-0.2.1.md</path>
+        <title>Epic 0.2.1: Service Foundation &amp; Location Permissions</title>
+        <section>Epic Goal</section>
+        <snippet>
+Establish the foundational Android Service infrastructure and obtain device location through
+proper permission handling. This epic proves we can run a background service and access
+location data - the core technical prerequisites for the entire location tracking system.
+
+Stories:
+- 0.2.1.1: Create Android Foreground Service
+- 0.2.1.2: Implement Foreground Notification
+- 0.2.1.3: Add Location Permission Handling
+- 0.2.1.4: Integrate Location Provider
+- 0.2.1.5: Implement Single Location Capture
+- 0.2.1.6: Service Testing &amp; Validation
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="app/src/main/java/com/phonemanager/service/LocationTrackingService.kt">
+        <snippet>
+class LocationTrackingService : Service() {
+
+    companion object {
+        const val SERVICE_ID = 1001
+        private const val CHANNEL_ID = "location_tracking_channel"
+        private const val TAG = "LocationTrackingService"
+    }
+
+    private lateinit var locationManager: LocationManager
+
+    override fun onCreate() {
+        super.onCreate()
+        Timber.d("$TAG: Service created")
+        locationManager = LocationManager(this)
+
+        if (!locationManager.isLocationEnabled()) {
+            Timber.w("Location services are disabled")
+        }
+    }
+
+    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Timber.d("$TAG: Service started")
+
+        createNotificationChannel()
+        startForeground(SERVICE_ID, createNotification())
+
+        // Capture initial location
+        serviceScope.launch {
+            val location = locationManager.getCurrentLocation()
+            if (location != null) {
+                Timber.i("Initial location: ${location.latitude}, ${location.longitude}, accuracy: ${location.accuracy}m")
+            }
+        }
+
+        return START_STICKY
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Location Tracking",
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = "Ongoing location tracking service"
+                setShowBadge(false)
+            }
+            val notificationManager = getSystemService(NotificationManager::class.java)
+            notificationManager.createNotificationChannel(channel)
+        }
+    }
+
+    private fun createNotification(): Notification {
+        return NotificationCompat.Builder(this, CHANNEL_ID)
+            .setContentTitle("Location Tracking Active")
+            .setContentText("Phone Manager is tracking your location")
+            .setSmallIcon(R.drawable.ic_location_notification)
+            .setOngoing(true)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setCategory(NotificationCompat.CATEGORY_SERVICE)
+            .build()
+    }
+
+    override fun onDestroy() {
+        Timber.d("$TAG: Service destroyed")
+        super.onDestroy()
+    }
+
+    override fun onBind(intent: Intent?): IBinder? = null
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/util/PermissionUtil.kt">
+        <snippet>
+object PermissionUtil {
+
+    fun hasLocationPermission(context: Context): Boolean {
+        return ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    fun hasBackgroundLocationPermission(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.Q) {
+            return ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        }
+        return true // Not required on Android 9 and below
+    }
+
+    fun hasAllRequiredPermissions(context: Context): Boolean {
+        return hasLocationPermission(context) &amp;&amp; hasBackgroundLocationPermission(context)
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/location/LocationManager.kt">
+        <snippet>
+class LocationManager(private val context: Context) {
+
+    private val fusedLocationClient: FusedLocationProviderClient =
+        LocationServices.getFusedLocationProviderClient(context)
+
+    fun isLocationEnabled(): Boolean {
+        val locationManager = context.getSystemService(Context.LOCATION_SERVICE)
+            as android.location.LocationManager
+        return locationManager.isProviderEnabled(android.location.LocationManager.GPS_PROVIDER) ||
+               locationManager.isProviderEnabled(android.location.LocationManager.NETWORK_PROVIDER)
+    }
+
+    suspend fun getCurrentLocation(timeoutMillis: Long = 30000): LocationData? {
+        if (!PermissionUtil.hasLocationPermission(context)) {
+            Timber.w("Location permission not granted")
+            return null
+        }
+
+        if (!isLocationEnabled()) {
+            Timber.w("Location services disabled")
+            return null
+        }
+
+        val locationRequest = CurrentLocationRequest.Builder()
+            .setDurationMillis(timeoutMillis)
+            .setMaxUpdateAgeMillis(60000)
+            .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
+            .build()
+
+        return try {
+            val location = fusedLocationClient.getCurrentLocation(
+                locationRequest,
+                CancellationTokenSource().token
+            ).await()
+
+            location?.let {
+                val locationData = LocationData.fromLocation(it)
+                if (locationData.isAccurate(threshold = 50f)) {
+                    Timber.d("Location captured: $locationData")
+                    locationData
+                } else {
+                    Timber.w("Location rejected: low accuracy ${locationData.accuracy}m")
+                    null
+                }
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to get current location")
+            null
+        }
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/data/model/LocationData.kt">
+        <snippet>
+@Parcelize
+data class LocationData(
+    val latitude: Double,
+    val longitude: Double,
+    val timestamp: Long, // Unix timestamp in milliseconds (UTC)
+    val accuracy: Float, // Accuracy in meters
+    val altitude: Double? = null,
+    val bearing: Float? = null,
+    val speed: Float? = null,
+    val provider: String? = null,
+    val capturedAt: String = Instant.ofEpochMilli(timestamp).toString()
+) : Parcelable {
+
+    companion object {
+        fun fromLocation(location: Location): LocationData {
+            return LocationData(
+                latitude = location.latitude,
+                longitude = location.longitude,
+                timestamp = location.time,
+                accuracy = location.accuracy,
+                altitude = if (location.hasAltitude()) location.altitude else null,
+                bearing = if (location.hasBearing()) location.bearing else null,
+                speed = if (location.hasSpeed()) location.speed else null,
+                provider = location.provider
+            )
+        }
+    }
+
+    fun isAccurate(threshold: Float = 50f): Boolean {
+        return accuracy &lt;= threshold
+    }
+}
+        </snippet>
+      </file>
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="com.google.android.gms:play-services-location" version="21.0.1" />
+        <package name="androidx.core:core-ktx" version="1.12.0" />
+        <package name="com.jakewharton.timber:timber" version="5.0.1" />
+      </android>
+      <internal>
+        <dependency story="none">First epic in sequence - no internal dependencies</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use Android Foreground Service (not background service)</constraint>
+    <constraint>Service must call startForeground() within 5 seconds on Android 8+</constraint>
+    <constraint>Use NotificationChannel for Android 8+ (API 26+)</constraint>
+    <constraint>Android 14+ requires FOREGROUND_SERVICE_LOCATION permission</constraint>
+    <constraint>Android 13+ requires POST_NOTIFICATIONS runtime permission</constraint>
+    <constraint>Background location permission only on Android 10+ (API 29+)</constraint>
+    <constraint>Use FusedLocationProviderClient (not deprecated LocationManager)</constraint>
+    <constraint>Service must return START_STICKY for auto-restart</constraint>
+    <constraint>Location accuracy threshold: 50 meters</constraint>
+    <constraint>Location timeout: 30 seconds maximum</constraint>
+    <constraint>Notification must be ongoing (cannot be dismissed)</constraint>
+    <constraint>Test on Android versions 8, 10, 12, 13, and 14</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="LocationManager">
+      <method>fun isLocationEnabled(): Boolean</method>
+      <method>suspend fun getCurrentLocation(timeoutMillis: Long = 30000): LocationData?</method>
+      <method>suspend fun getLastKnownLocation(): Location?</method>
+    </interface>
+
+    <interface name="PermissionUtil">
+      <method>fun hasLocationPermission(context: Context): Boolean</method>
+      <method>fun hasBackgroundLocationPermission(context: Context): Boolean</method>
+      <method>fun hasAllRequiredPermissions(context: Context): Boolean</method>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests required:
+- Service lifecycle methods (onCreate, onStartCommand, onDestroy)
+- Permission checking utility methods
+- LocationData model conversion and validation
+- Location accuracy threshold validation
+
+Integration tests required:
+- Service starts and runs as foreground service
+- Notification displays correctly and cannot be dismissed
+- Permission request flow (foreground and background)
+- Location capture with real GPS data
+
+Manual tests required:
+- Service start via ADB command
+- Notification appearance in system tray
+- Permission grant/deny scenarios
+- GPS enabled/disabled states
+- Test on multiple Android versions (8, 10, 12, 13, 14)
+- Test on multiple device manufacturers
+
+Performance tests:
+- Location capture timeout handling
+- Service start time &lt; 500ms
+- Memory usage monitoring
+
+Target coverage: &gt; 70% for service and utility classes
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/service/LocationTrackingServiceTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/util/PermissionUtilTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/data/model/LocationDataTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/service/LocationServiceIntegrationTest.kt</location>
+    </locations>
+
+    <ideas>
+      <idea ac="0.2.1.1">Test service returns START_STICKY from onStartCommand()</idea>
+      <idea ac="0.2.1.4">Verify notification appears in system tray when service starts</idea>
+      <idea ac="0.2.1.8">Attempt to dismiss notification and verify it remains</idea>
+      <idea ac="0.2.1.11">Test permission request flow with ActivityResultContracts</idea>
+      <idea ac="0.2.1.12">Test background permission request on Android 10+ devices</idea>
+      <idea ac="0.2.1.14">Mock FusedLocationProviderClient and verify location retrieval</idea>
+      <idea ac="0.2.1.17">Test location accuracy validation with various accuracy values</idea>
+      <idea ac="0.2.1.18">Run instrumentation tests on physical devices with different Android versions</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Create LocationTrackingService</title>
+      <description>Implement basic Android foreground service structure</description>
+      <actions>
+        - Create LocationTrackingService class extending Service
+        - Implement onCreate(), onStartCommand(), onDestroy(), onBind()
+        - Return START_STICKY from onStartCommand()
+        - Add Timber logging for lifecycle events
+        - Register service in AndroidManifest.xml with foregroundServiceType="location"
+        - Declare FOREGROUND_SERVICE and FOREGROUND_SERVICE_LOCATION permissions
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Implement Foreground Notification</title>
+      <description>Create persistent notification for foreground service</description>
+      <actions>
+        - Create notification channel for Android 8+
+        - Implement createNotification() method
+        - Design notification icon (24dp vector drawable)
+        - Set notification as ongoing (cannot be dismissed)
+        - Call startForeground() in onStartCommand()
+        - Declare POST_NOTIFICATIONS permission for Android 13+
+        - Add strings.xml entries for notification text
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Add Permission Handling</title>
+      <description>Implement location permission checking and requesting</description>
+      <actions>
+        - Declare ACCESS_FINE_LOCATION, ACCESS_COARSE_LOCATION, ACCESS_BACKGROUND_LOCATION in manifest
+        - Create PermissionUtil object with permission checking methods
+        - Implement hasLocationPermission() and hasBackgroundLocationPermission()
+        - Create test activity for runtime permission requests (MVP testing)
+        - Use ActivityResultContracts.RequestMultiplePermissions() for permission flow
+        - Handle Android 10+ two-step permission flow (foreground first, then background)
+        - Add educational rationale for background permission
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Integrate Location Provider</title>
+      <description>Setup Google Play Services Location API</description>
+      <actions>
+        - Add play-services-location dependency to build.gradle.kts
+        - Create LocationManager class wrapping FusedLocationProviderClient
+        - Implement isLocationEnabled() to check GPS/network providers
+        - Implement getLastKnownLocation() for quick location retrieval
+        - Add Task to suspend function extension (Task.await())
+        - Handle permission checks before location requests
+        - Add proper error handling and logging
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Implement Single Location Capture</title>
+      <description>Capture and validate a single device location</description>
+      <actions>
+        - Create LocationData data class with Parcelize
+        - Implement fromLocation() factory method
+        - Add isAccurate() validation method (50m threshold)
+        - Implement getCurrentLocation() in LocationManager
+        - Configure CurrentLocationRequest with timeout and priority
+        - Add accuracy validation before returning location
+        - Handle timeout scenarios gracefully
+        - Integrate location capture in service onStartCommand()
+        - Log captured location for verification
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Testing and Validation</title>
+      <description>Comprehensive testing of service foundation</description>
+      <actions>
+        - Write unit tests for service lifecycle methods
+        - Write unit tests for PermissionUtil
+        - Write unit tests for LocationData model
+        - Write integration tests for service + location capture
+        - Test permission flows on different Android versions
+        - Test with GPS enabled/disabled
+        - Test with mock location data via ADB
+        - Document manual testing procedures
+        - Test on Android 8, 10, 12, 13, 14
+        - Test on multiple device manufacturers (Pixel, Samsung, Xiaomi)
+        - Verify no memory leaks with LeakCanary
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>Service fails to start on Android 8+ (API 26+)</issue>
+      <solution>Use startForegroundService() instead of startService() for Android 8+, and service must call startForeground() within 5 seconds or it will crash</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Notification not showing on Android 8+</issue>
+      <solution>Must create NotificationChannel before posting notification. Create channel in createNotificationChannel() method called before startForeground()</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Notification permission not requested on Android 13+</issue>
+      <solution>Android 13+ requires POST_NOTIFICATIONS permission requested at runtime. Add permission to manifest and request using ActivityResultContracts</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Background location permission immediately requested</issue>
+      <solution>Android 10+ requires two-step permission flow: request foreground permission first, then request background permission in separate dialog with educational rationale</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Service crashes with SecurityException when accessing location</issue>
+      <solution>Always check PermissionUtil.hasLocationPermission() before calling location APIs. Validate permissions in onStartCommand() before starting foreground service</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Location always returns null</issue>
+      <solution>Check if location services are enabled with isLocationEnabled(). User must enable GPS/Location in device settings. Also check permission state and handle timeout scenarios</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Android 14 service crash with "Missing foreground service type"</issue>
+      <solution>Android 14 requires FOREGROUND_SERVICE_LOCATION permission and foregroundServiceType="location" attribute in service declaration. Add both to manifest</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Location accuracy always poor indoors</issue>
+      <solution>Indoor locations often have 50-200m accuracy. Adjust accuracy threshold based on use case, or use network provider as fallback. Consider rejecting locations above threshold</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="epic" path="docs/stories/story-0.2.1.md" section="All sections" />
+    <reference type="dependency" path="docs/stories/story-0.2.2.md" section="Blocks Epic 0.2.2" />
+    <reference type="documentation" url="https://developer.android.com/guide/components/foreground-services" />
+    <reference type="documentation" url="https://developer.android.com/training/location/permissions" />
+    <reference type="documentation" url="https://developers.google.com/android/reference/com/google/android/gms/location/FusedLocationProviderClient" />
+  </references>
+</story-context>

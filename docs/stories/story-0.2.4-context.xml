@@ -1,0 +1,638 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-0.2.4" v="1.0">
+  <metadata>
+    <epicId>0.2</epicId>
+    <storyId>0.2.4</storyId>
+    <title>Auto-start & Service Persistence</title>
+    <status>Blocked by Epic 0.2.3</status>
+    <generatedAt>2025-01-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/stories/story-0.2.4.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>location tracking system</asA>
+    <iWant>to enable automatic service startup on device boot and ensure persistence across all system events without user intervention</iWant>
+    <soThat>tracking continues hands-free after device restarts, crashes, or system kills - delivering truly autonomous background operation</soThat>
+    <tasks>
+      - Implement boot completed broadcast receiver
+      - Configure service auto-restart (START_STICKY)
+      - Integrate WorkManager watchdog for health monitoring
+      - Handle Doze mode and App Standby
+      - Implement service state persistence
+      - Battery optimization exemption guidance
+      - Multi-reboot and reliability testing (10+ reboots, 48+ hours)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="0.2.4.1">BootReceiver created for BOOT_COMPLETED</criterion>
+    <criterion id="0.2.4.2">RECEIVE_BOOT_COMPLETED permission declared</criterion>
+    <criterion id="0.2.4.3">Service starts automatically on device boot</criterion>
+    <criterion id="0.2.4.4">Permission state validated before boot start</criterion>
+    <criterion id="0.2.4.5">Battery optimization status checked on boot</criterion>
+    <criterion id="0.2.4.6">User notified if battery optimization enabled</criterion>
+    <criterion id="0.2.4.7">REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission declared</criterion>
+    <criterion id="0.2.4.8">Service returns START_STICKY from onStartCommand</criterion>
+    <criterion id="0.2.4.9">Service auto-restarts after system kill</criterion>
+    <criterion id="0.2.4.10">Service state restored after restart</criterion>
+    <criterion id="0.2.4.11">WorkManager health check worker created</criterion>
+    <criterion id="0.2.4.12">Health check runs every 15 minutes</criterion>
+    <criterion id="0.2.4.13">Watchdog detects and restarts down service</criterion>
+    <criterion id="0.2.4.14">Watchdog survives Doze mode</criterion>
+    <criterion id="0.2.4.15">Doze mode detection implemented</criterion>
+    <criterion id="0.2.4.16">Battery optimization exemption requestable</criterion>
+    <criterion id="0.2.4.17">App standby bucket monitoring implemented</criterion>
+    <criterion id="0.2.4.18">Foreground service provides Doze protection</criterion>
+    <criterion id="0.2.4.19">Service running state persisted</criterion>
+    <criterion id="0.2.4.20">Last known location persisted</criterion>
+    <criterion id="0.2.4.21">Service statistics tracked (uptime, locations captured/sent)</criterion>
+    <criterion id="0.2.4.22">Service survives 10+ consecutive reboots</criterion>
+    <criterion id="0.2.4.23">Service runs continuously for 48+ hours</criterion>
+    <criterion id="0.2.4.24">Auto-start success rate &gt;98%</criterion>
+    <criterion id="0.2.4.25">Watchdog recovery time &lt;15 minutes</criterion>
+    <criterion id="0.2.4.26">Service uptime &gt;99% over 48 hours</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/story-0.2.4.md</path>
+        <title>Epic 0.2.4: Auto-start &amp; Service Persistence</title>
+        <section>Epic Goal and MVP Milestone</section>
+        <snippet>
+Enable the service to start automatically on device boot and persist across all system
+events without user intervention. This epic delivers on the critical requirement of
+"hands-off operation," transforming the service from a manually-started application
+into a truly autonomous background tracking system.
+
+🎉 Completion of Epic 0.2.4 marks the MVP release milestone!
+
+Stories:
+- 0.2.4.1: Implement Boot Completed Receiver
+- 0.2.4.2: Configure Service Auto-restart
+- 0.2.4.3: Integrate WorkManager Watchdog
+- 0.2.4.4: Add Doze &amp; Standby Handling
+- 0.2.4.5: Implement Service State Persistence
+- 0.2.4.6: Multi-reboot &amp; Reliability Testing
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="app/src/main/java/com/phonemanager/receiver/BootReceiver.kt">
+        <snippet>
+class BootReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        if (intent.action != Intent.ACTION_BOOT_COMPLETED) {
+            return
+        }
+
+        Timber.i("Device boot completed, attempting to start service")
+
+        // Check permissions
+        if (!PermissionUtil.hasAllRequiredPermissions(context)) {
+            Timber.w("Cannot start service: missing permissions")
+            return
+        }
+
+        // Check if service should be running
+        val prefs = context.getSharedPreferences("service_state", Context.MODE_PRIVATE)
+        val shouldBeRunning = prefs.getBoolean("service_running", false)
+
+        if (!shouldBeRunning) {
+            Timber.d("Service was not running before reboot")
+            return
+        }
+
+        // Check battery optimization
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) {
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            if (!powerManager.isIgnoringBatteryOptimizations(context.packageName)) {
+                Timber.w("Battery optimization enabled - may affect service")
+                showBatteryOptimizationNotification(context)
+            }
+        }
+
+        // Start service
+        try {
+            val serviceIntent = Intent(context, LocationTrackingService::class.java)
+            if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
+            }
+            Timber.i("Service started after boot")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to start service after boot")
+        }
+    }
+
+    private fun showBatteryOptimizationNotification(context: Context) {
+        // Show notification guiding user to disable battery optimization
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:${context.packageName}")
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent,
+            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+        )
+
+        val notification = NotificationCompat.Builder(context, "battery_warning")
+            .setContentTitle("Location Tracking Reliability")
+            .setContentText("Battery optimization may stop tracking. Tap to fix.")
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setAutoCancel(true)
+            .setContentIntent(pendingIntent)
+            .build()
+
+        val notificationManager =
+            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        notificationManager.notify(9001, notification)
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/worker/ServiceHealthCheckWorker.kt">
+        <snippet>
+class ServiceHealthCheckWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    override suspend fun doWork(): Result {
+        Timber.d("Running service health check")
+
+        return try {
+            if (!isServiceRunning()) {
+                Timber.w("Service not running, attempting to start")
+                startService()
+            } else {
+                Timber.d("Service running normally")
+            }
+
+            checkQueueHealth()
+            Result.success()
+        } catch (e: Exception) {
+            Timber.e(e, "Error during health check")
+            Result.retry()
+        }
+    }
+
+    private fun isServiceRunning(): Boolean {
+        val manager = applicationContext
+            .getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+
+        @Suppress("DEPRECATION")
+        return manager.getRunningServices(Integer.MAX_VALUE).any { service -&gt;
+            service.service.className == LocationTrackingService::class.java.name
+        }
+    }
+
+    private fun startService() {
+        val prefs = applicationContext
+            .getSharedPreferences("service_state", Context.MODE_PRIVATE)
+        val shouldBeRunning = prefs.getBoolean("service_running", false)
+
+        if (!shouldBeRunning) {
+            return
+        }
+
+        if (!PermissionUtil.hasAllRequiredPermissions(applicationContext)) {
+            Timber.w("Cannot start service: missing permissions")
+            return
+        }
+
+        try {
+            val intent = Intent(applicationContext, LocationTrackingService::class.java)
+            if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.O) {
+                applicationContext.startForegroundService(intent)
+            } else {
+                applicationContext.startService(intent)
+            }
+            Timber.i("Service started by watchdog")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to start service from watchdog")
+        }
+    }
+
+    private suspend fun checkQueueHealth() {
+        val database = AppDatabase.getInstance(applicationContext)
+        val queueSize = database.locationQueueDao().getQueueSize()
+
+        if (queueSize &gt; 800) {
+            Timber.w("Queue is very large: $queueSize items")
+        }
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/util/PowerUtil.kt">
+        <snippet>
+object PowerUtil {
+
+    fun isIgnoringBatteryOptimizations(context: Context): Boolean {
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) {
+            val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+            return powerManager.isIgnoringBatteryOptimizations(context.packageName)
+        }
+        return true
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun isDeviceInDozeMode(context: Context): Boolean {
+        val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+        return powerManager.isDeviceIdleMode
+    }
+
+    @RequiresApi(Build.VERSION_CODES.P)
+    fun getAppStandbyBucket(context: Context): Int {
+        val usageStatsManager =
+            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        return usageStatsManager.appStandbyBucket
+    }
+
+    @RequiresApi(Build.VERSION_CODES.M)
+    fun requestBatteryOptimizationExemption(activity: Activity) {
+        val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:${activity.packageName}")
+        }
+        activity.startActivity(intent)
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/state/ServiceStateManager.kt">
+        <snippet>
+class ServiceStateManager(context: Context) {
+
+    private val prefs = context.getSharedPreferences("service_state", Context.MODE_PRIVATE)
+
+    companion object {
+        private const val KEY_SERVICE_RUNNING = "service_running"
+        private const val KEY_LAST_LOCATION_LAT = "last_location_lat"
+        private const val KEY_LAST_LOCATION_LON = "last_location_lon"
+        private const val KEY_START_TIME = "start_time"
+        private const val KEY_TOTAL_LOCATIONS_CAPTURED = "total_locations_captured"
+        private const val KEY_TOTAL_LOCATIONS_SENT = "total_locations_sent"
+    }
+
+    fun saveServiceRunning(isRunning: Boolean) {
+        prefs.edit().putBoolean(KEY_SERVICE_RUNNING, isRunning).apply()
+    }
+
+    fun isServiceRunning(): Boolean {
+        return prefs.getBoolean(KEY_SERVICE_RUNNING, false)
+    }
+
+    fun saveLastLocation(locationData: LocationData) {
+        prefs.edit().apply {
+            putFloat(KEY_LAST_LOCATION_LAT, locationData.latitude.toFloat())
+            putFloat(KEY_LAST_LOCATION_LON, locationData.longitude.toFloat())
+        }.apply()
+    }
+
+    fun saveServiceStartTime(startTime: Long = System.currentTimeMillis()) {
+        prefs.edit().putLong(KEY_START_TIME, startTime).apply()
+    }
+
+    fun getServiceUptime(): Long {
+        val startTime = prefs.getLong(KEY_START_TIME, 0)
+        if (startTime == 0L) return 0
+        return System.currentTimeMillis() - startTime
+    }
+
+    fun incrementLocationsCaptured() {
+        val current = prefs.getInt(KEY_TOTAL_LOCATIONS_CAPTURED, 0)
+        prefs.edit().putInt(KEY_TOTAL_LOCATIONS_CAPTURED, current + 1).apply()
+    }
+
+    fun incrementLocationsSent() {
+        val current = prefs.getInt(KEY_TOTAL_LOCATIONS_SENT, 0)
+        prefs.edit().putInt(KEY_TOTAL_LOCATIONS_SENT, current + 1).apply()
+    }
+
+    fun getServiceStats(): ServiceStats {
+        return ServiceStats(
+            isRunning = isServiceRunning(),
+            startTime = prefs.getLong(KEY_START_TIME, 0),
+            uptime = getServiceUptime(),
+            totalLocationsCaptured = prefs.getInt(KEY_TOTAL_LOCATIONS_CAPTURED, 0),
+            totalLocationsSent = prefs.getInt(KEY_TOTAL_LOCATIONS_SENT, 0)
+        )
+    }
+
+    fun clearState() {
+        prefs.edit().clear().apply()
+    }
+}
+
+data class ServiceStats(
+    val isRunning: Boolean,
+    val startTime: Long,
+    val uptime: Long,
+    val totalLocationsCaptured: Int,
+    val totalLocationsSent: Int
+)
+        </snippet>
+      </file>
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="androidx.work:work-runtime-ktx" version="2.9.0" />
+      </android>
+      <internal>
+        <dependency story="0.2.1">LocationTrackingService</dependency>
+        <dependency story="0.2.1">PermissionUtil</dependency>
+        <dependency story="0.2.3">QueueManager for health check</dependency>
+        <dependency story="0.2.3">AppDatabase</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use BroadcastReceiver for BOOT_COMPLETED (not JobScheduler)</constraint>
+    <constraint>BootReceiver must be exported="true" in manifest</constraint>
+    <constraint>Service must return START_STICKY for auto-restart</constraint>
+    <constraint>Validate permissions before starting service on boot</constraint>
+    <constraint>Battery optimization status must be checked and user notified</constraint>
+    <constraint>WorkManager health check interval: 15 minutes</constraint>
+    <constraint>Watchdog must not require battery optimization exemption</constraint>
+    <constraint>Health check must run during Doze maintenance windows</constraint>
+    <constraint>State persistence using SharedPreferences (not Room)</constraint>
+    <constraint>Service state saved on start and destroy</constraint>
+    <constraint>Location statistics tracked incrementally</constraint>
+    <constraint>Multi-reboot test: 10+ consecutive reboots</constraint>
+    <constraint>48-hour continuous operation test required</constraint>
+    <constraint>Auto-start success rate target: &gt;98%</constraint>
+    <constraint>Watchdog recovery time target: &lt;15 minutes</constraint>
+    <constraint>Service uptime target: &gt;99% over 48 hours</constraint>
+    <constraint>Memory usage target: &lt;60MB average</constraint>
+    <constraint>Battery drain target: &lt;10% per 24 hours</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="BootReceiver">
+      <method>override fun onReceive(context: Context, intent: Intent)</method>
+      <method>private fun showBatteryOptimizationNotification(context: Context)</method>
+    </interface>
+
+    <interface name="ServiceHealthCheckWorker">
+      <method>override suspend fun doWork(): Result</method>
+      <method>private fun isServiceRunning(): Boolean</method>
+      <method>private fun startService()</method>
+      <method>private suspend fun checkQueueHealth()</method>
+    </interface>
+
+    <interface name="WatchdogManager">
+      <method>fun scheduleHealthChecks(context: Context)</method>
+      <method>fun cancelHealthChecks(context: Context)</method>
+      <method>fun getHealthCheckStatus(context: Context): WorkInfo.State?</method>
+    </interface>
+
+    <interface name="PowerUtil">
+      <method>fun isIgnoringBatteryOptimizations(context: Context): Boolean</method>
+      <method>fun isDeviceInDozeMode(context: Context): Boolean</method>
+      <method>fun getAppStandbyBucket(context: Context): Int</method>
+      <method>fun requestBatteryOptimizationExemption(activity: Activity)</method>
+    </interface>
+
+    <interface name="ServiceStateManager">
+      <method>fun saveServiceRunning(isRunning: Boolean)</method>
+      <method>fun isServiceRunning(): Boolean</method>
+      <method>fun saveLastLocation(locationData: LocationData)</method>
+      <method>fun saveServiceStartTime(startTime: Long)</method>
+      <method>fun getServiceUptime(): Long</method>
+      <method>fun incrementLocationsCaptured()</method>
+      <method>fun incrementLocationsSent()</method>
+      <method>fun getServiceStats(): ServiceStats</method>
+      <method>fun clearState()</method>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests required:
+- BootReceiver permission validation logic
+- ServiceStateManager state persistence
+- PowerUtil battery optimization checking
+- WatchdogManager scheduling logic
+- ServiceHealthCheckWorker service detection
+
+Integration tests required:
+- Boot receiver starts service after reboot
+- Service auto-restarts after force stop
+- Watchdog detects and restarts down service
+- State persistence across service restarts
+
+Manual tests required:
+- 10+ consecutive reboots
+- 48-hour continuous operation
+- Force stop recovery (5 times)
+- Low memory kill recovery
+- Doze mode simulation
+- Battery optimization scenarios
+- Multiple device manufacturers
+
+Reliability tests:
+- Auto-start success rate measurement
+- Watchdog effectiveness (10 service kills)
+- Service uptime percentage over 48 hours
+- Recovery time from failures
+- Mixed stress test (reboots + force stops + memory pressure)
+
+Performance tests:
+- Memory usage monitoring
+- Battery drain measurement
+- CPU usage profiling
+
+Target coverage: &gt; 70% for boot, watchdog, and state components
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/receiver/BootReceiverTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/state/ServiceStateManagerTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/util/PowerUtilTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/worker/ServiceHealthCheckWorkerTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/BootRebootIntegrationTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/ServiceReliabilityTest.kt</location>
+    </locations>
+
+    <ideas>
+      <idea ac="0.2.4.3">Start service, reboot device, verify service auto-starts within 60 seconds</idea>
+      <idea ac="0.2.4.9">Force stop service via Settings, wait for START_STICKY restart</idea>
+      <idea ac="0.2.4.13">Kill service process via ADB, wait 15 minutes, verify watchdog restarts it</idea>
+      <idea ac="0.2.4.15">Use ADB to force Doze mode, monitor service behavior</idea>
+      <idea ac="0.2.4.21">Start service, capture locations, check statistics via ServiceStateManager</idea>
+      <idea ac="0.2.4.22">Run automated reboot script 10 times, verify 100% auto-start success</idea>
+      <idea ac="0.2.4.23">Start service, let run for 48 hours, measure uptime percentage</idea>
+      <idea ac="0.2.4.24">Test on Xiaomi and Samsung devices with aggressive battery management</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Implement Boot Completed Receiver</title>
+      <description>Create broadcast receiver for automatic service start on boot</description>
+      <actions>
+        - Create BootReceiver class extending BroadcastReceiver
+        - Implement onReceive() with BOOT_COMPLETED check
+        - Validate location permissions before starting service
+        - Check service_running state from SharedPreferences
+        - Check battery optimization status (Android 6+)
+        - Show notification if battery optimization enabled
+        - Start service with startForegroundService() on Android 8+
+        - Register receiver in manifest with exported="true"
+        - Declare RECEIVE_BOOT_COMPLETED permission
+        - Declare REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission
+        - Add intent filters for BOOT_COMPLETED and QUICKBOOT_POWERON
+        - Test on multiple Android versions and manufacturers
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Configure Service Auto-restart</title>
+      <description>Ensure service restarts automatically after system kill</description>
+      <actions>
+        - Verify service returns START_STICKY from onStartCommand()
+        - Add EXTRA_RESTART_FLAG to detect restart events
+        - Implement initializeService() for normal startup
+        - Implement restoreServiceState() for restart recovery
+        - Override onTaskRemoved() to save state before kill
+        - Integrate ServiceStateManager for state persistence
+        - Save service_running=true on start
+        - Save service_running=false on destroy
+        - Test force stop recovery
+        - Test low memory kill recovery
+        - Monitor restart frequency over 24 hours
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Integrate WorkManager Watchdog</title>
+      <description>Add health monitoring to detect and restart down service</description>
+      <actions>
+        - Add WorkManager dependency to build.gradle.kts
+        - Create ServiceHealthCheckWorker extending CoroutineWorker
+        - Implement isServiceRunning() using ActivityManager
+        - Implement startService() with permission validation
+        - Add checkQueueHealth() for monitoring
+        - Create WatchdogManager for scheduling
+        - Configure PeriodicWorkRequest with 15-minute interval
+        - Set constraints (requiresBatteryNotLow=false for reliability)
+        - Schedule health checks in Application onCreate()
+        - Re-schedule health checks in BootReceiver
+        - Test watchdog detects and restarts service
+        - Verify health checks run during Doze mode
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Add Doze & Standby Handling</title>
+      <description>Handle Android battery optimization features</description>
+      <actions>
+        - Create PowerUtil object with battery optimization methods
+        - Implement isIgnoringBatteryOptimizations() check
+        - Implement isDeviceInDozeMode() detection (Android 6+)
+        - Implement getAppStandbyBucket() monitoring (Android 9+)
+        - Add requestBatteryOptimizationExemption() for user action
+        - Integrate Doze mode monitoring in service
+        - Log Doze mode events and standby bucket changes
+        - Add battery optimization action to notification
+        - Create user guidance documentation
+        - Test with manual Doze mode simulation (ADB)
+        - Test on devices with aggressive optimization (Xiaomi, Huawei)
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Implement Service State Persistence</title>
+      <description>Persist critical service state across restarts</description>
+      <actions>
+        - Create ServiceStateManager class with SharedPreferences
+        - Implement saveServiceRunning() and isServiceRunning()
+        - Implement saveLastLocation() and getLastLocation()
+        - Add saveServiceStartTime() and getServiceUptime()
+        - Add incrementLocationsCaptured() and incrementLocationsSent()
+        - Create getServiceStats() for monitoring
+        - Integrate with LocationTrackingService
+        - Save state on onStartCommand()
+        - Save state on location capture and transmission
+        - Clear state on explicit service stop
+        - Test state persistence across restarts and reboots
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Multi-reboot & Reliability Testing</title>
+      <description>Validate auto-start and persistence under stress</description>
+      <actions>
+        - Execute 10 consecutive reboot test
+        - Execute 48-hour continuous operation test
+        - Execute force stop recovery test (5 times)
+        - Execute low memory kill test
+        - Execute mixed stress test (reboots + kills + memory pressure)
+        - Execute watchdog effectiveness test (10 service kills)
+        - Measure auto-start success rate (target &gt;98%)
+        - Measure watchdog recovery time (target &lt;15 minutes)
+        - Measure service uptime percentage (target &gt;99%)
+        - Monitor memory usage (target &lt;60MB average)
+        - Monitor battery drain (target &lt;10% per 24h)
+        - Test on multiple devices (Google Pixel, Samsung, Xiaomi)
+        - Test on multiple Android versions (10, 12, 14)
+        - Create automated reboot test script
+        - Generate comprehensive test report
+        - Document known limitations
+        - Review results with team before MVP release
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>Service doesn't start after boot on some devices</issue>
+      <solution>Some manufacturers (Xiaomi, Huawei, Oppo) require auto-start permission from user. Add educational notification guiding users to enable auto-start in device settings</solution>
+    </gotcha>
+    <gotcha>
+      <issue>BootReceiver not called after boot</issue>
+      <solution>Receiver must have exported="true" in manifest. User must have run app at least once before reboot. Some manufacturers disable boot receivers until app launched</solution>
+    </gotcha>
+    <gotcha>
+      <issue>WorkManager health checks not running</issue>
+      <solution>WorkManager batches work during Doze mode maintenance windows. This is expected. Verify PeriodicWorkRequest scheduled correctly and survives app updates</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Service killed repeatedly by system despite START_STICKY</issue>
+      <solution>Android can kill foreground services under extreme memory pressure. Request battery optimization exemption. Ensure service has ongoing notification. Monitor OEM-specific battery management settings</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Battery optimization request dialog not showing</issue>
+      <solution>REQUEST_IGNORE_BATTERY_OPTIMIZATIONS permission must be declared. Some manufacturers require specific intents. Direct user to Settings if automatic request fails</solution>
+    </gotcha>
+    <gotcha>
+      <issue>State persistence failing after app update</issue>
+      <solution>SharedPreferences persist across updates by default. Ensure context.getSharedPreferences() uses applicationContext, not activity context. Test backup/restore scenarios</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Watchdog not detecting service is down</issue>
+      <solution>ActivityManager.getRunningServices() is deprecated and may not work on newer Android versions. Consider alternative detection methods (ping service via bound connection, check notification status)</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Service starts multiple times on boot causing duplicates</issue>
+      <solution>Check if service already running before starting. Use singleTop or singleTask launch mode. Implement idempotent service startup logic</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="epic" path="docs/stories/story-0.2.4.md" section="All sections" />
+    <reference type="dependency" path="docs/stories/story-0.2.3.md" section="Depends on Epic 0.2.3" />
+    <reference type="milestone" path="docs/stories/story-0.2.4.md" section="MVP Completion Milestone" />
+    <reference type="documentation" url="https://developer.android.com/guide/components/broadcasts" />
+    <reference type="documentation" url="https://developer.android.com/training/monitoring-device-state/doze-standby" />
+    <reference type="documentation" url="https://developer.android.com/topic/libraries/architecture/workmanager/advanced/long-running" />
+  </references>
+</story-context>

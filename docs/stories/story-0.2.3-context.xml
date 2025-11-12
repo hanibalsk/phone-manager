@@ -1,0 +1,664 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/story-0.2.3" v="1.0">
+  <metadata>
+    <epicId>0.2</epicId>
+    <storyId>0.2.3</storyId>
+    <title>Reliability & Offline Queue</title>
+    <status>Blocked by Epic 0.2.2</status>
+    <generatedAt>2025-01-11</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/home/user/phone-manager/docs/stories/story-0.2.3.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>location tracking service</asA>
+    <iWant>to ensure reliable location data delivery through local queuing, offline detection, and automatic retry mechanisms</iWant>
+    <soThat>I can handle real-world network conditions including intermittent connectivity, server outages, and offline periods without data loss</soThat>
+    <tasks>
+      - Setup Room database for local persistence
+      - Implement queue management system with size limits
+      - Add network connectivity monitoring with real-time callbacks
+      - Implement retry logic with exponential backoff
+      - Create queue processing worker (Service + WorkManager)
+      - Stress testing with offline scenarios and large queues
+      - Database migration strategy implementation
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="0.2.3.1">Room dependencies added to project</criterion>
+    <criterion id="0.2.3.2">Database class created with proper configuration</criterion>
+    <criterion id="0.2.3.3">LocationQueueEntity defined with all required fields</criterion>
+    <criterion id="0.2.3.4">DAO interface created with CRUD operations</criterion>
+    <criterion id="0.2.3.5">Database migration strategy defined and documented</criterion>
+    <criterion id="0.2.3.6">Schema export enabled and files committed to VCS</criterion>
+    <criterion id="0.2.3.7">QueueManager implemented with enqueue/dequeue operations</criterion>
+    <criterion id="0.2.3.8">Queue size limited to 1000 entries maximum</criterion>
+    <criterion id="0.2.3.9">Oldest entries pruned when queue full</criterion>
+    <criterion id="0.2.3.10">Queue persists across app restarts</criterion>
+    <criterion id="0.2.3.11">ConnectivityMonitor detects network changes in real-time</criterion>
+    <criterion id="0.2.3.12">Online/offline state tracked accurately</criterion>
+    <criterion id="0.2.3.13">Network type identified (WiFi vs cellular)</criterion>
+    <criterion id="0.2.3.14">Exponential backoff algorithm implemented</criterion>
+    <criterion id="0.2.3.15">Maximum retry attempts: 5 with backoff delays (1s, 2s, 4s, 8s, 16s, max 60s)</criterion>
+    <criterion id="0.2.3.16">Jitter added to prevent thundering herd</criterion>
+    <criterion id="0.2.3.17">Queue processor automatically triggered when network available</criterion>
+    <criterion id="0.2.3.18">Batch sending implemented (up to 50 locations per batch)</criterion>
+    <criterion id="0.2.3.19">WorkManager worker with network and battery constraints</criterion>
+    <criterion id="0.2.3.20">Periodic queue processing scheduled (hourly)</criterion>
+    <criterion id="0.2.3.21">Successful items removed from queue</criterion>
+    <criterion id="0.2.3.22">Failed items marked with retry count</criterion>
+    <criterion id="0.2.3.23">Offline/online cycle testing passed</criterion>
+    <criterion id="0.2.3.24">Large queue processing tested (1000+ items)</criterion>
+    <criterion id="0.2.3.25">Database performance: insert &lt;10ms, query &lt;50ms for 1000 records</criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/stories/story-0.2.3.md</path>
+        <title>Epic 0.2.3: Reliability &amp; Offline Queue</title>
+        <section>Epic Goal</section>
+        <snippet>
+Ensure reliable location data delivery through local queuing, offline detection, and
+automatic retry mechanisms. This epic transforms the service from a basic tracker into a
+production-ready system that handles real-world network conditions including intermittent
+connectivity, server outages, and offline periods.
+
+Stories:
+- 0.2.3.1: Setup Room Database
+- 0.2.3.2: Implement Queue Management
+- 0.2.3.3: Add Network Connectivity Monitoring
+- 0.2.3.4: Implement Retry Logic
+- 0.2.3.5: Create Queue Processing Worker
+- 0.2.3.6: Integration &amp; Stress Testing
+        </snippet>
+      </doc>
+    </docs>
+
+    <code>
+      <file path="app/src/main/java/com/phonemanager/data/db/AppDatabase.kt">
+        <snippet>
+@Database(
+    entities = [LocationQueueEntity::class],
+    version = 1,
+    exportSchema = true
+)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun locationQueueDao(): LocationQueueDao
+
+    companion object {
+        private const val DATABASE_NAME = "phone_manager.db"
+
+        @Volatile
+        private var INSTANCE: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase {
+            return INSTANCE ?: synchronized(this) {
+                val instance = Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    DATABASE_NAME
+                )
+                    .apply {
+                        if (BuildConfig.DEBUG) {
+                            fallbackToDestructiveMigration()
+                        } else {
+                            // Production: Add migrations as defined
+                            // addMigrations(MIGRATION_1_2, ...)
+                        }
+                    }
+                    .build()
+
+                INSTANCE = instance
+                instance
+            }
+        }
+
+        // Example migration for future use
+        val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_location_queue_timestamp " +
+                    "ON location_queue(timestamp)"
+                )
+            }
+        }
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/data/db/entity/LocationQueueEntity.kt">
+        <snippet>
+@Entity(tableName = "location_queue")
+data class LocationQueueEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+
+    @ColumnInfo(name = "device_id")
+    val deviceId: String,
+
+    @ColumnInfo(name = "latitude")
+    val latitude: Double,
+
+    @ColumnInfo(name = "longitude")
+    val longitude: Double,
+
+    @ColumnInfo(name = "timestamp")
+    val timestamp: Long,
+
+    @ColumnInfo(name = "accuracy")
+    val accuracy: Float,
+
+    @ColumnInfo(name = "queued_at")
+    val queuedAt: Long = System.currentTimeMillis(),
+
+    @ColumnInfo(name = "retry_count")
+    val retryCount: Int = 0,
+
+    @ColumnInfo(name = "last_retry_at")
+    val lastRetryAt: Long? = null,
+
+    @ColumnInfo(name = "status")
+    val status: String = QueueStatus.PENDING.name
+) {
+    companion object {
+        fun fromLocationData(locationData: LocationData, deviceId: String): LocationQueueEntity {
+            return LocationQueueEntity(
+                deviceId = deviceId,
+                latitude = locationData.latitude,
+                longitude = locationData.longitude,
+                timestamp = locationData.timestamp,
+                accuracy = locationData.accuracy
+            )
+        }
+    }
+
+    fun toLocationData(): LocationData {
+        return LocationData(
+            latitude = latitude,
+            longitude = longitude,
+            timestamp = timestamp,
+            accuracy = accuracy
+        )
+    }
+}
+
+enum class QueueStatus {
+    PENDING,
+    PROCESSING,
+    FAILED
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/data/queue/QueueManager.kt">
+        <snippet>
+class QueueManager(context: Context) {
+
+    private val database = AppDatabase.getInstance(context)
+    private val dao = database.locationQueueDao()
+    private val deviceId = DeviceUtil.getDeviceId(context)
+
+    companion object {
+        private const val MAX_QUEUE_SIZE = 1000
+        private const val MAX_RETRY_COUNT = 5
+        private const val MAX_AGE_DAYS = 7
+    }
+
+    suspend fun enqueue(locationData: LocationData): Result&lt;Long&gt; {
+        return withContext(Dispatchers.IO) {
+            try {
+                val currentSize = dao.getQueueSize()
+                if (currentSize &gt;= MAX_QUEUE_SIZE) {
+                    pruneOldestEntries(100)
+                }
+
+                val entity = LocationQueueEntity.fromLocationData(locationData, deviceId)
+                val id = dao.insert(entity)
+
+                Result.success(id)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun getPendingLocations(limit: Int = 50): List&lt;LocationQueueEntity&gt; {
+        return withContext(Dispatchers.IO) {
+            dao.getPendingLocations(QueueStatus.PENDING.name, limit)
+        }
+    }
+
+    suspend fun markAsSent(id: Long): Result&lt;Boolean&gt; {
+        return withContext(Dispatchers.IO) {
+            try {
+                dao.deleteById(id)
+                Result.success(true)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun markAsFailed(id: Long): Result&lt;Boolean&gt; {
+        return withContext(Dispatchers.IO) {
+            try {
+                val location = dao.getById(id)
+                if (location != null) {
+                    if (location.retryCount &gt;= MAX_RETRY_COUNT) {
+                        dao.updateStatus(id, QueueStatus.FAILED.name)
+                    } else {
+                        dao.incrementRetryCount(id)
+                    }
+                }
+                Result.success(true)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    suspend fun getQueueStats(): QueueStats {
+        return withContext(Dispatchers.IO) {
+            QueueStats(
+                totalCount = dao.getTotalCount(),
+                pendingCount = dao.getQueueSize(QueueStatus.PENDING.name),
+                failedCount = dao.getQueueSize(QueueStatus.FAILED.name)
+            )
+        }
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/network/ConnectivityMonitor.kt">
+        <snippet>
+class ConnectivityMonitor(private val context: Context) {
+
+    private val connectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+    private var callback: ConnectivityCallback? = null
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+
+    private val _isConnected = MutableStateFlow(isNetworkAvailable())
+    val isConnected: StateFlow&lt;Boolean&gt; = _isConnected.asStateFlow()
+
+    interface ConnectivityCallback {
+        fun onConnectivityChanged(isConnected: Boolean, networkType: NetworkType)
+    }
+
+    enum class NetworkType {
+        WIFI,
+        CELLULAR,
+        NONE
+    }
+
+    fun startMonitoring(callback: ConnectivityCallback) {
+        this.callback = callback
+
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N) {
+            registerNetworkCallback()
+        } else {
+            registerLegacyReceiver()
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.N)
+    private fun registerNetworkCallback() {
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                handleConnectivityChange(true)
+            }
+
+            override fun onLost(network: Network) {
+                handleConnectivityChange(false)
+            }
+        }
+
+        connectivityManager.registerNetworkCallback(request, networkCallback!!)
+    }
+
+    fun stopMonitoring() {
+        if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.N) {
+            networkCallback?.let {
+                connectivityManager.unregisterNetworkCallback(it)
+            }
+        }
+        callback = null
+    }
+}
+        </snippet>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/worker/QueueProcessingWorker.kt">
+        <snippet>
+class QueueProcessingWorker(
+    context: Context,
+    params: WorkerParameters
+) : CoroutineWorker(context, params) {
+
+    companion object {
+        const val WORK_NAME = "queue_processing_worker"
+        private const val MAX_RETRY_ATTEMPTS = 3
+    }
+
+    override suspend fun doWork(): Result {
+        val connectivityManager = applicationContext
+            .getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork
+        if (network == null) {
+            return Result.retry()
+        }
+
+        return try {
+            val queueManager = QueueManager(applicationContext)
+            val networkManager = NetworkManager(applicationContext)
+            val queueProcessor = QueueProcessor(queueManager, networkManager)
+
+            val result = queueProcessor.processQueue()
+
+            if (result.failureCount &gt; 0 &amp;&amp; runAttemptCount &lt; MAX_RETRY_ATTEMPTS) {
+                Result.retry()
+            } else {
+                Result.success()
+            }
+        } catch (e: Exception) {
+            if (runAttemptCount &lt; MAX_RETRY_ATTEMPTS) {
+                Result.retry()
+            } else {
+                Result.failure()
+            }
+        }
+    }
+}
+        </snippet>
+      </file>
+    </code>
+
+    <dependencies>
+      <android>
+        <package name="androidx.room:room-runtime" version="2.6.1" />
+        <package name="androidx.room:room-ktx" version="2.6.1" />
+        <package name="androidx.room:room-compiler" version="2.6.1" />
+        <package name="androidx.work:work-runtime-ktx" version="2.9.0" />
+      </android>
+      <internal>
+        <dependency story="0.2.2">NetworkManager for transmission</dependency>
+        <dependency story="0.2.2">LocationData model</dependency>
+        <dependency story="0.2.1">LocationTrackingService</dependency>
+      </internal>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Use Room database (not raw SQLite)</constraint>
+    <constraint>Database schema must be exported (exportSchema = true)</constraint>
+    <constraint>Migration strategy required for production builds</constraint>
+    <constraint>Development builds can use fallbackToDestructiveMigration</constraint>
+    <constraint>Queue size limit: 1000 entries maximum</constraint>
+    <constraint>Maximum retry count: 5 attempts</constraint>
+    <constraint>Exponential backoff: 1s, 2s, 4s, 8s, 16s, capped at 60s</constraint>
+    <constraint>Jitter factor: 10% to prevent thundering herd</constraint>
+    <constraint>Batch size: 50 locations per batch</constraint>
+    <constraint>Processing delay between batches: 1 second</constraint>
+    <constraint>WorkManager periodic interval: 1 hour</constraint>
+    <constraint>WorkManager constraints: network connected, battery not low</constraint>
+    <constraint>Max queue age: 7 days before cleanup</constraint>
+    <constraint>Database insert time: &lt;10ms average</constraint>
+    <constraint>Database query time: &lt;50ms for 1000 records</constraint>
+    <constraint>No blocking of location capture thread</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface name="LocationQueueDao">
+      <method>suspend fun insert(location: LocationQueueEntity): Long</method>
+      <method>suspend fun getPendingLocations(status: String, limit: Int): List&lt;LocationQueueEntity&gt;</method>
+      <method>suspend fun getQueueSize(status: String): Int</method>
+      <method>suspend fun deleteById(id: Long)</method>
+      <method>suspend fun updateStatus(id: Long, newStatus: String)</method>
+      <method>suspend fun incrementRetryCount(id: Long, retryTime: Long)</method>
+      <method>suspend fun deleteOldLocations(timestampBefore: Long): Int</method>
+    </interface>
+
+    <interface name="QueueManager">
+      <method>suspend fun enqueue(locationData: LocationData): Result&lt;Long&gt;</method>
+      <method>suspend fun getPendingLocations(limit: Int): List&lt;LocationQueueEntity&gt;</method>
+      <method>suspend fun markAsSent(id: Long): Result&lt;Boolean&gt;</method>
+      <method>suspend fun markAsFailed(id: Long): Result&lt;Boolean&gt;</method>
+      <method>suspend fun getQueueStats(): QueueStats</method>
+      <method>suspend fun cleanupOldEntries(): Int</method>
+      <method>suspend fun clearFailedEntries(): Int</method>
+    </interface>
+
+    <interface name="ConnectivityMonitor">
+      <method>fun startMonitoring(callback: ConnectivityCallback)</method>
+      <method>fun stopMonitoring()</method>
+      <method>val isConnected: StateFlow&lt;Boolean&gt;</method>
+    </interface>
+
+    <interface name="RetryManager">
+      <method>fun calculateBackoffDelay(retryCount: Int): Long</method>
+      <method>fun shouldRetry(retryCount: Int): Boolean</method>
+      <method>fun isRetryableException(exception: Throwable): Boolean</method>
+    </interface>
+
+    <interface name="QueueProcessor">
+      <method>suspend fun processQueue(): QueueProcessingResult</method>
+      <method>suspend fun processSingleBatch(): Int</method>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Unit tests required:
+- LocationQueueEntity conversion methods
+- DAO CRUD operations with in-memory database
+- QueueManager enqueue/dequeue logic
+- Queue size enforcement and pruning
+- ConnectivityMonitor state changes
+- RetryManager backoff calculation
+- QueueProcessor batch processing
+
+Integration tests required:
+- End-to-end queue flow: capture → queue → process → transmit
+- Offline to online transition
+- Queue persistence across app restarts
+- Concurrent queue operations
+- Large queue processing (500+ items)
+
+Stress tests required:
+- Offline/online cycle (10 locations queued)
+- Extended offline period (6 hours, 72 locations)
+- Large queue processing (500-1000 items)
+- Rapid connectivity changes (toggle airplane mode)
+- Queue overflow (1200+ locations)
+- Server error scenarios with retry logic
+
+Performance tests:
+- Database insert time (&lt;10ms target)
+- Database query time (&lt;50ms for 1000 records)
+- Queue processing throughput (&gt;10 locations/second)
+- Memory usage during queue processing
+
+Target coverage: &gt; 70% for queue and database components
+    </standards>
+
+    <locations>
+      <location>app/src/test/java/com/phonemanager/data/db/entity/LocationQueueEntityTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/data/db/dao/LocationQueueDaoTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/data/queue/QueueManagerTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/network/ConnectivityMonitorTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/network/RetryManagerTest.kt</location>
+      <location>app/src/test/java/com/phonemanager/data/queue/QueueProcessorTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/QueueIntegrationTest.kt</location>
+      <location>app/src/androidTest/java/com/phonemanager/QueueStressTest.kt</location>
+    </locations>
+
+    <ideas>
+      <idea ac="0.2.3.8">Queue 1000 locations, attempt to add 1 more, verify oldest entry removed</idea>
+      <idea ac="0.2.3.10">Queue locations, force close app, reopen, verify queue intact</idea>
+      <idea ac="0.2.3.12">Toggle airplane mode, verify connectivity state changes detected</idea>
+      <idea ac="0.2.3.15">Test retry with mock server returning errors, verify backoff delays</idea>
+      <idea ac="0.2.3.18">Queue 100 locations, verify processed in batches of 50</idea>
+      <idea ac="0.2.3.23">Go offline for 1 hour, queue locations, go online, verify all transmitted</idea>
+      <idea ac="0.2.3.24">Insert 500 locations to database, measure query time, verify &lt;50ms</idea>
+      <idea ac="0.2.3.25">Use Android Profiler to measure database operation times</idea>
+    </ideas>
+  </tests>
+
+  <implementation-guidance>
+    <step order="1">
+      <title>Setup Room Database</title>
+      <description>Create local database for queue persistence</description>
+      <actions>
+        - Add Room dependencies to build.gradle.kts (runtime, ktx, compiler with KSP)
+        - Create LocationQueueEntity with all required fields
+        - Add QueueStatus enum (PENDING, PROCESSING, FAILED)
+        - Create LocationQueueDao interface with CRUD methods
+        - Implement AppDatabase class with singleton pattern
+        - Configure schema export in build.gradle.kts
+        - Define migration strategy with example migrations
+        - Use fallbackToDestructiveMigration for debug builds only
+        - Create migration test helper method
+        - Commit schema JSON files to version control
+      </actions>
+    </step>
+
+    <step order="2">
+      <title>Implement Queue Management</title>
+      <description>Build queue manager with size limits and cleanup</description>
+      <actions>
+        - Create QueueManager class with context and DAO
+        - Implement enqueue() with size checking
+        - Add automatic pruning when queue reaches 1000 items
+        - Implement getPendingLocations() with limit
+        - Create markAsSent() to remove successful transmissions
+        - Create markAsFailed() with retry count tracking
+        - Implement getQueueStats() for monitoring
+        - Add cleanupOldEntries() for 7-day cleanup
+        - Add clearFailedEntries() for manual cleanup
+        - Integrate with LocationTrackingService
+        - Schedule daily cleanup job
+      </actions>
+    </step>
+
+    <step order="3">
+      <title>Add Network Connectivity Monitoring</title>
+      <description>Monitor network state changes in real-time</description>
+      <actions>
+        - Create ConnectivityMonitor class
+        - Define ConnectivityCallback interface
+        - Implement NetworkType enum (WIFI, CELLULAR, NONE)
+        - Add StateFlow for connectivity state
+        - Implement NetworkCallback for Android 7+ (API 24+)
+        - Implement BroadcastReceiver fallback for older versions
+        - Register network callback with proper request
+        - Unregister callback in stopMonitoring()
+        - Integrate with LocationTrackingService
+        - Trigger queue processing on connectivity change
+      </actions>
+    </step>
+
+    <step order="4">
+      <title>Implement Retry Logic</title>
+      <description>Add exponential backoff with jitter</description>
+      <actions>
+        - Create RetryManager class
+        - Implement calculateBackoffDelay() with exponential algorithm
+        - Cap backoff at 60 seconds maximum
+        - Add 10% jitter to prevent thundering herd
+        - Implement shouldRetry() checking max retry count (5)
+        - Create isRetryableException() for error classification
+        - Handle 5xx server errors as retryable
+        - Handle 4xx client errors as non-retryable
+        - Enhance NetworkManager with sendLocationWithRetry()
+        - Test with mock server returning various error codes
+      </actions>
+    </step>
+
+    <step order="5">
+      <title>Create Queue Processing Worker</title>
+      <description>Process queue automatically with Service and WorkManager</description>
+      <actions>
+        - Create QueueProcessor class
+        - Implement processQueue() with batch processing
+        - Process up to 50 locations per batch
+        - Add 1-second delay between batches
+        - Implement processSingleBatch() for incremental processing
+        - Integrate QueueProcessor with LocationTrackingService
+        - Create QueueProcessingWorker extending CoroutineWorker
+        - Configure WorkManager constraints (network, battery)
+        - Schedule periodic processing (1 hour interval)
+        - Implement exponential backoff for worker retries
+        - Create QueueWorkManager helper for scheduling
+        - Schedule worker in Application onCreate()
+        - Test both service-based and WorkManager-based processing
+      </actions>
+    </step>
+
+    <step order="6">
+      <title>Integration & Stress Testing</title>
+      <description>Validate reliability under real-world conditions</description>
+      <actions>
+        - Execute offline/online cycle test (10 locations)
+        - Execute extended offline test (6 hours, 72 locations)
+        - Execute large queue test (500-1000 locations)
+        - Execute rapid connectivity changes test
+        - Execute queue overflow test (1200+ locations)
+        - Execute server error retry test
+        - Measure database performance (insert, query times)
+        - Measure queue processing throughput
+        - Monitor memory usage during processing
+        - Test WorkManager constraints and periodic execution
+        - Generate comprehensive test report
+        - Document known limitations
+      </actions>
+    </step>
+  </implementation-guidance>
+
+  <gotchas>
+    <gotcha>
+      <issue>Database migration missing causes app crash on update</issue>
+      <solution>Always define explicit migrations for production builds. Export schema files and test migrations. Use fallbackToDestructiveMigration ONLY in debug builds</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Queue grows unbounded causing database bloat</issue>
+      <solution>Enforce MAX_QUEUE_SIZE limit (1000 entries). Prune oldest 100 entries when full. Schedule daily cleanup of entries older than 7 days</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Database operations on main thread causing ANRs</issue>
+      <solution>Always use suspend functions with withContext(Dispatchers.IO) for database operations. Room enforces this by crashing if database accessed on main thread</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Network state false positives (shows online but no actual connectivity)</issue>
+      <solution>Verify connectivity by attempting actual transmission. Retry logic handles false positives by retrying failed transmissions</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Queue processing blocks location capture</issue>
+      <solution>Process queue asynchronously in separate coroutine scope. Use Dispatchers.IO for database operations. Never block main thread or location callback thread</solution>
+    </gotcha>
+    <gotcha>
+      <issue>WorkManager not running during Doze mode</issue>
+      <solution>WorkManager intelligently batches work during Doze maintenance windows. This is expected behavior. Foreground service provides primary reliability</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Exponential backoff causing excessive delays</issue>
+      <solution>Cap maximum backoff at 60 seconds. Add jitter to spread out retries. Limit retry count to 5 attempts. After max retries, mark as FAILED and move on</solution>
+    </gotcha>
+    <gotcha>
+      <issue>Database corruption after app crash during write</issue>
+      <solution>Room handles transactions safely. Use @Transaction annotation for multi-step operations. Regular database integrity checks not needed with Room</solution>
+    </gotcha>
+  </gotchas>
+
+  <references>
+    <reference type="epic" path="docs/stories/story-0.2.3.md" section="All sections" />
+    <reference type="dependency" path="docs/stories/story-0.2.2.md" section="Depends on Epic 0.2.2" />
+    <reference type="dependency" path="docs/stories/story-0.2.4.md" section="Blocks Epic 0.2.4" />
+    <reference type="documentation" url="https://developer.android.com/training/data-storage/room" />
+    <reference type="documentation" url="https://developer.android.com/topic/libraries/architecture/workmanager" />
+    <reference type="documentation" url="https://developer.android.com/training/monitoring-device-state/connectivity-status-type" />
+  </references>
+</story-context>
