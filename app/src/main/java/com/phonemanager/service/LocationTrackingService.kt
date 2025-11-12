@@ -16,6 +16,8 @@ import com.phonemanager.data.model.HealthStatus
 import com.phonemanager.data.model.ServiceHealth
 import com.phonemanager.data.repository.LocationRepositoryImpl
 import com.phonemanager.location.LocationManager
+import com.phonemanager.queue.QueueManager
+import com.phonemanager.queue.WorkManagerScheduler
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -30,9 +32,10 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Story 0.2.1: LocationTrackingService - Foreground service for location tracking
+ * Story 0.2.1/0.2.3: LocationTrackingService - Foreground service for location tracking
  *
  * Story 0.2.1: Implements periodic location capture
+ * Story 0.2.3: Integrates upload queue and WorkManager
  * Epic 1: Provides service infrastructure for UI layer
  */
 @AndroidEntryPoint
@@ -43,6 +46,12 @@ class LocationTrackingService : Service() {
 
     @Inject
     lateinit var locationManager: LocationManager
+
+    @Inject
+    lateinit var queueManager: QueueManager
+
+    @Inject
+    lateinit var workManagerScheduler: WorkManagerScheduler
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -114,6 +123,9 @@ class LocationTrackingService : Service() {
         // Story 0.2.1: Start periodic location capture
         startLocationCapture()
 
+        // Story 0.2.3: Schedule periodic queue processing
+        workManagerScheduler.scheduleQueueProcessing(intervalMinutes = 15)
+
         Timber.i("Foreground tracking started")
     }
 
@@ -142,9 +154,12 @@ class LocationTrackingService : Service() {
 
                     result.onSuccess { locationEntity ->
                         if (locationEntity != null) {
-                            // Store location to database
+                            // Story 0.2.1: Store location to database
                             val id = locationRepository.insertLocation(locationEntity)
                             Timber.i("Location captured and stored: id=$id, lat=${locationEntity.latitude}, lon=${locationEntity.longitude}, accuracy=${locationEntity.accuracy}m")
+
+                            // Story 0.2.3: Enqueue location for upload
+                            queueManager.enqueueLocation(id)
 
                             // Update service health to HEALTHY
                             locationRepository.updateServiceHealth(
@@ -193,6 +208,9 @@ class LocationTrackingService : Service() {
         // Cancel location capture
         trackingJob?.cancel()
         trackingJob = null
+
+        // Story 0.2.3: Cancel queue processing
+        workManagerScheduler.cancelQueueProcessing()
 
         // Update service health
         locationRepository.updateServiceHealth(

@@ -7,14 +7,16 @@ import com.phonemanager.data.model.LocationEntity
 import kotlinx.coroutines.flow.Flow
 
 /**
- * Epic 0.2.2: LocationDao - Database access object for locations
- * Stub implementation for Epic 1 development
+ * Story 0.2.3: LocationDao - Database access object for locations
  */
 @Dao
 interface LocationDao {
 
     @Insert
     suspend fun insert(location: LocationEntity): Long
+
+    @Query("SELECT * FROM locations WHERE id = :id")
+    suspend fun getById(id: Long): LocationEntity?
 
     @Query("SELECT * FROM locations ORDER BY timestamp DESC LIMIT 1")
     fun observeLastLocation(): Flow<LocationEntity?>

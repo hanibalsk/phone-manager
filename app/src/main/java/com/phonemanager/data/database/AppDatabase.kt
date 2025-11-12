@@ -3,18 +3,24 @@ package com.phonemanager.data.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.phonemanager.data.model.LocationEntity
+import com.phonemanager.data.model.LocationQueueEntity
 
 /**
- * Epic 0.2.2: AppDatabase - Room database for Phone Manager
- * Stub implementation for Epic 1 development
+ * Story 0.2.3: AppDatabase - Room database for Phone Manager
+ *
+ * Version 2: Added LocationQueueEntity for upload queue management
  */
 @Database(
-    entities = [LocationEntity::class],
-    version = 1,
+    entities = [
+        LocationEntity::class,
+        LocationQueueEntity::class
+    ],
+    version = 2,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao
+    abstract fun locationQueueDao(): LocationQueueDao
 
     companion object {
         const val DATABASE_NAME = "phone_manager_db"
