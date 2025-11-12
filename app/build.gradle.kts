@@ -104,6 +104,21 @@ dependencies {
     // Google Play Services Location (Epic 0.2 dependency)
     implementation("com.google.android.gms:play-services-location:21.1.0")
 
+    // Ktor for networking (Story 0.2.2)
+    implementation("io.ktor:ktor-client-android:2.3.7")
+    implementation("io.ktor:ktor-client-content-negotiation:2.3.7")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.7")
+    implementation("io.ktor:ktor-client-logging:2.3.7")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2")
+
+    // Encrypted SharedPreferences for API keys (Story 0.2.2)
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // WorkManager for background tasks (Story 0.2.3/0.2.4)
+    implementation("androidx.work:work-runtime-ktx:2.9.0")
+    implementation("androidx.hilt:hilt-work:1.1.0")
+    ksp("androidx.hilt:hilt-compiler:1.1.0")
+
     // Testing
     testImplementation("junit:junit:4.13.2")
     testImplementation("io.mockk:mockk:1.13.8")
