@@ -2,6 +2,7 @@ package com.phonemanager.ui.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.phonemanager.analytics.Analytics
 import com.phonemanager.data.preferences.PreferencesRepository
 import com.phonemanager.data.repository.LocationRepository
 import com.phonemanager.domain.model.EnhancedServiceState
@@ -32,7 +33,8 @@ class LocationTrackingViewModel @Inject constructor(
     private val preferencesRepository: PreferencesRepository,
     private val serviceController: LocationServiceController,
     private val permissionManager: PermissionManager,
-    private val locationRepository: LocationRepository
+    private val locationRepository: LocationRepository,
+    private val analytics: Analytics
 ) : ViewModel() {
 
     private val _trackingState = MutableStateFlow<TrackingState>(TrackingState.Stopped)
@@ -135,30 +137,38 @@ class LocationTrackingViewModel @Inject constructor(
         }
 
         _trackingState.value = TrackingState.Starting
+        analytics.logServiceStateChanged("starting")
 
         serviceController.startTracking()
             .onSuccess {
                 preferencesRepository.setTrackingEnabled(true)
                 _trackingState.value = TrackingState.Active()
+                analytics.logTrackingToggled(true)
+                analytics.logServiceStateChanged("running")
                 Timber.i("Tracking started successfully")
             }
             .onFailure { error ->
                 _trackingState.value = TrackingState.Error(error.message ?: "Failed to start")
+                analytics.logServiceStateChanged("error")
                 Timber.e(error, "Failed to start tracking")
             }
     }
 
     private suspend fun stopTracking() {
         _trackingState.value = TrackingState.Stopping
+        analytics.logServiceStateChanged("stopping")
 
         serviceController.stopTracking()
             .onSuccess {
                 preferencesRepository.setTrackingEnabled(false)
                 _trackingState.value = TrackingState.Stopped
+                analytics.logTrackingToggled(false)
+                analytics.logServiceStateChanged("stopped")
                 Timber.i("Tracking stopped successfully")
             }
             .onFailure { error ->
                 _trackingState.value = TrackingState.Error(error.message ?: "Failed to stop")
+                analytics.logServiceStateChanged("error")
                 Timber.e(error, "Failed to stop tracking")
             }
     }
