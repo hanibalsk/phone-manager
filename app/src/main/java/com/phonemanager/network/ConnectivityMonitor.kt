@@ -34,8 +34,8 @@ class ConnectivityMonitor @Inject constructor(
      */
     fun observeConnectivity(): Flow<Boolean> = callbackFlow {
         val networkCallback = object : ConnectivityManager.NetworkCallback() {
-            // HashSet to track available networks
-            private val availableNetworks = mutableSetOf<Network>()
+            // Thread-safe set to track available networks (callbacks may come from different threads)
+            private val availableNetworks = java.util.Collections.synchronizedSet(mutableSetOf<Network>())
 
             override fun onAvailable(network: Network) {
                 Timber.d("Network available: $network")

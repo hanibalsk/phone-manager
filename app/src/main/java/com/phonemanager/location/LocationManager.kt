@@ -38,7 +38,10 @@ class LocationManager @Inject constructor(
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
 
-    private var locationCallback: LocationCallback? = null
+    // Track active callback for cleanup - use synchronized access
+    @Volatile
+    private var activeLocationCallback: LocationCallback? = null
+    private val callbackLock = Any()
 
     /**
      * Story 0.2.1: Get current location (single capture)
@@ -84,6 +87,14 @@ class LocationManager @Inject constructor(
             return@callbackFlow
         }
 
+        // Stop any existing location updates to prevent memory leak
+        synchronized(callbackLock) {
+            activeLocationCallback?.let { existingCallback ->
+                Timber.w("Stopping existing location updates before starting new ones")
+                fusedLocationClient.removeLocationUpdates(existingCallback)
+            }
+        }
+
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             intervalMillis
@@ -92,7 +103,8 @@ class LocationManager @Inject constructor(
             .setMaxUpdateDelayMillis(intervalMillis * 2)
             .build()
 
-        locationCallback = object : LocationCallback() {
+        // Create callback local to this flow
+        val callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 result.lastLocation?.let { location ->
                     Timber.d("Location update: ${location.latitude}, ${location.longitude}, accuracy=${location.accuracy}m")
@@ -101,28 +113,41 @@ class LocationManager @Inject constructor(
             }
         }
 
+        // Store reference for external cleanup
+        synchronized(callbackLock) {
+            activeLocationCallback = callback
+        }
+
         try {
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
-                locationCallback!!,
+                callback,
                 Looper.getMainLooper()
             ).await()
 
             Timber.i("Location updates started with interval ${intervalMillis}ms")
         } catch (e: SecurityException) {
             Timber.e(e, "Security exception starting location updates")
+            synchronized(callbackLock) {
+                activeLocationCallback = null
+            }
             close(e)
         } catch (e: Exception) {
             Timber.e(e, "Failed to start location updates")
+            synchronized(callbackLock) {
+                activeLocationCallback = null
+            }
             close(e)
         }
 
         awaitClose {
             Timber.d("Stopping location updates")
-            locationCallback?.let {
-                fusedLocationClient.removeLocationUpdates(it)
+            synchronized(callbackLock) {
+                fusedLocationClient.removeLocationUpdates(callback)
+                if (activeLocationCallback === callback) {
+                    activeLocationCallback = null
+                }
             }
-            locationCallback = null
         }
     }
 
@@ -130,11 +155,13 @@ class LocationManager @Inject constructor(
      * Stop location updates
      */
     fun stopLocationUpdates() {
-        locationCallback?.let {
-            fusedLocationClient.removeLocationUpdates(it)
-            Timber.d("Location updates stopped")
+        synchronized(callbackLock) {
+            activeLocationCallback?.let {
+                fusedLocationClient.removeLocationUpdates(it)
+                Timber.d("Location updates stopped")
+            }
+            activeLocationCallback = null
         }
-        locationCallback = null
     }
 
     /**

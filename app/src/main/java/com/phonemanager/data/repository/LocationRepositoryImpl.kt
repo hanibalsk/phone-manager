@@ -80,4 +80,20 @@ class LocationRepositoryImpl @Inject constructor(
         _serviceHealth.value = health
         Timber.d("Service health updated: $health")
     }
+
+    /**
+     * Get service health as a flow (one-shot)
+     * Used by ServiceHealthCheckWorker and BootReceiver
+     */
+    override fun getServiceHealth(): Flow<ServiceHealth> {
+        return _serviceHealth.asStateFlow()
+    }
+
+    /**
+     * Get the latest location as a flow (one-shot)
+     * Used by ServiceHealthCheckWorker to check for stale data
+     */
+    override fun getLatestLocation(): Flow<LocationEntity?> {
+        return locationDao.observeLastLocation()
+    }
 }

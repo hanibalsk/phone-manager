@@ -21,15 +21,27 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // API configuration - override in local.properties or CI environment
+        buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL") ?: ""}\"")
+        buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY") ?: ""}\"")
     }
 
     buildTypes {
+        debug {
+            // Debug builds can use test endpoints
+            buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL_DEBUG") ?: project.findProperty("API_BASE_URL") ?: "https://api-dev.phonemanager.example.com"}\"")
+            buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY_DEBUG") ?: project.findProperty("API_KEY") ?: ""}\"")
+        }
         release {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            // Release builds require proper configuration
+            buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL") ?: ""}\"")
+            buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY") ?: ""}\"")
         }
     }
 
@@ -44,6 +56,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     composeOptions {

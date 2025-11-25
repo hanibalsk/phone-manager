@@ -6,7 +6,10 @@ import com.phonemanager.data.model.LocationQueueEntity
 import com.phonemanager.data.model.QueueStatus
 import com.phonemanager.network.NetworkManager
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import timber.log.Timber
+import java.util.concurrent.atomic.AtomicBoolean
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.min
@@ -35,6 +38,10 @@ class QueueManager @Inject constructor(
         private const val BATCH_SIZE = 50
     }
 
+    // Mutex to prevent concurrent queue processing
+    private val processingMutex = Mutex()
+    private val isProcessing = AtomicBoolean(false)
+
     /**
      * Add location to upload queue
      */
@@ -50,10 +57,36 @@ class QueueManager @Inject constructor(
 
     /**
      * Process pending items in the queue
+     * Uses mutex to prevent concurrent processing which could cause race conditions
      *
      * @return Number of items successfully uploaded
      */
     suspend fun processQueue(): Int {
+        // Quick check to avoid mutex contention if already processing
+        if (isProcessing.get()) {
+            Timber.d("Queue processing already in progress, skipping")
+            return 0
+        }
+
+        return processingMutex.withLock {
+            // Double-check after acquiring lock
+            if (isProcessing.getAndSet(true)) {
+                Timber.d("Queue processing already in progress (after lock), skipping")
+                return@withLock 0
+            }
+
+            try {
+                processQueueInternal()
+            } finally {
+                isProcessing.set(false)
+            }
+        }
+    }
+
+    /**
+     * Internal queue processing logic - called within mutex lock
+     */
+    private suspend fun processQueueInternal(): Int {
         if (!networkManager.isNetworkAvailable()) {
             Timber.d("Network unavailable, skipping queue processing")
             return 0
@@ -77,7 +110,7 @@ class QueueManager @Inject constructor(
             }
         }
 
-        Timber.i("Queue processing complete: $successCount/$${pendingItems.size} succeeded")
+        Timber.i("Queue processing complete: $successCount/${pendingItems.size} succeeded")
         return successCount
     }
 

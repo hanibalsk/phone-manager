@@ -66,15 +66,37 @@ class NetworkManager @Inject constructor(
 
     /**
      * Get current battery level percentage
+     * Uses BatteryManager for modern API, with sticky broadcast fallback
      */
     fun getBatteryLevel(): Int {
-        val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-        val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
-        val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+        // Prefer BatteryManager API (available since API 21)
+        return try {
+            val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
+            batteryManager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: getBatteryLevelFromStickyBroadcast()
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to get battery level from BatteryManager, falling back to sticky broadcast")
+            getBatteryLevelFromStickyBroadcast()
+        }
+    }
 
-        return if (level >= 0 && scale > 0) {
-            (level * 100 / scale)
-        } else {
+    /**
+     * Fallback method to get battery level from sticky broadcast
+     * Note: registerReceiver with null receiver just retrieves the sticky intent, doesn't register a receiver
+     */
+    @Suppress("DEPRECATION")
+    private fun getBatteryLevelFromStickyBroadcast(): Int {
+        return try {
+            val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+            val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+            val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+
+            if (level >= 0 && scale > 0) {
+                (level * 100 / scale)
+            } else {
+                -1
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to get battery level from sticky broadcast")
             -1
         }
     }

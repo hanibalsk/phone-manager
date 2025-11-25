@@ -5,7 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.phonemanager.data.repository.LocationRepository
-import com.phonemanager.service.ServiceController
+import com.phonemanager.service.LocationServiceController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first
@@ -24,7 +24,7 @@ class ServiceHealthCheckWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val locationRepository: LocationRepository,
-    private val serviceController: ServiceController
+    private val serviceController: LocationServiceController
 ) : CoroutineWorker(appContext, workerParams) {
 
     companion object {

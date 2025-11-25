@@ -63,6 +63,7 @@ class LocationTrackingService : Service() {
     private var currentLocationCount = 0
     private var currentInterval = 5 // minutes
     private var trackingJob: Job? = null
+    private var consecutiveFailures = 0
 
     companion object {
         const val ACTION_START_TRACKING = "com.phonemanager.action.START_TRACKING"
@@ -72,6 +73,11 @@ class LocationTrackingService : Service() {
 
         private const val NOTIFICATION_ID = 1001
         private const val CHANNEL_ID = "location_tracking_channel"
+
+        // Error recovery constants
+        private const val MAX_CONSECUTIVE_FAILURES = 5
+        private const val FAILURE_BACKOFF_MULTIPLIER = 2
+        private const val MAX_BACKOFF_MINUTES = 30
     }
 
     override fun onCreate() {
@@ -139,75 +145,132 @@ class LocationTrackingService : Service() {
 
     /**
      * Story 0.2.1: Periodically capture location and store to database
+     * Enhanced with error recovery and backoff logic
      */
     private fun startLocationCapture() {
         trackingJob?.cancel()
+        consecutiveFailures = 0
 
         trackingJob = serviceScope.launch {
             Timber.d("Starting location capture loop with interval $currentInterval minutes")
 
             while (isActive) {
-                try {
-                    // Update service health to GPS_ACQUIRING
+                val captureSuccess = captureLocationWithRecovery()
+
+                // Calculate next interval based on success/failure
+                val nextIntervalMinutes = if (captureSuccess) {
+                    consecutiveFailures = 0
+                    currentInterval
+                } else {
+                    consecutiveFailures++
+                    calculateBackoffInterval()
+                }
+
+                // Check if we've exceeded max failures
+                if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
+                    Timber.e("Max consecutive failures ($MAX_CONSECUTIVE_FAILURES) reached, entering recovery mode")
                     locationRepository.updateServiceHealth(
                         ServiceHealth(
                             isRunning = true,
-                            healthStatus = HealthStatus.GPS_ACQUIRING,
-                            locationCount = currentLocationCount
+                            healthStatus = HealthStatus.ERROR,
+                            locationCount = currentLocationCount,
+                            errorMessage = "Location capture repeatedly failing. Will retry in $nextIntervalMinutes minutes."
                         )
                     )
-
-                    // Get current location
-                    val result = locationManager.getCurrentLocation()
-
-                    result.onSuccess { locationEntity ->
-                        if (locationEntity != null) {
-                            // Story 0.2.1: Store location to database
-                            val id = locationRepository.insertLocation(locationEntity)
-                            Timber.i("Location captured and stored: id=$id, lat=${locationEntity.latitude}, lon=${locationEntity.longitude}, accuracy=${locationEntity.accuracy}m")
-
-                            // Story 0.2.3: Enqueue location for upload
-                            queueManager.enqueueLocation(id)
-
-                            // Update service health to HEALTHY
-                            locationRepository.updateServiceHealth(
-                                ServiceHealth(
-                                    isRunning = true,
-                                    lastLocationUpdate = locationEntity.timestamp,
-                                    locationCount = currentLocationCount + 1,
-                                    healthStatus = HealthStatus.HEALTHY
-                                )
-                            )
-                        } else {
-                            Timber.w("Location is null - GPS may be unavailable")
-                            locationRepository.updateServiceHealth(
-                                ServiceHealth(
-                                    isRunning = true,
-                                    healthStatus = HealthStatus.NO_GPS_SIGNAL,
-                                    locationCount = currentLocationCount,
-                                    errorMessage = "No GPS signal"
-                                )
-                            )
-                        }
-                    }.onFailure { error ->
-                        Timber.e(error, "Failed to capture location")
-                        locationRepository.updateServiceHealth(
-                            ServiceHealth(
-                                isRunning = true,
-                                healthStatus = HealthStatus.ERROR,
-                                locationCount = currentLocationCount,
-                                errorMessage = error.message ?: "Location capture failed"
-                            )
-                        )
-                    }
-                } catch (e: Exception) {
-                    Timber.e(e, "Exception in location capture loop")
                 }
 
                 // Wait for next interval
-                delay(currentInterval * 60 * 1000L)
+                delay(nextIntervalMinutes * 60 * 1000L)
             }
         }
+    }
+
+    /**
+     * Attempt to capture location with error handling
+     * @return true if capture was successful, false otherwise
+     */
+    private suspend fun captureLocationWithRecovery(): Boolean {
+        return try {
+            // Update service health to GPS_ACQUIRING
+            locationRepository.updateServiceHealth(
+                ServiceHealth(
+                    isRunning = true,
+                    healthStatus = HealthStatus.GPS_ACQUIRING,
+                    locationCount = currentLocationCount
+                )
+            )
+
+            // Get current location
+            val result = locationManager.getCurrentLocation()
+
+            result.fold(
+                onSuccess = { locationEntity ->
+                    if (locationEntity != null) {
+                        // Story 0.2.1: Store location to database
+                        val id = locationRepository.insertLocation(locationEntity)
+                        Timber.i("Location captured and stored: id=$id, lat=${locationEntity.latitude}, lon=${locationEntity.longitude}, accuracy=${locationEntity.accuracy}m")
+
+                        // Story 0.2.3: Enqueue location for upload
+                        queueManager.enqueueLocation(id)
+
+                        // Update service health to HEALTHY
+                        locationRepository.updateServiceHealth(
+                            ServiceHealth(
+                                isRunning = true,
+                                lastLocationUpdate = locationEntity.timestamp,
+                                locationCount = currentLocationCount + 1,
+                                healthStatus = HealthStatus.HEALTHY
+                            )
+                        )
+                        true
+                    } else {
+                        Timber.w("Location is null - GPS may be unavailable")
+                        locationRepository.updateServiceHealth(
+                            ServiceHealth(
+                                isRunning = true,
+                                healthStatus = HealthStatus.NO_GPS_SIGNAL,
+                                locationCount = currentLocationCount,
+                                errorMessage = "No GPS signal"
+                            )
+                        )
+                        false
+                    }
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to capture location (failure $consecutiveFailures)")
+                    locationRepository.updateServiceHealth(
+                        ServiceHealth(
+                            isRunning = true,
+                            healthStatus = HealthStatus.ERROR,
+                            locationCount = currentLocationCount,
+                            errorMessage = error.message ?: "Location capture failed"
+                        )
+                    )
+                    false
+                }
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Exception in location capture (failure $consecutiveFailures)")
+            locationRepository.updateServiceHealth(
+                ServiceHealth(
+                    isRunning = true,
+                    healthStatus = HealthStatus.ERROR,
+                    locationCount = currentLocationCount,
+                    errorMessage = "Unexpected error: ${e.message}"
+                )
+            )
+            false
+        }
+    }
+
+    /**
+     * Calculate backoff interval based on consecutive failures
+     * Uses exponential backoff with a maximum cap
+     */
+    private fun calculateBackoffInterval(): Int {
+        val backoffMinutes = currentInterval *
+            kotlin.math.pow(FAILURE_BACKOFF_MULTIPLIER.toDouble(), consecutiveFailures.toDouble()).toInt()
+        return kotlin.math.min(backoffMinutes, MAX_BACKOFF_MINUTES)
     }
 
     private fun stopTracking() {

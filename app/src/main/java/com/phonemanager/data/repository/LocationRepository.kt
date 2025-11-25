@@ -54,4 +54,16 @@ interface LocationRepository {
      * Delete all locations
      */
     suspend fun deleteAllLocations()
+
+    /**
+     * Get service health as a flow (one-shot)
+     * Used by ServiceHealthCheckWorker and BootReceiver
+     */
+    fun getServiceHealth(): Flow<ServiceHealth>
+
+    /**
+     * Get the latest location as a flow (one-shot)
+     * Used by ServiceHealthCheckWorker to check for stale data
+     */
+    fun getLatestLocation(): Flow<LocationEntity?>
 }

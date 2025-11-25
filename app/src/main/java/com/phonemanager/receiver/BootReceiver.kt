@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.phonemanager.data.repository.LocationRepository
-import com.phonemanager.service.ServiceController
+import com.phonemanager.service.LocationServiceController
 import com.phonemanager.watchdog.WatchdogManager
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -28,7 +28,7 @@ class BootReceiver : BroadcastReceiver() {
     lateinit var locationRepository: LocationRepository
 
     @Inject
-    lateinit var serviceController: ServiceController
+    lateinit var serviceController: LocationServiceController
 
     @Inject
     lateinit var watchdogManager: WatchdogManager

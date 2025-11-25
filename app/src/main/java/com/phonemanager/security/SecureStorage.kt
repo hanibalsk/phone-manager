@@ -38,9 +38,13 @@ class SecureStorage @Inject constructor(
                 EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
             )
         } catch (e: Exception) {
-            Timber.e(e, "Failed to create EncryptedSharedPreferences, falling back to regular SharedPreferences")
+            // SECURITY WARNING: Falling back to unencrypted storage
+            // This should only happen on devices with broken KeyStore or during testing
+            Timber.e(e, "SECURITY WARNING: Failed to create EncryptedSharedPreferences, " +
+                "falling back to regular SharedPreferences. Sensitive data will NOT be encrypted!")
             // Fallback to regular SharedPreferences if encryption fails
-            context.getSharedPreferences("phone_manager_secure", Context.MODE_PRIVATE)
+            // Use a different name to avoid mixing encrypted and unencrypted data
+            context.getSharedPreferences("phone_manager_secure_fallback", Context.MODE_PRIVATE)
         }
     }
 
