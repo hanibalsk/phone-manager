@@ -13,6 +13,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -37,16 +38,25 @@ import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
 
 /**
- * Story E3.1/E3.2: Map Screen
+ * Story E3.1/E3.2/E3.3: Map Screen
  *
  * Story E3.1: Displays Google Map with current device location
  * Story E3.2: Displays group member locations on map
- * ACs: E3.1.1, E3.1.2, E3.1.3, E3.1.4, E3.2.1, E3.2.2, E3.2.3, E3.2.4, E3.2.5
+ * Story E3.3: Real-time polling for location updates
+ * ACs: E3.1.1, E3.1.2, E3.1.3, E3.1.4, E3.2.1, E3.2.2, E3.2.3, E3.2.4, E3.2.5, E3.3.1, E3.3.6
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Story E3.3: Lifecycle-aware polling (AC E3.3.6)
+    DisposableEffect(Unit) {
+        viewModel.startPolling()
+        onDispose {
+            viewModel.stopPolling()
+        }
+    }
 
     // AC E3.1.3: Camera position with zoom level 15
     val cameraPositionState =

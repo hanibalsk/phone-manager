@@ -18,10 +18,11 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Story 1.1/1.4/E2.1: PreferencesRepository - Manages app preferences using DataStore
+ * Story 1.1/1.4/E2.1/E3.3: PreferencesRepository - Manages app preferences using DataStore
  *
  * Story 1.4 additions: Service state persistence for boot restoration
  * Story E2.1 additions: Secret mode setting
+ * Story E3.3 additions: Map polling interval
  */
 interface PreferencesRepository {
     val isTrackingEnabled: Flow<Boolean>
@@ -39,6 +40,10 @@ interface PreferencesRepository {
     // Story E2.1: Secret mode
     val isSecretModeEnabled: Flow<Boolean>
     suspend fun setSecretModeEnabled(enabled: Boolean)
+
+    // Story E3.3: Map polling interval
+    val mapPollingIntervalSeconds: Flow<Int>
+    suspend fun setMapPollingIntervalSeconds(seconds: Int)
 }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -50,6 +55,9 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
     companion object {
         /** Default tracking interval in minutes */
         const val DEFAULT_TRACKING_INTERVAL_MINUTES = 5
+
+        /** Default map polling interval in seconds (Story E3.3) */
+        const val DEFAULT_MAP_POLLING_INTERVAL_SECONDS = 15
     }
 
     private object PreferencesKeys {
@@ -62,6 +70,9 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
 
         // Story E2.1: Secret mode key
         val SECRET_MODE_ENABLED = booleanPreferencesKey("secret_mode_enabled")
+
+        // Story E3.3: Map polling interval key
+        val MAP_POLLING_INTERVAL_SECONDS = intPreferencesKey("map_polling_interval_seconds")
     }
 
     override val isTrackingEnabled: Flow<Boolean> = context.dataStore.data
@@ -174,5 +185,29 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
             preferences[PreferencesKeys.SECRET_MODE_ENABLED] = enabled
         }
         // Note: No logging here to avoid revealing secret mode state in logs (AC E2.1.6)
+    }
+
+    // Story E3.3: Map polling interval implementation
+
+    override val mapPollingIntervalSeconds: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.MAP_POLLING_INTERVAL_SECONDS]
+                ?: DEFAULT_MAP_POLLING_INTERVAL_SECONDS
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading map polling interval preference")
+                emit(DEFAULT_MAP_POLLING_INTERVAL_SECONDS)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setMapPollingIntervalSeconds(seconds: Int) {
+        require(seconds in 10..30) { "Polling interval must be between 10 and 30 seconds" }
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MAP_POLLING_INTERVAL_SECONDS] = seconds
+        }
+        Timber.d("Map polling interval set to: $seconds seconds")
     }
 }
