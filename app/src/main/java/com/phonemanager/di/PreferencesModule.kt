@@ -17,7 +17,5 @@ abstract class PreferencesModule {
 
     @Binds
     @Singleton
-    abstract fun bindPreferencesRepository(
-        impl: PreferencesRepositoryImpl
-    ): PreferencesRepository
+    abstract fun bindPreferencesRepository(impl: PreferencesRepositoryImpl): PreferencesRepository
 }

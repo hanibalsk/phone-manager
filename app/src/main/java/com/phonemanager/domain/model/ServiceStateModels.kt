@@ -14,7 +14,7 @@ data class EnhancedServiceState(
     val locationCount: Int,
     val currentInterval: Duration,
     val healthStatus: com.phonemanager.data.model.HealthStatus,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )
 
 enum class ServiceStatus {
@@ -23,7 +23,7 @@ enum class ServiceStatus {
     RUNNING,
     GPS_ACQUIRING,
     STOPPING,
-    ERROR
+    ERROR,
 }
 
 /**
@@ -34,5 +34,5 @@ data class LocationStats(
     val todayCount: Int,
     val lastLocation: LocationEntity?,
     val averageAccuracy: Float?,
-    val trackingInterval: Duration
+    val trackingInterval: Duration,
 )

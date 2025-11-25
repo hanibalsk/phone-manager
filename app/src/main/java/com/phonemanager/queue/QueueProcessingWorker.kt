@@ -17,7 +17,7 @@ import timber.log.Timber
 class QueueProcessingWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
-    private val queueManager: QueueManager
+    private val queueManager: QueueManager,
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result {

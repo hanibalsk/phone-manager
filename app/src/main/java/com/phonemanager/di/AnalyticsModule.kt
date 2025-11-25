@@ -21,14 +21,12 @@ object AnalyticsModule {
 
     @Provides
     @Singleton
-    fun provideAnalytics(): Analytics {
-        return if (BuildConfig.DEBUG) {
-            // Use DebugAnalytics in debug builds for Timber logging
-            DebugAnalytics()
-        } else {
-            // Use NoOpAnalytics in release builds until real analytics is configured
-            // TODO: Replace with FirebaseAnalytics or other provider
-            NoOpAnalytics()
-        }
+    fun provideAnalytics(): Analytics = if (BuildConfig.DEBUG) {
+        // Use DebugAnalytics in debug builds for Timber logging
+        DebugAnalytics()
+    } else {
+        // Use NoOpAnalytics in release builds until real analytics is configured
+        // TODO: Replace with FirebaseAnalytics or other provider
+        NoOpAnalytics()
     }
 }

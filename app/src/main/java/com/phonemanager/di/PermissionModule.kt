@@ -17,7 +17,5 @@ abstract class PermissionModule {
 
     @Binds
     @Singleton
-    abstract fun bindPermissionManager(
-        impl: PermissionManagerImpl
-    ): PermissionManager
+    abstract fun bindPermissionManager(impl: PermissionManagerImpl): PermissionManager
 }

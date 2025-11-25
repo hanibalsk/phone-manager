@@ -97,7 +97,10 @@ class LocationTrackingService : Service() {
                 stopTracking()
             }
             ACTION_UPDATE_INTERVAL -> {
-                val newInterval = intent.getIntExtra(EXTRA_INTERVAL_MINUTES, PreferencesRepositoryImpl.DEFAULT_TRACKING_INTERVAL_MINUTES)
+                val newInterval = intent.getIntExtra(
+                    EXTRA_INTERVAL_MINUTES,
+                    PreferencesRepositoryImpl.DEFAULT_TRACKING_INTERVAL_MINUTES,
+                )
                 updateTrackingInterval(newInterval)
             }
         }
@@ -120,8 +123,8 @@ class LocationTrackingService : Service() {
             ServiceHealth(
                 isRunning = true,
                 healthStatus = HealthStatus.HEALTHY,
-                locationCount = 0
-            )
+                locationCount = 0,
+            ),
         )
 
         // Observe location count for notification updates
@@ -170,13 +173,15 @@ class LocationTrackingService : Service() {
                 // Check if we've exceeded max failures
                 if (consecutiveFailures >= MAX_CONSECUTIVE_FAILURES) {
                     Timber.e("Max consecutive failures ($MAX_CONSECUTIVE_FAILURES) reached, entering recovery mode")
+                    val errorMsg = "Location capture repeatedly failing. " +
+                        "Will retry in $nextIntervalMinutes minutes."
                     locationRepository.updateServiceHealth(
                         ServiceHealth(
                             isRunning = true,
                             healthStatus = HealthStatus.ERROR,
                             locationCount = currentLocationCount,
-                            errorMessage = "Location capture repeatedly failing. Will retry in $nextIntervalMinutes minutes."
-                        )
+                            errorMessage = errorMsg,
+                        ),
                     )
                 }
 
@@ -190,78 +195,78 @@ class LocationTrackingService : Service() {
      * Attempt to capture location with error handling
      * @return true if capture was successful, false otherwise
      */
-    private suspend fun captureLocationWithRecovery(): Boolean {
-        return try {
-            // Update service health to GPS_ACQUIRING
-            locationRepository.updateServiceHealth(
-                ServiceHealth(
-                    isRunning = true,
-                    healthStatus = HealthStatus.GPS_ACQUIRING,
-                    locationCount = currentLocationCount
-                )
-            )
+    private suspend fun captureLocationWithRecovery(): Boolean = try {
+        // Update service health to GPS_ACQUIRING
+        locationRepository.updateServiceHealth(
+            ServiceHealth(
+                isRunning = true,
+                healthStatus = HealthStatus.GPS_ACQUIRING,
+                locationCount = currentLocationCount,
+            ),
+        )
 
-            // Get current location
-            val result = locationManager.getCurrentLocation()
+        // Get current location
+        val result = locationManager.getCurrentLocation()
 
-            result.fold(
-                onSuccess = { locationEntity ->
-                    if (locationEntity != null) {
-                        // Story 0.2.1: Store location to database
-                        val id = locationRepository.insertLocation(locationEntity)
-                        Timber.i("Location captured and stored: id=$id, lat=${locationEntity.latitude}, lon=${locationEntity.longitude}, accuracy=${locationEntity.accuracy}m")
+        result.fold(
+            onSuccess = { locationEntity ->
+                if (locationEntity != null) {
+                    // Story 0.2.1: Store location to database
+                    val id = locationRepository.insertLocation(locationEntity)
+                    Timber.i(
+                        "Location captured and stored: id=$id, lat=${locationEntity.latitude}, lon=${locationEntity.longitude}, accuracy=${locationEntity.accuracy}m",
+                    )
 
-                        // Story 0.2.3: Enqueue location for upload
-                        queueManager.enqueueLocation(id)
+                    // Story 0.2.3: Enqueue location for upload
+                    queueManager.enqueueLocation(id)
 
-                        // Update service health to HEALTHY
-                        locationRepository.updateServiceHealth(
-                            ServiceHealth(
-                                isRunning = true,
-                                lastLocationUpdate = locationEntity.timestamp,
-                                locationCount = currentLocationCount + 1,
-                                healthStatus = HealthStatus.HEALTHY
-                            )
-                        )
-                        true
-                    } else {
-                        Timber.w("Location is null - GPS may be unavailable")
-                        locationRepository.updateServiceHealth(
-                            ServiceHealth(
-                                isRunning = true,
-                                healthStatus = HealthStatus.NO_GPS_SIGNAL,
-                                locationCount = currentLocationCount,
-                                errorMessage = "No GPS signal"
-                            )
-                        )
-                        false
-                    }
-                },
-                onFailure = { error ->
-                    Timber.e(error, "Failed to capture location (failure $consecutiveFailures)")
+                    // Update service health to HEALTHY
                     locationRepository.updateServiceHealth(
                         ServiceHealth(
                             isRunning = true,
-                            healthStatus = HealthStatus.ERROR,
+                            lastLocationUpdate = locationEntity.timestamp,
+                            locationCount = currentLocationCount + 1,
+                            healthStatus = HealthStatus.HEALTHY,
+                        ),
+                    )
+                    true
+                } else {
+                    Timber.w("Location is null - GPS may be unavailable")
+                    locationRepository.updateServiceHealth(
+                        ServiceHealth(
+                            isRunning = true,
+                            healthStatus = HealthStatus.NO_GPS_SIGNAL,
                             locationCount = currentLocationCount,
-                            errorMessage = error.message ?: "Location capture failed"
-                        )
+                            errorMessage = "No GPS signal",
+                        ),
                     )
                     false
                 }
-            )
-        } catch (e: Exception) {
-            Timber.e(e, "Exception in location capture (failure $consecutiveFailures)")
-            locationRepository.updateServiceHealth(
-                ServiceHealth(
-                    isRunning = true,
-                    healthStatus = HealthStatus.ERROR,
-                    locationCount = currentLocationCount,
-                    errorMessage = "Unexpected error: ${e.message}"
+            },
+            onFailure = { error ->
+                Timber.e(error, "Failed to capture location (failure $consecutiveFailures)")
+                locationRepository.updateServiceHealth(
+                    ServiceHealth(
+                        isRunning = true,
+                        healthStatus = HealthStatus.ERROR,
+                        locationCount = currentLocationCount,
+                        errorMessage = error.message ?: "Location capture failed",
+                    ),
                 )
-            )
-            false
-        }
+                false
+            },
+        )
+    } catch (e: Exception) {
+        Timber.e(e, "Exception in location capture (failure $consecutiveFailures)")
+        locationRepository.updateServiceHealth(
+            ServiceHealth(
+                isRunning = true,
+                healthStatus = HealthStatus.ERROR,
+                locationCount = currentLocationCount,
+                errorMessage = "Unexpected error: ${e.message}",
+            ),
+        )
+        false
     }
 
     /**
@@ -291,8 +296,8 @@ class LocationTrackingService : Service() {
         locationRepository.updateServiceHealth(
             ServiceHealth(
                 isRunning = false,
-                healthStatus = HealthStatus.HEALTHY
-            )
+                healthStatus = HealthStatus.HEALTHY,
+            ),
         )
 
         stopForeground(STOP_FOREGROUND_REMOVE)
@@ -316,7 +321,7 @@ class LocationTrackingService : Service() {
             val channel = NotificationChannel(
                 CHANNEL_ID,
                 "Location Tracking",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description = "Ongoing location tracking service"
                 setShowBadge(false)
@@ -333,7 +338,7 @@ class LocationTrackingService : Service() {
             this,
             0,
             Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         // Stop tracking action
@@ -343,7 +348,7 @@ class LocationTrackingService : Service() {
             Intent(this, LocationTrackingService::class.java).apply {
                 action = ACTION_STOP_TRACKING
             },
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
@@ -357,7 +362,7 @@ class LocationTrackingService : Service() {
             .addAction(
                 android.R.drawable.ic_delete,
                 "Stop Tracking",
-                stopIntent
+                stopIntent,
             )
             .build()
     }
@@ -368,9 +373,7 @@ class LocationTrackingService : Service() {
         notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
-    private fun getNotificationText(): String {
-        return "$currentLocationCount locations • Interval: $currentInterval min"
-    }
+    private fun getNotificationText(): String = "$currentLocationCount locations • Interval: $currentInterval min"
 
     override fun onDestroy() {
         Timber.d("LocationTrackingService destroyed")

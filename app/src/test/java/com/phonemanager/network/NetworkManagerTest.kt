@@ -175,7 +175,7 @@ class NetworkManagerTest {
             latitude = 40.7128,
             longitude = -74.0060,
             accuracy = 10f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
 
         // When
@@ -203,13 +203,13 @@ class NetworkManagerTest {
             latitude = 40.7128,
             longitude = -74.0060,
             accuracy = 10f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
 
         val response = LocationUploadResponse(
             success = true,
             message = "Location uploaded",
-            processedCount = 1
+            processedCount = 1,
         )
 
         coEvery { locationApiService.uploadLocation(any()) } returns Result.success(response)
@@ -260,21 +260,21 @@ class NetworkManagerTest {
                 latitude = 40.7128,
                 longitude = -74.0060,
                 accuracy = 10f,
-                timestamp = System.currentTimeMillis()
+                timestamp = System.currentTimeMillis(),
             ),
             LocationEntity(
                 id = 2,
                 latitude = 34.0522,
                 longitude = -118.2437,
                 accuracy = 15f,
-                timestamp = System.currentTimeMillis()
-            )
+                timestamp = System.currentTimeMillis(),
+            ),
         )
 
         val response = LocationUploadResponse(
             success = true,
             message = "Batch uploaded",
-            processedCount = 2
+            processedCount = 2,
         )
 
         coEvery { locationApiService.uploadLocations(any()) } returns Result.success(response)

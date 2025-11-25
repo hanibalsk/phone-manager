@@ -34,66 +34,59 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideJson(): Json {
-        return Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-            encodeDefaults = true
-            prettyPrint = BuildConfig.DEBUG
-        }
+    fun provideJson(): Json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+        encodeDefaults = true
+        prettyPrint = BuildConfig.DEBUG
     }
 
     @Provides
     @Singleton
-    fun provideHttpClient(json: Json): HttpClient {
-        return HttpClient(Android) {
-            // JSON serialization
-            install(ContentNegotiation) {
-                json(json)
-            }
+    fun provideHttpClient(json: Json): HttpClient = HttpClient(Android) {
+        // JSON serialization
+        install(ContentNegotiation) {
+            json(json)
+        }
 
-            // Logging (only in debug builds)
-            if (BuildConfig.DEBUG) {
-                install(Logging) {
-                    logger = object : Logger {
-                        override fun log(message: String) {
-                            Timber.tag("Ktor").d(message)
-                        }
+        // Logging (only in debug builds)
+        if (BuildConfig.DEBUG) {
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        Timber.tag("Ktor").d(message)
                     }
-                    level = LogLevel.HEADERS
                 }
+                level = LogLevel.HEADERS
             }
+        }
 
-            // Default request configuration
-            defaultRequest {
-                contentType(ContentType.Application.Json)
-            }
+        // Default request configuration
+        defaultRequest {
+            contentType(ContentType.Application.Json)
+        }
 
-            // Configure engine
-            engine {
-                connectTimeout = 30_000
-                socketTimeout = 30_000
-            }
+        // Configure engine
+        engine {
+            connectTimeout = 30_000
+            socketTimeout = 30_000
         }
     }
 
     @Provides
     @Singleton
-    fun provideApiConfiguration(
-        @ApplicationContext context: Context,
-        secureStorage: SecureStorage
-    ): ApiConfiguration {
+    fun provideApiConfiguration(@ApplicationContext context: Context, secureStorage: SecureStorage): ApiConfiguration {
         // Get base URL from secure storage - require HTTPS in production
         val baseUrl = secureStorage.getApiBaseUrl()
             ?: BuildConfig.API_BASE_URL.takeIf { it.isNotBlank() }
             ?: throw IllegalStateException(
-                "API base URL not configured. Set API_BASE_URL in build config or configure via SecureStorage."
+                "API base URL not configured. Set API_BASE_URL in build config or configure via SecureStorage.",
             )
 
         // Validate URL uses HTTPS in release builds
         if (!BuildConfig.DEBUG && !baseUrl.startsWith("https://")) {
             throw IllegalStateException(
-                "API base URL must use HTTPS in production builds: $baseUrl"
+                "API base URL must use HTTPS in production builds: $baseUrl",
             )
         }
 
@@ -101,21 +94,17 @@ object NetworkModule {
         val apiKey = secureStorage.getApiKey()
             ?: BuildConfig.API_KEY.takeIf { it.isNotBlank() && it != "default-api-key-change-me" }
             ?: throw IllegalStateException(
-                "API key not configured. Set API_KEY in build config or configure via SecureStorage."
+                "API key not configured. Set API_KEY in build config or configure via SecureStorage.",
             )
 
         return ApiConfiguration(
             baseUrl = baseUrl,
-            apiKey = apiKey
+            apiKey = apiKey,
         )
     }
 
     @Provides
     @Singleton
-    fun provideLocationApiService(
-        httpClient: HttpClient,
-        apiConfig: ApiConfiguration
-    ): LocationApiService {
-        return LocationApiServiceImpl(httpClient, apiConfig)
-    }
+    fun provideLocationApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): LocationApiService =
+        LocationApiServiceImpl(httpClient, apiConfig)
 }

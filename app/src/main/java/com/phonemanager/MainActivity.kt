@@ -29,24 +29,24 @@ class MainActivity : ComponentActivity() {
 
     // Permission launchers - must be registered before onCreate
     private val locationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
+        ActivityResultContracts.RequestMultiplePermissions(),
     ) { permissions ->
         val locationGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
         val shouldShow = ActivityCompat.shouldShowRequestPermissionRationale(
             this,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
         )
 
         permissionViewModel.onLocationPermissionResult(locationGranted, shouldShow)
     }
 
     private val backgroundPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission(),
     ) { granted ->
         val shouldShow = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             ActivityCompat.shouldShowRequestPermissionRationale(
                 this,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             )
         } else {
             false
@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
     }
 
     private val notificationPermissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestPermission()
+        ActivityResultContracts.RequestPermission(),
     ) { granted ->
         permissionViewModel.onNotificationPermissionResult(granted)
     }
@@ -70,13 +70,13 @@ class MainActivity : ComponentActivity() {
             PhoneManagerTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
+                    color = MaterialTheme.colorScheme.background,
                 ) {
                     PhoneManagerNavHost(
                         permissionViewModel = permissionViewModel,
                         onRequestLocationPermission = ::requestLocationPermission,
                         onRequestBackgroundPermission = ::requestBackgroundPermission,
-                        onRequestNotificationPermission = ::requestNotificationPermission
+                        onRequestNotificationPermission = ::requestNotificationPermission,
                     )
                 }
             }
@@ -94,8 +94,8 @@ class MainActivity : ComponentActivity() {
         locationPermissionLauncher.launch(
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ),
         )
     }
 
@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             Timber.d("Launching background permission request")
             backgroundPermissionLauncher.launch(
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                Manifest.permission.ACCESS_BACKGROUND_LOCATION,
             )
         }
     }
@@ -112,7 +112,7 @@ class MainActivity : ComponentActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             Timber.d("Launching notification permission request")
             notificationPermissionLauncher.launch(
-                Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.POST_NOTIFICATIONS,
             )
         }
     }

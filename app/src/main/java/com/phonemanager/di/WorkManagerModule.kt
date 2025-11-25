@@ -1,7 +1,6 @@
 package com.phonemanager.di
 
 import android.content.Context
-import androidx.work.Configuration
 import androidx.work.WorkManager
 import dagger.Module
 import dagger.Provides
@@ -19,9 +18,5 @@ object WorkManagerModule {
 
     @Provides
     @Singleton
-    fun provideWorkManager(
-        @ApplicationContext context: Context
-    ): WorkManager {
-        return WorkManager.getInstance(context)
-    }
+    fun provideWorkManager(@ApplicationContext context: Context): WorkManager = WorkManager.getInstance(context)
 }

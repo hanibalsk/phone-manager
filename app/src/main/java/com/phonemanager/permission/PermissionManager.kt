@@ -30,18 +30,14 @@ interface PermissionManager {
 }
 
 @Singleton
-class PermissionManagerImpl @Inject constructor(
-    @ApplicationContext private val context: Context
-) : PermissionManager {
+class PermissionManagerImpl @Inject constructor(@ApplicationContext private val context: Context) : PermissionManager {
 
-    private val _permissionState = MutableStateFlow<PermissionState>(PermissionState.Checking)
+    private val permissionStateFlow = MutableStateFlow<PermissionState>(PermissionState.Checking)
 
-    override fun hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
+    override fun hasLocationPermission(): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    ) == PackageManager.PERMISSION_GRANTED
 
     override fun hasBackgroundLocationPermission(): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -49,7 +45,7 @@ class PermissionManagerImpl @Inject constructor(
         }
         return ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
         ) == PackageManager.PERMISSION_GRANTED
     }
 
@@ -59,22 +55,19 @@ class PermissionManagerImpl @Inject constructor(
         }
         return ContextCompat.checkSelfPermission(
             context,
-            Manifest.permission.POST_NOTIFICATIONS
+            Manifest.permission.POST_NOTIFICATIONS,
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    override fun hasAllRequiredPermissions(): Boolean {
-        return hasLocationPermission() &&
-               hasBackgroundLocationPermission() &&
-               hasNotificationPermission()
-    }
+    override fun hasAllRequiredPermissions(): Boolean = hasLocationPermission() &&
+        hasBackgroundLocationPermission() &&
+        hasNotificationPermission()
 
-    override fun shouldShowLocationRationale(activity: Activity): Boolean {
-        return ActivityCompat.shouldShowRequestPermissionRationale(
+    override fun shouldShowLocationRationale(activity: Activity): Boolean =
+        ActivityCompat.shouldShowRequestPermissionRationale(
             activity,
-            Manifest.permission.ACCESS_FINE_LOCATION
+            Manifest.permission.ACCESS_FINE_LOCATION,
         )
-    }
 
     override fun shouldShowBackgroundRationale(activity: Activity): Boolean {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -82,11 +75,11 @@ class PermissionManagerImpl @Inject constructor(
         }
         return ActivityCompat.shouldShowRequestPermissionRationale(
             activity,
-            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION,
         )
     }
 
-    override fun observePermissionState(): Flow<PermissionState> = _permissionState.asStateFlow()
+    override fun observePermissionState(): Flow<PermissionState> = permissionStateFlow.asStateFlow()
 
     override fun updatePermissionState() {
         val newState = when {
@@ -100,7 +93,7 @@ class PermissionManagerImpl @Inject constructor(
             else -> PermissionState.AllGranted
         }
 
-        _permissionState.value = newState
+        permissionStateFlow.value = newState
         Timber.d("Permission state updated: $newState")
     }
 }

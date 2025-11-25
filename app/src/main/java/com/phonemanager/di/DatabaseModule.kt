@@ -21,27 +21,19 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(
-        @ApplicationContext context: Context
-    ): AppDatabase {
-        return Room.databaseBuilder(
-            context,
-            AppDatabase::class.java,
-            AppDatabase.DATABASE_NAME
-        )
-            .fallbackToDestructiveMigration()
-            .build()
-    }
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase = Room.databaseBuilder(
+        context,
+        AppDatabase::class.java,
+        AppDatabase.DATABASE_NAME,
+    )
+        .fallbackToDestructiveMigration()
+        .build()
 
     @Provides
     @Singleton
-    fun provideLocationDao(database: AppDatabase): LocationDao {
-        return database.locationDao()
-    }
+    fun provideLocationDao(database: AppDatabase): LocationDao = database.locationDao()
 
     @Provides
     @Singleton
-    fun provideLocationQueueDao(database: AppDatabase): LocationQueueDao {
-        return database.locationQueueDao()
-    }
+    fun provideLocationQueueDao(database: AppDatabase): LocationQueueDao = database.locationQueueDao()
 }

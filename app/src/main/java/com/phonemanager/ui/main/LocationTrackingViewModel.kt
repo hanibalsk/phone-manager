@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import java.time.Instant
-import java.time.LocalDate
-import java.time.ZoneId
 import javax.inject.Inject
 
 /**
@@ -34,7 +32,7 @@ class LocationTrackingViewModel @Inject constructor(
     private val serviceController: LocationServiceController,
     private val permissionManager: PermissionManager,
     private val locationRepository: LocationRepository,
-    private val analytics: Analytics
+    private val analytics: Analytics,
 ) : ViewModel() {
 
     private val _trackingState = MutableStateFlow<TrackingState>(TrackingState.Stopped)
@@ -57,8 +55,8 @@ class LocationTrackingViewModel @Inject constructor(
                 locationCount = 0,
                 currentInterval = java.time.Duration.ofMinutes(5),
                 healthStatus = com.phonemanager.data.model.HealthStatus.HEALTHY,
-                errorMessage = null
-            )
+                errorMessage = null,
+            ),
         )
 
     /**
@@ -69,14 +67,14 @@ class LocationTrackingViewModel @Inject constructor(
         locationRepository.observeTodayLocationCount(),
         locationRepository.observeLastLocation(),
         locationRepository.observeAverageAccuracy(),
-        preferencesRepository.trackingInterval
+        preferencesRepository.trackingInterval,
     ) { totalCount, todayCount, lastLocation, avgAccuracy, intervalMinutes ->
         LocationStats(
             totalCount = totalCount,
             todayCount = todayCount,
             lastLocation = lastLocation,
             averageAccuracy = avgAccuracy,
-            trackingInterval = java.time.Duration.ofMinutes(intervalMinutes.toLong())
+            trackingInterval = java.time.Duration.ofMinutes(intervalMinutes.toLong()),
         )
     }.stateIn(
         scope = viewModelScope,
@@ -86,8 +84,8 @@ class LocationTrackingViewModel @Inject constructor(
             todayCount = 0,
             lastLocation = null,
             averageAccuracy = null,
-            trackingInterval = java.time.Duration.ofMinutes(5)
-        )
+            trackingInterval = java.time.Duration.ofMinutes(5),
+        ),
     )
 
     init {

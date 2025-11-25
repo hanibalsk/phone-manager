@@ -31,9 +31,7 @@ import javax.inject.Singleton
  * - Permission checking
  */
 @Singleton
-class LocationManager @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class LocationManager @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)
@@ -56,11 +54,13 @@ class LocationManager @Inject constructor(
         return try {
             val location = fusedLocationClient.getCurrentLocation(
                 Priority.PRIORITY_HIGH_ACCURACY,
-                null
+                null,
             ).await()
 
             if (location != null) {
-                Timber.d("Current location obtained: ${location.latitude}, ${location.longitude}, accuracy=${location.accuracy}m")
+                Timber.d(
+                    "Current location obtained: ${location.latitude}, ${location.longitude}, accuracy=${location.accuracy}m",
+                )
                 Result.success(location.toLocationEntity())
             } else {
                 Timber.w("Current location is null")
@@ -97,7 +97,7 @@ class LocationManager @Inject constructor(
 
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
-            intervalMillis
+            intervalMillis,
         )
             .setMinUpdateIntervalMillis(intervalMillis / 2)
             .setMaxUpdateDelayMillis(intervalMillis * 2)
@@ -107,7 +107,9 @@ class LocationManager @Inject constructor(
         val callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 result.lastLocation?.let { location ->
-                    Timber.d("Location update: ${location.latitude}, ${location.longitude}, accuracy=${location.accuracy}m")
+                    Timber.d(
+                        "Location update: ${location.latitude}, ${location.longitude}, accuracy=${location.accuracy}m",
+                    )
                     trySend(location.toLocationEntity())
                 }
             }
@@ -122,7 +124,7 @@ class LocationManager @Inject constructor(
             fusedLocationClient.requestLocationUpdates(
                 locationRequest,
                 callback,
-                Looper.getMainLooper()
+                Looper.getMainLooper(),
             ).await()
 
             Timber.i("Location updates started with interval ${intervalMillis}ms")
@@ -167,40 +169,34 @@ class LocationManager @Inject constructor(
     /**
      * Check if app has location permission
      */
-    private fun hasLocationPermission(): Boolean {
-        return ContextCompat.checkSelfPermission(
-            context,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-    }
+    private fun hasLocationPermission(): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    ) == PackageManager.PERMISSION_GRANTED
 
     /**
      * Check if location services are enabled on device
      */
-    suspend fun isLocationEnabled(): Boolean {
-        return try {
-            val location = fusedLocationClient.getLastLocation().await()
-            // If we can get last location, services are enabled
-            true
-        } catch (e: Exception) {
-            Timber.w(e, "Location services may be disabled")
-            false
-        }
+    suspend fun isLocationEnabled(): Boolean = try {
+        val location = fusedLocationClient.getLastLocation().await()
+        // If we can get last location, services are enabled
+        true
+    } catch (e: Exception) {
+        Timber.w(e, "Location services may be disabled")
+        false
     }
 }
 
 /**
  * Extension function to convert Android Location to LocationEntity
  */
-private fun Location.toLocationEntity(): LocationEntity {
-    return LocationEntity(
-        latitude = latitude,
-        longitude = longitude,
-        accuracy = accuracy,
-        timestamp = time,
-        altitude = if (hasAltitude()) altitude else null,
-        bearing = if (hasBearing()) bearing else null,
-        speed = if (hasSpeed()) speed else null,
-        provider = provider
-    )
-}
+private fun Location.toLocationEntity(): LocationEntity = LocationEntity(
+    latitude = latitude,
+    longitude = longitude,
+    accuracy = accuracy,
+    timestamp = time,
+    altitude = if (hasAltitude()) altitude else null,
+    bearing = if (hasBearing()) bearing else null,
+    speed = if (hasSpeed()) speed else null,
+    provider = provider,
+)

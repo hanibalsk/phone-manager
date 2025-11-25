@@ -17,7 +17,5 @@ abstract class ServiceModule {
 
     @Binds
     @Singleton
-    abstract fun bindLocationServiceController(
-        impl: LocationServiceControllerImpl
-    ): LocationServiceController
+    abstract fun bindLocationServiceController(impl: LocationServiceControllerImpl): LocationServiceController
 }

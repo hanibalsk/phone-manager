@@ -15,10 +15,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.phonemanager.permission.PermissionState
 import com.phonemanager.ui.components.LocationStatsCard
 import com.phonemanager.ui.components.LocationTrackingToggle
 import com.phonemanager.ui.components.ServiceStatusCard
@@ -27,7 +25,6 @@ import com.phonemanager.ui.permissions.PermissionRationaleDialog
 import com.phonemanager.ui.permissions.PermissionStatusCard
 import com.phonemanager.ui.permissions.PermissionType
 import com.phonemanager.ui.permissions.PermissionViewModel
-import com.phonemanager.ui.theme.PhoneManagerTheme
 
 /**
  * HomeScreen - Main screen with permission management and tracking toggle
@@ -38,7 +35,7 @@ fun HomeScreen(
     onRequestLocationPermission: () -> Unit,
     onRequestBackgroundPermission: () -> Unit,
     onRequestNotificationPermission: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val permissionState by permissionViewModel.permissionState.collectAsState()
@@ -51,18 +48,18 @@ fun HomeScreen(
             .fillMaxSize()
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         // App title
         Text(
             text = "Phone Manager",
-            style = MaterialTheme.typography.headlineMedium
+            style = MaterialTheme.typography.headlineMedium,
         )
 
         Text(
             text = "Location Tracking",
             style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
 
         // Permission status card
@@ -74,12 +71,12 @@ fun HomeScreen(
             onOpenSettings = {
                 permissionViewModel.openAppSettings(context)
             },
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         // Location tracking toggle (Story 1.1)
         LocationTrackingToggle(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         // Story 1.3: Service status and location statistics
@@ -90,13 +87,13 @@ fun HomeScreen(
         // Service status card (Story 1.3)
         ServiceStatusCard(
             serviceState = serviceState,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
 
         // Location stats card (Story 1.3)
         LocationStatsCard(
             locationStats = locationStats,
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         )
     }
 
@@ -110,7 +107,7 @@ fun HomeScreen(
             },
             onDismiss = {
                 permissionViewModel.onLocationRationaleDismissed()
-            }
+            },
         )
     }
 
@@ -124,7 +121,7 @@ fun HomeScreen(
             },
             onDismiss = {
                 permissionViewModel.onBackgroundRationaleDismissed()
-            }
+            },
         )
     }
 
@@ -138,8 +135,7 @@ fun HomeScreen(
             },
             onDismiss = {
                 permissionViewModel.onNotificationRationaleDismissed()
-            }
+            },
         )
     }
 }
-

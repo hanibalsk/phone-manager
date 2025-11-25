@@ -44,7 +44,7 @@ class QueueManagerTest {
         queueManager = QueueManager(
             locationDao = locationDao,
             locationQueueDao = locationQueueDao,
-            networkManager = networkManager
+            networkManager = networkManager,
         )
     }
 
@@ -65,9 +65,11 @@ class QueueManagerTest {
 
         // Then
         coVerify {
-            locationQueueDao.insert(match {
-                it.locationId == locationId && it.status == QueueStatus.PENDING
-            })
+            locationQueueDao.insert(
+                match {
+                    it.locationId == locationId && it.status == QueueStatus.PENDING
+                },
+            )
         }
     }
 
@@ -105,14 +107,14 @@ class QueueManagerTest {
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            queuedAt = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis(),
         )
         val locationEntity = LocationEntity(
             id = locationId,
             latitude = 40.7128,
             longitude = -74.0060,
             accuracy = 10f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
         val uploadResponse = mockk<com.phonemanager.network.models.LocationUploadResponse>(relaxed = true)
 
@@ -129,14 +131,18 @@ class QueueManagerTest {
         assertEquals(1, result)
         coVerify {
             // First update to UPLOADING
-            locationQueueDao.update(match {
-                it.locationId == queueItem.locationId && it.status == QueueStatus.UPLOADING
-            })
+            locationQueueDao.update(
+                match {
+                    it.locationId == queueItem.locationId && it.status == QueueStatus.UPLOADING
+                },
+            )
 
             // Then update to UPLOADED
-            locationQueueDao.update(match {
-                it.locationId == queueItem.locationId && it.status == QueueStatus.UPLOADED
-            })
+            locationQueueDao.update(
+                match {
+                    it.locationId == queueItem.locationId && it.status == QueueStatus.UPLOADED
+                },
+            )
         }
     }
 
@@ -148,14 +154,14 @@ class QueueManagerTest {
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            queuedAt = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis(),
         )
         val locationEntity = LocationEntity(
             id = locationId,
             latitude = 40.7128,
             longitude = -74.0060,
             accuracy = 10f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
 
         every { networkManager.isNetworkAvailable() } returns true
@@ -171,12 +177,14 @@ class QueueManagerTest {
         assertEquals(0, result, "Should return 0 success count on failure")
         coVerify {
             // Update to RETRY_PENDING with incremented retry count
-            locationQueueDao.update(match {
-                it.locationId == queueItem.locationId &&
-                it.status == QueueStatus.RETRY_PENDING &&
-                it.retryCount == 1 &&
-                (it.nextRetryTime ?: 0) > System.currentTimeMillis()
-            })
+            locationQueueDao.update(
+                match {
+                    it.locationId == queueItem.locationId &&
+                        it.status == QueueStatus.RETRY_PENDING &&
+                        it.retryCount == 1 &&
+                        (it.nextRetryTime ?: 0) > System.currentTimeMillis()
+                },
+            )
         }
     }
 
@@ -188,14 +196,14 @@ class QueueManagerTest {
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 4, // Already tried 4 times, next will be 5 (max)
-            queuedAt = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis(),
         )
         val locationEntity = LocationEntity(
             id = locationId,
             latitude = 40.7128,
             longitude = -74.0060,
             accuracy = 10f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
 
         every { networkManager.isNetworkAvailable() } returns true
@@ -211,11 +219,13 @@ class QueueManagerTest {
         assertEquals(0, result)
         coVerify {
             // Should mark as FAILED after max retries
-            locationQueueDao.update(match {
-                it.locationId == queueItem.locationId &&
-                it.status == QueueStatus.FAILED &&
-                it.retryCount == 5
-            })
+            locationQueueDao.update(
+                match {
+                    it.locationId == queueItem.locationId &&
+                        it.status == QueueStatus.FAILED &&
+                        it.retryCount == 5
+                },
+            )
         }
     }
 
@@ -227,7 +237,7 @@ class QueueManagerTest {
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            queuedAt = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis(),
         )
 
         every { networkManager.isNetworkAvailable() } returns true
@@ -241,11 +251,13 @@ class QueueManagerTest {
         // Then
         assertEquals(0, result)
         coVerify {
-            locationQueueDao.update(match {
-                it.locationId == queueItem.locationId &&
-                it.status == QueueStatus.FAILED &&
-                it.errorMessage == "Location not found in database"
-            })
+            locationQueueDao.update(
+                match {
+                    it.locationId == queueItem.locationId &&
+                        it.status == QueueStatus.FAILED &&
+                        it.errorMessage == "Location not found in database"
+                },
+            )
         }
     }
 
@@ -256,27 +268,27 @@ class QueueManagerTest {
             locationId = 1L,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            queuedAt = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis(),
         )
         val queueItem2 = LocationQueueEntity(
             locationId = 2L,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            queuedAt = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis(),
         )
         val location1 = LocationEntity(
             id = 1L,
             latitude = 40.7128,
             longitude = -74.0060,
             accuracy = 10f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
         val location2 = LocationEntity(
             id = 2L,
             latitude = 34.0522,
             longitude = -118.2437,
             accuracy = 15f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
         val uploadResponse = mockk<com.phonemanager.network.models.LocationUploadResponse>(relaxed = true)
 
@@ -323,11 +335,13 @@ class QueueManagerTest {
         // Then
         assertEquals(expectedCount, result)
         coVerify {
-            locationQueueDao.deleteUploadedBefore(match {
-                // Verify it's approximately 7 days ago (within 1 second tolerance)
-                val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
-                Math.abs(it - sevenDaysAgo) < 1000
-            })
+            locationQueueDao.deleteUploadedBefore(
+                match {
+                    // Verify it's approximately 7 days ago (within 1 second tolerance)
+                    val sevenDaysAgo = System.currentTimeMillis() - (7 * 24 * 60 * 60 * 1000L)
+                    Math.abs(it - sevenDaysAgo) < 1000
+                },
+            )
         }
     }
 
@@ -368,7 +382,7 @@ class QueueManagerTest {
             latitude = 40.7128,
             longitude = -74.0060,
             accuracy = 10f,
-            timestamp = System.currentTimeMillis()
+            timestamp = System.currentTimeMillis(),
         )
 
         val capturedUpdates = mutableListOf<LocationQueueEntity>()
@@ -384,7 +398,7 @@ class QueueManagerTest {
                 locationId = locationId,
                 status = QueueStatus.PENDING,
                 retryCount = retryCount,
-                queuedAt = System.currentTimeMillis()
+                queuedAt = System.currentTimeMillis(),
             )
 
             coEvery { locationQueueDao.getPendingItems(any(), any()) } returns listOf(queueItem)
@@ -397,12 +411,14 @@ class QueueManagerTest {
 
         // Verify each subsequent retry has a longer wait time
         for (i in 1 until retryPendingUpdates.size) {
-            val prevWaitTime = (retryPendingUpdates[i-1].nextRetryTime ?: 0) - (retryPendingUpdates[i-1].lastAttemptTime ?: 0)
-            val currWaitTime = (retryPendingUpdates[i].nextRetryTime ?: 0) - (retryPendingUpdates[i].lastAttemptTime ?: 0)
+            val prevWaitTime =
+                (retryPendingUpdates[i - 1].nextRetryTime ?: 0) - (retryPendingUpdates[i - 1].lastAttemptTime ?: 0)
+            val currWaitTime =
+                (retryPendingUpdates[i].nextRetryTime ?: 0) - (retryPendingUpdates[i].lastAttemptTime ?: 0)
             // Current wait time should be roughly double the previous (accounting for jitter)
             assertTrue(
                 currWaitTime > prevWaitTime,
-                "Backoff should increase: previous=$prevWaitTime, current=$currWaitTime"
+                "Backoff should increase: previous=$prevWaitTime, current=$currWaitTime",
             )
         }
     }

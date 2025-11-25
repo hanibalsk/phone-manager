@@ -31,33 +31,30 @@ import com.phonemanager.ui.theme.PhoneManagerTheme
  * Story 1.1: LocationTrackingToggle - Material 3 toggle for starting/stopping tracking
  */
 @Composable
-fun LocationTrackingToggle(
-    viewModel: LocationTrackingViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier
-) {
+fun LocationTrackingToggle(viewModel: LocationTrackingViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
     val trackingState by viewModel.trackingState.collectAsState()
     val permissionState by viewModel.permissionState.collectAsState()
 
     val isChecked = trackingState is TrackingState.Active
     val isEnabled = permissionState is PermissionState.AllGranted &&
-                    trackingState !is TrackingState.Starting &&
-                    trackingState !is TrackingState.Stopping
+        trackingState !is TrackingState.Starting &&
+        trackingState !is TrackingState.Stopping
 
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = "Location Tracking",
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
                     text = when (trackingState) {
@@ -76,14 +73,14 @@ fun LocationTrackingToggle(
                         is TrackingState.Active -> MaterialTheme.colorScheme.primary
                         is TrackingState.Error -> MaterialTheme.colorScheme.error
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
-                    }
+                    },
                 )
             }
 
             if (trackingState is TrackingState.Starting || trackingState is TrackingState.Stopping) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp
+                    strokeWidth = 2.dp,
                 )
             } else {
                 Switch(
@@ -96,7 +93,7 @@ fun LocationTrackingToggle(
                         } else {
                             "Location tracking is inactive. Toggle to start."
                         }
-                    }
+                    },
                 )
             }
         }
@@ -109,7 +106,7 @@ fun LocationTrackingTogglePreview() {
     PhoneManagerTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // Note: Preview won't work with hiltViewModel()
             // This is just for layout preview

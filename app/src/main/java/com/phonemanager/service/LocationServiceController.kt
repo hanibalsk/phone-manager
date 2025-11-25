@@ -5,8 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.phonemanager.data.model.HealthStatus
-import com.phonemanager.data.repository.LocationRepository
 import com.phonemanager.data.preferences.PreferencesRepository
+import com.phonemanager.data.repository.LocationRepository
 import com.phonemanager.domain.model.EnhancedServiceState
 import com.phonemanager.domain.model.ServiceStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -34,83 +34,77 @@ interface LocationServiceController {
 class LocationServiceControllerImpl @Inject constructor(
     @ApplicationContext private val context: Context,
     private val locationRepository: LocationRepository,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
 ) : LocationServiceController {
 
-    private val _serviceState = MutableStateFlow(
+    private val serviceStateFlow = MutableStateFlow(
         ServiceState(
             isRunning = false,
             lastUpdate = null,
-            locationCount = 0
-        )
+            locationCount = 0,
+        ),
     )
 
-    override suspend fun startTracking(): Result<Unit> {
-        return try {
-            val intent = Intent(context, LocationTrackingService::class.java).apply {
-                action = LocationTrackingService.ACTION_START_TRACKING
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(intent)
-            } else {
-                context.startService(intent)
-            }
-
-            _serviceState.value = _serviceState.value.copy(isRunning = true)
-
-            Timber.i("Location tracking service start requested")
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to start tracking service")
-            Result.failure(e)
+    override suspend fun startTracking(): Result<Unit> = try {
+        val intent = Intent(context, LocationTrackingService::class.java).apply {
+            action = LocationTrackingService.ACTION_START_TRACKING
         }
-    }
 
-    override suspend fun stopTracking(): Result<Unit> {
-        return try {
-            val intent = Intent(context, LocationTrackingService::class.java).apply {
-                action = LocationTrackingService.ACTION_STOP_TRACKING
-            }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
             context.startService(intent)
-
-            _serviceState.value = _serviceState.value.copy(isRunning = false)
-
-            Timber.i("Location tracking service stop requested")
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to stop tracking service")
-            Result.failure(e)
         }
+
+        serviceStateFlow.value = serviceStateFlow.value.copy(isRunning = true)
+
+        Timber.i("Location tracking service start requested")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to start tracking service")
+        Result.failure(e)
     }
 
-    override fun observeServiceState(): Flow<ServiceState> = _serviceState.asStateFlow()
+    override suspend fun stopTracking(): Result<Unit> = try {
+        val intent = Intent(context, LocationTrackingService::class.java).apply {
+            action = LocationTrackingService.ACTION_STOP_TRACKING
+        }
+        context.startService(intent)
+
+        serviceStateFlow.value = serviceStateFlow.value.copy(isRunning = false)
+
+        Timber.i("Location tracking service stop requested")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to stop tracking service")
+        Result.failure(e)
+    }
+
+    override fun observeServiceState(): Flow<ServiceState> = serviceStateFlow.asStateFlow()
 
     /**
      * Story 1.3: Observe enhanced service state combining multiple data sources
      */
-    override fun observeEnhancedServiceState(): Flow<EnhancedServiceState> {
-        return combine(
-            _serviceState,
-            locationRepository.observeServiceHealth(),
-            locationRepository.observeLocationCount(),
-            preferencesRepository.trackingInterval
-        ) { serviceState, serviceHealth, locationCount, intervalMinutes ->
-            EnhancedServiceState(
-                isRunning = serviceState.isRunning,
-                status = when {
-                    !serviceState.isRunning -> ServiceStatus.STOPPED
-                    serviceHealth.healthStatus == HealthStatus.GPS_ACQUIRING -> ServiceStatus.GPS_ACQUIRING
-                    serviceHealth.healthStatus == HealthStatus.ERROR -> ServiceStatus.ERROR
-                    else -> ServiceStatus.RUNNING
-                },
-                lastUpdate = serviceHealth.lastLocationUpdate?.let { Instant.ofEpochMilli(it) },
-                locationCount = locationCount,
-                currentInterval = java.time.Duration.ofMinutes(intervalMinutes.toLong()),
-                healthStatus = serviceHealth.healthStatus,
-                errorMessage = serviceHealth.errorMessage
-            )
-        }
+    override fun observeEnhancedServiceState(): Flow<EnhancedServiceState> = combine(
+        serviceStateFlow,
+        locationRepository.observeServiceHealth(),
+        locationRepository.observeLocationCount(),
+        preferencesRepository.trackingInterval,
+    ) { serviceState, serviceHealth, locationCount, intervalMinutes ->
+        EnhancedServiceState(
+            isRunning = serviceState.isRunning,
+            status = when {
+                !serviceState.isRunning -> ServiceStatus.STOPPED
+                serviceHealth.healthStatus == HealthStatus.GPS_ACQUIRING -> ServiceStatus.GPS_ACQUIRING
+                serviceHealth.healthStatus == HealthStatus.ERROR -> ServiceStatus.ERROR
+                else -> ServiceStatus.RUNNING
+            },
+            lastUpdate = serviceHealth.lastLocationUpdate?.let { Instant.ofEpochMilli(it) },
+            locationCount = locationCount,
+            currentInterval = java.time.Duration.ofMinutes(intervalMinutes.toLong()),
+            healthStatus = serviceHealth.healthStatus,
+            errorMessage = serviceHealth.errorMessage,
+        )
     }
 
     /**
@@ -125,21 +119,21 @@ class LocationServiceControllerImpl @Inject constructor(
      */
     override fun isServiceRunning(): Boolean {
         val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
-            ?: return _serviceState.value.isRunning // Fallback to in-memory state
+            ?: return serviceStateFlow.value.isRunning // Fallback to in-memory state
 
         @Suppress("DEPRECATION") // Still works, and alternatives are more complex
         val runningServices = try {
             activityManager.getRunningServices(Int.MAX_VALUE)
         } catch (e: Exception) {
             Timber.w(e, "Failed to get running services, falling back to in-memory state")
-            return _serviceState.value.isRunning
+            return serviceStateFlow.value.isRunning
         }
 
         val isRunning = runningServices?.any { serviceInfo ->
             serviceInfo.service.className == LocationTrackingService::class.java.name
         } ?: false
 
-        Timber.d("isServiceRunning check: actual=$isRunning, in-memory=${_serviceState.value.isRunning}")
+        Timber.d("isServiceRunning check: actual=$isRunning, in-memory=${serviceStateFlow.value.isRunning}")
 
         return isRunning
     }
@@ -149,8 +143,4 @@ class LocationServiceControllerImpl @Inject constructor(
  * Story 1.1: ServiceState - Represents service state
  * Enhanced in Story 1.3 with more details
  */
-data class ServiceState(
-    val isRunning: Boolean,
-    val lastUpdate: java.time.Instant?,
-    val locationCount: Int
-)
+data class ServiceState(val isRunning: Boolean, val lastUpdate: java.time.Instant?, val locationCount: Int)

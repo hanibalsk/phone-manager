@@ -39,9 +39,8 @@ interface PreferencesRepository {
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @Singleton
-class PreferencesRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context
-) : PreferencesRepository {
+class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context) :
+    PreferencesRepository {
 
     companion object {
         /** Default tracking interval in minutes */
@@ -51,6 +50,7 @@ class PreferencesRepositoryImpl @Inject constructor(
     private object PreferencesKeys {
         val TRACKING_ENABLED = booleanPreferencesKey("tracking_enabled")
         val TRACKING_INTERVAL = intPreferencesKey("tracking_interval_minutes")
+
         // Story 1.4: Service state persistence keys
         val SERVICE_RUNNING = booleanPreferencesKey("service_running")
         val LAST_LOCATION_UPDATE = longPreferencesKey("last_location_update")

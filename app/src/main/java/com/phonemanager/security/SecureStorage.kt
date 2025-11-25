@@ -18,9 +18,7 @@ import javax.inject.Singleton
  * - API base URLs
  */
 @Singleton
-class SecureStorage @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class SecureStorage @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val masterKey: MasterKey by lazy {
         MasterKey.Builder(context)
@@ -35,13 +33,16 @@ class SecureStorage @Inject constructor(
                 "phone_manager_secure",
                 masterKey,
                 EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM,
             )
         } catch (e: Exception) {
             // SECURITY WARNING: Falling back to unencrypted storage
             // This should only happen on devices with broken KeyStore or during testing
-            Timber.e(e, "SECURITY WARNING: Failed to create EncryptedSharedPreferences, " +
-                "falling back to regular SharedPreferences. Sensitive data will NOT be encrypted!")
+            Timber.e(
+                e,
+                "SECURITY WARNING: Failed to create EncryptedSharedPreferences, " +
+                    "falling back to regular SharedPreferences. Sensitive data will NOT be encrypted!",
+            )
             // Fallback to regular SharedPreferences if encryption fails
             // Use a different name to avoid mixing encrypted and unencrypted data
             context.getSharedPreferences("phone_manager_secure_fallback", Context.MODE_PRIVATE)
@@ -57,9 +58,7 @@ class SecureStorage @Inject constructor(
     /**
      * Get API key for backend authentication
      */
-    fun getApiKey(): String? {
-        return encryptedPrefs.getString(KEY_API_KEY, null)
-    }
+    fun getApiKey(): String? = encryptedPrefs.getString(KEY_API_KEY, null)
 
     /**
      * Store API key securely
@@ -74,9 +73,7 @@ class SecureStorage @Inject constructor(
     /**
      * Get API base URL
      */
-    fun getApiBaseUrl(): String? {
-        return encryptedPrefs.getString(KEY_API_BASE_URL, null)
-    }
+    fun getApiBaseUrl(): String? = encryptedPrefs.getString(KEY_API_BASE_URL, null)
 
     /**
      * Store API base URL

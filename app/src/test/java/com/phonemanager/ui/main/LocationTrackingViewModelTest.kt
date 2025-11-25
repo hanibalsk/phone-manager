@@ -214,7 +214,7 @@ class LocationTrackingViewModelTest {
     fun `permission state updated from PermissionManager`() = runTest {
         val permissionFlow = flowOf(
             PermissionState.Checking,
-            PermissionState.AllGranted
+            PermissionState.AllGranted,
         )
         every { permissionManager.observePermissionState() } returns permissionFlow
 
@@ -232,6 +232,6 @@ class LocationTrackingViewModelTest {
         serviceController = serviceController,
         permissionManager = permissionManager,
         locationRepository = locationRepository,
-        analytics = analytics
+        analytics = analytics,
     )
 }

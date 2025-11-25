@@ -39,11 +39,7 @@ import java.time.Duration
  * Story 1.3: ServiceStatusCard - Displays service health and status
  */
 @Composable
-fun ServiceStatusCard(
-    serviceState: EnhancedServiceState,
-    modifier: Modifier = Modifier,
-    onCardClick: () -> Unit = {}
-) {
+fun ServiceStatusCard(serviceState: EnhancedServiceState, modifier: Modifier = Modifier, onCardClick: () -> Unit = {}) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -55,20 +51,20 @@ fun ServiceStatusCard(
                 ServiceStatus.GPS_ACQUIRING -> MaterialTheme.colorScheme.tertiaryContainer
                 ServiceStatus.ERROR -> MaterialTheme.colorScheme.errorContainer
                 else -> MaterialTheme.colorScheme.surfaceVariant
-            }
-        )
+            },
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     // Status indicator dot
                     Box(
@@ -82,8 +78,8 @@ fun ServiceStatusCard(
                                     HealthStatus.NO_GPS_SIGNAL -> Color(0xFFFF9800)
                                     HealthStatus.ERROR -> Color.Red
                                 },
-                                shape = CircleShape
-                            )
+                                shape = CircleShape,
+                            ),
                     )
 
                     Text(
@@ -96,7 +92,7 @@ fun ServiceStatusCard(
                             ServiceStatus.ERROR -> "Service Error"
                         },
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
 
@@ -114,7 +110,7 @@ fun ServiceStatusCard(
                         else -> "Ready to start tracking"
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
@@ -132,7 +128,7 @@ fun ServiceStatusCard(
                     HealthStatus.ERROR -> MaterialTheme.colorScheme.error
                     else -> MaterialTheme.colorScheme.onSurfaceVariant
                 },
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(32.dp),
             )
         }
     }
@@ -144,7 +140,7 @@ fun ServiceStatusCardPreview() {
     PhoneManagerTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             ServiceStatusCard(
                 serviceState = EnhancedServiceState(
@@ -153,8 +149,8 @@ fun ServiceStatusCardPreview() {
                     lastUpdate = java.time.Instant.now(),
                     locationCount = 42,
                     currentInterval = Duration.ofMinutes(5),
-                    healthStatus = HealthStatus.HEALTHY
-                )
+                    healthStatus = HealthStatus.HEALTHY,
+                ),
             )
 
             ServiceStatusCard(
@@ -164,8 +160,8 @@ fun ServiceStatusCardPreview() {
                     lastUpdate = null,
                     locationCount = 0,
                     currentInterval = Duration.ofMinutes(5),
-                    healthStatus = HealthStatus.GPS_ACQUIRING
-                )
+                    healthStatus = HealthStatus.GPS_ACQUIRING,
+                ),
             )
 
             ServiceStatusCard(
@@ -176,8 +172,8 @@ fun ServiceStatusCardPreview() {
                     locationCount = 0,
                     currentInterval = Duration.ofMinutes(5),
                     healthStatus = HealthStatus.ERROR,
-                    errorMessage = "GPS signal lost"
-                )
+                    errorMessage = "GPS signal lost",
+                ),
             )
         }
     }

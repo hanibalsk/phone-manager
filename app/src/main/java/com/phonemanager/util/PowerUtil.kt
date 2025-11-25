@@ -23,9 +23,7 @@ import javax.inject.Singleton
  * - Checking if exact alarms can be scheduled (Android 12+)
  */
 @Singleton
-class PowerUtil @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class PowerUtil @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val powerManager: PowerManager? by lazy {
         context.getSystemService()
@@ -41,13 +39,11 @@ class PowerUtil @Inject constructor(
      * Battery optimization can prevent background services from running.
      * For reliable location tracking, the app should request exemption.
      */
-    fun isIgnoringBatteryOptimizations(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            powerManager?.isIgnoringBatteryOptimizations(context.packageName) ?: false
-        } else {
-            // Battery optimization doesn't exist before Android M
-            true
-        }
+    fun isIgnoringBatteryOptimizations(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        powerManager?.isIgnoringBatteryOptimizations(context.packageName) ?: false
+    } else {
+        // Battery optimization doesn't exist before Android M
+        true
     }
 
     /**
@@ -55,12 +51,10 @@ class PowerUtil @Inject constructor(
      *
      * Doze mode restricts app activity to save battery.
      */
-    fun isDeviceIdleMode(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            powerManager?.isDeviceIdleMode == true
-        } else {
-            false
-        }
+    fun isDeviceIdleMode(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        powerManager?.isDeviceIdleMode == true
+    } else {
+        false
     }
 
     /**
@@ -68,13 +62,11 @@ class PowerUtil @Inject constructor(
      *
      * Exact alarms can be used to wake up the device for critical tasks.
      */
-    fun canScheduleExactAlarms(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            alarmManager?.canScheduleExactAlarms() ?: false
-        } else {
-            // Exact alarms don't require permission before Android 12
-            true
-        }
+    fun canScheduleExactAlarms(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        alarmManager?.canScheduleExactAlarms() ?: false
+    } else {
+        // Exact alarms don't require permission before Android 12
+        true
     }
 
     /**
@@ -83,15 +75,13 @@ class PowerUtil @Inject constructor(
      * This opens the system settings page where the user can disable
      * battery optimization for this app.
      */
-    fun createBatteryOptimizationIntent(): Intent {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                data = Uri.parse("package:${context.packageName}")
-            }
-        } else {
-            // Return settings intent as fallback
-            Intent(Settings.ACTION_SETTINGS)
+    fun createBatteryOptimizationIntent(): Intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+        Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+            data = Uri.parse("package:${context.packageName}")
         }
+    } else {
+        // Return settings intent as fallback
+        Intent(Settings.ACTION_SETTINGS)
     }
 
     /**
@@ -100,15 +90,13 @@ class PowerUtil @Inject constructor(
      * This opens the system settings page where the user can grant
      * exact alarm permission.
      */
-    fun createExactAlarmPermissionIntent(): Intent {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-                data = Uri.parse("package:${context.packageName}")
-            }
-        } else {
-            // Return settings intent as fallback
-            Intent(Settings.ACTION_SETTINGS)
+    fun createExactAlarmPermissionIntent(): Intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
+            data = Uri.parse("package:${context.packageName}")
         }
+    } else {
+        // Return settings intent as fallback
+        Intent(Settings.ACTION_SETTINGS)
     }
 
     /**
@@ -116,21 +104,17 @@ class PowerUtil @Inject constructor(
      *
      * Power save mode can affect background processing.
      */
-    fun isPowerSaveMode(): Boolean {
-        return powerManager?.isPowerSaveMode == true
-    }
+    fun isPowerSaveMode(): Boolean = powerManager?.isPowerSaveMode == true
 
     /**
      * Get comprehensive power status information
      */
-    fun getPowerStatus(): PowerStatus {
-        return PowerStatus(
-            isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations(),
-            isDeviceIdleMode = isDeviceIdleMode(),
-            canScheduleExactAlarms = canScheduleExactAlarms(),
-            isPowerSaveMode = isPowerSaveMode()
-        )
-    }
+    fun getPowerStatus(): PowerStatus = PowerStatus(
+        isIgnoringBatteryOptimizations = isIgnoringBatteryOptimizations(),
+        isDeviceIdleMode = isDeviceIdleMode(),
+        canScheduleExactAlarms = canScheduleExactAlarms(),
+        isPowerSaveMode = isPowerSaveMode(),
+    )
 
     /**
      * Log power status for debugging
@@ -144,7 +128,7 @@ class PowerUtil @Inject constructor(
             - Device in Doze mode: ${status.isDeviceIdleMode}
             - Can schedule exact alarms: ${status.canScheduleExactAlarms}
             - Power save mode: ${status.isPowerSaveMode}
-            """.trimIndent()
+            """.trimIndent(),
         )
     }
 }
@@ -156,5 +140,5 @@ data class PowerStatus(
     val isIgnoringBatteryOptimizations: Boolean,
     val isDeviceIdleMode: Boolean,
     val canScheduleExactAlarms: Boolean,
-    val isPowerSaveMode: Boolean
+    val isPowerSaveMode: Boolean,
 )

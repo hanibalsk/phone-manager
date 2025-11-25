@@ -1,14 +1,11 @@
 package com.phonemanager.service
 
 import android.app.ActivityManager
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import com.phonemanager.data.preferences.PreferencesRepository
 import com.phonemanager.data.repository.LocationRepository
 import io.mockk.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -137,7 +134,7 @@ class LocationServiceControllerTest {
         val state = ServiceState(
             isRunning = true,
             lastUpdate = java.time.Instant.now(),
-            locationCount = 5
+            locationCount = 5,
         )
 
         // Then

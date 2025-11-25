@@ -29,7 +29,7 @@ import kotlin.random.Random
 class QueueManager @Inject constructor(
     private val locationDao: LocationDao,
     private val locationQueueDao: LocationQueueDao,
-    private val networkManager: NetworkManager
+    private val networkManager: NetworkManager,
 ) {
 
     companion object {
@@ -49,7 +49,7 @@ class QueueManager @Inject constructor(
     suspend fun enqueueLocation(locationId: Long) {
         val queueItem = LocationQueueEntity(
             locationId = locationId,
-            status = QueueStatus.PENDING
+            status = QueueStatus.PENDING,
         )
 
         locationQueueDao.insert(queueItem)
@@ -124,8 +124,8 @@ class QueueManager @Inject constructor(
             locationQueueDao.update(
                 queueItem.copy(
                     status = QueueStatus.UPLOADING,
-                    lastAttemptTime = System.currentTimeMillis()
-                )
+                    lastAttemptTime = System.currentTimeMillis(),
+                ),
             )
 
             // Get location entity
@@ -135,8 +135,8 @@ class QueueManager @Inject constructor(
                 locationQueueDao.update(
                     queueItem.copy(
                         status = QueueStatus.FAILED,
-                        errorMessage = "Location not found in database"
-                    )
+                        errorMessage = "Location not found in database",
+                    ),
                 )
                 return false
             }
@@ -149,8 +149,8 @@ class QueueManager @Inject constructor(
                 locationQueueDao.update(
                     queueItem.copy(
                         status = QueueStatus.UPLOADED,
-                        lastAttemptTime = System.currentTimeMillis()
-                    )
+                        lastAttemptTime = System.currentTimeMillis(),
+                    ),
                 )
                 return true
             }.onFailure { error ->
@@ -180,8 +180,8 @@ class QueueManager @Inject constructor(
                     status = QueueStatus.FAILED,
                     retryCount = newRetryCount,
                     lastAttemptTime = System.currentTimeMillis(),
-                    errorMessage = errorMessage ?: "Upload failed after max retries"
-                )
+                    errorMessage = errorMessage ?: "Upload failed after max retries",
+                ),
             )
         } else {
             // Calculate next retry time with exponential backoff + jitter
@@ -196,8 +196,8 @@ class QueueManager @Inject constructor(
                     retryCount = newRetryCount,
                     lastAttemptTime = System.currentTimeMillis(),
                     nextRetryTime = nextRetryTime,
-                    errorMessage = errorMessage
-                )
+                    errorMessage = errorMessage,
+                ),
             )
         }
     }
@@ -234,16 +234,12 @@ class QueueManager @Inject constructor(
     /**
      * Observe pending count
      */
-    fun observePendingCount(): Flow<Int> {
-        return locationQueueDao.observePendingCount()
-    }
+    fun observePendingCount(): Flow<Int> = locationQueueDao.observePendingCount()
 
     /**
      * Observe failed count
      */
-    fun observeFailedCount(): Flow<Int> {
-        return locationQueueDao.observeFailedCount()
-    }
+    fun observeFailedCount(): Flow<Int> = locationQueueDao.observeFailedCount()
 
     /**
      * Get queue statistics

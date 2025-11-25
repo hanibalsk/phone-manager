@@ -35,7 +35,7 @@ fun PermissionStatusCard(
     permissionState: PermissionState,
     onGrantPermissions: () -> Unit,
     onOpenSettings: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -48,20 +48,20 @@ fun PermissionStatusCard(
                 is PermissionState.NotificationDenied -> MaterialTheme.colorScheme.tertiaryContainer
                 is PermissionState.PermanentlyDenied -> MaterialTheme.colorScheme.errorContainer
                 else -> MaterialTheme.colorScheme.surfaceVariant
-            }
-        )
+            },
+        ),
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Icon(
                         imageVector = when (permissionState) {
@@ -80,7 +80,7 @@ fun PermissionStatusCard(
                             is PermissionState.NotificationDenied -> MaterialTheme.colorScheme.tertiary
                             is PermissionState.PermanentlyDenied -> MaterialTheme.colorScheme.error
                             else -> MaterialTheme.colorScheme.onSurfaceVariant
-                        }
+                        },
                     )
 
                     Text(
@@ -92,7 +92,7 @@ fun PermissionStatusCard(
                             is PermissionState.PermanentlyDenied -> "Permission Blocked"
                             else -> "Checking Permissions..."
                         },
-                        style = MaterialTheme.typography.titleSmall
+                        style = MaterialTheme.typography.titleSmall,
                     )
                 }
 
@@ -113,25 +113,26 @@ fun PermissionStatusCard(
                         else -> "Loading..."
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
 
             if (permissionState !is PermissionState.AllGranted &&
-                permissionState !is PermissionState.Checking) {
+                permissionState !is PermissionState.Checking
+            ) {
                 Button(
                     onClick = if (permissionState is PermissionState.PermanentlyDenied) {
                         onOpenSettings
                     } else {
                         onGrantPermissions
-                    }
+                    },
                 ) {
                     Text(
                         text = if (permissionState is PermissionState.PermanentlyDenied) {
                             "Open Settings"
                         } else {
                             "Grant"
-                        }
+                        },
                     )
                 }
             }
@@ -145,24 +146,24 @@ fun PermissionStatusCardPreview() {
     PhoneManagerTheme {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             PermissionStatusCard(
                 permissionState = PermissionState.AllGranted,
                 onGrantPermissions = {},
-                onOpenSettings = {}
+                onOpenSettings = {},
             )
 
             PermissionStatusCard(
                 permissionState = PermissionState.LocationDenied,
                 onGrantPermissions = {},
-                onOpenSettings = {}
+                onOpenSettings = {},
             )
 
             PermissionStatusCard(
                 permissionState = PermissionState.BackgroundDenied(foregroundGranted = true),
                 onGrantPermissions = {},
-                onOpenSettings = {}
+                onOpenSettings = {},
             )
         }
     }

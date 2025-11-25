@@ -18,9 +18,7 @@ import javax.inject.Singleton
  * Schedules periodic work to process the upload queue
  */
 @Singleton
-class WorkManagerScheduler @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class WorkManagerScheduler @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 
@@ -35,7 +33,8 @@ class WorkManagerScheduler @Inject constructor(
             .build()
 
         val queueWork = PeriodicWorkRequestBuilder<QueueProcessingWorker>(
-            intervalMinutes, TimeUnit.MINUTES
+            intervalMinutes,
+            TimeUnit.MINUTES,
         )
             .setConstraints(constraints)
             .build()
@@ -43,7 +42,7 @@ class WorkManagerScheduler @Inject constructor(
         workManager.enqueueUniquePeriodicWork(
             QueueProcessingWorker.WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
-            queueWork
+            queueWork,
         )
 
         Timber.i("Queue processing scheduled every $intervalMinutes minutes")

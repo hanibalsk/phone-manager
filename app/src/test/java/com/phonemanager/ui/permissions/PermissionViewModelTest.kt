@@ -1,13 +1,11 @@
 package com.phonemanager.ui.permissions
 
-import android.content.Context
 import app.cash.turbine.test
 import com.phonemanager.analytics.Analytics
 import com.phonemanager.permission.PermissionManager
 import com.phonemanager.permission.PermissionState
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkStatic
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -258,6 +256,6 @@ class PermissionViewModelTest {
 
     private fun createViewModel() = PermissionViewModel(
         permissionManager = permissionManager,
-        analytics = analytics
+        analytics = analytics,
     )
 }

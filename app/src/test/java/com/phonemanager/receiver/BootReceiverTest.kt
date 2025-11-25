@@ -54,7 +54,7 @@ class BootReceiverTest {
             isRunning = true,
             healthStatus = HealthStatus.HEALTHY,
             locationCount = 5,
-            lastLocationUpdate = System.currentTimeMillis()
+            lastLocationUpdate = System.currentTimeMillis(),
         )
 
         // Then - model should indicate service should be restored
@@ -68,7 +68,7 @@ class BootReceiverTest {
         // Given
         val serviceHealth = ServiceHealth(
             isRunning = false,
-            healthStatus = HealthStatus.HEALTHY
+            healthStatus = HealthStatus.HEALTHY,
         )
 
         // Then
@@ -95,7 +95,7 @@ class BootReceiverTest {
         // Given
         val serviceHealth = ServiceHealth(
             isRunning = true,
-            healthStatus = HealthStatus.HEALTHY
+            healthStatus = HealthStatus.HEALTHY,
         )
         coEvery { locationRepository.getServiceHealth() } returns flowOf(serviceHealth)
 

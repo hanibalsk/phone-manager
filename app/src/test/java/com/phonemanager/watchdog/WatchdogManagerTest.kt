@@ -55,7 +55,7 @@ class WatchdogManagerTest {
             workManager.enqueueUniquePeriodicWork(
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -74,7 +74,7 @@ class WatchdogManagerTest {
             workManager.enqueueUniquePeriodicWork(
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }
@@ -105,7 +105,7 @@ class WatchdogManagerTest {
             workManager.enqueueUniquePeriodicWork(
                 any(),
                 any(),
-                any()
+                any(),
             )
         }
     }

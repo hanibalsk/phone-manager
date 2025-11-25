@@ -9,13 +9,13 @@ data class ServiceHealth(
     val lastLocationUpdate: Long? = null,
     val locationCount: Int = 0,
     val healthStatus: HealthStatus = HealthStatus.HEALTHY,
-    val errorMessage: String? = null
+    val errorMessage: String? = null,
 )
 
 enum class HealthStatus {
-    HEALTHY,           // Service running, locations being collected
-    GPS_UNAVAILABLE,   // Location services disabled
-    GPS_ACQUIRING,     // Service running but no GPS fix yet
-    NO_GPS_SIGNAL,     // Service running but no GPS fix
-    ERROR              // Service error state
+    HEALTHY, // Service running, locations being collected
+    GPS_UNAVAILABLE, // Location services disabled
+    GPS_ACQUIRING, // Service running but no GPS fix yet
+    NO_GPS_SIGNAL, // Service running but no GPS fix
+    ERROR, // Service error state
 }

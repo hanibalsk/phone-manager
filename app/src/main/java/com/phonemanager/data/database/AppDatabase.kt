@@ -13,10 +13,10 @@ import com.phonemanager.data.model.LocationQueueEntity
 @Database(
     entities = [
         LocationEntity::class,
-        LocationQueueEntity::class
+        LocationQueueEntity::class,
     ],
     version = 2,
-    exportSchema = false
+    exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
     abstract fun locationDao(): LocationDao

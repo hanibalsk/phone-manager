@@ -27,49 +27,45 @@ interface LocationApiService {
 @Singleton
 class LocationApiServiceImpl @Inject constructor(
     private val httpClient: HttpClient,
-    private val apiConfig: ApiConfiguration
+    private val apiConfig: ApiConfiguration,
 ) : LocationApiService {
 
     /**
      * Upload single location to backend
      */
-    override suspend fun uploadLocation(location: LocationPayload): Result<LocationUploadResponse> {
-        return try {
-            Timber.d("Uploading single location: lat=${location.latitude}, lon=${location.longitude}")
+    override suspend fun uploadLocation(location: LocationPayload): Result<LocationUploadResponse> = try {
+        Timber.d("Uploading single location: lat=${location.latitude}, lon=${location.longitude}")
 
-            val response: LocationUploadResponse = httpClient.post(apiConfig.uploadEndpoint) {
-                contentType(ContentType.Application.Json)
-                header("X-API-Key", apiConfig.apiKey)
-                setBody(location)
-            }.body()
+        val response: LocationUploadResponse = httpClient.post(apiConfig.uploadEndpoint) {
+            contentType(ContentType.Application.Json)
+            header("X-API-Key", apiConfig.apiKey)
+            setBody(location)
+        }.body()
 
-            Timber.i("Location uploaded successfully: ${response.message}")
-            Result.success(response)
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to upload location")
-            Result.failure(e)
-        }
+        Timber.i("Location uploaded successfully: ${response.message}")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to upload location")
+        Result.failure(e)
     }
 
     /**
      * Upload batch of locations to backend
      */
-    override suspend fun uploadLocations(batch: LocationBatchPayload): Result<LocationUploadResponse> {
-        return try {
-            Timber.d("Uploading location batch: ${batch.locations.size} locations")
+    override suspend fun uploadLocations(batch: LocationBatchPayload): Result<LocationUploadResponse> = try {
+        Timber.d("Uploading location batch: ${batch.locations.size} locations")
 
-            val response: LocationUploadResponse = httpClient.post(apiConfig.batchUploadEndpoint) {
-                contentType(ContentType.Application.Json)
-                header("X-API-Key", apiConfig.apiKey)
-                setBody(batch)
-            }.body()
+        val response: LocationUploadResponse = httpClient.post(apiConfig.batchUploadEndpoint) {
+            contentType(ContentType.Application.Json)
+            header("X-API-Key", apiConfig.apiKey)
+            setBody(batch)
+        }.body()
 
-            Timber.i("Location batch uploaded successfully: processed=${response.processedCount}")
-            Result.success(response)
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to upload location batch")
-            Result.failure(e)
-        }
+        Timber.i("Location batch uploaded successfully: processed=${response.processedCount}")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to upload location batch")
+        Result.failure(e)
     }
 }
 
@@ -82,5 +78,5 @@ data class ApiConfiguration(
     val uploadEndpoint: String = "$baseUrl/api/locations",
     val batchUploadEndpoint: String = "$baseUrl/api/locations/batch",
     val connectionTimeout: Long = 30_000L,
-    val requestTimeout: Long = 30_000L
+    val requestTimeout: Long = 30_000L,
 )

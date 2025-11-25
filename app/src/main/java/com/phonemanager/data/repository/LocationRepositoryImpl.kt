@@ -28,7 +28,7 @@ import javax.inject.Singleton
 @Singleton
 class LocationRepositoryImpl @Inject constructor(
     private val locationDao: LocationDao,
-    private val preferencesRepository: PreferencesRepository
+    private val preferencesRepository: PreferencesRepository,
 ) : LocationRepository {
 
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -37,8 +37,8 @@ class LocationRepositoryImpl @Inject constructor(
     private val _serviceHealth = MutableStateFlow(
         ServiceHealth(
             isRunning = false,
-            healthStatus = HealthStatus.HEALTHY
-        )
+            healthStatus = HealthStatus.HEALTHY,
+        ),
     )
 
     init {
@@ -46,20 +46,18 @@ class LocationRepositoryImpl @Inject constructor(
         repositoryScope.launch {
             combine(
                 preferencesRepository.serviceRunningState,
-                preferencesRepository.lastLocationUpdateTime
+                preferencesRepository.lastLocationUpdateTime,
             ) { isRunning, lastUpdate ->
                 Timber.d("Restoring service health from persistence: isRunning=$isRunning, lastUpdate=$lastUpdate")
                 _serviceHealth.value = _serviceHealth.value.copy(
                     isRunning = isRunning,
-                    lastLocationUpdate = lastUpdate
+                    lastLocationUpdate = lastUpdate,
                 )
             }.collect { /* Keep collecting to stay in sync */ }
         }
     }
 
-    override fun observeLocationCount(): Flow<Int> {
-        return locationDao.observeLocationCount()
-    }
+    override fun observeLocationCount(): Flow<Int> = locationDao.observeLocationCount()
 
     override fun observeTodayLocationCount(): Flow<Int> {
         val startOfDay = LocalDate.now()
@@ -69,30 +67,21 @@ class LocationRepositoryImpl @Inject constructor(
         return locationDao.observeTodayLocationCount(startOfDay)
     }
 
-    override fun observeLastLocation(): Flow<LocationEntity?> {
-        return locationDao.observeLastLocation()
-    }
+    override fun observeLastLocation(): Flow<LocationEntity?> = locationDao.observeLastLocation()
 
-    override fun observeAverageAccuracy(): Flow<Float?> {
-        return locationDao.observeAverageAccuracy()
-    }
+    override fun observeAverageAccuracy(): Flow<Float?> = locationDao.observeAverageAccuracy()
 
-    override fun observeServiceHealth(): Flow<ServiceHealth> {
-        return _serviceHealth.asStateFlow()
-    }
+    override fun observeServiceHealth(): Flow<ServiceHealth> = _serviceHealth.asStateFlow()
 
-    override fun observeAllLocations(): Flow<List<LocationEntity>> {
-        return locationDao.observeAllLocations()
-    }
+    override fun observeAllLocations(): Flow<List<LocationEntity>> = locationDao.observeAllLocations()
 
     override suspend fun insertLocation(location: LocationEntity): Long {
         Timber.d("Inserting location: lat=${location.latitude}, lon=${location.longitude}")
         return locationDao.insert(location)
     }
 
-    override suspend fun deleteLocationsBefore(beforeMillis: Long): Int {
-        return locationDao.deleteLocationsBefore(beforeMillis)
-    }
+    override suspend fun deleteLocationsBefore(beforeMillis: Long): Int =
+        locationDao.deleteLocationsBefore(beforeMillis)
 
     override suspend fun deleteAllLocations() {
         locationDao.deleteAll()
@@ -129,15 +118,11 @@ class LocationRepositoryImpl @Inject constructor(
      * Get service health as a flow (one-shot)
      * Used by ServiceHealthCheckWorker and BootReceiver
      */
-    override fun getServiceHealth(): Flow<ServiceHealth> {
-        return _serviceHealth.asStateFlow()
-    }
+    override fun getServiceHealth(): Flow<ServiceHealth> = _serviceHealth.asStateFlow()
 
     /**
      * Get the latest location as a flow (one-shot)
      * Used by ServiceHealthCheckWorker to check for stale data
      */
-    override fun getLatestLocation(): Flow<LocationEntity?> {
-        return locationDao.observeLastLocation()
-    }
+    override fun getLatestLocation(): Flow<LocationEntity?> = locationDao.observeLastLocation()
 }

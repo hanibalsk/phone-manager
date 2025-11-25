@@ -6,10 +6,8 @@ import android.content.IntentFilter
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.BatteryManager
-import android.os.Build
 import com.phonemanager.data.model.LocationEntity
 import com.phonemanager.network.models.LocationBatchPayload
-import com.phonemanager.network.models.LocationPayload
 import com.phonemanager.network.models.LocationUploadResponse
 import com.phonemanager.network.models.toPayload
 import com.phonemanager.security.SecureStorage
@@ -31,7 +29,7 @@ import javax.inject.Singleton
 class NetworkManager @Inject constructor(
     @ApplicationContext private val context: Context,
     private val locationApiService: LocationApiService,
-    private val secureStorage: SecureStorage
+    private val secureStorage: SecureStorage,
 ) {
 
     private val connectivityManager: ConnectivityManager by lazy {
@@ -46,7 +44,7 @@ class NetworkManager @Inject constructor(
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
     /**
@@ -72,7 +70,8 @@ class NetworkManager @Inject constructor(
         // Prefer BatteryManager API (available since API 21)
         return try {
             val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
-            batteryManager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: getBatteryLevelFromStickyBroadcast()
+            batteryManager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+                ?: getBatteryLevelFromStickyBroadcast()
         } catch (e: Exception) {
             Timber.w(e, "Failed to get battery level from BatteryManager, falling back to sticky broadcast")
             getBatteryLevelFromStickyBroadcast()
@@ -84,21 +83,19 @@ class NetworkManager @Inject constructor(
      * Note: registerReceiver with null receiver just retrieves the sticky intent, doesn't register a receiver
      */
     @Suppress("DEPRECATION")
-    private fun getBatteryLevelFromStickyBroadcast(): Int {
-        return try {
-            val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
-            val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
+    private fun getBatteryLevelFromStickyBroadcast(): Int = try {
+        val batteryIntent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val level = batteryIntent?.getIntExtra(BatteryManager.EXTRA_LEVEL, -1) ?: -1
+        val scale = batteryIntent?.getIntExtra(BatteryManager.EXTRA_SCALE, -1) ?: -1
 
-            if (level >= 0 && scale > 0) {
-                (level * 100 / scale)
-            } else {
-                -1
-            }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to get battery level from sticky broadcast")
+        if (level >= 0 && scale > 0) {
+            (level * 100 / scale)
+        } else {
             -1
         }
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to get battery level from sticky broadcast")
+        -1
     }
 
     /**
@@ -112,7 +109,7 @@ class NetworkManager @Inject constructor(
         val deviceId = secureStorage.getDeviceId()
         val payload = location.toPayload(deviceId).copy(
             batteryLevel = getBatteryLevel(),
-            networkType = getNetworkType()
+            networkType = getNetworkType(),
         )
 
         return locationApiService.uploadLocation(payload)
@@ -137,13 +134,13 @@ class NetworkManager @Inject constructor(
         val payloads = locations.map { location ->
             location.toPayload(deviceId).copy(
                 batteryLevel = batteryLevel,
-                networkType = networkType
+                networkType = networkType,
             )
         }
 
         val batch = LocationBatchPayload(
             deviceId = deviceId,
-            locations = payloads
+            locations = payloads,
         )
 
         Timber.d("Uploading batch of ${locations.size} locations")

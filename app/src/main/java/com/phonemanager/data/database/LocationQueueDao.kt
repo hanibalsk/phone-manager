@@ -31,13 +31,15 @@ interface LocationQueueDao {
     /**
      * Get all pending items (including retry pending)
      */
-    @Query("""
+    @Query(
+        """
         SELECT * FROM location_queue
         WHERE status IN ('PENDING', 'RETRY_PENDING')
         AND (nextRetryTime IS NULL OR nextRetryTime <= :currentTime)
         ORDER BY queuedAt ASC
         LIMIT :limit
-    """)
+    """,
+    )
     suspend fun getPendingItems(currentTime: Long, limit: Int = 50): List<LocationQueueEntity>
 
     /**
@@ -79,14 +81,17 @@ interface LocationQueueDao {
     /**
      * Reset failed items to retry
      */
-    @Query("UPDATE location_queue SET status = 'RETRY_PENDING', retryCount = 0, nextRetryTime = :retryTime WHERE status = 'FAILED'")
+    @Query(
+        "UPDATE location_queue SET status = 'RETRY_PENDING', retryCount = 0, nextRetryTime = :retryTime WHERE status = 'FAILED'",
+    )
     suspend fun resetFailedItems(retryTime: Long): Int
 
     /**
      * Get queue statistics
      */
     @Transaction
-    @Query("""
+    @Query(
+        """
         SELECT
             COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pending,
             COUNT(CASE WHEN status = 'UPLOADING' THEN 1 END) as uploading,
@@ -94,20 +99,15 @@ interface LocationQueueDao {
             COUNT(CASE WHEN status = 'FAILED' THEN 1 END) as failed,
             COUNT(CASE WHEN status = 'RETRY_PENDING' THEN 1 END) as retryPending
         FROM location_queue
-    """)
+    """,
+    )
     suspend fun getQueueStats(): QueueStats
 }
 
 /**
  * Queue statistics data class
  */
-data class QueueStats(
-    val pending: Int,
-    val uploading: Int,
-    val uploaded: Int,
-    val failed: Int,
-    val retryPending: Int
-) {
+data class QueueStats(val pending: Int, val uploading: Int, val uploaded: Int, val failed: Int, val retryPending: Int) {
     val total: Int get() = pending + uploading + uploaded + failed + retryPending
     val needsUpload: Int get() = pending + retryPending
 }

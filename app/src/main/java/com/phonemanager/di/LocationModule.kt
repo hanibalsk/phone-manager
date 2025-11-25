@@ -20,9 +20,5 @@ object LocationModule {
 
     @Provides
     @Singleton
-    fun provideLocationManager(
-        @ApplicationContext context: Context
-    ): LocationManager {
-        return LocationManager(context)
-    }
+    fun provideLocationManager(@ApplicationContext context: Context): LocationManager = LocationManager(context)
 }

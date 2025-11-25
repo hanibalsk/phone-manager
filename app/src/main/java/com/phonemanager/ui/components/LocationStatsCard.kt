@@ -3,9 +3,7 @@ package com.phonemanager.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -30,42 +28,39 @@ import java.time.format.DateTimeFormatter
  * Story 1.3: LocationStatsCard - Displays location statistics
  */
 @Composable
-fun LocationStatsCard(
-    locationStats: LocationStats,
-    modifier: Modifier = Modifier
-) {
+fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
                 text = "Location Statistics",
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold
+                fontWeight = FontWeight.SemiBold,
             )
 
             // Location count
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column {
                     Text(
                         text = "Today",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = locationStats.todayCount.toString(),
                         style = MaterialTheme.typography.headlineSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
 
@@ -73,12 +68,12 @@ fun LocationStatsCard(
                     Text(
                         text = "All Time",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = locationStats.totalCount.toString(),
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
 
@@ -86,12 +81,12 @@ fun LocationStatsCard(
                     Text(
                         text = "Interval",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = "${locationStats.trackingInterval.toMinutes()} min",
                         style = MaterialTheme.typography.headlineSmall,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -102,19 +97,19 @@ fun LocationStatsCard(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     Text(
                         text = "Last Update",
                         style = MaterialTheme.typography.labelSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
                         text = locationStats.lastLocation?.let {
                             formatTimestamp(Instant.ofEpochMilli(it.timestamp))
                         } ?: "No locations yet",
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
 
@@ -123,7 +118,7 @@ fun LocationStatsCard(
                         Text(
                             text = "Avg Accuracy",
                             style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Text(
                             text = "±${accuracy.toInt()}m",
@@ -132,7 +127,7 @@ fun LocationStatsCard(
                                 accuracy <= 10f -> Color.Green
                                 accuracy <= 50f -> Color(0xFFFF9800)
                                 else -> Color.Red
-                            }
+                            },
                         )
                     }
                 }
@@ -168,9 +163,9 @@ fun LocationStatsCardPreview() {
                 todayCount = 42,
                 lastLocation = null,
                 averageAccuracy = 15.3f,
-                trackingInterval = Duration.ofMinutes(5)
+                trackingInterval = Duration.ofMinutes(5),
             ),
-            modifier = Modifier.padding(16.dp)
+            modifier = Modifier.padding(16.dp),
         )
     }
 }

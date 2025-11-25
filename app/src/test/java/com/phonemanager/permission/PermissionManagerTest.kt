@@ -13,7 +13,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertTrue
@@ -227,7 +226,7 @@ class PermissionManagerTest {
         every {
             androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale(
                 activity,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
             )
         } returns true
 
@@ -241,7 +240,7 @@ class PermissionManagerTest {
         verify {
             androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale(
                 activity,
-                Manifest.permission.ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION,
             )
         }
     }

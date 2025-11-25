@@ -5,6 +5,7 @@ plugins {
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.spotless)
 }
 
 android {
@@ -31,14 +32,24 @@ android {
     buildTypes {
         debug {
             // Debug builds can use test endpoints
-            buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL_DEBUG") ?: project.findProperty("API_BASE_URL") ?: "https://api-dev.phonemanager.example.com"}\"")
-            buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY_DEBUG") ?: project.findProperty("API_KEY") ?: ""}\"")
+            buildConfigField(
+                "String",
+                "API_BASE_URL",
+                "\"${project.findProperty(
+                    "API_BASE_URL_DEBUG",
+                ) ?: project.findProperty("API_BASE_URL") ?: "https://api-dev.phonemanager.example.com"}\"",
+            )
+            buildConfigField(
+                "String",
+                "API_KEY",
+                "\"${project.findProperty("API_KEY_DEBUG") ?: project.findProperty("API_KEY") ?: ""}\"",
+            )
         }
         release {
             isMinifyEnabled = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             // Release builds require proper configuration
             buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL") ?: ""}\"")

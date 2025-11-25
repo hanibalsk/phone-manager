@@ -51,10 +51,13 @@ interface Analytics {
      * @param reason Denial reason (user_denied, permanently_denied)
      */
     fun logPermissionDenied(permissionType: String, reason: String) {
-        logEvent("permission_denied", mapOf(
-            "permission_type" to permissionType,
-            "denial_reason" to reason
-        ))
+        logEvent(
+            "permission_denied",
+            mapOf(
+                "permission_type" to permissionType,
+                "denial_reason" to reason,
+            ),
+        )
     }
 
     /**

@@ -29,7 +29,7 @@ fun PermissionRationaleDialog(
     type: PermissionType,
     onAccept: () -> Unit,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -41,7 +41,7 @@ fun PermissionRationaleDialog(
                     PermissionType.NOTIFICATION -> Icons.Default.Notifications
                 },
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary
+                tint = MaterialTheme.colorScheme.primary,
             )
         },
         title = {
@@ -50,7 +50,7 @@ fun PermissionRationaleDialog(
                     PermissionType.LOCATION -> "Location Permission Required"
                     PermissionType.BACKGROUND -> "Background Location Access"
                     PermissionType.NOTIFICATION -> "Notification Permission"
-                }
+                },
             )
         },
         text = {
@@ -61,22 +61,22 @@ fun PermissionRationaleDialog(
                             "Phone Manager needs access to your location to track your device's position."
                         PermissionType.BACKGROUND ->
                             "To continue tracking your location when the app is closed or in the background, " +
-                            "please allow location access \"All the time\" on the next screen."
+                                "please allow location access \"All the time\" on the next screen."
                         PermissionType.NOTIFICATION ->
                             "A persistent notification is required while location tracking is active. " +
-                            "This helps you know when tracking is running and provides quick access to stop it."
+                                "This helps you know when tracking is running and provides quick access to stop it."
                     },
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
 
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
                     text = "Your privacy: Location data is stored on your device and only sent to " +
-                           "endpoints you configure.",
+                        "endpoints you configure.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontStyle = FontStyle.Italic
+                    fontStyle = FontStyle.Italic,
                 )
             }
         },
@@ -90,14 +90,14 @@ fun PermissionRationaleDialog(
                 Text("Not Now")
             }
         },
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
 enum class PermissionType {
     LOCATION,
     BACKGROUND,
-    NOTIFICATION
+    NOTIFICATION,
 }
 
 @Preview(showBackground = true)
@@ -107,7 +107,7 @@ fun PermissionRationaleDialogPreview() {
         PermissionRationaleDialog(
             type = PermissionType.LOCATION,
             onAccept = {},
-            onDismiss = {}
+            onDismiss = {},
         )
     }
 }

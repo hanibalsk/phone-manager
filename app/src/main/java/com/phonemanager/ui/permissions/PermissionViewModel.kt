@@ -27,7 +27,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PermissionViewModel @Inject constructor(
     private val permissionManager: PermissionManager,
-    private val analytics: Analytics
+    private val analytics: Analytics,
 ) : ViewModel() {
 
     private val _permissionState = MutableStateFlow<PermissionState>(PermissionState.Checking)
@@ -93,7 +93,7 @@ class PermissionViewModel @Inject constructor(
                 // Permanently denied
                 analytics.logPermissionDenied("location", "permanently_denied")
                 _permissionState.value = PermissionState.PermanentlyDenied(
-                    Manifest.permission.ACCESS_FINE_LOCATION
+                    Manifest.permission.ACCESS_FINE_LOCATION,
                 )
                 _showSettingsDialog.value = true
             } else {

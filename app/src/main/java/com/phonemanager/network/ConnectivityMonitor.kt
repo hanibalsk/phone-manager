@@ -19,9 +19,7 @@ import javax.inject.Singleton
  * Provides real-time network state as a Flow
  */
 @Singleton
-class ConnectivityMonitor @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class ConnectivityMonitor @Inject constructor(@ApplicationContext private val context: Context) {
 
     private val connectivityManager: ConnectivityManager by lazy {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
@@ -49,15 +47,12 @@ class ConnectivityMonitor @Inject constructor(
                 trySend(availableNetworks.isNotEmpty())
             }
 
-            override fun onCapabilitiesChanged(
-                network: Network,
-                networkCapabilities: NetworkCapabilities
-            ) {
+            override fun onCapabilitiesChanged(network: Network, networkCapabilities: NetworkCapabilities) {
                 val hasInternet = networkCapabilities.hasCapability(
-                    NetworkCapabilities.NET_CAPABILITY_INTERNET
+                    NetworkCapabilities.NET_CAPABILITY_INTERNET,
                 )
                 val isValidated = networkCapabilities.hasCapability(
-                    NetworkCapabilities.NET_CAPABILITY_VALIDATED
+                    NetworkCapabilities.NET_CAPABILITY_VALIDATED,
                 )
 
                 if (hasInternet && isValidated) {
@@ -95,6 +90,6 @@ class ConnectivityMonitor @Inject constructor(
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-                capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 }

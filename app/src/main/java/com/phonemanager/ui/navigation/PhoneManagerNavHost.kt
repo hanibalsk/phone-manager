@@ -17,20 +17,20 @@ fun PhoneManagerNavHost(
     permissionViewModel: PermissionViewModel,
     onRequestLocationPermission: () -> Unit,
     onRequestBackgroundPermission: () -> Unit,
-    onRequestNotificationPermission: () -> Unit
+    onRequestNotificationPermission: () -> Unit,
 ) {
     val navController = rememberNavController()
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Home.route,
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
                 permissionViewModel = permissionViewModel,
                 onRequestLocationPermission = onRequestLocationPermission,
                 onRequestBackgroundPermission = onRequestBackgroundPermission,
-                onRequestNotificationPermission = onRequestNotificationPermission
+                onRequestNotificationPermission = onRequestNotificationPermission,
             )
         }
         // Future: Add Settings screen route
