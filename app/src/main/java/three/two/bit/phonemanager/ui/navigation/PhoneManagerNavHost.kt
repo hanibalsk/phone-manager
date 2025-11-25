@@ -8,12 +8,13 @@ import three.two.bit.phonemanager.ui.group.GroupMembersScreen
 import three.two.bit.phonemanager.ui.home.HomeScreen
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.registration.RegistrationScreen
+import three.two.bit.phonemanager.ui.settings.SettingsScreen
 
 sealed class Screen(val route: String) {
     object Registration : Screen("registration")
     object Home : Screen("home")
     object GroupMembers : Screen("group_members")
-    // Future: Add Settings screen
+    object Settings : Screen("settings")
 }
 
 @Composable
@@ -51,6 +52,9 @@ fun PhoneManagerNavHost(
                 onNavigateToGroupMembers = {
                     navController.navigate(Screen.GroupMembers.route)
                 },
+                onNavigateToSettings = {
+                    navController.navigate(Screen.Settings.route)
+                },
             )
         }
         composable(Screen.GroupMembers.route) {
@@ -58,6 +62,10 @@ fun PhoneManagerNavHost(
                 onNavigateBack = { navController.popBackStack() },
             )
         }
-        // Future: Add Settings screen route
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
     }
 }

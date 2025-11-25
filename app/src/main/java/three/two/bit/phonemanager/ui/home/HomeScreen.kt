@@ -7,9 +7,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +37,7 @@ import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 /**
  * HomeScreen - Main screen with permission management and tracking toggle
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     permissionViewModel: PermissionViewModel,
@@ -37,6 +45,7 @@ fun HomeScreen(
     onRequestBackgroundPermission: () -> Unit,
     onRequestNotificationPermission: () -> Unit,
     onNavigateToGroupMembers: () -> Unit = {},
+    onNavigateToSettings: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -45,65 +54,74 @@ fun HomeScreen(
     val showBackgroundRationale by permissionViewModel.showBackgroundRationale.collectAsState()
     val showNotificationRationale by permissionViewModel.showNotificationRationale.collectAsState()
 
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        // App title
-        Text(
-            text = "Phone Manager",
-            style = MaterialTheme.typography.headlineMedium,
-        )
-
-        Text(
-            text = "Location Tracking",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        // Permission status card
-        PermissionStatusCard(
-            permissionState = permissionState,
-            onGrantPermissions = {
-                permissionViewModel.requestLocationPermission(context as Activity)
-            },
-            onOpenSettings = {
-                permissionViewModel.openAppSettings(context)
-            },
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Location tracking toggle (Story 1.1)
-        LocationTrackingToggle(
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Story 1.3: Service status and location statistics
-        val trackingViewModel: LocationTrackingViewModel = hiltViewModel()
-        val serviceState by trackingViewModel.serviceState.collectAsState()
-        val locationStats by trackingViewModel.locationStats.collectAsState()
-
-        // Service status card (Story 1.3)
-        ServiceStatusCard(
-            serviceState = serviceState,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Location stats card (Story 1.3)
-        LocationStatsCard(
-            locationStats = locationStats,
-            modifier = Modifier.fillMaxWidth(),
-        )
-
-        // Navigate to Group Members screen (Story E1.2)
-        Button(
-            onClick = onNavigateToGroupMembers,
-            modifier = Modifier.fillMaxWidth(),
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Phone Manager") },
+                actions = {
+                    IconButton(onClick = onNavigateToSettings) {
+                        Icon(Icons.Default.Settings, "Settings")
+                    }
+                },
+            )
+        },
+    ) { paddingValues ->
+        Column(
+            modifier =
+            modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text("View Group Members")
+            Text(
+                text = "Location Tracking",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            // Permission status card
+            PermissionStatusCard(
+                permissionState = permissionState,
+                onGrantPermissions = {
+                    permissionViewModel.requestLocationPermission(context as Activity)
+                },
+                onOpenSettings = {
+                    permissionViewModel.openAppSettings(context)
+                },
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // Location tracking toggle (Story 1.1)
+            LocationTrackingToggle(
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // Story 1.3: Service status and location statistics
+            val trackingViewModel: LocationTrackingViewModel = hiltViewModel()
+            val serviceState by trackingViewModel.serviceState.collectAsState()
+            val locationStats by trackingViewModel.locationStats.collectAsState()
+
+            // Service status card (Story 1.3)
+            ServiceStatusCard(
+                serviceState = serviceState,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // Location stats card (Story 1.3)
+            LocationStatsCard(
+                locationStats = locationStats,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // Navigate to Group Members screen (Story E1.2)
+            Button(
+                onClick = onNavigateToGroupMembers,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("View Group Members")
+            }
         }
     }
 

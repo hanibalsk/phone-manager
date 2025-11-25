@@ -1,0 +1,318 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E6</epicId>
+    <storyId>E6.3</storyId>
+    <title>Webhook Integration</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E6.3.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>geofence events to trigger webhooks</iWant>
+    <soThat>I can automate actions in Home Assistant or n8n</soThat>
+    <tasks>
+      <task id="1" acs="E6.3.1">Create Webhook Domain Model</task>
+      <task id="2" acs="E6.3.1">Create Webhook Room Entity</task>
+      <task id="3" acs="E6.3.3">Create Network Models</task>
+      <task id="4" acs="E6.3.5">Create WebhookRepository</task>
+      <task id="5" acs="E6.3.2">Update CreateGeofenceScreen</task>
+      <task id="6" acs="E6.3.5">Create WebhooksScreen UI</task>
+      <task id="7" acs="E6.3.1, E6.3.6">Create CreateWebhookScreen</task>
+      <task id="8" acs="E6.3.5">Create WebhooksViewModel</task>
+      <task id="9" acs="E6.3.7">Update GeofenceEvent to Track Webhook Status</task>
+      <task id="10" acs="E6.3.3, E6.3.4">Document Backend Webhook Dispatch</task>
+      <task id="11" acs="All">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E6.3.1">
+      <title>Webhook Entity</title>
+      <given>the data model is defined</given>
+      <then>Webhook entity should include: id (UUID), ownerDeviceId, name (e.g., "Home Assistant", "n8n Workflow"), targetUrl (HTTPS URL), secret (for HMAC signing), enabled (Boolean), createdAt, updatedAt</then>
+    </ac>
+    <ac id="E6.3.2">
+      <title>Link Geofence to Webhook</title>
+      <given>I am creating or editing a geofence</given>
+      <when>I configure the geofence</when>
+      <then>I should be able to link it to a webhook</then>
+      <and>the webhook should trigger when geofence events occur</and>
+    </ac>
+    <ac id="E6.3.3">
+      <title>Backend Webhook Dispatch</title>
+      <given>a geofence event occurs with a linked webhook</given>
+      <when>the backend receives the geofence event</when>
+      <then>the backend should send HTTP POST to the webhook targetUrl</then>
+      <and>payload should include: event, deviceId, deviceName, geofenceId, geofenceName, eventType, timestamp, location</and>
+    </ac>
+    <ac id="E6.3.4">
+      <title>HMAC Signature</title>
+      <given>a webhook request is sent</given>
+      <when>the request is dispatched</when>
+      <then>X-Signature header should contain HMAC-SHA256 of payload using webhook secret</then>
+      <and>receiving system can verify authenticity</and>
+    </ac>
+    <ac id="E6.3.5">
+      <title>Webhook CRUD Operations</title>
+      <given>I am on the Webhooks screen</given>
+      <then>I should be able to: view list of my webhooks, create new webhook, edit existing webhook, delete webhook, enable/disable webhook</then>
+    </ac>
+    <ac id="E6.3.6">
+      <title>URL Validation</title>
+      <given>I am creating or editing a webhook</given>
+      <when>I enter the target URL</when>
+      <then>the system should validate URL format</then>
+      <and>enforce HTTPS for security</and>
+    </ac>
+    <ac id="E6.3.7">
+      <title>Webhook Delivery Status</title>
+      <given>a webhook was triggered</given>
+      <when>I view the geofence event</when>
+      <then>I should see webhook delivery status (delivered/failed)</then>
+      <and>response code from target server</and>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Feature 5: Geofencing with Webhooks</title>
+        <section>FR-5.3 Webhook Integration</section>
+        <snippet>FR-5.3.1: System SHALL support linking geofences to webhooks (Must Have)
+FR-5.3.2: Webhooks SHALL be defined with: targetUrl, secret (for HMAC) (Must Have)
+FR-5.3.3: Backend SHALL send HTTP POST to webhook URL on geofence event (Must Have)
+FR-5.3.4: Webhook payload SHALL include: deviceId, geofenceId, eventType, timestamp, location (Must Have)
+FR-5.3.5: Webhook request SHALL include HMAC signature in X-Signature header (Must Have)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Feature 5: Geofencing with Webhooks</title>
+        <section>FR-5.4 Webhook Management</section>
+        <snippet>FR-5.4.1: System SHALL provide CRUD operations for webhooks (Must Have)
+FR-5.4.2: System SHALL validate webhook URL format (Should Have)
+FR-5.4.3: System SHALL support enabling/disabling webhooks (Should Have)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Data Model: Webhook</title>
+        <section>Section 5 - Feature 5</section>
+        <snippet>data class Webhook(
+    val id: String,
+    val ownerDeviceId: String,
+    val name: String,
+    val targetUrl: String,
+    val secret: String, // For HMAC signing
+    val enabled: Boolean,
+    val createdAt: Instant,
+    val updatedAt: Instant
+)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Webhook Payload Example</title>
+        <section>Section 5 - Feature 5</section>
+        <snippet>{
+  "event": "geofence_trigger",
+  "deviceId": "device-001",
+  "deviceName": "Martin's Phone",
+  "geofenceId": "geo-home-001",
+  "geofenceName": "Home",
+  "eventType": "ENTER",
+  "timestamp": "2025-11-25T18:30:00Z",
+  "location": { "latitude": 48.1486, "longitude": 17.1077 }
+}
+HMAC Signature: X-Signature: sha256={hash}</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 6: Geofencing with Webhooks - Story 6.3</title>
+        <section>Story 6.3: Webhook Integration</section>
+        <snippet>User Story: As a user, I want geofence events to trigger webhooks so that I can automate actions in Home Assistant or n8n
+Acceptance Criteria:
+- Create Webhook entity with targetUrl and secret
+- Link geofences to webhooks
+- Backend dispatches HTTP POST to webhook URL with HMAC signature
+- CRUD operations for webhook management
+- URL validation enforcing HTTPS</snippet>
+      </doc>
+      <doc>
+        <path>docs/story-context-E6.1.xml</path>
+        <title>Story E6.1: Geofence Definition - Context</title>
+        <section>Related Story Context</section>
+        <snippet>Geofence entity includes webhookId field for linking to webhooks
+GeofenceRepository provides CRUD operations
+CreateGeofenceScreen UI for geofence creation with webhook selector capability</snippet>
+      </doc>
+      <doc>
+        <path>docs/story-context-E6.2.xml</path>
+        <title>Story E6.2: Geofence Events & Notifications - Context</title>
+        <section>Related Story Context</section>
+        <snippet>GeofenceEvent entity includes webhookDelivered and webhookResponseCode fields
+GeofenceEventProcessor handles event processing and backend sync
+POST /api/geofence-events sends event data to backend for webhook dispatch</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt</path>
+        <kind>repository-pattern</kind>
+        <symbol>DeviceRepository, DeviceRepositoryImpl</symbol>
+        <lines>18-106</lines>
+        <reason>Reference pattern for creating WebhookRepository - shows repository interface, implementation with network sync, local storage, and error handling</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/database/AppDatabase.kt</path>
+        <kind>database</kind>
+        <symbol>AppDatabase</symbol>
+        <lines>13-28</lines>
+        <reason>Must add WebhookEntity to entities list and provide webhookDao() method</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/database/LocationDao.kt</path>
+        <kind>dao-pattern</kind>
+        <symbol>LocationDao</symbol>
+        <lines>13-41</lines>
+        <reason>Reference pattern for creating WebhookDao - demonstrates Room DAO structure</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt</path>
+        <kind>api-service-pattern</kind>
+        <symbol>DeviceApiServiceImpl</symbol>
+        <lines>32-78</lines>
+        <reason>Reference pattern for WebhookApiService - demonstrates Ktor HTTP client usage with Result wrapping</reason>
+      </artifact>
+      <artifact>
+        <path>docs/story-context-E6.1.xml</path>
+        <kind>prerequisite-story</kind>
+        <symbol>Geofence with webhookId</symbol>
+        <lines>N/A</lines>
+        <reason>E6.3 depends on E6.1 - Geofence entity must have webhookId field for linking</reason>
+      </artifact>
+      <artifact>
+        <path>docs/story-context-E6.2.xml</path>
+        <kind>prerequisite-story</kind>
+        <symbol>GeofenceEvent with webhook status</symbol>
+        <lines>N/A</lines>
+        <reason>E6.3 depends on E6.2 - GeofenceEvent entity must have webhookDelivered and webhookResponseCode fields for status tracking</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <androidx-room version="2.8.4">Room database for WebhookEntity and WebhookDao</androidx-room>
+        <androidx-lifecycle version="2.10.0">ViewModels for WebhooksViewModel</androidx-lifecycle>
+        <androidx-compose-bom version="2025.10.01">Jetpack Compose UI for WebhooksScreen and CreateWebhookScreen</androidx-compose-bom>
+        <androidx-navigation version="2.9.6">Navigation Compose for screen routing</androidx-navigation>
+        <androidx-hilt version="1.3.0">Hilt navigation compose integration</androidx-hilt>
+      </android>
+      <networking>
+        <ktor version="3.3.2">HTTP client for WebhookApiService</ktor>
+      </networking>
+      <di>
+        <hilt version="2.57.2">Dependency injection for WebhookRepository, WebhookApiService, WebhooksViewModel</hilt>
+      </di>
+      <kotlin>
+        <kotlinx-datetime version="0.6.1">Instant timestamps for createdAt, updatedAt</kotlinx-datetime>
+        <kotlinx-coroutines version="1.10.2">Coroutines for suspend functions and Flow</kotlinx-coroutines>
+        <kotlinx-serialization version="1.9.0">JSON serialization for API DTOs</kotlinx-serialization>
+      </kotlin>
+      <logging>
+        <timber version="5.0.1">Debug and error logging</timber>
+      </logging>
+      <testing>
+        <junit version="4.13.2">Unit testing framework</junit>
+        <mockk version="1.14.6">Mocking library for WebhookRepository and WebhooksViewModel tests</mockk>
+        <kotlin-test version="2.2.21">Kotlin test assertions</kotlin-test>
+        <kotlinx-coroutines-test version="1.10.2">Coroutine testing support</kotlinx-coroutines-test>
+      </testing>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Depends on Story E6.1 - Geofence entity must have webhookId field</constraint>
+    <constraint>Depends on Story E6.2 - GeofenceEvent entity must have webhookDelivered and webhookResponseCode fields</constraint>
+    <constraint>Follow Repository pattern with local + remote sync strategy (see DeviceRepository)</constraint>
+    <constraint>Use Room database for offline support and data persistence</constraint>
+    <constraint>Sync strategy: remote-first on startup, optimistic local updates</constraint>
+    <constraint>Network availability check before API calls (use NetworkManager)</constraint>
+    <constraint>Wrap API responses in Result type for error handling</constraint>
+    <constraint>Use Ktor HttpClient for HTTP requests with X-API-Key header</constraint>
+    <constraint>Generate webhook secret on creation using UUID.randomUUID() or SecureRandom</constraint>
+    <constraint>Validate webhook URL format using java.net.URI</constraint>
+    <constraint>Enforce HTTPS-only URLs for webhook targetUrl (no HTTP allowed)</constraint>
+    <constraint>Use kotlinx.datetime.Instant for timestamps</constraint>
+    <constraint>Apply Timber logging for debug/error messages</constraint>
+    <constraint>Follow existing package structure: domain/model/, data/model/, data/database/dao/, network/, ui/webhooks/</constraint>
+    <constraint>Use Hilt @Inject and @Singleton for dependency injection</constraint>
+    <constraint>Unit tests require >80% coverage using MockK for mocking</constraint>
+    <constraint>Backend webhook dispatch is server-side - client only manages webhook CRUD and links to geofences</constraint>
+    <constraint>HMAC signing happens on backend using crypto libraries (Node.js example provided in story)</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>SecureStorage.getDeviceId()</name>
+      <kind>storage-method</kind>
+      <signature>fun getDeviceId(): String</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/security/SecureStorage.kt</path>
+      <reason>Required to set ownerDeviceId when creating webhooks</reason>
+    </interface>
+    <interface>
+      <name>NetworkManager.isNetworkAvailable()</name>
+      <kind>utility-method</kind>
+      <signature>fun isNetworkAvailable(): Boolean</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/network/NetworkManager.kt</path>
+      <reason>Required to check network before API sync operations</reason>
+    </interface>
+    <interface>
+      <name>ApiConfiguration</name>
+      <kind>config-class</kind>
+      <signature>data class ApiConfiguration(val baseUrl: String, val apiKey: String)</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/network/ApiConfiguration.kt</path>
+      <reason>Required for WebhookApiService to access API endpoint base URL and authentication</reason>
+    </interface>
+    <interface>
+      <name>WebhookRepository.getWebhooks()</name>
+      <kind>repository-method</kind>
+      <signature>fun observeWebhooks(): Flow&lt;List&lt;Webhook&gt;&gt;</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/data/repository/WebhookRepository.kt</path>
+      <reason>Required for CreateGeofenceScreen webhook selector dropdown</reason>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Unit tests use JUnit 4 with MockK for mocking. Tests follow Given-When-Then structure with descriptive names using backticks. Coroutine tests use runTest from kotlinx-coroutines-test. Target coverage: &gt;80% for repositories and ViewModels. Tests are located in app/src/test/java mirroring the main source structure. Use turbine for Flow testing when needed.
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/data/repository/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/ui/webhooks/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/domain/model/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/util/</location>
+    </locations>
+    <ideas>
+      <idea ac="E6.3.1">Test Webhook data class instantiation with all required fields</idea>
+      <idea ac="E6.3.1">Test Webhook secret generation on creation (non-empty, unique)</idea>
+      <idea ac="E6.3.2">Test CreateGeofenceScreen loads webhooks from repository</idea>
+      <idea ac="E6.3.2">Test CreateGeofenceScreen saves webhookId with geofence</idea>
+      <idea ac="E6.3.3">Test backend webhook dispatch documentation completeness (note: backend implementation, not client-side test)</idea>
+      <idea ac="E6.3.4">Test HMAC signature documentation includes crypto.createHmac example</idea>
+      <idea ac="E6.3.5">Test WebhookRepository.createWebhook() syncs to server via POST /api/webhooks</idea>
+      <idea ac="E6.3.5">Test WebhookRepository.createWebhook() stores locally in Room database</idea>
+      <idea ac="E6.3.5">Test WebhookRepository.createWebhook() fails gracefully when network unavailable</idea>
+      <idea ac="E6.3.5">Test WebhookRepository.updateWebhook() syncs changes to server</idea>
+      <idea ac="E6.3.5">Test WebhookRepository.deleteWebhook() removes from server and local DB</idea>
+      <idea ac="E6.3.5">Test WebhooksViewModel loads webhooks from repository on init</idea>
+      <idea ac="E6.3.5">Test WebhooksViewModel.createWebhook() delegates to repository</idea>
+      <idea ac="E6.3.5">Test WebhooksViewModel.toggleWebhook() enables/disables webhook</idea>
+      <idea ac="E6.3.6">Test URL validation accepts valid HTTPS URLs</idea>
+      <idea ac="E6.3.6">Test URL validation rejects HTTP URLs (not HTTPS)</idea>
+      <idea ac="E6.3.6">Test URL validation rejects malformed URLs</idea>
+      <idea ac="E6.3.7">Test GeofenceEvent displays webhookDelivered status correctly</idea>
+      <idea ac="E6.3.7">Test GeofenceEvent displays webhookResponseCode when available</idea>
+    </ideas>
+  </tests>
+</story-context>

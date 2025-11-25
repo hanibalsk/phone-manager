@@ -1,0 +1,270 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E6</epicId>
+    <storyId>E6.2</storyId>
+    <title>Geofence Events & Notifications</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E6.2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>local notifications on geofence events</iWant>
+    <soThat>I know when I enter/exit zones</soThat>
+    <tasks>
+      <task id="1" acs="E6.2.1">Create GeofenceBroadcastReceiver</task>
+      <task id="2" acs="E6.2.4">Create GeofenceEvent Entity</task>
+      <task id="3" acs="E6.2.2">Implement Local Notification</task>
+      <task id="4" acs="E6.2.3">Send Event to Backend</task>
+      <task id="5" acs="E6.2.5">Implement Event Logging</task>
+      <task id="6" acs="E6.2.6">Handle Multiple Events</task>
+      <task id="7" acs="All">Create GeofenceEventProcessor</task>
+      <task id="8" acs="All">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E6.2.1">
+      <title>GeofenceBroadcastReceiver</title>
+      <given>Android Geofencing API detects a transition</given>
+      <when>the system broadcasts the event</when>
+      <then>a GeofenceBroadcastReceiver should receive it</then>
+      <and>extract geofence ID and transition type</and>
+    </ac>
+    <ac id="E6.2.2">
+      <title>Local Notification on Event</title>
+      <given>a geofence event is received</given>
+      <when>processing the event</when>
+      <then>a local notification should be displayed</then>
+      <and>title should indicate transition: "Entered {geofenceName}" or "Left {geofenceName}"</and>
+      <and>notification should be high priority with sound</and>
+    </ac>
+    <ac id="E6.2.3">
+      <title>Send Event to Backend</title>
+      <given>a geofence event occurs</given>
+      <when>the event is processed</when>
+      <then>the app should send event to server via POST /api/geofence-events</then>
+      <and>payload should include: deviceId, geofenceId, eventType, timestamp, location</and>
+    </ac>
+    <ac id="E6.2.4">
+      <title>GeofenceEvent Entity</title>
+      <given>the data model is defined</given>
+      <then>GeofenceEvent should include: id (UUID), deviceId, geofenceId, eventType (ENTER, EXIT, DWELL), timestamp, latitude, longitude, webhookDelivered (Boolean), webhookResponseCode (optional)</then>
+    </ac>
+    <ac id="E6.2.5">
+      <title>Event Logging</title>
+      <given>a geofence event occurs</given>
+      <when>the event is processed</when>
+      <then>it should be logged locally for history/debugging</then>
+      <and>stored in Room database</and>
+    </ac>
+    <ac id="E6.2.6">
+      <title>Handle Multiple Geofences</title>
+      <given>the user has multiple geofences</given>
+      <when>events occur for different geofences</when>
+      <then>each should trigger its own notification</then>
+      <and>events should be correctly associated with their geofence</and>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Feature 5: Geofencing with Webhooks</title>
+        <section>FR-5.2 Geofence Events</section>
+        <snippet>FR-5.2.1: System SHALL receive geofence events via BroadcastReceiver (Must Have)
+FR-5.2.2: System SHALL display local notification on geofence event (Must Have)
+FR-5.2.3: System SHALL send event to backend: POST /api/geofence-events (Must Have)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Data Model: GeofenceEvent</title>
+        <section>Section 5 - Feature 5</section>
+        <snippet>data class GeofenceEvent(
+    val id: String,
+    val deviceId: String,
+    val geofenceId: String,
+    val eventType: TransitionType,
+    val timestamp: Instant,
+    val latitude: Double,
+    val longitude: Double,
+    val webhookDelivered: Boolean,
+    val webhookResponseCode: Int?
+)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>API Specification - POST /api/geofence-events</title>
+        <section>Section 6 - API Specifications</section>
+        <snippet>Request: { "deviceId": "device-001", "geofenceId": "geo-001", "eventType": "ENTER", "timestamp": "2025-11-25T18:30:00Z", "location": { "latitude": 48.1486, "longitude": 17.1077 } }
+Response (201): { "id": "event-uuid", "webhookTriggered": true, "webhookResponseCode": 200 }</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 6: Geofencing with Webhooks - Story 6.2</title>
+        <section>Story 6.2: Geofence Events & Notifications</section>
+        <snippet>User Story: As a user, I want local notifications on geofence events so that I know when I enter/exit zones
+Acceptance Criteria:
+- BroadcastReceiver receives Android geofence events
+- Display local notifications with geofence name and transition type
+- Send events to backend with device, location, and timestamp data
+- Log events locally in Room database</snippet>
+      </doc>
+      <doc>
+        <path>docs/story-context-E6.1.xml</path>
+        <title>Story E6.1: Geofence Definition - Context</title>
+        <section>Related Story Context</section>
+        <snippet>Geofence entity defined with: id, deviceId, name, latitude, longitude, radiusMeters, transitionTypes (ENTER/EXIT/DWELL), webhookId, active, createdAt, updatedAt
+GeofenceRepository provides CRUD operations and sync
+GeofenceManager wraps Android GeofencingClient for registration</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/service/LocationTrackingService.kt</path>
+        <kind>notification-pattern</kind>
+        <symbol>createNotificationChannel, createNotification</symbol>
+        <lines>319-368</lines>
+        <reason>Reference pattern for GeofenceNotificationManager - shows NotificationChannel creation, NotificationCompat.Builder, and PendingIntent setup</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/database/AppDatabase.kt</path>
+        <kind>database</kind>
+        <symbol>AppDatabase</symbol>
+        <lines>13-28</lines>
+        <reason>Must add GeofenceEventEntity to entities list and provide geofenceEventDao() method</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/database/LocationDao.kt</path>
+        <kind>dao-pattern</kind>
+        <symbol>LocationDao</symbol>
+        <lines>13-41</lines>
+        <reason>Reference pattern for creating GeofenceEventDao - demonstrates Room DAO structure</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt</path>
+        <kind>api-service-pattern</kind>
+        <symbol>DeviceApiServiceImpl</symbol>
+        <lines>32-78</lines>
+        <reason>Reference pattern for GeofenceApiService - demonstrates Ktor HTTP POST with Result wrapping</reason>
+      </artifact>
+      <artifact>
+        <path>docs/story-context-E6.1.xml</path>
+        <kind>prerequisite-story</kind>
+        <symbol>Geofence, GeofenceRepository, GeofenceManager</symbol>
+        <lines>N/A</lines>
+        <reason>E6.2 depends on E6.1 completion - Geofence entity and GeofenceManager with Android registration must exist for events to trigger</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <androidx-room version="2.8.4">Room database for GeofenceEventEntity and GeofenceEventDao</androidx-room>
+        <androidx-core version="1.17.0">NotificationCompat for notification creation and BroadcastReceiver</androidx-core>
+        <play-services-location version="21.3.0">Google Play Services Location for GeofencingEvent API</play-services-location>
+      </android>
+      <kotlin>
+        <kotlinx-datetime version="0.6.1">Instant for event timestamps</kotlinx-datetime>
+        <kotlinx-coroutines version="1.10.2">Coroutines for async event processing with goAsync()</kotlinx-coroutines>
+        <kotlinx-serialization version="1.9.0">JSON serialization for GeofenceEventDto</kotlinx-serialization>
+      </kotlin>
+      <networking>
+        <ktor version="3.3.2">HTTP client for sending events to backend</ktor>
+      </networking>
+      <di>
+        <hilt version="2.57.2">Dependency injection for GeofenceEventProcessor</hilt>
+      </di>
+      <logging>
+        <timber version="5.0.1">Debug and error logging</timber>
+      </logging>
+      <testing>
+        <junit version="4.13.2">Unit testing framework</junit>
+        <mockk version="1.14.6">Mocking for GeofenceEventProcessor tests</mockk>
+        <kotlin-test version="2.2.21">Kotlin test assertions</kotlin-test>
+        <kotlinx-coroutines-test version="1.10.2">Coroutine testing support</kotlinx-coroutines-test>
+      </testing>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Depends on Story E6.1 completion - Geofence entity and GeofenceManager must exist</constraint>
+    <constraint>Register GeofenceBroadcastReceiver in AndroidManifest.xml with android:exported="false"</constraint>
+    <constraint>Use GeofencingEvent.fromIntent() to parse geofence events from Intent</constraint>
+    <constraint>Use goAsync() in BroadcastReceiver for async processing within 10-second timeout</constraint>
+    <constraint>Create NotificationChannel with IMPORTANCE_HIGH for geofence alerts</constraint>
+    <constraint>Notification title format: "Entered {name}" or "Left {name}" or "At {name}"</constraint>
+    <constraint>Use unique notification IDs per geofence (geofenceId.hashCode()) for multiple concurrent notifications</constraint>
+    <constraint>Send geofence events to backend via POST /api/geofence-events with location data</constraint>
+    <constraint>Store GeofenceEventEntity in Room for local history and debugging</constraint>
+    <constraint>Handle multiple triggering geofences in same event with forEach processing</constraint>
+    <constraint>Use CoroutineScope(Dispatchers.IO) for processing in BroadcastReceiver</constraint>
+    <constraint>Follow existing notification patterns from LocationTrackingService</constraint>
+    <constraint>Apply Timber logging for event processing and error handling</constraint>
+    <constraint>Use Hilt @Inject for GeofenceEventProcessor dependencies</constraint>
+    <constraint>Unit tests require >80% coverage using MockK for mocking</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>GeofenceRepository.getGeofenceById()</name>
+      <kind>repository-method</kind>
+      <signature>suspend fun getGeofenceById(id: String): Geofence?</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/data/repository/GeofenceRepository.kt</path>
+      <reason>Required to fetch geofence name for notification display (from E6.1)</reason>
+    </interface>
+    <interface>
+      <name>SecureStorage.getDeviceId()</name>
+      <kind>storage-method</kind>
+      <signature>fun getDeviceId(): String</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/security/SecureStorage.kt</path>
+      <reason>Required to include deviceId in POST /api/geofence-events payload</reason>
+    </interface>
+    <interface>
+      <name>NetworkManager.isNetworkAvailable()</name>
+      <kind>utility-method</kind>
+      <signature>fun isNetworkAvailable(): Boolean</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/network/NetworkManager.kt</path>
+      <reason>Required to check network before sending event to backend</reason>
+    </interface>
+    <interface>
+      <name>GeofencingEvent (Android API)</name>
+      <kind>android-api</kind>
+      <signature>com.google.android.gms.location.GeofencingEvent</signature>
+      <path>com.google.android.gms:play-services-location</path>
+      <reason>Required to parse geofence transition events from Intent in BroadcastReceiver</reason>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      Unit tests use JUnit 4 with MockK for mocking. Tests follow Given-When-Then structure with descriptive names using backticks. Coroutine tests use runTest from kotlinx-coroutines-test. Target coverage: &gt;80% for GeofenceEventProcessor and event handling logic. Tests are located in app/src/test/java mirroring the main source structure. BroadcastReceiver tested via instrumented tests when needed.
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/geofence/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/receiver/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/notification/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/domain/model/</location>
+    </locations>
+    <ideas>
+      <idea ac="E6.2.1">Test GeofenceBroadcastReceiver.onReceive() extracts geofence ID from Intent</idea>
+      <idea ac="E6.2.1">Test GeofenceBroadcastReceiver.onReceive() handles GeofencingEvent errors gracefully</idea>
+      <idea ac="E6.2.1">Test GeofenceBroadcastReceiver.onReceive() extracts transition type correctly</idea>
+      <idea ac="E6.2.2">Test GeofenceNotificationManager creates notification with correct title for ENTER event</idea>
+      <idea ac="E6.2.2">Test GeofenceNotificationManager creates notification with correct title for EXIT event</idea>
+      <idea ac="E6.2.2">Test GeofenceNotificationManager sets high priority and sound on notification</idea>
+      <idea ac="E6.2.3">Test GeofenceEventProcessor sends event to backend via POST /api/geofence-events</idea>
+      <idea ac="E6.2.3">Test GeofenceEventProcessor includes deviceId, geofenceId, eventType, timestamp, location in payload</idea>
+      <idea ac="E6.2.3">Test GeofenceEventProcessor handles network unavailable gracefully</idea>
+      <idea ac="E6.2.4">Test GeofenceEvent data class instantiation with all required fields</idea>
+      <idea ac="E6.2.5">Test GeofenceEventProcessor saves GeofenceEventEntity to Room database</idea>
+      <idea ac="E6.2.5">Test GeofenceEventDao inserts and retrieves events correctly</idea>
+      <idea ac="E6.2.6">Test GeofenceEventProcessor handles multiple geofences in single event</idea>
+      <idea ac="E6.2.6">Test each geofence gets unique notification ID (using hashCode)</idea>
+      <idea ac="E6.2.6">Test notifications for different geofences don't overwrite each other</idea>
+      <idea ac="All">Test GeofenceEventProcessor coordinates notification, backend send, and logging</idea>
+      <idea ac="All">Test GeofenceEventProcessor handles processing errors without crashing</idea>
+    </ideas>
+  </tests>
+</story-context>

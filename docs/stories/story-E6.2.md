@@ -4,7 +4,7 @@
 **Epic**: 6 - Geofencing with Webhooks
 **Priority**: Must-Have
 **Estimate**: 2 story points (1-2 days)
-**Status**: Draft
+**Status**: ContextReadyDraft
 **Created**: 2025-11-25
 **PRD Reference**: Feature 5 (FR-5.2)
 
@@ -185,7 +185,7 @@ fun showGeofenceNotification(geofenceName: String, eventType: TransitionType) {
 ## Dev Agent Record
 
 ### Context Reference
-<!-- Path(s) to story context XML/JSON will be added here by context workflow -->
+- `/Users/martinjanci/cursor/phone-manager/docs/story-context-E6.2.xml` (Generated: 2025-11-25)
 
 ### Agent Model Used
 Claude Opus 4.5 (claude-opus-4-5-20251101)
@@ -202,5 +202,5 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 ---
 
 **Last Updated**: 2025-11-25
-**Status**: Draft
+**Status**: ContextReadyDraft
 **Dependencies**: Story E6.1 (Geofence Definition - geofences must be registered)
