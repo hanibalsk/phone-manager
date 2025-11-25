@@ -25,4 +25,4 @@
 -dontnote kotlinx.serialization.AnnotationsKt
 
 # Keep data models
--keep class com.phonemanager.domain.model.** { *; }
+-keep class three.two.bit.phonemanager.domain.model.** { *; }

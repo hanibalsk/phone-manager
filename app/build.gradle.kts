@@ -9,11 +9,11 @@ plugins {
 }
 
 android {
-    namespace = "com.phonemanager"
+    namespace = "three.two.bit.phonemanager"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.phonemanager"
+        applicationId = "three.two.bit.phonemanager"
         minSdk = 26
         targetSdk = 36
         versionCode = 1
