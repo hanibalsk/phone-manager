@@ -1,0 +1,249 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E5</epicId>
+    <storyId>E5.2</storyId>
+    <title>Proximity Alert Triggering</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E5.2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>to receive notifications when proximity alerts trigger</iWant>
+    <soThat>I know when someone is nearby</soThat>
+    <tasks>
+      <task id="1" acs="E5.2.1">Implement Distance Calculation</task>
+      <task id="2" acs="E5.2.2">Integrate with Polling Cycle</task>
+      <task id="3" acs="E5.2.3, E5.2.4">Implement State Tracking</task>
+      <task id="4" acs="E5.2.4">Implement Direction Logic</task>
+      <task id="5" acs="E5.2.5">Create Notification System</task>
+      <task id="6" acs="E5.2.6">Update Triggered Timestamp</task>
+      <task id="7" acs="All">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E5.2.1">
+      <title>Client-Side Distance Calculation</title>
+      <given>I have active proximity alerts</given>
+      <when>a location poll cycle occurs</when>
+      <then>the app should calculate distance between my location and target devices</then>
+      <and>use Haversine formula or Location.distanceTo()</and>
+    </ac>
+    <ac id="E5.2.2">
+      <title>Calculation During Poll Cycle</title>
+      <given>the map is polling for group member locations (E3.3)</given>
+      <when>new locations are received</when>
+      <then>proximity alert distances should be recalculated</then>
+      <and>this should happen automatically without user action</and>
+    </ac>
+    <ac id="E5.2.3">
+      <title>State Tracking</title>
+      <given>I have a proximity alert</given>
+      <then>the system should track lastState ("inside" or "outside") for each alert</then>
+      <and>state should persist across app restarts</and>
+    </ac>
+    <ac id="E5.2.4">
+      <title>Trigger on State Transition Only</title>
+      <given>I have a proximity alert with direction="enter"</given>
+      <and>the target is currently OUTSIDE the radius</and>
+      <when>the target moves INSIDE the radius</when>
+      <then>the alert should trigger (state transition OUTSIDE→INSIDE)</then>
+      <but>subsequent polls while still INSIDE should NOT trigger again (debounce)</but>
+    </ac>
+    <ac id="E5.2.5">
+      <title>Local Notification on Trigger</title>
+      <given>a proximity alert triggers</given>
+      <when>the state transition is detected</when>
+      <then>a local notification should appear</then>
+      <and>notification should include: "You are near {targetDisplayName}"</and>
+      <and>notification should be actionable (tap to open map)</and>
+    </ac>
+    <ac id="E5.2.6">
+      <title>Update lastTriggeredAt</title>
+      <given>a proximity alert triggers</given>
+      <when>the notification is shown</when>
+      <then>lastTriggeredAt should be updated</then>
+      <and>synced to server (optional)</and>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Feature 3: Proximity Alerts</title>
+        <section>FR-3.2 Proximity Calculation</section>
+        <snippet>FR-3.2.1: Distance calculation SHALL be performed on the client (Must Have)
+FR-3.2.2: System SHALL use Haversine formula or Location.distanceTo() (Must Have)
+FR-3.2.3: Calculation SHALL occur during each location poll cycle (Must Have)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Feature 3: Proximity Alerts</title>
+        <section>FR-3.3 Alert Triggering</section>
+        <snippet>FR-3.3.1: System SHALL track lastState ("inside" or "outside") for each alert (Must Have)
+FR-3.3.2: Alert SHALL trigger only on state transition (outside→inside or inside→outside) (Must Have)
+FR-3.3.3: System SHALL display local notification when alert triggers (Must Have)
+FR-3.3.4: System MAY send event to backend for audit logging (Should Have)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Acceptance Criteria</title>
+        <section>Scenario: Trigger proximity alert on approach</section>
+        <snippet>Given I have an active proximity alert for "Dad's Phone" with radius 200m, direction "enter"
+And Dad's Phone is currently 500m away (state: OUTSIDE)
+When Dad's Phone moves to 150m away
+Then a notification should appear: "You are near Dad's Phone"
+And lastState should update to INSIDE
+And lastTriggeredAt should update
+
+Scenario: No duplicate alert on repeated proximity
+Given I triggered a proximity alert and am still within radius
+When the next poll cycle occurs
+And I am still within radius
+Then no new notification should appear</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 5: Proximity Alerts - Story 5.2</title>
+        <section>Story 5.2: Proximity Alert Triggering</section>
+        <snippet>User Story: As a user, I want to receive notifications when proximity alerts trigger so that I know when someone is nearby
+Acceptance Criteria:
+- Client-side distance calculation using Haversine or Location.distanceTo()
+- Calculation occurs during each location poll cycle
+- Track lastState ("inside" or "outside") for each alert
+- Alert triggers only on state transition (debounce)
+- Display local notification when alert triggers</snippet>
+      </doc>
+      <doc>
+        <path>docs/story-context-E5.1.xml</path>
+        <title>Story E5.1: Proximity Alert Definition - Context</title>
+        <section>Related Story Context</section>
+        <snippet>ProximityAlert entity defined with: id, ownerDeviceId, targetDeviceId, radiusMeters, direction (ENTER/EXIT/BOTH), lastState (INSIDE/OUTSIDE), active, createdAt, updatedAt, lastTriggeredAt
+AlertRepository provides CRUD operations and sync functionality
+AlertsViewModel manages alert state and UI interactions</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/service/LocationTrackingService.kt</path>
+        <kind>notification-pattern</kind>
+        <symbol>createNotificationChannel, createNotification</symbol>
+        <lines>319-368</lines>
+        <reason>Reference pattern for creating ProximityNotificationManager - shows NotificationChannel creation, NotificationCompat.Builder usage, and PendingIntent setup</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/location/LocationManager.kt</path>
+        <kind>location-utility</kind>
+        <symbol>LocationManager</symbol>
+        <lines>1-76</lines>
+        <reason>Reference for location operations - demonstrates FusedLocationProviderClient usage and Location entity conversion. android.location.Location class available for distanceBetween() method</reason>
+      </artifact>
+      <artifact>
+        <path>docs/story-context-E5.1.xml</path>
+        <kind>prerequisite-story</kind>
+        <symbol>ProximityAlert, AlertRepository</symbol>
+        <lines>N/A</lines>
+        <reason>E5.2 depends on E5.1 completion - ProximityAlert domain model, AlertRepository with updateAlert() method, and ProximityAlertEntity with lastState and lastTriggeredAt fields must exist before implementing triggering logic</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <android-location>Android Location API for Location.distanceBetween() distance calculation</android-location>
+        <androidx-core version="1.17.0">NotificationCompat for notification creation</androidx-core>
+        <play-services-location version="21.3.0">Google Play Services Location for FusedLocationProviderClient</play-services-location>
+      </android>
+      <kotlin>
+        <kotlinx-datetime version="0.6.1">Instant for lastTriggeredAt timestamp</kotlinx-datetime>
+        <kotlinx-coroutines version="1.10.2">Coroutines for async proximity checks and Flow observation</kotlinx-coroutines>
+      </kotlin>
+      <di>
+        <hilt version="2.57.2">Dependency injection for ProximityManager and ProximityNotificationManager</hilt>
+      </di>
+      <logging>
+        <timber version="5.0.1">Debug and error logging</timber>
+      </logging>
+      <testing>
+        <junit version="4.13.2">Unit testing framework</junit>
+        <mockk version="1.14.6">Mocking for ProximityCalculator and ProximityManager tests</mockk>
+        <kotlin-test version="2.2.21">Kotlin test assertions</kotlin-test>
+        <kotlinx-coroutines-test version="1.10.2">Coroutine testing support</kotlinx-coroutines-test>
+      </testing>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Depends on Story E5.1 completion - ProximityAlert domain model and AlertRepository must exist</constraint>
+    <constraint>Use android.location.Location.distanceBetween() for client-side distance calculation (static method)</constraint>
+    <constraint>Integrate with existing location polling from Story E3.3 (MapViewModel or create ProximityManager)</constraint>
+    <constraint>State transitions must be debounced - only trigger on OUTSIDE→INSIDE or INSIDE→OUTSIDE changes</constraint>
+    <constraint>Create NotificationChannel with IMPORTANCE_HIGH for proximity alerts (user-facing)</constraint>
+    <constraint>Notification must include target display name and PendingIntent to open MapScreen</constraint>
+    <constraint>Update ProximityAlert.lastState and lastTriggeredAt in local database via AlertRepository</constraint>
+    <constraint>Follow existing notification patterns from LocationTrackingService</constraint>
+    <constraint>Use Hilt @Inject for ProximityManager and ProximityNotificationManager</constraint>
+    <constraint>Apply Timber logging for distance calculations and state transitions</constraint>
+    <constraint>Unit tests require >80% coverage for ProximityCalculator and state transition logic</constraint>
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>AlertRepository.getActiveAlerts()</name>
+      <kind>repository-method</kind>
+      <signature>fun observeActiveAlerts(): Flow&lt;List&lt;ProximityAlert&gt;&gt;</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/data/repository/AlertRepository.kt</path>
+      <reason>Required to fetch active proximity alerts for distance calculation during poll cycles (from E5.1)</reason>
+    </interface>
+    <interface>
+      <name>AlertRepository.updateAlert()</name>
+      <kind>repository-method</kind>
+      <signature>suspend fun updateAlert(alert: ProximityAlert): Result&lt;Unit&gt;</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/data/repository/AlertRepository.kt</path>
+      <reason>Required to update lastState and lastTriggeredAt when proximity alert triggers (from E5.1)</reason>
+    </interface>
+    <interface>
+      <name>DeviceRepository.getGroupMembers()</name>
+      <kind>repository-method</kind>
+      <signature>suspend fun getGroupMembers(): Result&lt;List&lt;Device&gt;&gt;</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt:20</path>
+      <reason>Required to get current locations of target devices for distance calculation</reason>
+    </interface>
+    <interface>
+      <name>LocationManager.getCurrentLocation()</name>
+      <kind>location-method</kind>
+      <signature>suspend fun getCurrentLocation(): Result&lt;LocationEntity?&gt;</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/location/LocationManager.kt:49</path>
+      <reason>Required to get user's current location for proximity distance calculation</reason>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      Unit tests use JUnit 4 with MockK for mocking. Tests follow Given-When-Then structure with descriptive names using backticks. Coroutine tests use runTest from kotlinx-coroutines-test. Target coverage: &gt;80% for ProximityCalculator utility, ProximityManager, and state transition logic. Tests are located in app/src/test/java mirroring the main source structure.
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/util/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/proximity/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/notification/</location>
+    </locations>
+    <ideas>
+      <idea ac="E5.2.1">Test ProximityCalculator.calculateDistance() with known lat/lon pairs verifies correct distance in meters</idea>
+      <idea ac="E5.2.1">Test ProximityCalculator.checkProximity() correctly identifies INSIDE when distance &lt; radiusMeters</idea>
+      <idea ac="E5.2.1">Test ProximityCalculator.checkProximity() correctly identifies OUTSIDE when distance &gt; radiusMeters</idea>
+      <idea ac="E5.2.1">Test ProximityCalculator with edge case: distance exactly equals radiusMeters</idea>
+      <idea ac="E5.2.3">Test state tracking persists INSIDE/OUTSIDE states correctly in ProximityAlert</idea>
+      <idea ac="E5.2.4">Test shouldTrigger() with ENTER direction: returns true only on OUTSIDE→INSIDE transition</idea>
+      <idea ac="E5.2.4">Test shouldTrigger() with EXIT direction: returns true only on INSIDE→OUTSIDE transition</idea>
+      <idea ac="E5.2.4">Test shouldTrigger() with BOTH direction: returns true on either transition</idea>
+      <idea ac="E5.2.4">Test shouldTrigger() returns false when state unchanged (debounce: INSIDE→INSIDE, OUTSIDE→OUTSIDE)</idea>
+      <idea ac="E5.2.5">Test ProximityNotificationManager creates notification with correct title and target name</idea>
+      <idea ac="E5.2.5">Test notification includes PendingIntent that opens MapScreen</idea>
+      <idea ac="E5.2.6">Test ProximityManager updates lastTriggeredAt timestamp when alert triggers</idea>
+      <idea ac="E5.2.6">Test ProximityManager updates lastState in AlertRepository after state transition</idea>
+      <idea ac="E5.2.2">Test ProximityManager integrates with poll cycle - proximity checked after location updates</idea>
+      <idea ac="E5.2.2">Test ProximityManager handles multiple active alerts simultaneously</idea>
+      <idea ac="E5.2.2">Test ProximityManager gracefully handles missing target device locations</idea>
+    </ideas>
+  </tests>
+</story-context>

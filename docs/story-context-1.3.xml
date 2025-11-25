@@ -1,0 +1,163 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/E1.3" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>3</storyId>
+    <title>Device Settings Screen</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-E1.3.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to configure my device settings</iWant>
+    <soThat>I can update my display name or change groups</soThat>
+    <tasks>
+      <task id="1">Create SettingsScreen UI - SettingsScreen composable with displayName/groupId TextFields and Save button</task>
+      <task id="2">Create SettingsViewModel - Load settings from SecureStorage, updateSettings() method, re-register via DeviceRepository</task>
+      <task id="3">Update Navigation - Add Settings route to NavHost, add settings icon to Home screen AppBar</task>
+      <task id="4">Testing - Unit test SettingsViewModel, manual test settings persistence</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E1.3.1" title="Settings Screen Access">
+      <given>I am on the Home screen</given>
+      <when>I tap the settings icon/menu</when>
+      <then>I should see a Settings screen with device configuration options</then>
+    </ac>
+    <ac id="E1.3.2" title="Display Name Update">
+      <given>I am on the Settings screen</given>
+      <when>I edit my display name and save</when>
+      <then>the new name should be persisted to SecureStorage and device should re-register with server via PUT/POST</then>
+    </ac>
+    <ac id="E1.3.3" title="Group ID Change">
+      <given>I am on the Settings screen</given>
+      <when>I change my groupId and save</when>
+      <then>new groupId persisted to SecureStorage, device re-registers with server, group member list refreshes with new group members</then>
+    </ac>
+    <ac id="E1.3.4" title="Settings Persistence">
+      <given>I have updated settings</given>
+      <when>I restart the app</when>
+      <then>my settings should be preserved</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/prd-phone-manager-2025-11-25.md" relevance="high">
+        PRD with FR-6.2.3 - System SHALL support changing groupId
+      </doc>
+      <doc path="docs/epics.md" relevance="high">
+        Epic 1 overview and Story 1.3 description
+      </doc>
+      <doc path="docs/stories/story-E1.1.md" relevance="high">
+        Predecessor story - Device Registration patterns and DeviceRepository usage
+      </doc>
+    </docs>
+    <code>
+      <file path="app/src/main/java/three/two/bit/phonemanager/security/SecureStorage.kt" relevance="high" action="REUSE">
+        <purpose>Encrypted storage for device settings - already has setDisplayName, setGroupId, getDisplayName, getGroupId</purpose>
+        <methods>getDisplayName(), setDisplayName(String), getGroupId(), setGroupId(String), isRegistered()</methods>
+        <pattern>EncryptedSharedPreferences with AES256 encryption</pattern>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt" relevance="high" action="REUSE">
+        <purpose>Repository for device operations - has registerDevice() for re-registration</purpose>
+        <interface>suspend fun registerDevice(displayName: String, groupId: String): Result&lt;Unit&gt;</interface>
+        <note>Reuse registerDevice() method - will update server with new settings</note>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/home/HomeScreen.kt" relevance="high" action="MODIFY">
+        <purpose>Home screen UI - needs settings navigation icon in AppBar</purpose>
+        <current>No TopAppBar currently, uses simple Column layout with Text title</current>
+        <needed>Add Scaffold with TopAppBar containing settings IconButton</needed>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/navigation/PhoneManagerNavHost.kt" relevance="high" action="MODIFY">
+        <purpose>Navigation host - needs Settings route added</purpose>
+        <existing>Screen sealed class with Registration, Home routes</existing>
+        <needed>Add Screen.Settings route and composable()</needed>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/registration/RegistrationViewModel.kt" relevance="medium" action="REFERENCE">
+        <purpose>Reference for ViewModel patterns - updateDisplayName, updateGroupId, validateForm patterns</purpose>
+        <pattern>MutableStateFlow with _uiState, StateFlow exposed, update{} lambda pattern</pattern>
+        <pattern>viewModelScope.launch for coroutines, Result.fold for error handling</pattern>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/registration/RegistrationScreen.kt" relevance="medium" action="REFERENCE">
+        <purpose>Reference for Compose UI patterns - TextField with error state, Button with loading</purpose>
+        <pattern>OutlinedTextField with isError, supportingText for errors</pattern>
+      </file>
+    </code>
+    <dependencies>
+      <dependency name="Hilt" usage="Dependency injection for SettingsViewModel">
+        @HiltViewModel, @Inject constructor, hiltViewModel()
+      </dependency>
+      <dependency name="Jetpack Compose" usage="UI for SettingsScreen">
+        Scaffold, TopAppBar, OutlinedTextField, Button, IconButton, Icon
+      </dependency>
+      <dependency name="Navigation Compose" usage="Navigation to Settings screen">
+        NavHost, composable(), navController.navigate()
+      </dependency>
+      <dependency name="Material Icons Extended" usage="Settings icon">
+        Icons.Default.Settings, Icons.AutoMirrored.Filled.ArrowBack
+      </dependency>
+      <dependency name="Coroutines" usage="Async operations in ViewModel">
+        viewModelScope.launch, StateFlow, MutableStateFlow
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Follow MVVM pattern established in E1.1 (RegistrationViewModel)</constraint>
+    <constraint type="architecture">Use Result wrapper for error handling from DeviceRepository</constraint>
+    <constraint type="architecture">Reuse DeviceRepository.registerDevice() for server updates</constraint>
+    <constraint type="storage">Use SecureStorage for settings persistence (already has methods)</constraint>
+    <constraint type="ui">Material 3 design system, consistent with existing screens</constraint>
+    <constraint type="ui">Use Scaffold with TopAppBar for settings navigation</constraint>
+    <constraint type="ui">Include back navigation from Settings screen</constraint>
+    <constraint type="validation">Reuse validation patterns from RegistrationViewModel (displayName 2-50 chars, groupId alphanumeric+hyphens)</constraint>
+    <constraint type="code-style">Use Spotless for formatting, follow existing code patterns</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface type="kotlin" name="SettingsViewModel">
+      <signature>@HiltViewModel class SettingsViewModel @Inject constructor(private val secureStorage: SecureStorage, private val deviceRepository: DeviceRepository)</signature>
+      <state>StateFlow&lt;SettingsUiState&gt; with displayName, groupId, isLoading, error, isSaved</state>
+      <methods>loadCurrentSettings(), updateDisplayName(String), updateGroupId(String), saveSettings()</methods>
+    </interface>
+    <interface type="kotlin" name="SettingsUiState">
+      <signature>data class SettingsUiState(displayName: String, groupId: String, displayNameError: String?, groupIdError: String?, isFormValid: Boolean, isLoading: Boolean, error: String?, isSaved: Boolean)</signature>
+    </interface>
+    <interface type="compose" name="SettingsScreen">
+      <signature>@Composable fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBack: () -> Unit, onSettingsSaved: () -> Unit)</signature>
+      <components>Scaffold, TopAppBar with back button, OutlinedTextField for displayName/groupId, Button for save</components>
+    </interface>
+    <interface type="navigation" name="Screen.Settings">
+      <signature>data object Settings : Screen("settings")</signature>
+      <composable>composable(Screen.Settings.route) { SettingsScreen(onNavigateBack = { navController.popBackStack() }, onSettingsSaved = { ... }) }</composable>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Use JUnit 5 with MockK for mocking</standard>
+      <standard>Use Turbine for Flow testing in ViewModels</standard>
+      <standard>Use kotlinx-coroutines-test for suspend function testing</standard>
+      <standard>Follow AAA pattern (Arrange, Act, Assert)</standard>
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/ui/settings/SettingsViewModelTest.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E1.3.1">Test SettingsViewModel.loadCurrentSettings() loads from SecureStorage on init</idea>
+      <idea ac="E1.3.2">Test SettingsViewModel.saveSettings() calls DeviceRepository.registerDevice() with new displayName</idea>
+      <idea ac="E1.3.2">Test SettingsViewModel updates SecureStorage on successful save</idea>
+      <idea ac="E1.3.3">Test SettingsViewModel.saveSettings() calls DeviceRepository.registerDevice() with new groupId</idea>
+      <idea ac="E1.3.3">Test SettingsViewModel shows error state on repository failure</idea>
+      <idea ac="E1.3.4">Test SettingsViewModel loads persisted values after simulated restart</idea>
+      <idea ac="E1.3.2">Test validation - displayName too short/long returns error</idea>
+      <idea ac="E1.3.3">Test validation - groupId with invalid characters returns error</idea>
+      <idea manual="true">Update displayName, restart app, verify new name persisted</idea>
+      <idea manual="true">Change groupId, verify server call and group member list refreshes</idea>
+    </ideas>
+  </tests>
+</story-context>

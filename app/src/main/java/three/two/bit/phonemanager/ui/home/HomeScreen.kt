@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -35,6 +36,7 @@ fun HomeScreen(
     onRequestLocationPermission: () -> Unit,
     onRequestBackgroundPermission: () -> Unit,
     onRequestNotificationPermission: () -> Unit,
+    onNavigateToGroupMembers: () -> Unit = {},
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -95,6 +97,14 @@ fun HomeScreen(
             locationStats = locationStats,
             modifier = Modifier.fillMaxWidth(),
         )
+
+        // Navigate to Group Members screen (Story E1.2)
+        Button(
+            onClick = onNavigateToGroupMembers,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("View Group Members")
+        }
     }
 
     // Location permission rationale dialog

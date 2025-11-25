@@ -4,13 +4,16 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.header
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import three.two.bit.phonemanager.network.models.DeviceInfo
+import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.network.models.DeviceRegistrationRequest
 import three.two.bit.phonemanager.network.models.DeviceRegistrationResponse
+import three.two.bit.phonemanager.network.models.DevicesResponse
+import three.two.bit.phonemanager.network.models.toDomain
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -22,7 +25,7 @@ import javax.inject.Singleton
  */
 interface DeviceApiService {
     suspend fun registerDevice(request: DeviceRegistrationRequest): Result<DeviceRegistrationResponse>
-    suspend fun getGroupMembers(groupId: String): Result<List<DeviceInfo>>
+    suspend fun getGroupMembers(groupId: String): Result<List<Device>>
 }
 
 @Singleton
@@ -54,21 +57,22 @@ class DeviceApiServiceImpl @Inject constructor(
     /**
      * Get all devices in a group
      * GET /api/devices?groupId={id}
+     *
+     * Story E1.2: AC E1.2.1 - Fetch group members with proper API call and headers
      */
-    override suspend fun getGroupMembers(groupId: String): Result<List<DeviceInfo>> = try {
+    override suspend fun getGroupMembers(groupId: String): Result<List<Device>> = try {
         Timber.d("Fetching group members for groupId=$groupId")
 
-        val response: List<DeviceInfo> = httpClient.get("${apiConfig.baseUrl}/api/devices") {
-            url {
-                parameters.append("groupId", groupId)
-            }
+        val response: DevicesResponse = httpClient.get("${apiConfig.baseUrl}/api/devices") {
+            parameter("groupId", groupId)
             header("X-API-Key", apiConfig.apiKey)
         }.body()
 
-        Timber.i("Fetched ${response.size} group members")
-        Result.success(response)
+        val devices = response.devices.map { it.toDomain() }
+        Timber.i("Fetched ${devices.size} group members for group: $groupId")
+        Result.success(devices)
     } catch (e: Exception) {
-        Timber.e(e, "Failed to fetch group members")
+        Timber.e(e, "Failed to fetch group members for groupId=$groupId")
         Result.failure(e)
     }
 }

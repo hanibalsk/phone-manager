@@ -30,11 +30,7 @@ class WatchdogManagerTest {
         context = mockk(relaxed = true)
         workManager = mockk(relaxed = true)
 
-        // Mock WorkManager.getInstance
-        mockkStatic(WorkManager::class)
-        every { WorkManager.getInstance(context) } returns workManager
-
-        watchdogManager = WatchdogManager(context)
+        watchdogManager = WatchdogManager(context, workManager)
     }
 
     @After

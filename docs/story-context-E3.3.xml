@@ -1,0 +1,170 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E3</epicId>
+    <storyId>E3.3</storyId>
+    <title>Real-Time Location Polling</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E3.3.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>location markers to update periodically</iWant>
+    <soThat>I see near real-time positions</soThat>
+    <tasks>
+      <task id="1" ac="E3.3.1,E3.3.6">Implement Polling Timer - Create polling coroutine in MapViewModel with lifecycle awareness, start when visible, stop when hidden</task>
+      <task id="2" ac="E3.3.2">Fetch and Update Locations - Call DeviceRepository.getGroupMembers() on each poll, update MapUiState, trigger recomposition</task>
+      <task id="3" ac="E3.3.3">Display Last Update Time - Track lastPolledAt timestamp, update marker snippets with relative time</task>
+      <task id="4" ac="E3.3.4">Handle Network Errors - Catch exceptions in polling coroutine, log but don't crash, continue on next interval</task>
+      <task id="5" ac="E3.3.5">Add Polling Interval Setting - Add to PreferencesRepository, UI in Settings (10,15,20,30s), MapViewModel reads from prefs</task>
+      <task id="6" ac="All">Testing - Manual test polling, network disconnection, lifecycle-aware behavior</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E3.3.1" title="Periodic Polling">
+      <given>the Map screen is open</given>
+      <when>the configured polling interval elapses (10-30 seconds)</when>
+      <then>the app should fetch updated locations for all group members AND this should happen automatically without manual refresh</then>
+    </ac>
+    <ac id="E3.3.2" title="Marker Updates">
+      <given>new location data is received</given>
+      <when>the poll completes</when>
+      <then>markers on the map should update to reflect new positions AND animation should smooth the transition (optional)</then>
+    </ac>
+    <ac id="E3.3.3" title="Last Update Time Indicator">
+      <given>markers are displayed</given>
+      <when>I view a group member's marker</when>
+      <then>I should see the last update time for that member AND time should update after each poll</then>
+    </ac>
+    <ac id="E3.3.4" title="Network Failure Handling">
+      <given>network is unavailable</given>
+      <when>a poll cycle occurs</when>
+      <then>the system should fail gracefully without crashing AND retry on next interval AND optionally show a subtle connectivity indicator</then>
+    </ac>
+    <ac id="E3.3.5" title="Configurable Polling Interval">
+      <given>I am in Settings</given>
+      <when>I configure the polling interval</when>
+      <then>I should be able to choose between 10, 15, 20, 30 seconds AND the Map screen should respect this setting</then>
+    </ac>
+    <ac id="E3.3.6" title="Stop Polling When Screen Hidden">
+      <given>the Map screen is open and polling</given>
+      <when>I navigate away or minimize the app</when>
+      <then>polling should pause to save battery AND resume when I return to the Map screen</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" section="Feature 2">
+        <title>Real-Time Map Display (FR-2.3)</title>
+        <snippet>FR-2.3: Real-time location updates on map. Users should see group member locations update periodically (configurable 10-30s). Markers should animate position changes smoothly. System should handle network failures gracefully.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E3.2.md">
+        <title>Story E3.2 - Group Members on Map</title>
+        <snippet>Displays group member markers with DeviceRepository.getGroupMembers(). Returns List&lt;DeviceInfo&gt; with lastLocation. MapViewModel manages groupMembers state. Foundation for polling updates.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E3.1.md">
+        <title>Story E3.1 - Google Maps Integration</title>
+        <snippet>MapViewModel with StateFlow pattern. GoogleMap composable with lifecycle-aware coroutines. Uses DisposableEffect for lifecycle management. Foundation for polling implementation.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E1.2.md">
+        <title>Story E1.2 - Group Member Discovery</title>
+        <snippet>DeviceRepository.getGroupMembers() API. Returns Result&lt;List&lt;DeviceInfo&gt;&gt; with network error handling. This is the API endpoint to poll periodically for location updates.</snippet>
+      </doc>
+      <doc path="docs/solution-architecture.md" section="1.2 ADR-004">
+        <title>WorkManager for Background Tasks</title>
+        <snippet>WorkManager chosen for periodic background tasks with Doze mode compatibility. Battery-efficient with constraints. Guaranteed execution across app kills and reboots. Not suitable for precise timing but acceptable for configurable intervals.</snippet>
+      </doc>
+      <doc path="docs/epics.md" section="Epic 3">
+        <title>Epic 3 - Real-Time Map & Group Display</title>
+        <snippet>Story E3.3 adds real-time location polling to update markers periodically. Configurable interval (10-30s). Lifecycle-aware to conserve battery when not visible.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt" kind="interface" symbol="DeviceRepository.getGroupMembers()" lines="67-76">
+        <reason>API to fetch group member locations. This will be called periodically in polling coroutine. Returns Result&lt;List&lt;DeviceInfo&gt;&gt; with lastLocation data.</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/preferences/PreferencesRepository.kt" kind="interface" symbol="PreferencesRepository" lines="25-37">
+        <reason>Existing preferences system using DataStore. Need to extend with pollingIntervalSeconds Flow and setter for configurable polling interval (10-30s).</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/preferences/PreferencesRepository.kt" kind="implementation" symbol="PreferencesRepositoryImpl" lines="42-148">
+        <reason>DataStore-based preferences implementation. Shows pattern for adding new preferences with Flow and error handling. Will extend for polling interval setting.</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/network/models/DeviceModels.kt" kind="model" symbol="DeviceInfo" lines="37-42">
+        <reason>Domain model returned by getGroupMembers(). Contains lastLocation field which needs to be updated on each poll and reflected in map markers.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <dependency name="androidx.lifecycle:lifecycle-viewmodel-compose" version="~2.10.0" required="true">ViewModel with viewModelScope for polling coroutine</dependency>
+        <dependency name="org.jetbrains.kotlinx:kotlinx-coroutines-android" version="~1.10.2" required="true">Coroutines with delay() for polling timer</dependency>
+        <dependency name="androidx.datastore:datastore-preferences" version="~1.2.0" required="true">DataStore for polling interval preference</dependency>
+        <dependency name="androidx.compose:compose-bom" version="2025.10.01" required="true">Compose for DisposableEffect lifecycle management</dependency>
+        <dependency name="com.jakewharton.timber:timber" version="~5.0.1" required="true">Logging for polling events and errors</dependency>
+        <dependency name="com.google.dagger:hilt-android" version="~2.57.2" required="true">Hilt DI for dependencies</dependency>
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Lifecycle Awareness: Use DisposableEffect to start polling when MapScreen visible, stop when disposed</constraint>
+    <constraint>Battery Efficiency: Polling must stop when screen not visible (onPause/onStop) to conserve battery</constraint>
+    <constraint>Coroutine Scope: Use viewModelScope for polling coroutine, automatically cancelled when ViewModel cleared</constraint>
+    <constraint>Polling Implementation: Use while(isActive) loop with delay() for configurable interval, cancel via Job.cancel()</constraint>
+    <constraint>Error Handling: Catch and log polling errors, continue to next interval without crashing</constraint>
+    <constraint>Network Failures: Handle Result.failure gracefully, keep last known positions, retry on next interval</constraint>
+    <constraint>Configurable Interval: Support 10, 15, 20, 30 seconds via PreferencesRepository Flow</constraint>
+    <constraint>State Updates: Update MapUiState with new groupMembers and lastPolledAt timestamp on successful poll</constraint>
+    <constraint>DataStore Pattern: Follow existing PreferencesRepository pattern for new polling interval preference</constraint>
+    <constraint>Logging: Use Timber for polling start/stop, successful updates, and error cases</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="DeviceRepository.getGroupMembers()" kind="suspend function" path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt">
+      <signature>suspend fun getGroupMembers(): Result&lt;List&lt;DeviceInfo&gt;&gt;</signature>
+      <description>API to fetch current locations of all group members. Call periodically in polling loop.</description>
+    </interface>
+    <interface name="PreferencesRepository (to extend)" kind="interface" path="app/src/main/java/three/two/bit/phonemanager/data/preferences/PreferencesRepository.kt">
+      <signature>val pollingIntervalSeconds: Flow&lt;Int&gt; (NEW)
+suspend fun setPollingIntervalSeconds(seconds: Int) (NEW)</signature>
+      <description>Extend with polling interval preference. Default 15 seconds, options: 10, 15, 20, 30.</description>
+    </interface>
+    <interface name="MapViewModel (to extend)" kind="class" path="app/src/main/java/three/two/bit/phonemanager/ui/map/MapViewModel.kt">
+      <signature>fun startPolling() (NEW)
+fun stopPolling() (NEW)
+private suspend fun fetchGroupMembers() (NEW)</signature>
+      <description>Add polling logic to existing MapViewModel. Start/stop controlled by DisposableEffect lifecycle.</description>
+    </interface>
+    <interface name="MapUiState (to extend)" kind="data class" path="app/src/main/java/three/two/bit/phonemanager/ui/map/MapViewModel.kt">
+      <signature>data class MapUiState(..., lastPolledAt: Instant? = null) (NEW FIELD)</signature>
+      <description>Add lastPolledAt timestamp to track when locations were last updated. Used for "last update" indicator.</description>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      Project uses JUnit for unit tests and AndroidX Test for instrumented tests.
+      Use MockK for mocking dependencies. Test ViewModels with Turbine for Flow testing.
+      Use kotlinx-coroutines-test for testing coroutines with TestDispatcher.
+      Manual testing required for real-time polling behavior and lifecycle scenarios.
+    </standards>
+    <locations>
+      <location>app/src/test/java/**/*Test.kt</location>
+      <location>app/src/androidTest/java/**/*Test.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E3.3.1">Unit test MapViewModel startPolling() triggers initial fetch and subsequent polls at configured interval</idea>
+      <idea ac="E3.3.1">Unit test polling coroutine uses pollingIntervalSeconds from PreferencesRepository</idea>
+      <idea ac="E3.3.2">Unit test MapUiState updates with new groupMembers when poll succeeds</idea>
+      <idea ac="E3.3.3">Unit test lastPolledAt timestamp is updated after each successful poll</idea>
+      <idea ac="E3.3.4">Unit test network failure doesn't crash polling, continues to next interval</idea>
+      <idea ac="E3.3.4">Unit test Result.failure from getGroupMembers() is logged but state unchanged</idea>
+      <idea ac="E3.3.5">Unit test PreferencesRepository pollingIntervalSeconds Flow with different values (10, 15, 20, 30)</idea>
+      <idea ac="E3.3.6">Unit test stopPolling() cancels polling coroutine and no further polls occur</idea>
+      <idea ac="E3.3.6">Manual test: Open Map screen, observe polling, navigate away, verify polling stops (check logs)</idea>
+      <idea ac="All">Manual test: Set polling interval to 10s in Settings, observe markers update every 10s on Map screen</idea>
+      <idea ac="All">Manual test: Disable network during polling, verify app doesn't crash and retries on next interval</idea>
+    </ideas>
+  </tests>
+</story-context>

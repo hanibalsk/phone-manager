@@ -18,9 +18,10 @@ import javax.inject.Singleton
  * Uses WorkManager to schedule periodic health checks.
  */
 @Singleton
-class WatchdogManager @Inject constructor(@ApplicationContext private val context: Context) {
-
-    private val workManager = WorkManager.getInstance(context)
+class WatchdogManager @Inject constructor(
+    @ApplicationContext private val context: Context,
+    private val workManager: WorkManager,
+) {
 
     companion object {
         private const val WATCHDOG_WORK_NAME = "service_health_watchdog"

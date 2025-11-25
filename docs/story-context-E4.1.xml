@@ -1,0 +1,166 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E4</epicId>
+    <storyId>E4.1</storyId>
+    <title>Location History UI</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E4.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>to view my location history on the map</iWant>
+    <soThat>I can see where I've been</soThat>
+    <tasks>
+      <task id="1" ac="E4.1.1">Create HistoryScreen - Composable with GoogleMap, date filter UI, navigation entry</task>
+      <task id="2" ac="E4.1.3">Create HistoryViewModel - HistoryUiState, fetchHistoryFromLocal(startTime, endTime), query LocationDao</task>
+      <task id="3" ac="E4.1.2">Implement Polyline Rendering - Convert LocationEntity to LatLng, use Polyline composable, style polyline</task>
+      <task id="4" ac="E4.1.4">Implement Date Presets - Today, Yesterday, Last 7 Days chips, calculate ranges, update query</task>
+      <task id="5" ac="E4.1.5">Implement Custom Date Range - Date picker dialogs, allow custom start/end, validate range</task>
+      <task id="6" ac="E4.1.6">Handle Empty State - Detect empty result, show empty state message</task>
+      <task id="7" ac="All">Testing - Manual test polyline, date filters, offline functionality</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E4.1.1" title="History Screen">
+      <given>I am in the app</given>
+      <when>I navigate to History</when>
+      <then>I should see a History screen with a map view AND date/time filter options</then>
+    </ac>
+    <ac id="E4.1.2" title="Polyline Display">
+      <given>I have recorded location history</given>
+      <when>I view the History screen</when>
+      <then>my path should be displayed as a polyline on the map AND the polyline should connect location points chronologically</then>
+    </ac>
+    <ac id="E4.1.3" title="Local Data Source">
+      <given>I want to view my own history</given>
+      <when>I select a date range</when>
+      <then>the app should fetch data from local Room database AND display without requiring network connectivity</then>
+    </ac>
+    <ac id="E4.1.4" title="Date Filter - Presets">
+      <given>I am on the History screen</given>
+      <when>I tap the date filter</when>
+      <then>I should see preset options: Today, Yesterday, Last 7 days</then>
+    </ac>
+    <ac id="E4.1.5" title="Date Filter - Custom Range">
+      <given>I am on the History screen</given>
+      <when>I select "Custom range"</when>
+      <then>I should be able to pick start and end dates AND the polyline should update to show only that range</then>
+    </ac>
+    <ac id="E4.1.6" title="Empty History State">
+      <given>no location data exists for selected range</given>
+      <when>I view History</when>
+      <then>I should see a message: "No location history for this period"</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" section="NFR-4.1, NFR-4.3">
+        <title>Local Storage and Reliability Requirements</title>
+        <snippet>NFR-4.1: 99% successful transmission. NFR-4.3: Service restart after crash. Local Room database stores location data as queue. Offline-capable design with local persistence.</snippet>
+      </doc>
+      <doc path="docs/solution-architecture.md" section="2.3">
+        <title>Room Database Architecture</title>
+        <snippet>Transmission Queue (Room Database) stores location data locally. LocationEntity persisted in Room. Supports offline queuing and viewing. Part of Data Layer with LocationRepository interface.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E3.1.md">
+        <title>Story E3.1 - Google Maps Integration</title>
+        <snippet>GoogleMap composable with maps-compose library. MapViewModel with StateFlow pattern. Uses Marker and CameraPosition. Foundation for polyline rendering on history map.</snippet>
+      </doc>
+      <doc path="docs/epics.md" section="Epic 4">
+        <title>Epic 4 - Location History</title>
+        <snippet>Story E4.1: Display user's own location history as polyline on map. Query local Room database by date range. Date filter presets (Today, Yesterday, Last 7 days) and custom range picker. Offline-capable.</snippet>
+      </doc>
+      <doc path="docs/epics.md" section="Epic 0">
+        <title>Epic 0 - Foundation Infrastructure</title>
+        <snippet>Room Database completed with LocationDao and LocationEntity. SQLite persistence for location data. LocationQueueDao for transmission queue. Local data storage foundation ready.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/database/LocationDao.kt" kind="interface" symbol="LocationDao" lines="12-41">
+        <reason>Existing DAO for location database operations. Need to add getLocationsBetween(startTime, endTime) query for date range filtering. Has observeAllLocations() pattern to follow.</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/model/LocationEntity.kt" kind="entity" symbol="LocationEntity" lines="10-22">
+        <reason>Room entity representing stored location. Contains latitude, longitude, timestamp, accuracy. This is the data model to convert to LatLng for polyline rendering.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <dependency name="com.google.maps.android:maps-compose" version="~4.3.0" required="true">Maps Compose for polyline rendering</dependency>
+        <dependency name="com.google.android.gms:play-services-maps" version="~18.2.0" required="true">Google Maps SDK for polyline and map</dependency>
+        <dependency name="androidx.room:room-runtime" version="~2.8.4" required="true">Room database for local storage</dependency>
+        <dependency name="androidx.room:room-ktx" version="~2.8.4" required="true">Room Coroutines support</dependency>
+        <dependency name="androidx.compose:compose-bom" version="2025.10.01" required="true">Jetpack Compose for UI</dependency>
+        <dependency name="androidx.lifecycle:lifecycle-viewmodel-compose" version="~2.10.0" required="true">ViewModel for Compose</dependency>
+        <dependency name="com.google.dagger:hilt-android" version="~2.57.2" required="true">Hilt DI</dependency>
+        <dependency name="com.jakewharton.timber:timber" version="~5.0.1" required="true">Logging</dependency>
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>MVVM Pattern: HistoryScreen must use HistoryViewModel with StateFlow for UI state</constraint>
+    <constraint>Offline First: Query local Room database only, no network required for viewing history</constraint>
+    <constraint>Date Range Query: Extend LocationDao with getLocationsBetween(startTime, endTime) returning List&lt;LocationEntity&gt;</constraint>
+    <constraint>Polyline Rendering: Convert List&lt;LocationEntity&gt; to List&lt;LatLng&gt; chronologically (ORDER BY timestamp ASC)</constraint>
+    <constraint>Maps Compose: Use Polyline composable with points, color, width parameters on GoogleMap</constraint>
+    <constraint>Date Filters: Support Today, Yesterday, Last 7 Days presets plus custom range picker</constraint>
+    <constraint>Empty State: Show "No location history for this period" when query returns empty list</constraint>
+    <constraint>Compose UI: Use Material 3 components with chips/buttons for date filter selection</constraint>
+    <constraint>Navigation: Add History route to existing navigation system</constraint>
+    <constraint>Hilt DI: Use @HiltViewModel and @Inject for dependency injection</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="LocationDao (to extend)" kind="interface" path="app/src/main/java/three/two/bit/phonemanager/data/database/LocationDao.kt">
+      <signature>@Query("SELECT * FROM locations WHERE timestamp >= :startTime AND timestamp &lt;= :endTime ORDER BY timestamp ASC")
+suspend fun getLocationsBetween(startTime: Long, endTime: Long): List&lt;LocationEntity&gt; (NEW)</signature>
+      <description>Add date range query to fetch locations between start and end timestamps. Order chronologically for polyline display.</description>
+    </interface>
+    <interface name="LocationEntity" kind="data class" path="app/src/main/java/three/two/bit/phonemanager/data/model/LocationEntity.kt">
+      <signature>data class LocationEntity(latitude: Double, longitude: Double, timestamp: Long, ...)</signature>
+      <description>Existing Room entity with location data. Convert to LatLng(latitude, longitude) for polyline points.</description>
+    </interface>
+    <interface name="HistoryViewModel (NEW)" kind="class" path="app/src/main/java/three/two/bit/phonemanager/ui/history/HistoryViewModel.kt">
+      <signature>@HiltViewModel class HistoryViewModel(locationDao: LocationDao)
+fun setDateFilter(filter: DateFilter)
+private suspend fun fetchLocations(startTime: Long, endTime: Long)</signature>
+      <description>New ViewModel to manage history UI state, date filtering, and location queries.</description>
+    </interface>
+    <interface name="HistoryUiState (NEW)" kind="data class" path="app/src/main/java/three/two/bit/phonemanager/ui/history/HistoryViewModel.kt">
+      <signature>data class HistoryUiState(locations: List&lt;LocationEntity&gt; = emptyList(), selectedFilter: DateFilter = DateFilter.Today, isLoading: Boolean = false)</signature>
+      <description>UI state for history screen with locations list and selected date filter.</description>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      Project uses JUnit for unit tests and AndroidX Test for instrumented tests.
+      Use MockK for mocking dependencies. Test ViewModels with Turbine for Flow testing.
+      Room database tests use in-memory database with AndroidX Test.
+      Manual testing required for map polyline rendering and date picker interactions.
+    </standards>
+    <locations>
+      <location>app/src/test/java/**/*Test.kt</location>
+      <location>app/src/androidTest/java/**/*Test.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E4.1.1">UI test: Navigate to History screen, verify GoogleMap is displayed</idea>
+      <idea ac="E4.1.1">UI test: Verify date filter UI is present (chips for Today, Yesterday, Last 7 Days)</idea>
+      <idea ac="E4.1.2">Unit test: LocationDao.getLocationsBetween() returns locations in chronological order</idea>
+      <idea ac="E4.1.2">Unit test: HistoryViewModel converts LocationEntity list to LatLng list for polyline</idea>
+      <idea ac="E4.1.3">Unit test: HistoryViewModel queries LocationDao with correct date range timestamps</idea>
+      <idea ac="E4.1.3">Manual test: Disable network, verify history displays without errors (offline capability)</idea>
+      <idea ac="E4.1.4">Unit test: Date filter "Today" calculates correct start of day timestamp</idea>
+      <idea ac="E4.1.4">Unit test: Date filter "Yesterday" calculates correct previous day range</idea>
+      <idea ac="E4.1.4">Unit test: Date filter "Last 7 Days" calculates correct 7-day range</idea>
+      <idea ac="E4.1.5">UI test: Select custom date range, verify start/end date pickers appear</idea>
+      <idea ac="E4.1.5">Unit test: Custom date range validation (end date must be after start date)</idea>
+      <idea ac="E4.1.6">Unit test: Empty LocationEntity list results in empty state UI</idea>
+      <idea ac="E4.1.6">Manual test: Select date range with no data, verify "No location history" message shown</idea>
+      <idea ac="All">Manual test: Record locations, view History, verify polyline connects all points chronologically</idea>
+    </ideas>
+  </tests>
+</story-context>

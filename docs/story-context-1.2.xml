@@ -1,0 +1,208 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/E1.2" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>Group Member Discovery</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-E1.2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to see devices in my group</iWant>
+    <soThat>I can share location with specific people and know who is in my group</soThat>
+    <tasks>
+      <task id="1">Create Device Domain Model - Device and DeviceLocation data classes in domain/model</task>
+      <task id="2">Extend Device Network Models - DevicesResponse, DeviceDto, LocationDto DTOs with toDomain() mapper</task>
+      <task id="3">Extend DeviceApiService - Add getGroupMembers() with Ktor GET request to /api/devices?groupId={id}</task>
+      <task id="4">Extend DeviceRepository - Add getGroupMembers() with network check, filter current device</task>
+      <task id="5">Create GroupMembersViewModel - GroupMembersUiState, loadGroupMembers(), refresh()</task>
+      <task id="6">Create GroupMembersScreen - Compose UI with DeviceCard, EmptyGroupContent, ErrorContent, pull-to-refresh</task>
+      <task id="7">Update Navigation - Add GroupMembers route to Screen sealed class and NavHost</task>
+      <task id="8">Testing - Unit tests for mapper, repository, viewmodel; manual testing with 2+ devices</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E1.2.1" title="Fetch Group Members API Call">
+      <given>I am registered with a groupId</given>
+      <when>I request the list of group members</when>
+      <then>the app should call GET /api/devices?groupId={id} with X-API-Key header and parse response into Device objects</then>
+    </ac>
+    <ac id="E1.2.2" title="Device Entity and Repository">
+      <given>the group members API returns a response</given>
+      <when>the response is parsed</when>
+      <then>each device mapped to Device entity (deviceId, displayName, lastLocation, lastSeenAt) and DeviceRepository provides getGroupMembers method</then>
+    </ac>
+    <ac id="E1.2.3" title="Group Members List Display">
+      <given>I have fetched the list of group members</given>
+      <when>I navigate to the group members screen</when>
+      <then>I should see list of all devices with displayName and lastSeenAt in human-readable format, own device filtered out</then>
+    </ac>
+    <ac id="E1.2.4" title="Empty Group Handling">
+      <given>I am the only device registered in my group</given>
+      <when>I fetch group members</when>
+      <then>show empty state message: "No other devices in your group yet" with instructions to share group ID</then>
+    </ac>
+    <ac id="E1.2.5" title="Group Members Fetch Error Handling">
+      <given>the group members API fails</given>
+      <when>the error response is received</when>
+      <then>display error message, show Retry button, log via Timber</then>
+    </ac>
+    <ac id="E1.2.6" title="Pull-to-Refresh Group Members">
+      <given>I am viewing the group members list</given>
+      <when>I pull down to refresh</when>
+      <then>re-fetch group members from server and update the list</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/prd-phone-manager-2025-11-25.md" relevance="high">
+        PRD with Feature 6 (FR-6.2, FR-6.3) requirements and Section 6.3 API spec for GET /api/devices
+      </doc>
+      <doc path="docs/epics.md" relevance="high">
+        Epic 1 overview and Story 1.2 description with acceptance criteria
+      </doc>
+      <doc path="docs/stories/story-E1.1.md" relevance="high">
+        Predecessor story - Device Registration patterns to follow
+      </doc>
+    </docs>
+    <code>
+      <file path="app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt" relevance="high" action="MODIFY">
+        <purpose>HTTP client for device operations - already has registerDevice, needs getGroupMembers</purpose>
+        <interface>interface DeviceApiService { suspend fun getGroupMembers(groupId: String): Result&lt;List&lt;DeviceInfo&gt;&gt; }</interface>
+        <pattern>Uses Ktor HttpClient with Result wrapper, Timber logging, ApiConfiguration for baseUrl/apiKey</pattern>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt" relevance="high" action="MODIFY">
+        <purpose>Repository with local+network data access - already has registerDevice, needs getGroupMembers</purpose>
+        <interface>interface DeviceRepository { suspend fun getGroupMembers(): Result&lt;List&lt;DeviceInfo&gt;&gt; }</interface>
+        <pattern>Uses SecureStorage for credentials, NetworkManager for connectivity check, Result wrapper</pattern>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/network/models/DeviceModels.kt" relevance="high" action="MODIFY">
+        <purpose>Network DTOs for device API - already has DeviceInfo, DeviceLastLocation</purpose>
+        <existing>DeviceRegistrationRequest, DeviceRegistrationResponse, DeviceInfo, DeviceLastLocation</existing>
+        <needed>DevicesResponse wrapper DTO for API response parsing, mapper to domain model</needed>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/security/SecureStorage.kt" relevance="medium" action="REUSE">
+        <purpose>Encrypted storage for device credentials</purpose>
+        <methods>getDeviceId(), getGroupId(), getDisplayName(), isRegistered()</methods>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/network/NetworkManager.kt" relevance="medium" action="REUSE">
+        <purpose>Network connectivity management</purpose>
+        <methods>isNetworkAvailable(), getNetworkType()</methods>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/navigation/PhoneManagerNavHost.kt" relevance="medium" action="MODIFY">
+        <purpose>Navigation host - needs GroupMembers route</purpose>
+        <existing>Screen sealed class with Registration, Home routes</existing>
+        <pattern>Uses NavHost with composable() calls, route-based navigation</pattern>
+      </file>
+    </code>
+    <dependencies>
+      <dependency name="Ktor Client" usage="HTTP requests to /api/devices endpoint">
+        libs.ktor.client.android, libs.ktor.client.content.negotiation, libs.ktor.serialization.kotlinx.json
+      </dependency>
+      <dependency name="Hilt" usage="Dependency injection for ViewModel, Repository, ApiService">
+        libs.hilt.android, @HiltViewModel, @Inject constructor, @Singleton
+      </dependency>
+      <dependency name="Jetpack Compose" usage="UI for GroupMembersScreen">
+        libs.androidx.compose.material3, Scaffold, LazyColumn, Card, PullToRefreshState
+      </dependency>
+      <dependency name="Navigation Compose" usage="Navigation to GroupMembers screen">
+        libs.androidx.navigation.compose, NavHost, composable()
+      </dependency>
+      <dependency name="Kotlinx Serialization" usage="JSON parsing for API response">
+        @Serializable data classes, libs.kotlinx.serialization.json
+      </dependency>
+      <dependency name="Kotlinx Datetime" usage="Instant parsing for lastSeenAt timestamp">
+        kotlinx.datetime.Instant, Clock.System.now() for relative time
+      </dependency>
+      <dependency name="Timber" usage="Logging">
+        Timber.d(), Timber.e(), Timber.i()
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Follow MVVM + Repository pattern established in E1.1</constraint>
+    <constraint type="architecture">Use Result wrapper for error handling, not exceptions</constraint>
+    <constraint type="architecture">Filter current device from group members on client side</constraint>
+    <constraint type="api">GET /api/devices?groupId={id} with X-API-Key header</constraint>
+    <constraint type="api">Response format: { "devices": [{ deviceId, displayName, lastLocation?, lastSeenAt? }] }</constraint>
+    <constraint type="ui">Material 3 design system, consistent with existing screens</constraint>
+    <constraint type="ui">Handle loading, error, and empty states explicitly</constraint>
+    <constraint type="ui">Pull-to-refresh for list updates</constraint>
+    <constraint type="ui">Relative time formatting for lastSeenAt (e.g., "2 min ago")</constraint>
+    <constraint type="performance">PRD limits 20 devices per group - no pagination needed initially</constraint>
+    <constraint type="code-style">Use Spotless for formatting, follow existing code patterns</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface type="api" name="GET /api/devices">
+      <endpoint>GET /api/devices?groupId={id}</endpoint>
+      <headers>X-API-Key: {apiKey}, Content-Type: application/json</headers>
+      <response>{
+  "devices": [
+    {
+      "deviceId": "device-001",
+      "displayName": "Martin's Phone",
+      "lastLocation": {
+        "latitude": 48.1486,
+        "longitude": 17.1077,
+        "timestamp": "2025-11-25T18:30:00Z"
+      },
+      "lastSeenAt": "2025-11-25T18:30:00Z"
+    }
+  ]
+}</response>
+    </interface>
+    <interface type="kotlin" name="DeviceApiService">
+      <signature>suspend fun getGroupMembers(groupId: String): Result&lt;List&lt;DeviceInfo&gt;&gt;</signature>
+    </interface>
+    <interface type="kotlin" name="DeviceRepository">
+      <signature>suspend fun getGroupMembers(): Result&lt;List&lt;DeviceInfo&gt;&gt;</signature>
+      <note>Gets groupId from SecureStorage, filters out current device</note>
+    </interface>
+    <interface type="kotlin" name="GroupMembersViewModel">
+      <signature>class GroupMembersViewModel @Inject constructor(private val deviceRepository: DeviceRepository)</signature>
+      <state>StateFlow&lt;GroupMembersUiState&gt; with members, isLoading, error, isEmpty</state>
+      <methods>loadGroupMembers(), refresh()</methods>
+    </interface>
+    <interface type="compose" name="GroupMembersScreen">
+      <signature>@Composable fun GroupMembersScreen(viewModel: GroupMembersViewModel = hiltViewModel(), onNavigateBack: () -> Unit)</signature>
+      <components>DeviceCard, EmptyGroupContent, ErrorContent, PullToRefreshContainer</components>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Use JUnit 5 with MockK for mocking</standard>
+      <standard>Use Turbine for Flow testing in ViewModels</standard>
+      <standard>Use kotlinx-coroutines-test for suspend function testing</standard>
+      <standard>Follow AAA pattern (Arrange, Act, Assert)</standard>
+      <standard>Test naming: `method_condition_expectedResult` or backticks with description</standard>
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/data/repository/DeviceRepositoryTest.kt</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/ui/group/GroupMembersViewModelTest.kt</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/network/models/DeviceModelsMapperTest.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E1.2.1">Test DeviceApiService.getGroupMembers() returns parsed devices on success</idea>
+      <idea ac="E1.2.1">Test DeviceApiService.getGroupMembers() returns Result.failure on network error</idea>
+      <idea ac="E1.2.2">Test DeviceDto.toDomain() maps all fields correctly including nullable lastLocation</idea>
+      <idea ac="E1.2.2">Test DeviceRepository.getGroupMembers() filters out current device</idea>
+      <idea ac="E1.2.2">Test DeviceRepository.getGroupMembers() returns error when not registered (no groupId)</idea>
+      <idea ac="E1.2.3">Test GroupMembersViewModel.loadGroupMembers() updates state with devices</idea>
+      <idea ac="E1.2.4">Test GroupMembersViewModel shows empty state when devices list is empty</idea>
+      <idea ac="E1.2.5">Test GroupMembersViewModel shows error state on repository failure</idea>
+      <idea ac="E1.2.5">Test DeviceRepository returns error when network unavailable</idea>
+      <idea ac="E1.2.6">Test GroupMembersViewModel.refresh() reloads group members</idea>
+      <idea manual="true">Register 2+ devices in same group, verify list shows other members</idea>
+      <idea manual="true">Disable network, attempt fetch, verify error with retry button</idea>
+      <idea manual="true">Single device in group, verify empty state message shown</idea>
+    </ideas>
+  </tests>
+</story-context>

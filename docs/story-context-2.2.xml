@@ -1,0 +1,185 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/E2.2" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2</storyId>
+    <title>Discreet Notification</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-E2.2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>the foreground notification to be discreet</iWant>
+    <soThat>others don't notice the tracking</soThat>
+    <tasks>
+      <task id="1">Create Notification Variants - Secret mode channel (IMPORTANCE_MIN), discreet builder, neutral icon</task>
+      <task id="2">Implement Notification Switching - Observe secret mode in service, update dynamically, maintain foreground</task>
+      <task id="3">Update LocationTrackingService - Inject PreferencesRepository, build notification by mode, subscribe to changes</task>
+      <task id="4">Testing - Manual test both modes, dynamic switching while tracking</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E2.2.1" title="Generic Notification Title">
+      <given>secret mode is enabled and background tracking is active</given>
+      <when>the foreground notification is displayed</when>
+      <then>the title should be generic: "Service running"</then>
+    </ac>
+    <ac id="E2.2.2" title="Neutral Notification Icon">
+      <given>secret mode is enabled</given>
+      <when>the foreground notification is displayed</when>
+      <then>the icon should be neutral (no GPS/location symbol), use generic system-style icon</then>
+    </ac>
+    <ac id="E2.2.3" title="Low Importance Notification">
+      <given>secret mode is enabled</given>
+      <when>the foreground notification is displayed</when>
+      <then>importance should be IMPORTANCE_MIN or IMPORTANCE_LOW, notification should not appear prominently</then>
+    </ac>
+    <ac id="E2.2.4" title="Silent Notification">
+      <given>secret mode is enabled</given>
+      <when>the foreground notification is displayed</when>
+      <then>there should be no sound and no vibration</then>
+    </ac>
+    <ac id="E2.2.5" title="Normal Mode Notification">
+      <given>secret mode is disabled</given>
+      <when>the foreground notification is displayed</when>
+      <then>the notification should use normal title, icon, and importance with standard behavior</then>
+    </ac>
+    <ac id="E2.2.6" title="Dynamic Notification Switching">
+      <given>tracking is active</given>
+      <when>secret mode is toggled</when>
+      <then>the notification should update to match new mode without interrupting tracking service</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/prd-phone-manager-2025-11-25.md" relevance="high">
+        PRD with Feature 1 (FR-1.2) - Notification Behavior requirements
+      </doc>
+      <doc path="docs/epics.md" relevance="high">
+        Epic 2 overview and Story 2.2 description
+      </doc>
+      <doc path="docs/solution-architecture.md" relevance="medium">
+        Architecture reference for LocationTrackingService
+      </doc>
+    </docs>
+    <code>
+      <file path="app/src/main/java/three/two/bit/phonemanager/service/LocationTrackingService.kt" relevance="high" action="MODIFY">
+        <purpose>Foreground service for location tracking - needs notification variants based on secret mode</purpose>
+        <current-notification>Single channel CHANNEL_ID with IMPORTANCE_LOW, title "Location Tracking Active", system location icon</current-notification>
+        <methods>createNotificationChannel() line 319, createNotification() line 335, updateNotification() line 370</methods>
+        <needed>
+          - Add second channel for secret mode (IMPORTANCE_MIN)
+          - Inject PreferencesRepository to observe secret mode
+          - Create buildNotification(isSecretMode: Boolean) method
+          - Subscribe to secret mode Flow, call updateNotification() on changes
+          - Maintain foreground service during notification updates
+        </needed>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/data/preferences/PreferencesRepository.kt" relevance="high" action="REUSE">
+        <purpose>DataStore preferences - provides secret mode state</purpose>
+        <interface>val isSecretModeEnabled: Flow&lt;Boolean&gt; (added in E2.1)</interface>
+        <note>Service will collect this Flow to dynamically update notification</note>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/di/ServiceModule.kt" relevance="medium" action="REFERENCE">
+        <purpose>Hilt service module - may need updates if PreferencesRepository binding needed</purpose>
+        <current>Only binds LocationServiceController</current>
+        <note>PreferencesRepository already bound in RepositoryModule, should auto-inject</note>
+      </file>
+    </code>
+    <dependencies>
+      <dependency name="Android Notification API" usage="Notification channels and builders">
+        NotificationChannel, NotificationCompat.Builder, NotificationManager.IMPORTANCE_MIN
+      </dependency>
+      <dependency name="DataStore Preferences" usage="Observe secret mode state">
+        PreferencesRepository.isSecretModeEnabled: Flow&lt;Boolean&gt;
+      </dependency>
+      <dependency name="Coroutines" usage="Collect secret mode Flow in service scope">
+        serviceScope.launch, Flow.collectLatest
+      </dependency>
+      <dependency name="Hilt" usage="Inject PreferencesRepository into service">
+        @Inject lateinit var, @AndroidEntryPoint on service
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Extend existing notification logic in LocationTrackingService</constraint>
+    <constraint type="architecture">Use two notification channels: normal (IMPORTANCE_LOW) and secret (IMPORTANCE_MIN)</constraint>
+    <constraint type="architecture">Maintain foreground service status during notification updates - use NotificationManager.notify() not startForeground()</constraint>
+    <constraint type="notification">Secret mode channel must be IMPORTANCE_MIN with no sound/vibration</constraint>
+    <constraint type="notification">Secret mode title: "Service running" (generic)</constraint>
+    <constraint type="notification">Secret mode icon: neutral system icon, not GPS/location symbol</constraint>
+    <constraint type="notification">Normal mode title: "Location Tracking Active" (descriptive)</constraint>
+    <constraint type="notification">Update notification in-place when secret mode toggles without stopping service</constraint>
+    <constraint type="code-style">Use Spotless for formatting, follow existing code patterns</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface type="kotlin" name="LocationTrackingService (extended)">
+      <signature>@Inject lateinit var preferencesRepository: PreferencesRepository</signature>
+      <constants>
+        CHANNEL_ID_NORMAL = "location_tracking_channel"
+        CHANNEL_ID_SECRET = "background_service_channel"
+      </constants>
+      <methods>
+        private fun createNotificationChannels() - create both normal and secret channels
+        private fun buildNotification(isSecretMode: Boolean): Notification - create notification based on mode
+        private fun observeSecretMode() - subscribe to secret mode changes and update notification
+      </methods>
+    </interface>
+    <interface type="android" name="Notification Channels">
+      <normal>
+        id: "location_tracking_channel"
+        name: "Location Tracking"
+        importance: IMPORTANCE_LOW
+        sound: default, vibration: default
+      </normal>
+      <secret>
+        id: "background_service_channel"
+        name: "Background Service"
+        importance: IMPORTANCE_MIN
+        sound: null, vibration: false
+      </secret>
+    </interface>
+    <interface type="android" name="Notification Builders">
+      <normal>
+        title: "Location Tracking Active"
+        text: "{count} locations • Interval: {interval} min"
+        icon: android.R.drawable.ic_menu_mylocation
+        priority: PRIORITY_LOW
+      </normal>
+      <secret>
+        title: "Service running"
+        text: minimal or empty
+        icon: R.drawable.ic_service_neutral (new neutral icon)
+        priority: PRIORITY_MIN
+        silent: true
+      </secret>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Manual testing required - notification behavior best verified on device</standard>
+      <standard>Test on Android 8+ (notification channels) and earlier versions</standard>
+    </standards>
+    <locations>
+      <location>Manual testing only - service notification behavior</location>
+    </locations>
+    <ideas>
+      <idea ac="E2.2.1" manual="true">Enable secret mode, start tracking, verify notification title is "Service running"</idea>
+      <idea ac="E2.2.2" manual="true">Enable secret mode, verify notification icon is neutral (not location/GPS icon)</idea>
+      <idea ac="E2.2.3" manual="true">Enable secret mode, verify notification uses IMPORTANCE_MIN channel, appears minimally</idea>
+      <idea ac="E2.2.4" manual="true">Enable secret mode, verify notification has no sound or vibration</idea>
+      <idea ac="E2.2.5" manual="true">Disable secret mode, verify notification title is "Location Tracking Active" with descriptive info</idea>
+      <idea ac="E2.2.6" manual="true">Start tracking in normal mode, toggle secret mode ON, verify notification updates without stopping service</idea>
+      <idea ac="E2.2.6" manual="true">Start tracking in secret mode, toggle secret mode OFF, verify notification updates to normal</idea>
+      <idea manual="true">Toggle secret mode multiple times while tracking, verify smooth transitions</idea>
+      <idea manual="true">Check notification drawer in secret mode - verify it's minimized and doesn't draw attention</idea>
+    </ideas>
+  </tests>
+</story-context>

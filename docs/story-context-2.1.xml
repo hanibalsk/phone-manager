@@ -1,0 +1,163 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/E2.1" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>1</storyId>
+    <title>Secret Mode Activation</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-E2.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to enable secret mode</iWant>
+    <soThat>the app is minimally visible on my device</soThat>
+    <tasks>
+      <task id="1">Add Secret Mode to PreferencesRepository - secret_mode_enabled Boolean in DataStore with getter/setter/Flow</task>
+      <task id="2">Implement Hidden Activation Gestures - Long-press logo 3 seconds, tap version 5 times within 2 seconds</task>
+      <task id="3">Suppress UI Feedback in Secret Mode - Hide indicators, suppress toast messages</task>
+      <task id="4">Control Logging Verbosity - Conditional Timber tree, filter sensitive data in secret mode</task>
+      <task id="5">Testing - Unit test PreferencesRepository, manual test gestures, verify no visible indicators</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E2.1.1" title="Secret Mode DataStore Setting">
+      <given>the app is installed</given>
+      <when>secret mode state changes</when>
+      <then>secret_mode_enabled: Boolean SHALL be stored in DataStore</then>
+    </ac>
+    <ac id="E2.1.2" title="Hidden Activation Gesture - Long Press">
+      <given>I am on the main screen</given>
+      <when>I long-press on the app logo for 3 seconds</when>
+      <then>secret mode should toggle (enable if disabled, disable if enabled) with no visible confirmation</then>
+    </ac>
+    <ac id="E2.1.3" title="Hidden Activation Gesture - Tap Sequence">
+      <given>I am on the main screen</given>
+      <when>I tap the app version number 5 times quickly</when>
+      <then>secret mode should toggle with no visible confirmation</then>
+    </ac>
+    <ac id="E2.1.4" title="No UI Indication">
+      <given>secret mode is enabled</given>
+      <when>I view the app UI</when>
+      <then>there SHALL be no visible indication that secret mode is enabled, no "Secret mode ON" text or icons</then>
+    </ac>
+    <ac id="E2.1.5" title="Suppress Toast Messages">
+      <given>secret mode is enabled</given>
+      <when>location tracking starts/stops</when>
+      <then>no "Location tracking is ON/OFF" toasts should appear</then>
+    </ac>
+    <ac id="E2.1.6" title="Disable Verbose Logging">
+      <given>secret mode is enabled</given>
+      <when>the app runs</when>
+      <then>verbose Logcat logging SHALL be disabled, no sensitive info (coordinates, device names) logged</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/prd-phone-manager-2025-11-25.md" relevance="high">
+        PRD with Feature 1 (FR-1.1, FR-1.3) - Secret Mode Setting and UI Behavior requirements
+      </doc>
+      <doc path="docs/epics.md" relevance="high">
+        Epic 2 overview and Story 2.1 description
+      </doc>
+    </docs>
+    <code>
+      <file path="app/src/main/java/three/two/bit/phonemanager/data/preferences/PreferencesRepository.kt" relevance="high" action="MODIFY">
+        <purpose>DataStore preferences - add secret_mode_enabled setting</purpose>
+        <existing-keys>TRACKING_ENABLED, TRACKING_INTERVAL, SERVICE_RUNNING, LAST_LOCATION_UPDATE</existing-keys>
+        <pattern>booleanPreferencesKey, Flow&lt;Boolean&gt;, edit{} for writes, map{} for reads with catch{}</pattern>
+        <needed>Add SECRET_MODE_ENABLED key, isSecretModeEnabled Flow, setSecretModeEnabled() method</needed>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/home/HomeScreen.kt" relevance="high" action="MODIFY">
+        <purpose>Main screen - add gesture detectors for secret mode toggle</purpose>
+        <needed>Add long-press on logo (3s), tap counter on version text (5 taps)</needed>
+        <pattern>Use Modifier.pointerInput with detectTapGestures for long press</pattern>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/PhoneManagerApp.kt" relevance="high" action="MODIFY">
+        <purpose>Application class - conditional Timber tree based on secret mode</purpose>
+        <current>Plants Timber.DebugTree() in debug builds</current>
+        <needed>Create SecretModeTree that filters sensitive data, switch trees based on secret mode state</needed>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/main/LocationTrackingViewModel.kt" relevance="medium" action="REFERENCE">
+        <purpose>Reference for ViewModel observing PreferencesRepository flows</purpose>
+        <pattern>Inject PreferencesRepository, collect flows in viewModelScope</pattern>
+      </file>
+    </code>
+    <dependencies>
+      <dependency name="DataStore Preferences" usage="Store secret_mode_enabled setting">
+        libs.androidx.datastore.preferences - already used in PreferencesRepository
+      </dependency>
+      <dependency name="Jetpack Compose Gestures" usage="Long-press and tap detection">
+        Modifier.pointerInput, detectTapGestures, combinedClickable
+      </dependency>
+      <dependency name="Timber" usage="Conditional logging tree">
+        Timber.plant(), Timber.Tree, custom tree for filtering sensitive data
+      </dependency>
+      <dependency name="Coroutines" usage="Flow collection in ViewModel">
+        viewModelScope.launch, StateFlow, collect{}
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Secret mode is purely client-side per FR-1.4.1 - no server sync</constraint>
+    <constraint type="architecture">Follow existing PreferencesRepository pattern with DataStore</constraint>
+    <constraint type="ui">NO visible indicators when secret mode is enabled - critical security requirement</constraint>
+    <constraint type="ui">Gesture toggles must work silently - no toast, snackbar, or visual feedback</constraint>
+    <constraint type="ui">Long press must be exactly 3 seconds on logo</constraint>
+    <constraint type="ui">Tap sequence must be 5 taps within 2 seconds on version text</constraint>
+    <constraint type="logging">In secret mode, filter out: coordinates, device names, group IDs from logs</constraint>
+    <constraint type="logging">Timber tree must be switchable at runtime based on secret mode state</constraint>
+    <constraint type="code-style">Use Spotless for formatting, follow existing code patterns</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface type="kotlin" name="PreferencesRepository (extended)">
+      <signature>interface PreferencesRepository { val isSecretModeEnabled: Flow&lt;Boolean&gt;; suspend fun setSecretModeEnabled(enabled: Boolean) }</signature>
+      <key>SECRET_MODE_ENABLED = booleanPreferencesKey("secret_mode_enabled")</key>
+    </interface>
+    <interface type="kotlin" name="SecretModeTimberTree">
+      <signature>class SecretModeTimberTree : Timber.Tree()</signature>
+      <override>override fun log(priority: Int, tag: String?, message: String, t: Throwable?)</override>
+      <behavior>Filter messages containing coordinates (lat/lng patterns), device names, group IDs</behavior>
+    </interface>
+    <interface type="compose" name="Gesture Detectors">
+      <longPress>Modifier.pointerInput(Unit) { detectTapGestures(onLongPress = { /* toggle after 3s */ }) }</longPress>
+      <tapSequence>Track tap count with timestamp, reset if interval > 500ms, toggle on 5th tap</tapSequence>
+    </interface>
+    <interface type="kotlin" name="HomeViewModel (extended)">
+      <signature>fun toggleSecretMode()</signature>
+      <state>val isSecretModeEnabled: StateFlow&lt;Boolean&gt;</state>
+      <note>May need to create HomeViewModel if not exists, or add to existing tracking ViewModel</note>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Use JUnit 5 with MockK for mocking</standard>
+      <standard>Use Turbine for Flow testing</standard>
+      <standard>Use kotlinx-coroutines-test for suspend function testing</standard>
+      <standard>Follow AAA pattern (Arrange, Act, Assert)</standard>
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/data/preferences/PreferencesRepositoryTest.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E2.1.1">Test PreferencesRepository.setSecretModeEnabled(true) persists to DataStore</idea>
+      <idea ac="E2.1.1">Test PreferencesRepository.isSecretModeEnabled Flow emits correct values</idea>
+      <idea ac="E2.1.1">Test secret mode default is false when not set</idea>
+      <idea ac="E2.1.2">Test toggleSecretMode() changes state from false to true</idea>
+      <idea ac="E2.1.2">Test toggleSecretMode() changes state from true to false</idea>
+      <idea ac="E2.1.6">Test SecretModeTimberTree filters coordinate patterns</idea>
+      <idea ac="E2.1.6">Test SecretModeTimberTree filters device name patterns</idea>
+      <idea manual="true">Long-press logo for 3 seconds, verify secret mode toggles with no visual feedback</idea>
+      <idea manual="true">Tap version 5 times quickly, verify secret mode toggles with no visual feedback</idea>
+      <idea manual="true">Enable secret mode, verify no UI indicators anywhere in app</idea>
+      <idea manual="true">Enable secret mode, start/stop tracking, verify no toast messages</idea>
+      <idea manual="true">Enable secret mode, check Logcat for sensitive data absence</idea>
+    </ideas>
+  </tests>
+</story-context>

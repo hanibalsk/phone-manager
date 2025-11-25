@@ -1,0 +1,163 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E4</epicId>
+    <storyId>E4.2</storyId>
+    <title>History Performance & Server Sync</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E4.2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>to view other group members' history</iWant>
+    <soThat>I can see where they've been</soThat>
+    <tasks>
+      <task id="1" ac="E4.2.3">Add Device Selector to History - Dropdown/chips for device selection, include "My Device" and group members, update HistoryViewModel</task>
+      <task id="2" ac="E4.2.1">Implement Server History Fetch - Add getDeviceHistory() to DeviceApiService, parse response to LocationRecord list, add to DeviceRepository</task>
+      <task id="3" ac="E4.2.2">Implement Client-Side Downsampling - Douglas-Peucker or similar algorithm, target 200-500 points, apply before polyline rendering</task>
+      <task id="4" ac="E4.2.4">Extend LocationEntity for Sync Tracking - Add isSynced and syncedAt fields, create Room migration, update batch upload to mark synced</task>
+      <task id="5" ac="E4.2.5">Add simplify Parameter Support - Add simplify query param to API call, handle server-downsampled response</task>
+      <task id="6" ac="All">Testing - Test viewing other member's history, downsampling with large datasets, sync tracking fields</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E4.2.1" title="Fetch History from Server">
+      <given>I want to view another group member's history</given>
+      <when>I select that member</when>
+      <then>the app should call GET /api/devices/{deviceId}/locations AND display their path as a polyline</then>
+    </ac>
+    <ac id="E4.2.2" title="Downsampling for Performance">
+      <given>a date range returns many location points (1000+)</given>
+      <when>rendering the polyline</when>
+      <then>points should be downsampled to 200-500 visible points AND path accuracy should be preserved at current zoom level</then>
+    </ac>
+    <ac id="E4.2.3" title="Device Selector">
+      <given>I am on the History screen</given>
+      <when>I want to view another member's history</when>
+      <then>I should see a device selector (dropdown or list) AND I can switch between my history and group members' history</then>
+    </ac>
+    <ac id="E4.2.4" title="Sync Tracking Extension">
+      <given>location records are uploaded to server</given>
+      <when>sync completes</when>
+      <then>LocationEntity should be marked with isSynced=true and syncedAt timestamp AND duplicate uploads should be avoided</then>
+    </ac>
+    <ac id="E4.2.5" title="Server-Side Downsampling (Optional)">
+      <given>fetching large history from server</given>
+      <when>the request includes simplify=true parameter</when>
+      <then>the server should return pre-downsampled data</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" section="FR-4.2, FR-4.4">
+        <title>Server Synchronization and Performance Requirements</title>
+        <snippet>FR-4.2: Server synchronization for location data sharing. FR-4.4: Performance optimization with downsampling for large datasets (1000+ points). Target 200-500 visible points on map while preserving path accuracy.</snippet>
+      </doc>
+      <doc path="docs/backend/rust-backend-spec.md" section="API Endpoints">
+        <title>Device Location History API</title>
+        <snippet>GET /api/devices/{deviceId}/locations endpoint for fetching device location history. Index on device_id and captured_at DESC for efficient queries. Supports date range filtering and optional simplify parameter for server-side downsampling.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E4.1.md">
+        <title>Story E4.1 - Location History UI</title>
+        <snippet>Foundation for location history with polyline rendering, date filters, and local Room database queries. HistoryViewModel pattern to extend with device selection and server fetching.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E1.2.md">
+        <title>Story E1.2 - Group Member Discovery</title>
+        <snippet>DeviceRepository.getGroupMembers() returns list of devices in group. Device selector for history will use this list to show available group members.</snippet>
+      </doc>
+      <doc path="docs/epics.md" section="Epic 4">
+        <title>Epic 4 - Location History</title>
+        <snippet>Story E4.2 extends E4.1 with server sync, group member history viewing, performance optimization via downsampling, and sync tracking to avoid duplicate uploads.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt" kind="interface" symbol="DeviceApiService" lines="26-29">
+        <reason>Existing API service to extend with getDeviceHistory() method. Follow existing pattern with Result type, Ktor HttpClient, X-API-Key header, and Timber logging.</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt" kind="implementation" symbol="DeviceApiServiceImpl" lines="32-78">
+        <reason>Implementation pattern for new getDeviceHistory() endpoint. Shows HttpClient.get() with parameters, error handling, and Result wrapping.</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/model/LocationEntity.kt" kind="entity" symbol="LocationEntity" lines="10-22">
+        <reason>Room entity to extend with isSynced: Boolean and syncedAt: Long? fields for sync tracking. Requires Room migration (ALTER TABLE).</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt" kind="interface" symbol="DeviceRepository.getGroupMembers()" lines="67-76">
+        <reason>Repository pattern to extend with getDeviceHistory() method. Device selector will use getGroupMembers() to populate device list.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <dependency name="io.ktor:ktor-client-android" version="~3.3.2" required="true">Ktor HTTP client for API calls</dependency>
+        <dependency name="androidx.room:room-runtime" version="~2.8.4" required="true">Room database for sync tracking</dependency>
+        <dependency name="androidx.room:room-ktx" version="~2.8.4" required="true">Room coroutines support</dependency>
+        <dependency name="com.google.maps.android:maps-compose" version="~4.3.0" required="true">Maps Compose for polyline</dependency>
+        <dependency name="androidx.compose:compose-bom" version="2025.10.01" required="true">Jetpack Compose for device selector UI</dependency>
+        <dependency name="androidx.lifecycle:lifecycle-viewmodel-compose" version="~2.10.0" required="true">ViewModel for history management</dependency>
+        <dependency name="com.google.dagger:hilt-android" version="~2.57.2" required="true">Hilt DI</dependency>
+        <dependency name="com.jakewharton.timber:timber" version="~5.0.1" required="true">Logging</dependency>
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>API Endpoint: GET /api/devices/{deviceId}/locations with from, to, simplify parameters</constraint>
+    <constraint>Downsampling Algorithm: Implement Douglas-Peucker or distance-based filtering for 200-500 target points</constraint>
+    <constraint>Room Migration: Add isSynced BOOLEAN DEFAULT 0 and syncedAt INTEGER fields to locations table</constraint>
+    <constraint>Sync Tracking: Mark LocationEntity.isSynced=true and syncedAt=timestamp after successful server upload</constraint>
+    <constraint>Device Selector: Use getGroupMembers() to populate device list, include "My Device" option</constraint>
+    <constraint>Performance: Apply downsampling before polyline rendering for datasets >500 points</constraint>
+    <constraint>Error Handling: Use Result type for API calls, handle network failures gracefully</constraint>
+    <constraint>API Pattern: Follow existing DeviceApiService pattern with Ktor, X-API-Key header, Timber logging</constraint>
+    <constraint>Repository Pattern: Add getDeviceHistory() to DeviceRepository interface and implementation</constraint>
+    <constraint>Optional Server Downsampling: Include simplify=true parameter for server-side optimization</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="DeviceApiService (to extend)" kind="interface" path="app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt">
+      <signature>suspend fun getDeviceHistory(deviceId: String, from: Long, to: Long, simplify: Boolean = false): Result&lt;List&lt;LocationRecord&gt;&gt; (NEW)</signature>
+      <description>Fetch location history for device from server. Returns LocationRecord list with lat, lng, timestamp for polyline rendering.</description>
+    </interface>
+    <interface name="LocationEntity (to extend)" kind="data class" path="app/src/main/java/three/two/bit/phonemanager/data/model/LocationEntity.kt">
+      <signature>data class LocationEntity(..., isSynced: Boolean = false, syncedAt: Long? = null) (NEW FIELDS)</signature>
+      <description>Add sync tracking fields. Requires Room migration: ALTER TABLE locations ADD COLUMN isSynced INTEGER DEFAULT 0; ADD COLUMN syncedAt INTEGER;</description>
+    </interface>
+    <interface name="DeviceRepository (to extend)" kind="interface" path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt">
+      <signature>suspend fun getDeviceHistory(deviceId: String, from: Long, to: Long, simplify: Boolean = false): Result&lt;List&lt;LocationRecord&gt;&gt; (NEW)</signature>
+      <description>Repository method to fetch device history from server. Wraps DeviceApiService.getDeviceHistory().</description>
+    </interface>
+    <interface name="DownsamplingUtils (NEW)" kind="utility" path="app/src/main/java/three/two/bit/phonemanager/util/DownsamplingUtils.kt">
+      <signature>fun downsample(points: List&lt;LatLng&gt;, targetCount: Int = 300): List&lt;LatLng&gt;</signature>
+      <description>Downsample location points using Douglas-Peucker or distance-based algorithm. Target 200-500 points for performance.</description>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      Project uses JUnit for unit tests and AndroidX Test for instrumented tests.
+      Use MockK for mocking dependencies. Test ViewModels with Turbine for Flow testing.
+      Room database migrations tested with AndroidX Test MigrationTestHelper.
+      Manual testing required for downsampling algorithm accuracy and large dataset performance.
+    </standards>
+    <locations>
+      <location>app/src/test/java/**/*Test.kt</location>
+      <location>app/src/androidTest/java/**/*Test.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E4.2.1">Unit test: DeviceApiService.getDeviceHistory() calls correct endpoint with deviceId, from, to parameters</idea>
+      <idea ac="E4.2.1">Unit test: DeviceApiService.getDeviceHistory() includes X-API-Key header and parses LocationRecord response</idea>
+      <idea ac="E4.2.1">Manual test: Select group member from device selector, verify their history polyline displays on map</idea>
+      <idea ac="E4.2.2">Unit test: DownsamplingUtils.downsample() reduces 1000 points to 200-500 points</idea>
+      <idea ac="E4.2.2">Unit test: Downsampled polyline preserves general path shape (start/end points match original)</idea>
+      <idea ac="E4.2.2">Manual test: Load history with 1000+ points, verify map performance is smooth without lag</idea>
+      <idea ac="E4.2.3">UI test: History screen displays device selector dropdown/chips</idea>
+      <idea ac="E4.2.3">UI test: Device selector includes "My Device" and all group member names</idea>
+      <idea ac="E4.2.3">Unit test: HistoryViewModel switches data source when device selection changes</idea>
+      <idea ac="E4.2.4">Room migration test: MigrationTestHelper validates schema upgrade adds isSynced and syncedAt columns</idea>
+      <idea ac="E4.2.4">Unit test: LocationEntity marked with isSynced=true and syncedAt=timestamp after successful upload</idea>
+      <idea ac="E4.2.4">Unit test: Duplicate uploads avoided - only upload LocationEntity where isSynced=false</idea>
+      <idea ac="E4.2.5">Unit test: DeviceApiService.getDeviceHistory() includes simplify=true parameter when requested</idea>
+      <idea ac="All">Manual test: View group member history with large dataset, verify downsampling works and polyline renders smoothly</idea>
+    </ideas>
+  </tests>
+</story-context>

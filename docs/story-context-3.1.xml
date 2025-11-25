@@ -1,0 +1,171 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/E3.1" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>1</storyId>
+    <title>Google Maps Integration</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-E3.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>to see my current location on a map</iWant>
+    <soThat>I can orient myself</soThat>
+    <tasks>
+      <task id="1">Add Google Maps Dependencies - maps-compose, play-services-maps, configure API key in AndroidManifest</task>
+      <task id="2">Create MapScreen Composable - GoogleMap with UI settings, enable gestures</task>
+      <task id="3">Create MapViewModel - MapUiState, current location fetching, camera position state</task>
+      <task id="4">Display Current Location Marker - Marker for device location, distinctive icon, initial positioning</task>
+      <task id="5">Update Navigation - Add Map route to NavHost, add bottom navigation/tab</task>
+      <task id="6">Testing - Manual test map display, location marker, map gestures</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E3.1.1" title="Google Maps SDK Integration">
+      <given>the app is launched</given>
+      <when>I navigate to the Map screen</when>
+      <then>a Google Map should be displayed using Maps Compose</then>
+    </ac>
+    <ac id="E3.1.2" title="Current Location Marker">
+      <given>the Map screen is open and location permissions are granted</given>
+      <when>the map loads</when>
+      <then>my current location should be displayed with a distinctive marker (blue dot or custom), visually prominent</then>
+    </ac>
+    <ac id="E3.1.3" title="Map Centering">
+      <given>I open the Map screen</given>
+      <when>the map finishes loading</when>
+      <then>map should center on my current device location with zoom level ~15-16 showing reasonable area</then>
+    </ac>
+    <ac id="E3.1.4" title="Standard Map Interactions">
+      <given>the Map is displayed</given>
+      <when>I interact with the map</when>
+      <then>I should be able to pan (drag), zoom (pinch/buttons), and rotate (two-finger rotate)</then>
+    </ac>
+    <ac id="E3.1.5" title="Map Screen and ViewModel">
+      <given>proper architecture</given>
+      <when>MapScreen is implemented</when>
+      <then>it should follow MVVM pattern with MapViewModel, state managed via StateFlow</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/prd-phone-manager-2025-11-25.md" relevance="high">
+        PRD with Feature 2 (FR-2.1) - Map Display requirements, Section 1.3 - Maps: Google Maps SDK for Compose
+      </doc>
+      <doc path="docs/epics.md" relevance="high">
+        Epic 3 overview and Story 3.1 description
+      </doc>
+    </docs>
+    <code>
+      <file path="app/build.gradle.kts" relevance="high" action="MODIFY">
+        <purpose>Project dependencies - add Google Maps Compose and Play Services Maps</purpose>
+        <current-deps>Compose BOM, Hilt, Room, Ktor, DataStore, WorkManager, Play Services Location (already present)</current-deps>
+        <needed>
+          implementation("com.google.maps.android:maps-compose:4.3.0")
+          implementation("com.google.android.gms:play-services-maps:18.2.0")
+        </needed>
+      </file>
+      <file path="app/src/main/AndroidManifest.xml" relevance="high" action="MODIFY">
+        <purpose>Manifest configuration - add Google Maps API key meta-data</purpose>
+        <current>Location permissions, foreground service, boot receiver</current>
+        <needed>
+          &lt;meta-data
+              android:name="com.google.android.geo.API_KEY"
+              android:value="${MAPS_API_KEY}" /&gt;
+          Add to &lt;application&gt; section
+        </needed>
+        <note>API key should be in local.properties or environment variable, referenced via manifestPlaceholders</note>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/ui/navigation/PhoneManagerNavHost.kt" relevance="high" action="MODIFY">
+        <purpose>Navigation host - add Map route</purpose>
+        <existing>Screen sealed class with Registration, Home routes</existing>
+        <needed>Add Screen.Map route and composable()</needed>
+      </file>
+      <file path="app/src/main/java/three/two/bit/phonemanager/location/LocationManager.kt" relevance="medium" action="REUSE">
+        <purpose>Location provider - reuse for current location in MapViewModel</purpose>
+        <interface>suspend fun getCurrentLocation(): Result&lt;LocationEntity?&gt;</interface>
+        <note>Already implemented, can be used to get initial map position</note>
+      </file>
+    </code>
+    <dependencies>
+      <dependency name="Google Maps Compose" usage="Jetpack Compose integration for Google Maps">
+        com.google.maps.android:maps-compose:4.3.0 - GoogleMap composable, Marker, CameraPositionState
+      </dependency>
+      <dependency name="Google Play Services Maps" usage="Google Maps SDK">
+        com.google.android.gms:play-services-maps:18.2.0 - LatLng, CameraPosition, MapProperties, MapUiSettings
+      </dependency>
+      <dependency name="Lifecycle Compose" usage="collectAsStateWithLifecycle for StateFlow">
+        Already present - androidx.lifecycle.runtime.compose
+      </dependency>
+      <dependency name="Hilt Navigation Compose" usage="hiltViewModel() for MapViewModel">
+        Already present - androidx.hilt.navigation.compose
+      </dependency>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Follow MVVM pattern with MapViewModel and MapUiState</constraint>
+    <constraint type="architecture">Use StateFlow for state management, collectAsStateWithLifecycle in composable</constraint>
+    <constraint type="architecture">Reuse LocationManager for getting current location</constraint>
+    <constraint type="maps">Use maps-compose library for Jetpack Compose integration</constraint>
+    <constraint type="maps">Configure API key via local.properties and manifestPlaceholders (not hardcoded)</constraint>
+    <constraint type="maps">Initial camera zoom level 15-16 for reasonable area view</constraint>
+    <constraint type="maps">Enable standard map gestures: pan, zoom, rotate</constraint>
+    <constraint type="ui">Distinctive marker for current location (blue dot or custom icon)</constraint>
+    <constraint type="permissions">Requires ACCESS_FINE_LOCATION permission (already in manifest)</constraint>
+    <constraint type="code-style">Use Spotless for formatting, follow existing code patterns</constraint>
+  </constraints>
+
+  <interfaces>
+    <interface type="kotlin" name="MapViewModel">
+      <signature>@HiltViewModel class MapViewModel @Inject constructor(private val locationManager: LocationManager)</signature>
+      <state>StateFlow&lt;MapUiState&gt; with currentLocation: LatLng?, isLoading: Boolean, error: String?</state>
+      <methods>init { loadCurrentLocation() }, suspend fun loadCurrentLocation()</methods>
+    </interface>
+    <interface type="kotlin" name="MapUiState">
+      <signature>data class MapUiState(val currentLocation: LatLng? = null, val isLoading: Boolean = false, val error: String? = null)</signature>
+    </interface>
+    <interface type="compose" name="MapScreen">
+      <signature>@Composable fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> Unit)</signature>
+      <components>
+        GoogleMap with fillMaxSize modifier
+        CameraPositionState with fromLatLngZoom(location, 15f)
+        MapProperties(isMyLocationEnabled = true)
+        MapUiSettings(zoomControlsEnabled = true, compassEnabled = true, rotationGesturesEnabled = true)
+        Marker for current location with blue color or custom icon
+      </components>
+    </interface>
+    <interface type="navigation" name="Screen.Map">
+      <signature>data object Map : Screen("map")</signature>
+      <composable>composable(Screen.Map.route) { MapScreen(onNavigateBack = { navController.popBackStack() }) }</composable>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+      <standard>Manual testing required - Maps SDK best verified on device</standard>
+      <standard>Test on real device with GPS enabled</standard>
+      <standard>Unit test MapViewModel state management</standard>
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/ui/map/MapViewModelTest.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E3.1.1" manual="true">Navigate to Map screen, verify Google Map displays without errors</idea>
+      <idea ac="E3.1.2" manual="true">Grant location permission, verify current location marker appears on map</idea>
+      <idea ac="E3.1.2" manual="true">Verify marker is visually distinctive (blue dot or custom icon)</idea>
+      <idea ac="E3.1.3" manual="true">Open Map screen, verify map centers on device location with appropriate zoom</idea>
+      <idea ac="E3.1.4" manual="true">Test pan gesture - drag map to different area</idea>
+      <idea ac="E3.1.4" manual="true">Test zoom gesture - pinch to zoom in/out, use zoom buttons</idea>
+      <idea ac="E3.1.4" manual="true">Test rotate gesture - two-finger rotate to change orientation</idea>
+      <idea ac="E3.1.5">Unit test MapViewModel.loadCurrentLocation() updates state with LatLng</idea>
+      <idea ac="E3.1.5">Unit test MapViewModel handles location error gracefully</idea>
+      <idea manual="true">Test without location permission, verify map still displays (no marker)</idea>
+      <idea manual="true">Test in airplane mode, verify map tiles load from cache</idea>
+    </ideas>
+  </tests>
+</story-context>

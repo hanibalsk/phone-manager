@@ -1,0 +1,294 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E5</epicId>
+    <storyId>E5.1</storyId>
+    <title>Proximity Alert Definition</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E5.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>to create a proximity alert for another user</iWant>
+    <soThat>I'm notified when they're nearby</soThat>
+    <tasks>
+      <task id="1" acs="E5.1.1">Create ProximityAlert Domain Model</task>
+      <task id="2" acs="E5.1.1">Create ProximityAlert Room Entity</task>
+      <task id="3" acs="E5.1.4">Create Network Models</task>
+      <task id="4" acs="E5.1.4, E5.1.6">Create AlertRepository</task>
+      <task id="5" acs="E5.1.5">Create AlertsScreen UI</task>
+      <task id="6" acs="E5.1.2, E5.1.3">Create CreateAlertScreen</task>
+      <task id="7" acs="E5.1.5, E5.1.6">Create AlertsViewModel</task>
+      <task id="8" acs="All">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E5.1.1">
+      <title>ProximityAlert Entity</title>
+      <given>the data model is defined</given>
+      <then>ProximityAlert entity should include: id (UUID), ownerDeviceId (my device), targetDeviceId (watched device), radiusMeters (50-10,000), direction (ENTER, EXIT, BOTH), active (Boolean), lastState (INSIDE, OUTSIDE), createdAt, updatedAt, lastTriggeredAt</then>
+    </ac>
+    <ac id="E5.1.2">
+      <title>Radius Configuration</title>
+      <given>I am creating a proximity alert</given>
+      <when>I set the radius</when>
+      <then>I should be able to choose values from 50 to 10,000 meters</then>
+      <and>invalid values should be rejected</and>
+    </ac>
+    <ac id="E5.1.3">
+      <title>Direction Selection</title>
+      <given>I am creating a proximity alert</given>
+      <when>I select the direction type</when>
+      <then>I should be able to choose: "Enter" (notify when target enters radius), "Exit" (notify when target leaves radius), "Both" (notify on both transitions)</then>
+    </ac>
+    <ac id="E5.1.4">
+      <title>Server Sync</title>
+      <given>I create a proximity alert</given>
+      <when>I save the alert</when>
+      <then>it should be sent to server via POST /api/proximity-alerts</then>
+      <and>synced alerts should persist across app reinstalls</and>
+    </ac>
+    <ac id="E5.1.5">
+      <title>Alert Management UI</title>
+      <given>I am on the Alerts screen</given>
+      <then>I should be able to: view list of my proximity alerts, create new alert, edit existing alert, delete alert, enable/disable alert without deletion</then>
+    </ac>
+    <ac id="E5.1.6">
+      <title>Sync on Startup</title>
+      <given>I launch the app</given>
+      <when>network is available</when>
+      <then>alerts should sync from server</then>
+      <and>local state should match server state</and>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Feature 3: Proximity Alerts</title>
+        <section>FR-3.1 Proximity Alert Definition</section>
+        <snippet>FR-3.1.1: System SHALL allow creating alerts with: ownerDeviceId, targetDeviceId, radiusMeters (Must Have)
+FR-3.1.2: System SHALL support radius values from 50 to 10,000 meters (Must Have)
+FR-3.1.3: System SHALL support direction types: "enter", "exit", "both" (Should Have)
+FR-3.1.4: System SHALL store alerts on the server for sync across devices (Must Have)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Feature 3: Proximity Alerts</title>
+        <section>FR-3.4 Alert Management</section>
+        <snippet>FR-3.4.1: System SHALL provide UI to create, view, edit, and delete proximity alerts (Must Have)
+FR-3.4.2: System SHALL allow enabling/disabling alerts without deletion (Should Have)
+FR-3.4.3: System SHALL sync alerts from server on app startup (Must Have)</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>Product Requirements Document - Data Model: ProximityAlert</title>
+        <section>Section 5 - Feature 3</section>
+        <snippet>data class ProximityAlert(
+    val id: String,
+    val ownerDeviceId: String,
+    val targetDeviceId: String,
+    val radiusMeters: Int,
+    val active: Boolean,
+    val direction: AlertDirection, // ENTER, EXIT, BOTH
+    val lastState: ProximityState, // INSIDE, OUTSIDE
+    val createdAt: Instant,
+    val updatedAt: Instant,
+    val lastTriggeredAt: Instant?
+)
+enum class AlertDirection { ENTER, EXIT, BOTH }
+enum class ProximityState { INSIDE, OUTSIDE }</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd-phone-manager-2025-11-25.md</path>
+        <title>API Specification - POST /api/proximity-alerts</title>
+        <section>Section 6 - API Specifications</section>
+        <snippet>Request: { "ownerDeviceId": "device-001", "targetDeviceId": "device-002", "radiusMeters": 200, "direction": "enter", "active": true }
+Response (201): { "id": "alert-uuid", "ownerDeviceId": "device-001", "targetDeviceId": "device-002", "radiusMeters": 200, "direction": "enter", "active": true, "lastState": "outside", "createdAt": "2025-11-25T10:00:00Z" }</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 5: Proximity Alerts - Story 5.1</title>
+        <section>Story 5.1: Proximity Alert Definition</section>
+        <snippet>User Story: As a user, I want to create a proximity alert for another user so that I'm notified when they're nearby
+Acceptance Criteria:
+- Create ProximityAlert entity: ownerDeviceId, targetDeviceId, radiusMeters, direction, active
+- Support radius values from 50 to 10,000 meters
+- Support direction types: "enter", "exit", "both"
+- Store alerts on server for sync via POST /api/proximity-alerts
+- UI to create, view, edit, and delete proximity alerts</snippet>
+      </doc>
+      <doc>
+        <path>docs/solution-architecture.md</path>
+        <title>Solution Architecture - Repository Pattern</title>
+        <section>ADR-005: Room Database for Transmission Queue</section>
+        <snippet>Repository pattern isolates data sources from ViewModels. Room database used for type-safe SQL queries with compile-time verification. Multiple data sources: Location API, Network, Database, Preferences.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt</path>
+        <kind>repository-interface</kind>
+        <symbol>DeviceRepository</symbol>
+        <lines>18-25</lines>
+        <reason>Reference pattern for creating AlertRepository - shows repository interface structure with sync operations</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt</path>
+        <kind>repository-implementation</kind>
+        <symbol>DeviceRepositoryImpl</symbol>
+        <lines>28-106</lines>
+        <reason>Pattern for AlertRepository implementation - demonstrates network check, API calls, local storage, and error handling</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/database/AppDatabase.kt</path>
+        <kind>database</kind>
+        <symbol>AppDatabase</symbol>
+        <lines>13-28</lines>
+        <reason>Must add ProximityAlertEntity to entities list and provide alertDao() method</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/data/database/LocationDao.kt</path>
+        <kind>dao-interface</kind>
+        <symbol>LocationDao</symbol>
+        <lines>13-41</lines>
+        <reason>Reference pattern for creating ProximityAlertDao - demonstrates Room DAO structure with Flow, suspend functions, and queries</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt</path>
+        <kind>api-service-interface</kind>
+        <symbol>DeviceApiService</symbol>
+        <lines>26-29</lines>
+        <reason>Reference pattern for creating AlertApiService interface - shows API service structure</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt</path>
+        <kind>api-service-implementation</kind>
+        <symbol>DeviceApiServiceImpl</symbol>
+        <lines>32-78</lines>
+        <reason>Pattern for AlertApiService implementation - demonstrates Ktor HTTP client usage with proper headers, error handling, and Result wrapping</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/main/java/three/two/bit/phonemanager/domain/model/Device.kt</path>
+        <kind>domain-model</kind>
+        <symbol>Device</symbol>
+        <lines>13-18</lines>
+        <reason>Used in AlertRepository.getGroupMembers() for target device selection in CreateAlertScreen</reason>
+      </artifact>
+      <artifact>
+        <path>app/src/test/java/three/two/bit/phonemanager/data/repository/DeviceRepositoryTest.kt</path>
+        <kind>test-pattern</kind>
+        <symbol>DeviceRepositoryTest</symbol>
+        <lines>30-60</lines>
+        <reason>Reference pattern for AlertRepository unit tests - shows MockK setup, network mocking, and Result testing</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <androidx-room version="2.8.4">Room database for ProximityAlertEntity and ProximityAlertDao</androidx-room>
+        <androidx-lifecycle version="2.10.0">ViewModels and lifecycle-aware components for AlertsViewModel</androidx-lifecycle>
+        <androidx-compose-bom version="2025.10.01">Jetpack Compose UI for AlertsScreen and CreateAlertScreen</androidx-compose-bom>
+        <androidx-navigation version="2.9.6">Navigation Compose for screen routing</androidx-navigation>
+        <androidx-hilt version="1.3.0">Hilt navigation compose integration</androidx-hilt>
+      </android>
+      <networking>
+        <ktor version="3.3.2">HTTP client for AlertApiService (ktor-client-android, ktor-client-content-negotiation, ktor-serialization-kotlinx-json)</ktor>
+      </networking>
+      <di>
+        <hilt version="2.57.2">Dependency injection for AlertRepository, AlertApiService, AlertsViewModel</hilt>
+      </di>
+      <kotlin>
+        <kotlinx-datetime version="0.6.1">Instant timestamps for createdAt, updatedAt, lastTriggeredAt</kotlinx-datetime>
+        <kotlinx-coroutines version="1.10.2">Coroutines for suspend functions and Flow</kotlinx-coroutines>
+        <kotlinx-serialization version="1.9.0">JSON serialization for API DTOs</kotlinx-serialization>
+      </kotlin>
+      <logging>
+        <timber version="5.0.1">Debug and error logging</timber>
+      </logging>
+      <testing>
+        <junit version="4.13.2">Unit testing framework</junit>
+        <mockk version="1.14.6">Mocking library for AlertRepository and AlertsViewModel tests</mockk>
+        <kotlin-test version="2.2.21">Kotlin test assertions</kotlin-test>
+        <kotlinx-coroutines-test version="1.10.2">Coroutine testing support</kotlinx-coroutines-test>
+      </testing>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>Follow Repository pattern with local + remote sync strategy (see DeviceRepository)</constraint>
+    <constraint>Use Room database for offline support and data persistence</constraint>
+    <constraint>Sync strategy: remote-first on startup, optimistic local updates</constraint>
+    <constraint>Network availability check before API calls (use NetworkManager)</constraint>
+    <constraint>Wrap API responses in Result type for error handling</constraint>
+    <constraint>Use Ktor HttpClient for HTTP requests with X-API-Key header</constraint>
+    <constraint>Store enums as String in Room entities (e.g., direction: String, lastState: String)</constraint>
+    <constraint>Use kotlinx.datetime.Instant for timestamps</constraint>
+    <constraint>Apply Timber logging for debug/error messages</constraint>
+    <constraint>Follow existing package structure: domain/model/, data/model/, data/database/dao/, network/</constraint>
+    <constraint>Use Hilt @Inject and @Singleton for dependency injection</constraint>
+    <constraint>Unit tests require &gt;80% coverage using MockK for mocking</constraint>
+  </constraints>
+  <interfaces>
+    <interface>
+      <name>DeviceRepository.getGroupMembers()</name>
+      <kind>repository-method</kind>
+      <signature>suspend fun getGroupMembers(): Result&lt;List&lt;Device&gt;&gt;</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt:20</path>
+      <reason>Required to fetch group members for target device selection in CreateAlertScreen</reason>
+    </interface>
+    <interface>
+      <name>SecureStorage.getDeviceId()</name>
+      <kind>storage-method</kind>
+      <signature>fun getDeviceId(): String</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/security/SecureStorage.kt</path>
+      <reason>Required to get ownerDeviceId when creating proximity alerts</reason>
+    </interface>
+    <interface>
+      <name>NetworkManager.isNetworkAvailable()</name>
+      <kind>utility-method</kind>
+      <signature>fun isNetworkAvailable(): Boolean</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/network/NetworkManager.kt</path>
+      <reason>Required to check network before API sync operations</reason>
+    </interface>
+    <interface>
+      <name>ApiConfiguration</name>
+      <kind>config-class</kind>
+      <signature>data class ApiConfiguration(val baseUrl: String, val apiKey: String)</signature>
+      <path>app/src/main/java/three/two/bit/phonemanager/network/ApiConfiguration.kt</path>
+      <reason>Required for AlertApiService to access API endpoint base URL and authentication</reason>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      Unit tests use JUnit 4 with MockK for mocking. Tests follow Given-When-Then structure with descriptive names using backticks (e.g., `test name with spaces`). Coroutine tests use runTest from kotlinx-coroutines-test. Target coverage: &gt;80% for repositories and ViewModels. Tests are located in app/src/test/java mirroring the main source structure. Use turbine for Flow testing when needed.
+    </standards>
+    <locations>
+      <location>app/src/test/java/three/two/bit/phonemanager/data/repository/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/ui/alerts/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/domain/model/</location>
+      <location>app/src/test/java/three/two/bit/phonemanager/network/</location>
+    </locations>
+    <ideas>
+      <idea ac="E5.1.1">Test ProximityAlert data class instantiation and property validation</idea>
+      <idea ac="E5.1.1">Test AlertDirection and ProximityState enum values</idea>
+      <idea ac="E5.1.2">Test AlertRepository.createAlert() with valid radius values (50, 100, 5000, 10000)</idea>
+      <idea ac="E5.1.2">Test AlertRepository.createAlert() rejects invalid radius (&lt;50, &gt;10000)</idea>
+      <idea ac="E5.1.3">Test AlertRepository.createAlert() with each direction type (ENTER, EXIT, BOTH)</idea>
+      <idea ac="E5.1.4">Test AlertRepository.createAlert() success - verify API call and local storage</idea>
+      <idea ac="E5.1.4">Test AlertRepository.createAlert() network unavailable - verify failure</idea>
+      <idea ac="E5.1.4">Test AlertRepository.updateAlert() syncs to server</idea>
+      <idea ac="E5.1.4">Test AlertRepository.deleteAlert() removes from server and local DB</idea>
+      <idea ac="E5.1.5">Test AlertsViewModel loads alerts on init</idea>
+      <idea ac="E5.1.5">Test AlertsViewModel.createAlert() delegates to repository</idea>
+      <idea ac="E5.1.5">Test AlertsViewModel.deleteAlert() updates UI state</idea>
+      <idea ac="E5.1.5">Test AlertsViewModel.toggleAlert() enables/disables alert</idea>
+      <idea ac="E5.1.6">Test AlertRepository.syncAlerts() fetches from server on startup</idea>
+      <idea ac="E5.1.6">Test AlertRepository.syncAlerts() merges remote with local state</idea>
+      <idea ac="E5.1.6">Test AlertRepository.syncAlerts() handles network errors gracefully</idea>
+    </ideas>
+  </tests>
+</story-context>

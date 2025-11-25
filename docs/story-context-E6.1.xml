@@ -1,0 +1,81 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E6</epicId>
+    <storyId>E6.1</storyId>
+    <title>Geofence Definition</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E6.1.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>to define geofence zones</iWant>
+    <soThat>I get alerts for specific places</soThat>
+    <tasks>
+      <task id="1" acs="E6.1.1, E6.1.2">Create Geofence Domain Model</task>
+      <task id="2" acs="E6.1.1">Create Geofence Room Entity</task>
+      <task id="3" acs="E6.1.4">Create Network Models</task>
+      <task id="4" acs="E6.1.4">Create GeofenceRepository</task>
+      <task id="5" acs="E6.1.3">Implement Android Geofencing Registration</task>
+      <task id="6" acs="E6.1.5">Create GeofencesScreen UI</task>
+      <task id="7" acs="E6.1.6">Create CreateGeofenceScreen</task>
+      <task id="8" acs="E6.1.5">Create GeofencesViewModel</task>
+      <task id="9" acs="All">Testing</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E6.1.1">
+      <title>Geofence Entity</title>
+      <given>the data model is defined</given>
+      <then>Geofence entity should include: id (UUID), deviceId (owner device), name (e.g., "Home", "Office"), latitude, longitude (center point), radiusMeters, transitionTypes (ENTER, EXIT, DWELL set), webhookId (optional link to webhook), active (Boolean), createdAt, updatedAt</then>
+    </ac>
+    <ac id="E6.1.2">
+      <title>Transition Types</title>
+      <given>I am creating a geofence</given>
+      <when>I select transition types</when>
+      <then>I should be able to choose any combination of: ENTER (trigger when entering zone), EXIT (trigger when leaving zone), DWELL (trigger after staying in zone for duration)</then>
+    </ac>
+    <ac id="E6.1.3">
+      <title>Android Geofencing API Registration</title>
+      <given>I create or enable a geofence</given>
+      <when>the geofence is saved</when>
+      <then>it should be registered with Android Geofencing API</then>
+      <and>use GeofencingClient.addGeofences()</and>
+    </ac>
+    <ac id="E6.1.4">
+      <title>Server Sync</title>
+      <given>I create a geofence</given>
+      <when>I save</when>
+      <then>it should sync to server via POST /api/geofences</then>
+      <and>persist across app reinstalls</and>
+    </ac>
+    <ac id="E6.1.5">
+      <title>Geofence Management UI</title>
+      <given>I am on the Geofences screen</given>
+      <then>I should be able to: view list of my geofences, create new geofence, edit existing geofence, delete geofence, enable/disable geofence</then>
+    </ac>
+    <ac id="E6.1.6">
+      <title>Map-Based Location Selection</title>
+      <given>I am creating a geofence</given>
+      <when>I set the location</when>
+      <then>I should be able to: select location by tapping on map, enter coordinates manually, use current location as center</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>{{docs_artifacts}}</docs>
+    <code>{{code_artifacts}}</code>
+    <dependencies>{{dependencies_artifacts}}</dependencies>
+  </artifacts>
+
+  <constraints>{{constraints}}</constraints>
+  <interfaces>{{interfaces}}</interfaces>
+  <tests>
+    <standards>{{test_standards}}</standards>
+    <locations>{{test_locations}}</locations>
+    <ideas>{{test_ideas}}</ideas>
+  </tests>
+</story-context>

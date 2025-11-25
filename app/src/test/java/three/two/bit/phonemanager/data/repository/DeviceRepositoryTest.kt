@@ -6,8 +6,11 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Instant
 import org.junit.Before
 import org.junit.Test
+import three.two.bit.phonemanager.domain.model.Device
+import three.two.bit.phonemanager.domain.model.DeviceLocation
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.network.NetworkException
 import three.two.bit.phonemanager.network.NetworkManager
@@ -197,5 +200,109 @@ class DeviceRepositoryTest {
         repository.getGroupMembers()
 
         coVerify { deviceApiService.getGroupMembers("family") }
+    }
+
+    @Test
+    fun `getGroupMembers filters out current device`() = runTest {
+        // Given
+        val currentDeviceId = "device-current"
+        val devices = listOf(
+            Device(
+                deviceId = currentDeviceId,
+                displayName = "My Device",
+                lastLocation = null,
+                lastSeenAt = null,
+            ),
+            Device(
+                deviceId = "device-001",
+                displayName = "Other Device 1",
+                lastLocation = DeviceLocation(
+                    latitude = 48.1486,
+                    longitude = 17.1077,
+                    timestamp = Instant.parse("2025-11-25T18:30:00Z"),
+                ),
+                lastSeenAt = Instant.parse("2025-11-25T18:30:00Z"),
+            ),
+            Device(
+                deviceId = "device-002",
+                displayName = "Other Device 2",
+                lastLocation = null,
+                lastSeenAt = null,
+            ),
+        )
+
+        every { secureStorage.getGroupId() } returns "family"
+        every { secureStorage.getDeviceId() } returns currentDeviceId
+        every { networkManager.isNetworkAvailable() } returns true
+        coEvery { deviceApiService.getGroupMembers("family") } returns Result.success(devices)
+
+        // When
+        val result = repository.getGroupMembers()
+
+        // Then
+        assertTrue(result.isSuccess)
+        val filteredDevices = result.getOrNull()!!
+        assertEquals(2, filteredDevices.size)
+        assertEquals("device-001", filteredDevices[0].deviceId)
+        assertEquals("device-002", filteredDevices[1].deviceId)
+    }
+
+    @Test
+    fun `getGroupMembers returns empty list when only current device in group`() = runTest {
+        // Given
+        val currentDeviceId = "device-current"
+        val devices = listOf(
+            Device(
+                deviceId = currentDeviceId,
+                displayName = "My Device",
+                lastLocation = null,
+                lastSeenAt = null,
+            ),
+        )
+
+        every { secureStorage.getGroupId() } returns "family"
+        every { secureStorage.getDeviceId() } returns currentDeviceId
+        every { networkManager.isNetworkAvailable() } returns true
+        coEvery { deviceApiService.getGroupMembers("family") } returns Result.success(devices)
+
+        // When
+        val result = repository.getGroupMembers()
+
+        // Then
+        assertTrue(result.isSuccess)
+        val filteredDevices = result.getOrNull()!!
+        assertEquals(0, filteredDevices.size)
+    }
+
+    @Test
+    fun `getGroupMembers returns empty list when API returns empty list`() = runTest {
+        // Given
+        every { secureStorage.getGroupId() } returns "family"
+        every { secureStorage.getDeviceId() } returns "device-current"
+        every { networkManager.isNetworkAvailable() } returns true
+        coEvery { deviceApiService.getGroupMembers("family") } returns Result.success(emptyList())
+
+        // When
+        val result = repository.getGroupMembers()
+
+        // Then
+        assertTrue(result.isSuccess)
+        val filteredDevices = result.getOrNull()!!
+        assertEquals(0, filteredDevices.size)
+    }
+
+    @Test
+    fun `getGroupMembers propagates API error`() = runTest {
+        // Given
+        every { secureStorage.getGroupId() } returns "family"
+        every { secureStorage.getDeviceId() } returns "device-current"
+        every { networkManager.isNetworkAvailable() } returns true
+        coEvery { deviceApiService.getGroupMembers("family") } returns Result.failure(Exception("API error"))
+
+        // When
+        val result = repository.getGroupMembers()
+
+        // Then
+        assertTrue(result.isFailure)
     }
 }

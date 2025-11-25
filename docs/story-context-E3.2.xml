@@ -1,0 +1,159 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>E3</epicId>
+    <storyId>E3.2</storyId>
+    <title>Group Members on Map</title>
+    <status>Draft</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>/Users/martinjanci/cursor/phone-manager/docs/stories/story-E3.2.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>a user</asA>
+    <iWant>to see all group members' locations on the map</iWant>
+    <soThat>I know where everyone is</soThat>
+    <tasks>
+      <task id="1" ac="E3.2.1">Fetch Group Members with Locations - Use DeviceRepository.getGroupMembers(), filter members with valid lastLocation, store in MapUiState</task>
+      <task id="2" ac="E3.2.1,E3.2.2">Display Group Member Markers - Iterate through group members, create Marker for each with valid location, set title to displayName</task>
+      <task id="3" ac="E3.2.3">Implement Visual Distinction - Use different marker color for group members (red/orange), keep current device marker blue, consider custom marker icons</task>
+      <task id="4" ac="E3.2.4">Implement Info Window - Create custom InfoWindowContent composable, show displayName and relative time, handle marker click to show info</task>
+      <task id="5" ac="E3.2.5">Handle Edge Cases - Filter out members with null lastLocation, optionally show "offline members" section</task>
+      <task id="6" ac="All">Testing - Manual test with 2+ devices in same group, test marker tapping and info windows, test visual distinction</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <ac id="E3.2.1" title="Display Group Member Markers">
+      <given>I am on the Map screen AND I am registered in a group with other devices</given>
+      <when>the map loads</when>
+      <then>markers should be displayed for all devices in my groupId AND each marker should be positioned at the device's last known location</then>
+    </ac>
+    <ac id="E3.2.2" title="Display Name Labels">
+      <given>group member markers are displayed</given>
+      <when>I view a marker</when>
+      <then>the marker should display the device's displayName AND the name should be visible near or on the marker</then>
+    </ac>
+    <ac id="E3.2.3" title="Visual Distinction">
+      <given>markers are displayed for me and group members</given>
+      <when>I view the map</when>
+      <then>my marker should be visually distinct from group member markers AND different colors or icons should differentiate owner vs. members</then>
+    </ac>
+    <ac id="E3.2.4" title="Marker Info Window">
+      <given>group member markers are displayed</given>
+      <when>I tap on a group member's marker</when>
+      <then>an info window should appear showing: device display name, last update time (e.g., "5 min ago")</then>
+    </ac>
+    <ac id="E3.2.5" title="Handle Missing Locations">
+      <given>a group member has no lastLocation (null)</given>
+      <when>rendering markers</when>
+      <then>that member should be omitted from the map OR shown in a separate "offline" list</then>
+    </ac>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/PRD.md" section="Feature 2">
+        <title>Real-Time Map Display (FR-2)</title>
+        <snippet>FR-2.2: Display all group members' locations as markers on the map. FR-2.2.1: Each member marker should show displayName. FR-2.2.2: Markers should be visually distinct from current user marker. FR-2.2.3: Clicking member marker shows device info (name, last seen). FR-2.2.4: Members with no lastLocation should be filtered out or shown as offline.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E3.1.md">
+        <title>Story E3.1 - Google Maps Integration</title>
+        <snippet>Foundation map integration with current device location marker. Uses maps-compose library with MapViewModel/MapUiState pattern. Implements GoogleMap composable with MarkerState, CameraPosition, and MapProperties. MapViewModel manages currentLocation via StateFlow.</snippet>
+      </doc>
+      <doc path="docs/stories/story-E1.2.md">
+        <title>Story E1.2 - Group Member Discovery</title>
+        <snippet>DeviceRepository.getGroupMembers() fetches list of devices in same group via GET /api/devices?groupId={id}. Returns List&lt;Device&gt; with deviceId, displayName, lastLocation (nullable), lastSeenAt. Filters out current device. Device model includes DeviceLocation with latitude, longitude, timestamp.</snippet>
+      </doc>
+      <doc path="docs/epics.md" section="Epic 3">
+        <title>Epic 3 - Real-Time Map & Group Display</title>
+        <snippet>3 stories: E3.1 (Google Maps Integration), E3.2 (Group Members on Map), E3.3 (Location Updates). Epic focuses on visual map display with real-time group member locations.</snippet>
+      </doc>
+      <doc path="docs/solution-architecture.md" section="1.1">
+        <title>Technology Stack - Maps</title>
+        <snippet>Google Play Services Location 21.1.0 for Fused Location Provider. Maps Compose 4.3.0 for Jetpack Compose map integration. Uses MVVM pattern with ViewModels and StateFlow. Material 3 design system.</snippet>
+      </doc>
+      <doc path="docs/backend/rust-backend-spec.md" section="1.2, 6.0">
+        <title>Backend API - Device & Location Models</title>
+        <snippet>GET /api/devices?groupId={id} returns devices array with deviceId, displayName, lastLocation {latitude, longitude, timestamp}, lastSeenAt. Max 20 devices per group. API response time target &lt; 200ms (p95).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt" kind="interface" symbol="DeviceRepository.getGroupMembers()" lines="67-76">
+        <reason>Provides the existing API to fetch group members with lastLocation data. Returns Result&lt;List&lt;DeviceInfo&gt;&gt; which contains deviceId, displayName, groupId, lastLocation (nullable).</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/network/models/DeviceModels.kt" kind="model" symbol="DeviceInfo" lines="37-42">
+        <reason>Domain model for group member devices. Contains displayName and lastLocation field needed for map markers.</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/network/models/DeviceModels.kt" kind="model" symbol="DeviceLastLocation" lines="48-53">
+        <reason>Location data model with latitude, longitude, timestamp, and accuracy. Will be converted to LatLng for map markers.</reason>
+      </artifact>
+      <artifact path="app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt" kind="service" symbol="getGroupMembers()" lines="58-73">
+        <reason>Backend API implementation that fetches group members via GET /api/devices?groupId={id}. Returns List&lt;DeviceInfo&gt; with location data.</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <dependency name="com.google.maps.android:maps-compose" version="~4.3.0" required="true">Maps Compose for Jetpack Compose map integration</dependency>
+        <dependency name="com.google.android.gms:play-services-maps" version="~18.2.0" required="true">Google Maps SDK for Android</dependency>
+        <dependency name="androidx.compose:compose-bom" version="2025.10.01" required="true">Jetpack Compose Bill of Materials</dependency>
+        <dependency name="androidx.lifecycle:lifecycle-viewmodel-compose" version="~2.10.0" required="true">ViewModel for Compose</dependency>
+        <dependency name="com.google.dagger:hilt-android" version="~2.57.2" required="true">Hilt Dependency Injection</dependency>
+        <dependency name="androidx.navigation:navigation-compose" version="~2.9.6" required="true">Navigation for Compose</dependency>
+        <dependency name="com.jakewharton.timber:timber" version="~5.0.1" required="true">Logging framework</dependency>
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint>MVVM pattern: MapScreen must use MapViewModel with StateFlow for UI state management</constraint>
+    <constraint>Compose UI: Use Jetpack Compose with Material 3 for all UI components</constraint>
+    <constraint>Extend E3.1: Build on existing MapViewModel and MapScreen from story E3.1</constraint>
+    <constraint>Dependency Injection: Use Hilt @HiltViewModel and @Inject annotations for DI</constraint>
+    <constraint>Error Handling: Use Result type for API calls, handle loading/error/empty states in UI</constraint>
+    <constraint>Markers: Use com.google.android.gms.maps.model.Marker with BitmapDescriptorFactory for colors</constraint>
+    <constraint>Visual Distinction: Current device marker should use HUE_BLUE, group members should use HUE_ORANGE or HUE_RED</constraint>
+    <constraint>Null Safety: Filter out devices with null lastLocation before rendering markers</constraint>
+    <constraint>Logging: Use Timber for all logging statements</constraint>
+    <constraint>Architecture: Follow existing project structure (ui/map/, domain/model/, data/repository/)</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="DeviceRepository.getGroupMembers()" kind="suspend function" path="app/src/main/java/three/two/bit/phonemanager/data/repository/DeviceRepository.kt">
+      <signature>suspend fun getGroupMembers(): Result&lt;List&lt;DeviceInfo&gt;&gt;</signature>
+      <description>Fetch all devices in current group with lastLocation data. Filters out current device automatically.</description>
+    </interface>
+    <interface name="DeviceInfo" kind="data class" path="app/src/main/java/three/two/bit/phonemanager/network/models/DeviceModels.kt">
+      <signature>data class DeviceInfo(deviceId: String, displayName: String, groupId: String, lastLocation: DeviceLastLocation?)</signature>
+      <description>Domain model for group member device with optional location data</description>
+    </interface>
+    <interface name="DeviceLastLocation" kind="data class" path="app/src/main/java/three/two/bit/phonemanager/network/models/DeviceModels.kt">
+      <signature>data class DeviceLastLocation(latitude: Double, longitude: Double, timestamp: Long, accuracy: Float?)</signature>
+      <description>Location coordinates with timestamp. Convert to LatLng for map markers</description>
+    </interface>
+    <interface name="MapViewModel" kind="class" path="app/src/main/java/three/two/bit/phonemanager/ui/map/MapViewModel.kt">
+      <signature>@HiltViewModel class MapViewModel(deviceRepository: DeviceRepository, ...)</signature>
+      <description>Existing ViewModel from E3.1 to extend with group members state and loading logic</description>
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      Project uses JUnit for unit tests and AndroidX Test with Compose UI Test for UI/integration tests.
+      Test files mirror production structure in app/src/test/ (unit) and app/src/androidTest/ (instrumented).
+      Use MockK for mocking dependencies. Test ViewModels with Turbine for Flow testing.
+      Manual testing required for multi-device scenarios with real location data.
+    </standards>
+    <locations>
+      <location>app/src/test/java/**/*Test.kt</location>
+      <location>app/src/androidTest/java/**/*Test.kt</location>
+    </locations>
+    <ideas>
+      <idea ac="E3.2.1">Unit test MapViewModel to verify groupMembers list is populated when DeviceRepository.getGroupMembers() returns devices with valid lastLocation</idea>
+      <idea ac="E3.2.1">Unit test MapViewModel to verify devices with null lastLocation are filtered out from displayed markers</idea>
+      <idea ac="E3.2.2">Manual test: Launch map with 2+ devices in same group, verify all member names are visible on or near markers</idea>
+      <idea ac="E3.2.3">Manual test: Verify current device marker uses blue color (HUE_BLUE) and group member markers use orange/red color (HUE_ORANGE/HUE_RED)</idea>
+      <idea ac="E3.2.4">Manual test: Tap on group member marker, verify info window appears with displayName and relative time (e.g., "5 min ago")</idea>
+      <idea ac="E3.2.5">Unit test: DeviceRepository.getGroupMembers() handles devices with null lastLocation gracefully</idea>
+      <idea ac="All">Manual test: Register 2 devices in same group with different displayNames, view map on one device, verify other device marker appears at correct location</idea>
+    </ideas>
+  </tests>
+</story-context>
