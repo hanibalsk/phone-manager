@@ -6,6 +6,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import three.two.bit.phonemanager.ui.group.GroupMembersScreen
 import three.two.bit.phonemanager.ui.home.HomeScreen
+import three.two.bit.phonemanager.ui.map.MapScreen
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.registration.RegistrationScreen
 import three.two.bit.phonemanager.ui.settings.SettingsScreen
@@ -15,6 +16,7 @@ sealed class Screen(val route: String) {
     object Home : Screen("home")
     object GroupMembers : Screen("group_members")
     object Settings : Screen("settings")
+    object Map : Screen("map")
 }
 
 @Composable
@@ -55,6 +57,9 @@ fun PhoneManagerNavHost(
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
                 },
+                onNavigateToMap = {
+                    navController.navigate(Screen.Map.route)
+                },
             )
         }
         composable(Screen.GroupMembers.route) {
@@ -64,6 +69,11 @@ fun PhoneManagerNavHost(
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(Screen.Map.route) {
+            MapScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

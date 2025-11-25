@@ -27,6 +27,9 @@ android {
         // API configuration - override in local.properties or CI environment
         buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL") ?: ""}\"")
         buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY") ?: ""}\"")
+
+        // Story E3.1: Google Maps API key
+        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
     }
 
     buildTypes {
@@ -127,6 +130,10 @@ dependencies {
 
     // Google Play Services Location
     implementation(libs.play.services.location)
+
+    // Google Maps (Story E3.1)
+    implementation(libs.play.services.maps)
+    implementation(libs.maps.compose)
 
     // Ktor for networking
     implementation(libs.ktor.client.android)
