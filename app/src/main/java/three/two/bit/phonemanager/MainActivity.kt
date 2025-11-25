@@ -14,16 +14,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
+import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.ui.navigation.PhoneManagerNavHost
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.theme.PhoneManagerTheme
 import timber.log.Timber
+import javax.inject.Inject
 
 /**
  * MainActivity - Main entry point with Hilt integration and permission handling
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var secureStorage: SecureStorage
 
     private val permissionViewModel: PermissionViewModel by viewModels()
 
@@ -77,6 +82,7 @@ class MainActivity : ComponentActivity() {
                         onRequestLocationPermission = ::requestLocationPermission,
                         onRequestBackgroundPermission = ::requestBackgroundPermission,
                         onRequestNotificationPermission = ::requestNotificationPermission,
+                        isRegistered = secureStorage.isRegistered(),
                     )
                 }
             }

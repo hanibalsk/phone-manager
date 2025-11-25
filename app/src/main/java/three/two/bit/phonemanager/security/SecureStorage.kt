@@ -53,6 +53,8 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
         private const val KEY_API_KEY = "api_key"
         private const val KEY_API_BASE_URL = "api_base_url"
         private const val KEY_DEVICE_ID = "device_id"
+        private const val KEY_DISPLAY_NAME = "display_name"
+        private const val KEY_GROUP_ID = "group_id"
     }
 
     /**
@@ -103,6 +105,41 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
 
         return deviceId
     }
+
+    /**
+     * Get display name for device identification
+     */
+    fun getDisplayName(): String? = encryptedPrefs.getString(KEY_DISPLAY_NAME, null)
+
+    /**
+     * Store display name securely
+     */
+    fun setDisplayName(displayName: String) {
+        encryptedPrefs.edit()
+            .putString(KEY_DISPLAY_NAME, displayName)
+            .apply()
+        Timber.d("Display name stored")
+    }
+
+    /**
+     * Get group ID for device grouping
+     */
+    fun getGroupId(): String? = encryptedPrefs.getString(KEY_GROUP_ID, null)
+
+    /**
+     * Store group ID securely
+     */
+    fun setGroupId(groupId: String) {
+        encryptedPrefs.edit()
+            .putString(KEY_GROUP_ID, groupId)
+            .apply()
+        Timber.d("Group ID stored")
+    }
+
+    /**
+     * Check if device is registered (has displayName and groupId)
+     */
+    fun isRegistered(): Boolean = getDisplayName() != null && getGroupId() != null
 
     /**
      * Clear all secure storage (for logout/reset)

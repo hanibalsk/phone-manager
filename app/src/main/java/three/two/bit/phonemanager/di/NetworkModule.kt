@@ -19,6 +19,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.BuildConfig
 import three.two.bit.phonemanager.network.ApiConfiguration
+import three.two.bit.phonemanager.network.DeviceApiService
+import three.two.bit.phonemanager.network.DeviceApiServiceImpl
 import three.two.bit.phonemanager.network.LocationApiService
 import three.two.bit.phonemanager.network.LocationApiServiceImpl
 import three.two.bit.phonemanager.security.SecureStorage
@@ -107,4 +109,9 @@ object NetworkModule {
     @Singleton
     fun provideLocationApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): LocationApiService =
         LocationApiServiceImpl(httpClient, apiConfig)
+
+    @Provides
+    @Singleton
+    fun provideDeviceApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): DeviceApiService =
+        DeviceApiServiceImpl(httpClient, apiConfig)
 }
