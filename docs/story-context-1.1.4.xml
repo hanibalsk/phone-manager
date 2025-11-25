@@ -1,0 +1,223 @@
+<story-context id="bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1.4</storyId>
+    <title>Service State Persistence and Synchronization</title>
+    <status>Ready for Development</status>
+    <generatedAt>2025-11-25</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/stories/story-1.4.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>user</asA>
+    <iWant>the location tracking service state to persist correctly across app restarts and device reboots</iWant>
+    <soThat>tracking automatically resumes without manual intervention and the UI always reflects the actual service state</soThat>
+    <tasks>
+      <task id="1">Extend PreferencesRepository with serviceRunningState and lastLocationUpdateTime persistence</task>
+      <task id="2">Modify LocationRepositoryImpl to initialize from persisted state and persist on updateServiceHealth()</task>
+      <task id="3">Implement actual OS-level service running check in LocationServiceController using ActivityManager</task>
+      <task id="4">Enhance LocationTrackingViewModel init block with state reconciliation logic</task>
+      <task id="5">Update BootReceiver to correctly read persisted state before starting service</task>
+      <task id="6">Fix unit tests to align with production model signatures</task>
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+    <criterion id="AC-1.4.1" title="Persisted Service Running State">
+      <given>The user has enabled location tracking</given>
+      <when>The device reboots or the app process is killed</when>
+      <then>The "service should be running" preference is persisted in DataStore/SharedPreferences, the value survives process death and device reboots, and LocationRepositoryImpl.getServiceHealth() reads from persisted storage on initialization</then>
+    </criterion>
+    <criterion id="AC-1.4.2" title="Boot Receiver Correctly Restores Tracking">
+      <given>Tracking was enabled and persisted before device reboot</given>
+      <when>The device restarts and BootReceiver.onReceive() is triggered</when>
+      <then>locationRepository.getServiceHealth().first().isRunning returns true, the service is started via serviceController.startTracking(), and the watchdog is scheduled</then>
+    </criterion>
+    <criterion id="AC-1.4.3" title="Accurate Service Running Check">
+      <given>The app needs to determine if the location service is actually running</given>
+      <when>LocationServiceController.isServiceRunning() is called</when>
+      <then>It returns the actual OS-level service state using ActivityManager.getRunningServices()</then>
+    </criterion>
+    <criterion id="AC-1.4.4" title="ViewModel State Reconciliation">
+      <given>The app is opened after being killed or backgrounded</given>
+      <when>LocationTrackingViewModel.init executes</when>
+      <then>Toggle state is reconciled with actual service state, restarting service if persisted=ON but actual=OFF</then>
+    </criterion>
+    <criterion id="AC-1.4.5" title="ServiceHealth Persistence on State Changes">
+      <given>The service state changes (start/stop/error)</given>
+      <when>LocationRepositoryImpl.updateServiceHealth() is called</when>
+      <then>isRunning and lastLocationUpdate are persisted atomically to DataStore without blocking (&lt;100ms)</then>
+    </criterion>
+    <criterion id="AC-1.4.6" title="Unit Tests Aligned with Production Models">
+      <given>The test suite in app/src/test/</given>
+      <when>Tests are compiled and run</when>
+      <then>All tests use current production model signatures and pass without modification to production code</then>
+    </criterion>
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc path="docs/solution-architecture.md" title="Solution Architecture" section="Data Storage">
+        <snippet>EncryptedSharedPreferences for configuration and tracking state persistence. DataStore pattern for preferences.</snippet>
+      </doc>
+      <doc path="docs/product/Epic-1-Location-Tracking-Core.md" title="Epic 1: Location Tracking Core" section="Risk 1.3">
+        <snippet>RISK-1.3: Service-UI State Desynchronization - Mitigation: Health check mechanism on app resume, state reconciliation from service ground truth.</snippet>
+      </doc>
+      <doc path="docs/CODE_REVIEW.md" title="Code Review" section="Issue 15">
+        <snippet>isServiceRunning() is a stub - implement proper service state checking using ActivityManager.</snippet>
+      </doc>
+      <doc path="docs/stories/story-1.1.md" title="Story 1.1: Tracking Toggle" section="PreferencesRepository">
+        <snippet>PreferencesRepository with DataStore for toggle state persistence pattern.</snippet>
+      </doc>
+      <doc path="docs/stories/story-1.3.md" title="Story 1.3: UI-Service Integration" section="ServiceHealth">
+        <snippet>ServiceHealth model and LocationServiceController interface definitions.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <file path="app/src/main/java/com/phonemanager/data/preferences/PreferencesRepository.kt" kind="interface" symbol="PreferencesRepository" lines="22-27" reason="Interface to extend with serviceRunningState and lastLocationUpdateTime persistence methods">
+        <signature>interface PreferencesRepository { val isTrackingEnabled: Flow&lt;Boolean&gt;; suspend fun setTrackingEnabled(enabled: Boolean); val trackingInterval: Flow&lt;Int&gt;; suspend fun setTrackingInterval(minutes: Int) }</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/data/preferences/PreferencesRepository.kt" kind="class" symbol="PreferencesRepositoryImpl" lines="31-81" reason="Implementation that uses DataStore - needs new keys for SERVICE_RUNNING and LAST_LOCATION_UPDATE">
+        <signature>class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context) : PreferencesRepository</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/data/repository/LocationRepositoryImpl.kt" kind="class" symbol="LocationRepositoryImpl" lines="22-99" reason="Repository that manages _serviceHealth in-memory - needs persistence via PreferencesRepository injection">
+        <signature>class LocationRepositoryImpl @Inject constructor(private val locationDao: LocationDao) : LocationRepository</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/service/LocationServiceController.kt" kind="interface" symbol="LocationServiceController" lines="24-30" reason="Interface with isServiceRunning() stub that needs actual ActivityManager implementation">
+        <signature>interface LocationServiceController { suspend fun startTracking(): Result&lt;Unit&gt;; suspend fun stopTracking(): Result&lt;Unit&gt;; fun observeServiceState(): Flow&lt;ServiceState&gt;; fun observeEnhancedServiceState(): Flow&lt;EnhancedServiceState&gt;; fun isServiceRunning(): Boolean }</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/service/LocationServiceController.kt" kind="method" symbol="isServiceRunning" lines="115-118" reason="Stub implementation returning in-memory state - needs ActivityManager check">
+        <signature>override fun isServiceRunning(): Boolean = _serviceState.value.isRunning</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/ui/main/LocationTrackingViewModel.kt" kind="class" symbol="LocationTrackingViewModel" lines="31-186" reason="ViewModel with init block that needs state reconciliation enhancement">
+        <signature>class LocationTrackingViewModel @Inject constructor(preferencesRepository, serviceController, permissionManager, locationRepository, analytics) : ViewModel()</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/receiver/BootReceiver.kt" kind="class" symbol="BootReceiver" lines="25-77" reason="Boot receiver that checks serviceHealth.isRunning which currently reads in-memory state">
+        <signature>class BootReceiver : BroadcastReceiver() { @Inject locationRepository: LocationRepository; @Inject serviceController: LocationServiceController }</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/data/model/ServiceHealth.kt" kind="data class" symbol="ServiceHealth" lines="7-13" reason="Data model for service health state that needs to be persisted">
+        <signature>data class ServiceHealth(val isRunning: Boolean, val lastLocationUpdate: Long? = null, val locationCount: Int = 0, val healthStatus: HealthStatus = HealthStatus.HEALTHY, val errorMessage: String? = null)</signature>
+      </file>
+      <file path="app/src/main/java/com/phonemanager/service/LocationTrackingService.kt" kind="class" symbol="LocationTrackingService" lines="44-390" reason="Foreground service that calls updateServiceHealth() which needs persistence">
+        <signature>class LocationTrackingService : Service() { @Inject locationRepository: LocationRepositoryImpl }</signature>
+      </file>
+    </code>
+    <dependencies>
+      <ecosystem name="android-kotlin">
+        <package name="kotlin" version="1.9.x" />
+        <package name="kotlinx-coroutines-android" version="1.7.3" />
+        <package name="kotlinx-serialization-json" version="1.6.2" />
+      </ecosystem>
+      <ecosystem name="android-core">
+        <package name="core-ktx" version="1.12.0" />
+        <package name="lifecycle-runtime-ktx" version="2.7.0" />
+        <package name="lifecycle-viewmodel-compose" version="2.7.0" />
+        <package name="datastore-preferences" version="1.0.0" note="Primary dependency for service state persistence" />
+      </ecosystem>
+      <ecosystem name="hilt-di">
+        <package name="hilt-android" version="2.48.1" />
+        <package name="hilt-navigation-compose" version="1.1.0" />
+        <package name="hilt-work" version="1.1.0" />
+      </ecosystem>
+      <ecosystem name="room-database">
+        <package name="room-runtime" version="2.6.1" />
+        <package name="room-ktx" version="2.6.1" />
+      </ecosystem>
+      <ecosystem name="workmanager">
+        <package name="work-runtime-ktx" version="2.9.0" note="Used for ServiceHealthCheckWorker" />
+      </ecosystem>
+      <ecosystem name="android-framework">
+        <package name="ActivityManager" version="API 26+" note="Required for isServiceRunning() OS-level check - getRunningServices deprecated but functional" />
+        <package name="Context.ACTIVITY_SERVICE" version="API 26+" note="System service for ActivityManager" />
+      </ecosystem>
+      <ecosystem name="testing">
+        <package name="junit" version="4.13.2" />
+        <package name="mockk" version="1.13.8" />
+        <package name="turbine" version="1.0.0" />
+        <package name="kotlinx-coroutines-test" version="1.7.3" />
+      </ecosystem>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+    <constraint type="architecture">Extend existing MVVM + Repository pattern with persistent state backing</constraint>
+    <constraint type="pattern">Use existing PreferencesRepository DataStore pattern for state persistence</constraint>
+    <constraint type="performance">DataStore persistence must not block calling coroutine excessively (&lt;100ms)</constraint>
+    <constraint type="compatibility">ActivityManager.getRunningServices() is deprecated since API 26 but still works - add fallback if needed</constraint>
+    <constraint type="testing">Test fixes must not modify production code - only test signatures</constraint>
+    <constraint type="layer">No new modules required - extends existing data layer</constraint>
+  </constraints>
+  <interfaces>
+    <interface name="PreferencesRepository" kind="interface" path="app/src/main/java/com/phonemanager/data/preferences/PreferencesRepository.kt">
+      <method signature="val serviceRunningState: Flow&lt;Boolean&gt;" new="true" />
+      <method signature="suspend fun setServiceRunningState(isRunning: Boolean)" new="true" />
+      <method signature="val lastLocationUpdateTime: Flow&lt;Long?&gt;" new="true" />
+      <method signature="suspend fun setLastLocationUpdateTime(timestamp: Long)" new="true" />
+    </interface>
+    <interface name="LocationServiceController" kind="interface" path="app/src/main/java/com/phonemanager/service/LocationServiceController.kt">
+      <method signature="fun isServiceRunning(): Boolean" modify="true" note="Implement actual OS-level check using ActivityManager" />
+    </interface>
+    <interface name="LocationRepository" kind="interface" path="app/src/main/java/com/phonemanager/data/repository/LocationRepository.kt">
+      <method signature="fun getServiceHealth(): Flow&lt;ServiceHealth&gt;" existing="true" note="Already added, reads from in-memory but should read persisted state on init" />
+    </interface>
+  </interfaces>
+  <tests>
+    <standards>
+      <standard name="Coverage Target">Unit test coverage &gt; 80%</standard>
+      <standard name="Testing Framework">JUnit 4 with MockK for mocking, Turbine for Flow testing, kotlinx-coroutines-test for coroutines</standard>
+      <standard name="Test Naming Convention">Backtick-style descriptive names: `description of test behavior`</standard>
+      <standard name="Test Structure">Given-When-Then pattern with clear setup, action, and assertion sections</standard>
+      <standard name="Async Testing">Use runTest {} block for suspend functions and Flow testing</standard>
+    </standards>
+    <locations>
+      <location path="app/src/test/java/com/phonemanager/data/preferences/PreferencesRepositoryTest.kt" status="needs_new_tests" note="Add tests for serviceRunningState and lastLocationUpdateTime" />
+      <location path="app/src/test/java/com/phonemanager/service/LocationServiceControllerTest.kt" status="needs_fixes" note="Line 38: constructor mismatch - test creates LocationServiceController(context, permissionManager) but production uses LocationServiceControllerImpl @Inject constructor(context, locationRepository, preferencesRepository)" />
+      <location path="app/src/test/java/com/phonemanager/receiver/BootReceiverTest.kt" status="needs_fixes" note="Line 8: imports ServiceController but production uses LocationServiceController; Line 35: type should be LocationServiceController" />
+      <location path="app/src/test/java/com/phonemanager/ui/main/LocationTrackingViewModelTest.kt" status="needs_new_tests" note="Add tests for state reconciliation logic in init block" />
+      <location path="app/src/androidTest/" status="missing" note="Integration tests for state persistence across process death recommended" />
+    </locations>
+    <ideas>
+      <idea id="test-1" criterion="AC-1.4.1" priority="high">
+        <name>Test serviceRunningState persists to DataStore</name>
+        <description>Verify setServiceRunningState(true) persists to DataStore and is readable via serviceRunningState Flow</description>
+      </idea>
+      <idea id="test-2" criterion="AC-1.4.1" priority="high">
+        <name>Test LocationRepositoryImpl initializes from persisted state</name>
+        <description>Mock PreferencesRepository to return persisted state, verify _serviceHealth is initialized correctly</description>
+      </idea>
+      <idea id="test-3" criterion="AC-1.4.2" priority="high">
+        <name>Test BootReceiver reads persisted state correctly</name>
+        <description>Mock PreferencesRepository.serviceRunningState to return true, verify serviceController.startTracking() is called</description>
+      </idea>
+      <idea id="test-4" criterion="AC-1.4.3" priority="high">
+        <name>Test isServiceRunning uses ActivityManager</name>
+        <description>Mock ActivityManager.getRunningServices() to return list with/without LocationTrackingService, verify correct boolean returned</description>
+      </idea>
+      <idea id="test-5" criterion="AC-1.4.4" priority="high">
+        <name>Test ViewModel reconciles state desync (persisted=ON, actual=OFF)</name>
+        <description>Mock preferencesRepository.isTrackingEnabled=true but serviceController.isServiceRunning()=false, verify serviceController.startTracking() is called</description>
+      </idea>
+      <idea id="test-6" criterion="AC-1.4.5" priority="medium">
+        <name>Test updateServiceHealth persists state atomically</name>
+        <description>Call updateServiceHealth with isRunning=true, verify both setServiceRunningState and setLastLocationUpdateTime are called</description>
+      </idea>
+      <idea id="test-7" criterion="AC-1.4.6" priority="high">
+        <name>Fix BootReceiverTest ServiceController import</name>
+        <description>Change import from ServiceController to LocationServiceController, update type declarations on line 35</description>
+      </idea>
+      <idea id="test-8" criterion="AC-1.4.6" priority="high">
+        <name>Fix LocationServiceControllerTest constructor signature</name>
+        <description>Update test to use correct constructor: LocationServiceControllerImpl(context, locationRepository, preferencesRepository) instead of LocationServiceController(context, permissionManager)</description>
+      </idea>
+      <idea id="test-9" criterion="AC-1.4.3" priority="medium">
+        <name>Integration test: isServiceRunning after service force-kill</name>
+        <description>Instrumented test: Start tracking → adb shell am force-stop → verify isServiceRunning() returns false</description>
+      </idea>
+      <idea id="test-10" criterion="AC-1.4.1" priority="medium">
+        <name>Integration test: State survives process death</name>
+        <description>Instrumented test: Enable tracking → Kill app → Reopen → Verify toggle shows ON and service restarts</description>
+      </idea>
+    </ideas>
+  </tests>
+</story-context>

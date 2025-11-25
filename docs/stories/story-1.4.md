@@ -4,8 +4,9 @@
 **Epic**: 1 - Location Tracking Core
 **Priority**: Must-Have
 **Estimate**: 5 story points (3-4 days)
-**Status**: Draft
+**Status**: Ready for Development
 **Created**: 2025-11-25
+**Context Document**: [story-context-1.1.4.xml](../story-context-1.1.4.xml)
 
 ---
 
