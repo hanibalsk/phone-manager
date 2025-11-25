@@ -7,7 +7,9 @@ import kotlinx.coroutines.flow.Flow
 import three.two.bit.phonemanager.data.model.LocationEntity
 
 /**
- * Story 0.2.3: LocationDao - Database access object for locations
+ * Story 0.2.3/E4.1: LocationDao - Database access object for locations
+ *
+ * Story E4.1: Add date range query for history viewing
  */
 @Dao
 interface LocationDao {
@@ -38,4 +40,19 @@ interface LocationDao {
 
     @Query("DELETE FROM locations")
     suspend fun deleteAll()
+
+    /**
+     * Story E4.1: Get locations within date range for history display (AC E4.1.3, E4.1.5)
+     * @param startTime Start timestamp in milliseconds
+     * @param endTime End timestamp in milliseconds
+     * @return List of locations ordered chronologically
+     */
+    @Query(
+        """
+        SELECT * FROM locations
+        WHERE timestamp >= :startTime AND timestamp <= :endTime
+        ORDER BY timestamp ASC
+    """,
+    )
+    suspend fun getLocationsBetween(startTime: Long, endTime: Long): List<LocationEntity>
 }

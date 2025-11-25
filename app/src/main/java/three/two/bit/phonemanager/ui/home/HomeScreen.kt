@@ -55,6 +55,7 @@ fun HomeScreen(
     onNavigateToGroupMembers: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
+    onNavigateToHistory: () -> Unit = {},
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -156,6 +157,14 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("View Map")
+            }
+
+            // Navigate to History screen (Story E4.1)
+            Button(
+                onClick = onNavigateToHistory,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("View Location History")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
