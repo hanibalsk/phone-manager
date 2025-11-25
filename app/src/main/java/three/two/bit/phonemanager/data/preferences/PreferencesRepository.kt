@@ -18,9 +18,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Story 1.1/1.4: PreferencesRepository - Manages app preferences using DataStore
+ * Story 1.1/1.4/E2.1: PreferencesRepository - Manages app preferences using DataStore
  *
  * Story 1.4 additions: Service state persistence for boot restoration
+ * Story E2.1 additions: Secret mode setting
  */
 interface PreferencesRepository {
     val isTrackingEnabled: Flow<Boolean>
@@ -34,6 +35,10 @@ interface PreferencesRepository {
     val lastLocationUpdateTime: Flow<Long?>
     suspend fun setLastLocationUpdateTime(timestamp: Long)
     suspend fun clearLastLocationUpdateTime()
+
+    // Story E2.1: Secret mode
+    val isSecretModeEnabled: Flow<Boolean>
+    suspend fun setSecretModeEnabled(enabled: Boolean)
 }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -54,6 +59,9 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
         // Story 1.4: Service state persistence keys
         val SERVICE_RUNNING = booleanPreferencesKey("service_running")
         val LAST_LOCATION_UPDATE = longPreferencesKey("last_location_update")
+
+        // Story E2.1: Secret mode key
+        val SECRET_MODE_ENABLED = booleanPreferencesKey("secret_mode_enabled")
     }
 
     override val isTrackingEnabled: Flow<Boolean> = context.dataStore.data
@@ -144,5 +152,27 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
             preferences.remove(PreferencesKeys.LAST_LOCATION_UPDATE)
         }
         Timber.d("Last location update time cleared")
+    }
+
+    // Story E2.1: Secret mode implementation
+
+    override val isSecretModeEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.SECRET_MODE_ENABLED] ?: false
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading secret mode preference")
+                emit(false)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setSecretModeEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SECRET_MODE_ENABLED] = enabled
+        }
+        // Note: No logging here to avoid revealing secret mode state in logs (AC E2.1.6)
     }
 }

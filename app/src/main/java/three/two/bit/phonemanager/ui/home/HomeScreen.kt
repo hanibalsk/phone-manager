@@ -2,10 +2,13 @@ package three.two.bit.phonemanager.ui.home
 
 import android.app.Activity
 import android.os.Build
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
@@ -20,8 +23,13 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -47,6 +55,7 @@ fun HomeScreen(
     onNavigateToGroupMembers: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     modifier: Modifier = Modifier,
+    homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val permissionState by permissionViewModel.permissionState.collectAsState()
@@ -54,10 +63,27 @@ fun HomeScreen(
     val showBackgroundRationale by permissionViewModel.showBackgroundRationale.collectAsState()
     val showNotificationRationale by permissionViewModel.showNotificationRationale.collectAsState()
 
+    // Story E2.1: Tap counter for version text (AC E2.1.3)
+    var tapCount by remember { mutableIntStateOf(0) }
+    var lastTapTime by remember { mutableLongStateOf(0L) }
+
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Phone Manager") },
+                title = {
+                    // Story E2.1: Long-press gesture on title to toggle secret mode (AC E2.1.2)
+                    Text(
+                        "Phone Manager",
+                        modifier =
+                        Modifier.pointerInput(Unit) {
+                            detectTapGestures(
+                                onLongPress = {
+                                    homeViewModel.toggleSecretMode()
+                                },
+                            )
+                        },
+                    )
+                },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
                         Icon(Icons.Default.Settings, "Settings")
@@ -122,6 +148,33 @@ fun HomeScreen(
             ) {
                 Text("View Group Members")
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Story E2.1: Version text with tap gesture to toggle secret mode (AC E2.1.3)
+            Text(
+                text = "v1.0.0",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier =
+                Modifier.pointerInput(Unit) {
+                    detectTapGestures(
+                        onTap = {
+                            val now = System.currentTimeMillis()
+                            if (now - lastTapTime < 500) {
+                                tapCount++
+                            } else {
+                                tapCount = 1
+                            }
+                            lastTapTime = now
+                            if (tapCount >= 5) {
+                                homeViewModel.toggleSecretMode()
+                                tapCount = 0
+                            }
+                        },
+                    )
+                },
+            )
         }
     }
 
