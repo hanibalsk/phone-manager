@@ -92,20 +92,9 @@ class LocationTrackingViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            // Load persisted toggle state
-            preferencesRepository.isTrackingEnabled.collect { enabled ->
-                // Reconcile with actual service state
-                val isServiceActuallyRunning = serviceController.isServiceRunning()
-
-                _trackingState.value = when {
-                    enabled && isServiceActuallyRunning -> TrackingState.Active()
-                    enabled && !isServiceActuallyRunning -> {
-                        // State desync - service should be running but isn't
-                        Timber.w("State desync detected: toggle ON but service not running")
-                        TrackingState.Stopped
-                    }
-                    else -> TrackingState.Stopped
-                }
+            // Story 1.4: Load persisted toggle state and reconcile with actual service state
+            preferencesRepository.isTrackingEnabled.collect { persistedEnabled ->
+                reconcileServiceState(persistedEnabled)
             }
         }
 
@@ -113,6 +102,66 @@ class LocationTrackingViewModel @Inject constructor(
             // Monitor permission state
             permissionManager.observePermissionState().collect { state ->
                 _permissionState.value = state
+            }
+        }
+    }
+
+    /**
+     * Story 1.4: Reconcile persisted state with actual service state.
+     *
+     * Handles state desynchronization by:
+     * - Restarting service if persisted=ON but actual=OFF
+     * - Stopping service if persisted=OFF but actual=ON (logs and corrects)
+     * - Setting correct UI state when states match
+     */
+    private suspend fun reconcileServiceState(persistedEnabled: Boolean) {
+        val isServiceActuallyRunning = serviceController.isServiceRunning()
+
+        when {
+            persistedEnabled && !isServiceActuallyRunning -> {
+                // State desync: should be running but isn't - restart service
+                Timber.w("State desync detected: persisted=ON, actual=OFF - restarting service")
+                if (permissionManager.hasAllRequiredPermissions()) {
+                    _trackingState.value = TrackingState.Starting
+                    serviceController.startTracking()
+                        .onSuccess {
+                            _trackingState.value = TrackingState.Active()
+                            analytics.logServiceStateChanged("restored_after_desync")
+                            Timber.i("Service restored successfully after state desync")
+                        }
+                        .onFailure { error ->
+                            // If restart fails, sync persisted state to match reality
+                            preferencesRepository.setTrackingEnabled(false)
+                            _trackingState.value = TrackingState.Stopped
+                            Timber.e(error, "Failed to restore service after desync, corrected persisted state")
+                        }
+                } else {
+                    // Can't restart without permissions, correct persisted state
+                    preferencesRepository.setTrackingEnabled(false)
+                    _trackingState.value = TrackingState.Stopped
+                    Timber.w("Cannot restore service: permissions not granted, corrected persisted state")
+                }
+            }
+            !persistedEnabled && isServiceActuallyRunning -> {
+                // State desync: shouldn't be running but is - stop and correct
+                Timber.w("State desync detected: persisted=OFF, actual=ON - stopping service")
+                _trackingState.value = TrackingState.Stopping
+                serviceController.stopTracking()
+                    .onSuccess {
+                        _trackingState.value = TrackingState.Stopped
+                        analytics.logServiceStateChanged("stopped_after_desync")
+                        Timber.i("Service stopped after state desync correction")
+                    }
+                    .onFailure { error ->
+                        _trackingState.value = TrackingState.Error(error.message ?: "Failed to stop")
+                        Timber.e(error, "Failed to stop service after desync")
+                    }
+            }
+            persistedEnabled && isServiceActuallyRunning -> {
+                _trackingState.value = TrackingState.Active()
+            }
+            else -> {
+                _trackingState.value = TrackingState.Stopped
             }
         }
     }
@@ -126,6 +175,7 @@ class LocationTrackingViewModel @Inject constructor(
                     // Ignore rapid taps during transition
                     Timber.d("Ignoring toggle during transition state")
                 }
+                is TrackingState.Error -> startTracking() // Allow retry from error state
             }
         }
     }

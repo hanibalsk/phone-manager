@@ -4,32 +4,58 @@ import com.phonemanager.data.database.LocationDao
 import com.phonemanager.data.model.HealthStatus
 import com.phonemanager.data.model.LocationEntity
 import com.phonemanager.data.model.ServiceHealth
+import com.phonemanager.data.preferences.PreferencesRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Epic 0.2.3: LocationRepositoryImpl - Stub implementation for Epic 1 development
- * Full implementation will be completed in Epic 0.2
+ * Epic 0.2.3/Story 1.4: LocationRepositoryImpl - Location data repository implementation
+ *
+ * Story 1.4: Enhanced to persist service health state via PreferencesRepository
+ * for reliable boot restoration.
  */
 @Singleton
 class LocationRepositoryImpl @Inject constructor(
-    private val locationDao: LocationDao
+    private val locationDao: LocationDao,
+    private val preferencesRepository: PreferencesRepository
 ) : LocationRepository {
 
-    // Stub service health state
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+
+    // Service health state - initialized from persisted storage
     private val _serviceHealth = MutableStateFlow(
         ServiceHealth(
             isRunning = false,
             healthStatus = HealthStatus.HEALTHY
         )
     )
+
+    init {
+        // Story 1.4: Restore persisted state on initialization
+        repositoryScope.launch {
+            combine(
+                preferencesRepository.serviceRunningState,
+                preferencesRepository.lastLocationUpdateTime
+            ) { isRunning, lastUpdate ->
+                Timber.d("Restoring service health from persistence: isRunning=$isRunning, lastUpdate=$lastUpdate")
+                _serviceHealth.value = _serviceHealth.value.copy(
+                    isRunning = isRunning,
+                    lastLocationUpdate = lastUpdate
+                )
+            }.collect { /* Keep collecting to stay in sync */ }
+        }
+    }
 
     override fun observeLocationCount(): Flow<Int> {
         return locationDao.observeLocationCount()
@@ -73,12 +99,27 @@ class LocationRepositoryImpl @Inject constructor(
     }
 
     /**
-     * Update service health - called by LocationTrackingService
-     * Stub implementation for Epic 1
+     * Story 1.4: Update service health - called by LocationTrackingService
+     *
+     * Persists the isRunning and lastLocationUpdate to DataStore for boot restoration.
+     * In-memory state is also updated for UI reactivity.
      */
     fun updateServiceHealth(health: ServiceHealth) {
         _serviceHealth.value = health
         Timber.d("Service health updated: $health")
+
+        // Story 1.4: Persist state for boot restoration
+        repositoryScope.launch {
+            try {
+                preferencesRepository.setServiceRunningState(health.isRunning)
+                health.lastLocationUpdate?.let {
+                    preferencesRepository.setLastLocationUpdateTime(it)
+                }
+                Timber.d("Service health persisted successfully")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to persist service health")
+            }
+        }
     }
 
     /**

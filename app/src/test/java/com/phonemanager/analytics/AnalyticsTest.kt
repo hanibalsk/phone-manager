@@ -14,7 +14,6 @@ import org.junit.Test
  * - Event logging
  * - Permission events
  * - Service events
- * - Location events
  */
 @OptIn(ExperimentalCoroutinesApi::class)
 class AnalyticsTest {
@@ -23,7 +22,7 @@ class AnalyticsTest {
 
     @Before
     fun setup() {
-        analytics = spyk(AnalyticsImpl())
+        analytics = spyk(DebugAnalytics())
     }
 
     @After
@@ -77,61 +76,42 @@ class AnalyticsTest {
     }
 
     @Test
-    fun `logServiceStarted logs event`() {
+    fun `logTrackingToggled logs event with enabled state`() {
         // When
-        analytics.logServiceStarted()
+        analytics.logTrackingToggled(true)
 
         // Then
-        verify { analytics.logServiceStarted() }
+        verify { analytics.logTrackingToggled(true) }
     }
 
     @Test
-    fun `logServiceStopped logs event`() {
+    fun `logServiceStateChanged logs event with state`() {
         // When
-        analytics.logServiceStopped()
+        analytics.logServiceStateChanged("running")
 
         // Then
-        verify { analytics.logServiceStopped() }
+        verify { analytics.logServiceStateChanged("running") }
     }
 
     @Test
-    fun `logLocationCaptured logs event`() {
+    fun `logEvent logs custom event with params`() {
+        // Given
+        val params = mapOf<String, Any>("key" to "value", "count" to 42)
+
         // When
-        analytics.logLocationCaptured()
+        analytics.logEvent("custom_event", params)
 
         // Then
-        verify { analytics.logLocationCaptured() }
+        verify { analytics.logEvent("custom_event", params) }
     }
 
     @Test
-    fun `logLocationUploaded logs event`() {
+    fun `setUserProperty sets user property`() {
         // When
-        analytics.logLocationUploaded()
+        analytics.setUserProperty("user_type", "premium")
 
         // Then
-        verify { analytics.logLocationUploaded() }
-    }
-
-    @Test
-    fun `logLocationUploadFailed logs event with error`() {
-        // When
-        analytics.logLocationUploadFailed("network_error")
-
-        // Then
-        verify { analytics.logLocationUploadFailed("network_error") }
-    }
-
-    @Test
-    fun `multiple events can be logged in sequence`() {
-        // When
-        analytics.logServiceStarted()
-        analytics.logLocationCaptured()
-        analytics.logLocationUploaded()
-
-        // Then
-        verify(exactly = 1) { analytics.logServiceStarted() }
-        verify(exactly = 1) { analytics.logLocationCaptured() }
-        verify(exactly = 1) { analytics.logLocationUploaded() }
+        verify { analytics.setUserProperty("user_type", "premium") }
     }
 
     @Test
@@ -149,5 +129,30 @@ class AnalyticsTest {
         verify(exactly = 1) { analytics.logPermissionRationaleShown("background") }
         verify(exactly = 1) { analytics.logPermissionGranted("background") }
         verify(exactly = 1) { analytics.logPermissionFlowCompleted(true) }
+    }
+
+    @Test
+    fun `service state changes can be tracked`() {
+        // When - simulate service state changes
+        analytics.logServiceStateChanged("starting")
+        analytics.logServiceStateChanged("running")
+        analytics.logTrackingToggled(true)
+
+        // Then
+        verify(exactly = 1) { analytics.logServiceStateChanged("starting") }
+        verify(exactly = 1) { analytics.logServiceStateChanged("running") }
+        verify(exactly = 1) { analytics.logTrackingToggled(true) }
+    }
+
+    @Test
+    fun `NoOpAnalytics does not throw exceptions`() {
+        // Given
+        val noOpAnalytics = NoOpAnalytics()
+
+        // When/Then - should not throw
+        noOpAnalytics.logEvent("test_event", mapOf("key" to "value"))
+        noOpAnalytics.setUserProperty("prop", "value")
+        noOpAnalytics.logPermissionGranted("location")
+        noOpAnalytics.logServiceStateChanged("running")
     }
 }

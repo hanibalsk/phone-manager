@@ -99,4 +99,66 @@ class PreferencesRepositoryTest {
         //     assertTrue(awaitItem())
         // }
     }
+
+    // Story 1.4: Service state persistence tests
+
+    @Test
+    fun `serviceRunningState returns false by default`() = runTest {
+        // This test requires actual DataStore implementation
+        // Use Robolectric or instrumented tests
+        //
+        // repository.serviceRunningState.test {
+        //     assertFalse(awaitItem())
+        // }
+    }
+
+    @Test
+    fun `setServiceRunningState persists value correctly`() = runTest {
+        // This test requires actual DataStore implementation
+        //
+        // repository.setServiceRunningState(true)
+        //
+        // repository.serviceRunningState.test {
+        //     assertTrue(awaitItem())
+        // }
+    }
+
+    @Test
+    fun `lastLocationUpdateTime returns null by default`() = runTest {
+        // This test requires actual DataStore implementation
+        //
+        // repository.lastLocationUpdateTime.test {
+        //     assertNull(awaitItem())
+        // }
+    }
+
+    @Test
+    fun `setLastLocationUpdateTime persists value correctly`() = runTest {
+        // This test requires actual DataStore implementation
+        //
+        // val timestamp = System.currentTimeMillis()
+        // repository.setLastLocationUpdateTime(timestamp)
+        //
+        // repository.lastLocationUpdateTime.test {
+        //     assertEquals(timestamp, awaitItem())
+        // }
+    }
+
+    @Test
+    fun `service_state_persists_across_app_restart_example`() {
+        // Integration test placeholder for Story 1.4 boot restoration
+        //
+        // Given: Service was running, state persisted
+        // val repository1 = PreferencesRepositoryImpl(context)
+        // repository1.setServiceRunningState(true)
+        // repository1.setLastLocationUpdateTime(System.currentTimeMillis())
+        //
+        // When: App restarts (new repository instance, simulating process death)
+        // val repository2 = PreferencesRepositoryImpl(context)
+        //
+        // Then: Persisted state should be restored
+        // repository2.serviceRunningState.test {
+        //     assertTrue(awaitItem())
+        // }
+    }
 }

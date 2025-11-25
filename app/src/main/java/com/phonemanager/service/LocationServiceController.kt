@@ -1,5 +1,6 @@
 package com.phonemanager.service
 
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -112,9 +113,35 @@ class LocationServiceControllerImpl @Inject constructor(
         }
     }
 
+    /**
+     * Story 1.4: Check if the location service is actually running at the OS level.
+     *
+     * Uses ActivityManager.getRunningServices() to check the actual service state,
+     * not just in-memory state. This ensures accurate state reconciliation after
+     * process death or service kill.
+     *
+     * Note: getRunningServices is deprecated since API 26 but still works.
+     * Alternative approaches (binding, WorkManager query) are more complex.
+     */
     override fun isServiceRunning(): Boolean {
-        // Simple stub implementation - full implementation would check ActivityManager
-        return _serviceState.value.isRunning
+        val activityManager = context.getSystemService(Context.ACTIVITY_SERVICE) as? ActivityManager
+            ?: return _serviceState.value.isRunning // Fallback to in-memory state
+
+        @Suppress("DEPRECATION") // Still works, and alternatives are more complex
+        val runningServices = try {
+            activityManager.getRunningServices(Int.MAX_VALUE)
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to get running services, falling back to in-memory state")
+            return _serviceState.value.isRunning
+        }
+
+        val isRunning = runningServices?.any { serviceInfo ->
+            serviceInfo.service.className == LocationTrackingService::class.java.name
+        } ?: false
+
+        Timber.d("isServiceRunning check: actual=$isRunning, in-memory=${_serviceState.value.isRunning}")
+
+        return isRunning
     }
 }
 

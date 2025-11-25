@@ -160,34 +160,54 @@ class LocationTrackingViewModelTest {
     fun `ignore rapid toggle taps during transition`() = runTest {
         every { permissionManager.hasAllRequiredPermissions() } returns true
         coEvery { serviceController.startTracking() } returns Result.success(Unit)
+        coEvery { serviceController.stopTracking() } returns Result.success(Unit)
 
         viewModel = createViewModel()
 
-        // Set state to Starting
+        // First toggle starts tracking - state goes from Stopped -> Starting
         viewModel.toggleTracking()
 
-        // Try to toggle again while starting (should be ignored)
+        // Second toggle while in Starting state should be ignored
+        // (before advanceUntilIdle completes the first operation)
         viewModel.toggleTracking()
+
+        // Now advance to let the coroutines complete
         testDispatcher.scheduler.advanceUntilIdle()
 
-        // Verify service was called only once
+        // Verify service start was called only once (second toggle was ignored during Starting state)
         coVerify(exactly = 1) { serviceController.startTracking() }
     }
 
     @Test
-    fun `state reconciliation detects desync`() = runTest {
-        // DataStore says tracking enabled, but service not running
+    fun `state reconciliation detects desync and attempts restart when permissions granted`() = runTest {
+        // Story 1.4: DataStore says tracking enabled, but service not running
+        // With permissions granted, it should attempt to restart the service
         every { preferencesRepository.isTrackingEnabled } returns flowOf(true)
         every { serviceController.isServiceRunning() } returns false
+        every { permissionManager.hasAllRequiredPermissions() } returns true
+        coEvery { serviceController.startTracking() } returns Result.success(Unit)
 
         viewModel = createViewModel()
         testDispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.trackingState.test {
-            val state = awaitItem()
-            // Should reconcile to Stopped due to desync
-            assertIs<TrackingState.Stopped>(state)
-        }
+        // Verify service restart was attempted
+        coVerify { serviceController.startTracking() }
+        verify { analytics.logServiceStateChanged("restored_after_desync") }
+    }
+
+    @Test
+    fun `state reconciliation corrects persisted state when permissions not granted`() = runTest {
+        // Story 1.4: DataStore says tracking enabled, but service not running
+        // Without permissions, it should correct the persisted state
+        every { preferencesRepository.isTrackingEnabled } returns flowOf(true)
+        every { serviceController.isServiceRunning() } returns false
+        every { permissionManager.hasAllRequiredPermissions() } returns false
+
+        viewModel = createViewModel()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Verify persisted state was corrected
+        coVerify { preferencesRepository.setTrackingEnabled(false) }
     }
 
     @Test

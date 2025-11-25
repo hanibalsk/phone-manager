@@ -57,12 +57,8 @@ class QueueManagerTest {
     fun `enqueueLocation adds location to queue with PENDING status`() = runTest {
         // Given
         val locationId = 123L
-        val expectedQueueItem = LocationQueueEntity(
-            locationId = locationId,
-            status = QueueStatus.PENDING
-        )
 
-        coEvery { locationQueueDao.insert(any()) } returns 1L
+        coEvery { locationQueueDao.insert(any()) } returns locationId
 
         // When
         queueManager.enqueueLocation(locationId)
@@ -106,11 +102,10 @@ class QueueManagerTest {
         // Given
         val locationId = 1L
         val queueItem = LocationQueueEntity(
-            id = 1,
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            createdTime = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis()
         )
         val locationEntity = LocationEntity(
             id = locationId,
@@ -119,11 +114,12 @@ class QueueManagerTest {
             accuracy = 10f,
             timestamp = System.currentTimeMillis()
         )
+        val uploadResponse = mockk<com.phonemanager.network.models.LocationUploadResponse>(relaxed = true)
 
         every { networkManager.isNetworkAvailable() } returns true
         coEvery { locationQueueDao.getPendingItems(any(), any()) } returns listOf(queueItem)
         coEvery { locationDao.getById(locationId) } returns locationEntity
-        coEvery { networkManager.uploadLocation(locationEntity) } returns Result.success(Unit)
+        coEvery { networkManager.uploadLocation(locationEntity) } returns Result.success(uploadResponse)
         coEvery { locationQueueDao.update(any()) } just Runs
 
         // When
@@ -134,12 +130,12 @@ class QueueManagerTest {
         coVerify {
             // First update to UPLOADING
             locationQueueDao.update(match {
-                it.id == queueItem.id && it.status == QueueStatus.UPLOADING
+                it.locationId == queueItem.locationId && it.status == QueueStatus.UPLOADING
             })
 
             // Then update to UPLOADED
             locationQueueDao.update(match {
-                it.id == queueItem.id && it.status == QueueStatus.UPLOADED
+                it.locationId == queueItem.locationId && it.status == QueueStatus.UPLOADED
             })
         }
     }
@@ -149,11 +145,10 @@ class QueueManagerTest {
         // Given
         val locationId = 1L
         val queueItem = LocationQueueEntity(
-            id = 1,
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            createdTime = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis()
         )
         val locationEntity = LocationEntity(
             id = locationId,
@@ -177,10 +172,10 @@ class QueueManagerTest {
         coVerify {
             // Update to RETRY_PENDING with incremented retry count
             locationQueueDao.update(match {
-                it.id == queueItem.id &&
+                it.locationId == queueItem.locationId &&
                 it.status == QueueStatus.RETRY_PENDING &&
                 it.retryCount == 1 &&
-                it.nextRetryTime > System.currentTimeMillis()
+                (it.nextRetryTime ?: 0) > System.currentTimeMillis()
             })
         }
     }
@@ -190,11 +185,10 @@ class QueueManagerTest {
         // Given
         val locationId = 1L
         val queueItem = LocationQueueEntity(
-            id = 1,
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 4, // Already tried 4 times, next will be 5 (max)
-            createdTime = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis()
         )
         val locationEntity = LocationEntity(
             id = locationId,
@@ -218,7 +212,7 @@ class QueueManagerTest {
         coVerify {
             // Should mark as FAILED after max retries
             locationQueueDao.update(match {
-                it.id == queueItem.id &&
+                it.locationId == queueItem.locationId &&
                 it.status == QueueStatus.FAILED &&
                 it.retryCount == 5
             })
@@ -230,11 +224,10 @@ class QueueManagerTest {
         // Given
         val locationId = 1L
         val queueItem = LocationQueueEntity(
-            id = 1,
             locationId = locationId,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            createdTime = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis()
         )
 
         every { networkManager.isNetworkAvailable() } returns true
@@ -249,7 +242,7 @@ class QueueManagerTest {
         assertEquals(0, result)
         coVerify {
             locationQueueDao.update(match {
-                it.id == queueItem.id &&
+                it.locationId == queueItem.locationId &&
                 it.status == QueueStatus.FAILED &&
                 it.errorMessage == "Location not found in database"
             })
@@ -260,18 +253,16 @@ class QueueManagerTest {
     fun `processQueue processes multiple items`() = runTest {
         // Given
         val queueItem1 = LocationQueueEntity(
-            id = 1,
             locationId = 1L,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            createdTime = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis()
         )
         val queueItem2 = LocationQueueEntity(
-            id = 2,
             locationId = 2L,
             status = QueueStatus.PENDING,
             retryCount = 0,
-            createdTime = System.currentTimeMillis()
+            queuedAt = System.currentTimeMillis()
         )
         val location1 = LocationEntity(
             id = 1L,
@@ -287,13 +278,14 @@ class QueueManagerTest {
             accuracy = 15f,
             timestamp = System.currentTimeMillis()
         )
+        val uploadResponse = mockk<com.phonemanager.network.models.LocationUploadResponse>(relaxed = true)
 
         every { networkManager.isNetworkAvailable() } returns true
         coEvery { locationQueueDao.getPendingItems(any(), any()) } returns listOf(queueItem1, queueItem2)
         coEvery { locationDao.getById(1L) } returns location1
         coEvery { locationDao.getById(2L) } returns location2
-        coEvery { networkManager.uploadLocation(location1) } returns Result.success(Unit)
-        coEvery { networkManager.uploadLocation(location2) } returns Result.success(Unit)
+        coEvery { networkManager.uploadLocation(location1) } returns Result.success(uploadResponse)
+        coEvery { networkManager.uploadLocation(location2) } returns Result.success(uploadResponse)
         coEvery { locationQueueDao.update(any()) } just Runs
 
         // When
@@ -389,11 +381,10 @@ class QueueManagerTest {
         // Simulate 3 retries
         for (retryCount in 0..2) {
             val queueItem = LocationQueueEntity(
-                id = 1,
                 locationId = locationId,
                 status = QueueStatus.PENDING,
                 retryCount = retryCount,
-                createdTime = System.currentTimeMillis()
+                queuedAt = System.currentTimeMillis()
             )
 
             coEvery { locationQueueDao.getPendingItems(any(), any()) } returns listOf(queueItem)
@@ -406,8 +397,8 @@ class QueueManagerTest {
 
         // Verify each subsequent retry has a longer wait time
         for (i in 1 until retryPendingUpdates.size) {
-            val prevWaitTime = retryPendingUpdates[i-1].nextRetryTime - retryPendingUpdates[i-1].lastAttemptTime
-            val currWaitTime = retryPendingUpdates[i].nextRetryTime - retryPendingUpdates[i].lastAttemptTime
+            val prevWaitTime = (retryPendingUpdates[i-1].nextRetryTime ?: 0) - (retryPendingUpdates[i-1].lastAttemptTime ?: 0)
+            val currWaitTime = (retryPendingUpdates[i].nextRetryTime ?: 0) - (retryPendingUpdates[i].lastAttemptTime ?: 0)
             // Current wait time should be roughly double the previous (accounting for jitter)
             assertTrue(
                 currWaitTime > prevWaitTime,

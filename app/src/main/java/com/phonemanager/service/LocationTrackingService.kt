@@ -268,8 +268,8 @@ class LocationTrackingService : Service() {
      * Uses exponential backoff with a maximum cap
      */
     private fun calculateBackoffInterval(): Int {
-        val backoffMinutes = currentInterval *
-            kotlin.math.pow(FAILURE_BACKOFF_MULTIPLIER.toDouble(), consecutiveFailures.toDouble()).toInt()
+        val multiplier = Math.pow(FAILURE_BACKOFF_MULTIPLIER.toDouble(), consecutiveFailures.toDouble())
+        val backoffMinutes = (currentInterval.toDouble() * multiplier).toInt()
         return kotlin.math.min(backoffMinutes, MAX_BACKOFF_MINUTES)
     }
 

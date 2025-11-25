@@ -408,13 +408,13 @@ fun serviceStatePersistedAcrossProcessDeath() {
 
 ## Definition of Done
 
-- [ ] `PreferencesRepository` extended with service state persistence methods
-- [ ] `LocationRepositoryImpl` initializes from persisted state
-- [ ] `LocationRepositoryImpl.updateServiceHealth()` persists state changes
-- [ ] `LocationServiceController.isServiceRunning()` checks actual OS service state
-- [ ] `LocationTrackingViewModel` reconciles persisted vs actual state on init
-- [ ] `BootReceiver` correctly reads persisted state and restores service
-- [ ] Unit tests updated to match production model signatures
+- [x] `PreferencesRepository` extended with service state persistence methods
+- [x] `LocationRepositoryImpl` initializes from persisted state
+- [x] `LocationRepositoryImpl.updateServiceHealth()` persists state changes
+- [x] `LocationServiceController.isServiceRunning()` checks actual OS service state
+- [x] `LocationTrackingViewModel` reconciles persisted vs actual state on init
+- [x] `BootReceiver` correctly reads persisted state and restores service
+- [x] Unit tests updated to match production model signatures
 - [ ] All unit tests pass
 - [ ] Integration tests for state persistence pass
 - [ ] Manual testing completed on Android 10, 13, 14
@@ -453,6 +453,44 @@ fun serviceStatePersistedAcrossProcessDeath() {
 
 ---
 
+## File List
+
+### Modified Files
+- `app/src/main/java/com/phonemanager/data/preferences/PreferencesRepository.kt` - Extended interface with service state persistence methods
+- `app/src/main/java/com/phonemanager/data/repository/LocationRepositoryImpl.kt` - Added persistence integration and state restoration from DataStore
+- `app/src/main/java/com/phonemanager/service/LocationServiceController.kt` - Implemented actual OS service state check via ActivityManager
+- `app/src/main/java/com/phonemanager/ui/main/LocationTrackingViewModel.kt` - Enhanced state reconciliation logic with service restart capability
+- `app/src/main/java/com/phonemanager/receiver/BootReceiver.kt` - Updated documentation (now uses persisted state via repository)
+- `app/src/test/java/com/phonemanager/queue/QueueManagerTest.kt` - Fixed LocationQueueEntity and NetworkManager signatures
+- `app/src/test/java/com/phonemanager/service/LocationServiceControllerTest.kt` - Fixed constructor, added isServiceRunning tests
+- `app/src/test/java/com/phonemanager/receiver/BootReceiverTest.kt` - Fixed interface reference to LocationServiceController
+- `app/src/test/java/com/phonemanager/ui/main/LocationTrackingViewModelTest.kt` - Added state reconciliation tests
+- `app/src/test/java/com/phonemanager/data/preferences/PreferencesRepositoryTest.kt` - Added service state persistence test stubs
+
+---
+
+## Dev Agent Record
+
+### Debug Log
+**2025-11-25**: Implementation Plan
+1. Extended PreferencesRepository interface with serviceRunningState and lastLocationUpdateTime flows/setters
+2. Implemented persistence methods in PreferencesRepositoryImpl using DataStore
+3. Modified LocationRepositoryImpl to inject PreferencesRepository and restore state on init
+4. Updated updateServiceHealth() to persist state changes asynchronously
+5. Implemented actual OS service state check in LocationServiceController.isServiceRunning() using ActivityManager
+6. Enhanced ViewModel reconciliation to restart service on desync when permissions granted
+7. Fixed unit tests to match production model signatures
+
+### Completion Notes
+All code changes for Story 1.4 have been implemented. The implementation follows the existing DataStore/Repository patterns in the codebase. Key architectural decisions:
+- Used async persistence (non-blocking) to avoid UI lag
+- Implemented graceful fallbacks for ActivityManager unavailability
+- Added state correction logic in ViewModel when permissions are missing
+
+**Note**: Gradle wrapper JAR is missing from the repository, preventing local test execution. Test validation requires running `./gradlew testDebugUnitTest` after restoring the gradle wrapper.
+
+---
+
 ## Dev Notes
 
 ### Source References
@@ -475,9 +513,10 @@ fun serviceStatePersistedAcrossProcessDeath() {
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-11-25 | Claude | Initial story creation based on code review analysis |
+| 2025-11-25 | Claude | Implemented all code changes: PreferencesRepository extensions, LocationRepositoryImpl persistence, isServiceRunning OS check, ViewModel reconciliation, test fixes |
 
 ---
 
 **Last Updated**: 2025-11-25
-**Status**: Draft
+**Status**: Ready for Review
 **Dependencies**: Stories 1.1, 1.3 (implemented), Epic 0.2.4 (implemented)

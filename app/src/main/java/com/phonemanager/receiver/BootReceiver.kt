@@ -16,10 +16,13 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Story 0.2.4: BootReceiver - Auto-starts tracking service on device boot
+ * Story 0.2.4/1.4: BootReceiver - Auto-starts tracking service on device boot
  *
  * Listens for BOOT_COMPLETED and QUICKBOOT_POWERON intents to restore
  * the location tracking service if it was running before reboot.
+ *
+ * Story 1.4: Now reads from persisted state via LocationRepository which
+ * initializes from DataStore, ensuring accurate restoration after reboot.
  */
 @AndroidEntryPoint
 class BootReceiver : BroadcastReceiver() {

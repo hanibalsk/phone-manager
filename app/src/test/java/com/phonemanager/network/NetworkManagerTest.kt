@@ -298,6 +298,8 @@ class NetworkManagerTest {
         every { connectivityManager.getNetworkCapabilities(network) } returns networkCapabilities
         every { networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) } returns true
         every { networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED) } returns true
+        every { networkCapabilities.hasTransport(any()) } returns false
+        every { networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) } returns true
 
         // When
         val result = networkManager.testConnection()
