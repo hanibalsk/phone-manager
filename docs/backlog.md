@@ -9,6 +9,16 @@
 
 | Date | Story | Epic | Type | Severity | Owner | Status | Notes |
 |------|-------|------|------|----------|-------|--------|-------|
+| 2025-11-25 | E3.3 | 3 | Enhancement | Medium | TBD | Open | Add Settings UI for polling interval configuration - Add dropdown/slider for 10, 15, 20, 30s selection. File: SettingsScreen.kt, AC: E3.3.5 |
+| 2025-11-25 | E3.3 | 3 | Testing | Low | TBD | Open | Add unit tests for polling lifecycle - Test startPolling(), stopPolling(), interval execution. File: MapViewModelTest.kt |
+| 2025-11-25 | E3.1 | 3 | Enhancement | Low | TBD | Open | Use camera animation for smooth transitions - Replace direct position with animate(). File: MapScreen.kt:72-79 |
+| 2025-11-25 | E3.1 | 3 | Enhancement | Low | TBD | Open | Add retry button to error state - Add Button calling viewModel.refresh(). File: MapScreen.kt:108-112 |
+| 2025-11-25 | E3.1 | 3 | Testing | Low | TBD | Open | Add tests for polling lifecycle - Test startPolling() and stopPolling(). File: MapViewModelTest.kt |
+| 2025-11-25 | E2.2 | 2 | Performance | Low | TBD | Open | Cache secret mode state to avoid runBlocking - Add cached field updated by Flow. File: LocationTrackingService.kt:393-397 |
+| 2025-11-25 | E2.2 | 2 | Testing | Low | TBD | Open | Add unit test for notification variants - Test createNotification() for secret vs normal mode. File: LocationTrackingServiceTest.kt (new) |
+| 2025-11-25 | E2.1 | 2 | Enhancement | Low | TBD | Open | Verify long-press duration is 3 seconds - Consider awaitLongPressOrCancellation with 3000ms. File: HomeScreen.kt:79-85, AC: E2.1.2 |
+| 2025-11-25 | E2.1 | 2 | Testing | Low | TBD | Open | Test gesture timing requirements - Add instrumented tests for 3s long-press and 5-tap timing. File: app/src/androidTest/ (new) |
+| 2025-11-25 | E2.1 | 2 | Testing | Low | TBD | Open | Verify haptic feedback suppression - Manual test on multiple devices. AC: E2.1.4 |
 | 2025-11-25 | E1.3 | 1 | Enhancement | Medium | Claude | Completed | Add comprehensive input validation matching RegistrationViewModel - Implemented 2-50 char limits and regex validation. File: SettingsViewModel.kt:127-167 |
 | 2025-11-25 | E1.3 | 1 | Enhancement | Low | Claude | Completed | Add confirmation dialog for group ID changes - AlertDialog with warning implemented. File: SettingsScreen.kt:152-175, SettingsViewModel.kt:91-113 |
 | 2025-11-25 | E1.3 | 1 | Enhancement | Low | Claude | Completed | Fix success message timing - Added 500ms delay before navigation. File: SettingsScreen.kt:48 |
