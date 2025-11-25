@@ -24,6 +24,8 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    val deviceId: String = deviceRepository.getDeviceId()
+
     private var originalDisplayName: String = ""
     private var originalGroupId: String = ""
 
@@ -59,9 +61,11 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
         _uiState.update {
             it.copy(
                 displayName = newName,
+                displayNameError = null,
                 hasChanges = newName != originalDisplayName || it.groupId != originalGroupId,
             )
         }
+        validateForm()
     }
 
     /**
@@ -71,27 +75,50 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
         _uiState.update {
             it.copy(
                 groupId = newGroupId,
+                groupIdError = null,
                 hasChanges = it.displayName != originalDisplayName || newGroupId != originalGroupId,
             )
         }
+        validateForm()
     }
 
     /**
      * Save settings and re-register with server (AC E1.3.2, E1.3.3)
      */
     fun onSaveClicked() {
+        if (!validateForm()) return
+
         val currentState = _uiState.value
 
-        // Validation
-        if (currentState.displayName.isBlank()) {
-            _uiState.update { it.copy(error = "Display name cannot be empty") }
+        // Check if group ID changed - show confirmation dialog
+        if (currentState.groupId.trim() != originalGroupId) {
+            _uiState.update { it.copy(showGroupChangeConfirmation = true) }
             return
         }
 
-        if (currentState.groupId.isBlank()) {
-            _uiState.update { it.copy(error = "Group ID cannot be empty") }
-            return
-        }
+        performSave()
+    }
+
+    /**
+     * Dismiss group change confirmation dialog
+     */
+    fun onDismissGroupChangeConfirmation() {
+        _uiState.update { it.copy(showGroupChangeConfirmation = false) }
+    }
+
+    /**
+     * Confirm group change and proceed with save
+     */
+    fun onConfirmGroupChange() {
+        _uiState.update { it.copy(showGroupChangeConfirmation = false) }
+        performSave()
+    }
+
+    /**
+     * Perform the actual save operation
+     */
+    private fun performSave() {
+        val currentState = _uiState.value
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
@@ -99,15 +126,15 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
             // Re-register with new settings (AC E1.3.2, E1.3.3)
             val result =
                 deviceRepository.registerDevice(
-                    displayName = currentState.displayName,
-                    groupId = currentState.groupId,
+                    displayName = currentState.displayName.trim(),
+                    groupId = currentState.groupId.trim(),
                 )
 
             result.fold(
                 onSuccess = {
                     // Settings persisted to SecureStorage by repository (AC E1.3.4)
-                    originalDisplayName = currentState.displayName
-                    originalGroupId = currentState.groupId
+                    originalDisplayName = currentState.displayName.trim()
+                    originalGroupId = currentState.groupId.trim()
 
                     _uiState.update {
                         it.copy(
@@ -128,6 +155,48 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
             )
         }
     }
+
+    /**
+     * Validate form fields (matches RegistrationViewModel validation)
+     * @return true if form is valid
+     */
+    private fun validateForm(): Boolean {
+        val state = _uiState.value
+        var isValid = true
+
+        // Validate display name (matching RegistrationViewModel.kt:88-93)
+        val displayNameError = when {
+            state.displayName.isBlank() -> "Display name is required"
+            state.displayName.trim().length < 2 -> "Display name must be at least 2 characters"
+            state.displayName.trim().length > 50 -> "Display name must be 50 characters or less"
+            else -> null
+        }
+
+        // Validate group ID (matching RegistrationViewModel.kt:96-104)
+        val groupIdRegex = Regex("^[a-zA-Z0-9-]+$")
+        val groupIdError = when {
+            state.groupId.isBlank() -> "Group ID is required"
+            state.groupId.trim().length < 2 -> "Group ID must be at least 2 characters"
+            state.groupId.trim().length > 50 -> "Group ID must be 50 characters or less"
+            !state.groupId.trim().matches(groupIdRegex) ->
+                "Group ID can only contain letters, numbers, and hyphens"
+            else -> null
+        }
+
+        if (displayNameError != null || groupIdError != null) {
+            isValid = false
+        }
+
+        _uiState.update {
+            it.copy(
+                displayNameError = displayNameError,
+                groupIdError = groupIdError,
+                isFormValid = isValid,
+            )
+        }
+
+        return isValid
+    }
 }
 
 /**
@@ -135,16 +204,24 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
  *
  * @property displayName Current display name value
  * @property groupId Current group ID value
+ * @property displayNameError Validation error for display name
+ * @property groupIdError Validation error for group ID
+ * @property isFormValid True when all validation passes
  * @property isLoading True when saving settings
  * @property error Error message if save failed, null otherwise
  * @property saveSuccess True when settings saved successfully
  * @property hasChanges True when values differ from original
+ * @property showGroupChangeConfirmation True when group ID change confirmation needed
  */
 data class SettingsUiState(
     val displayName: String = "",
     val groupId: String = "",
+    val displayNameError: String? = null,
+    val groupIdError: String? = null,
+    val isFormValid: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null,
     val saveSuccess: Boolean = false,
     val hasChanges: Boolean = false,
+    val showGroupChangeConfirmation: Boolean = false,
 )

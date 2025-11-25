@@ -8,9 +8,13 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import kotlinx.datetime.Instant
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.model.LocationEntity
+import three.two.bit.phonemanager.data.repository.DeviceRepository
+import three.two.bit.phonemanager.domain.model.Device
+import three.two.bit.phonemanager.domain.model.DeviceLocation
 import three.two.bit.phonemanager.location.LocationManager
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -20,6 +24,7 @@ import kotlin.test.assertNull
 @OptIn(ExperimentalCoroutinesApi::class)
 class MapViewModelTest {
     private lateinit var locationManager: LocationManager
+    private lateinit var deviceRepository: DeviceRepository
     private lateinit var viewModel: MapViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -28,6 +33,8 @@ class MapViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         locationManager = mockk(relaxed = true)
+        deviceRepository = mockk(relaxed = true)
+        coEvery { deviceRepository.getGroupMembers() } returns Result.success(emptyList())
     }
 
     @Test
@@ -44,7 +51,7 @@ class MapViewModelTest {
         coEvery { locationManager.getCurrentLocation() } returns Result.success(testLocation)
 
         // When
-        viewModel = MapViewModel(locationManager)
+        viewModel = MapViewModel(locationManager, deviceRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -67,7 +74,7 @@ class MapViewModelTest {
             )
 
         // When
-        viewModel = MapViewModel(locationManager)
+        viewModel = MapViewModel(locationManager, deviceRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -85,7 +92,7 @@ class MapViewModelTest {
         coEvery { locationManager.getCurrentLocation() } returns Result.success(null)
 
         // When
-        viewModel = MapViewModel(locationManager)
+        viewModel = MapViewModel(locationManager, deviceRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -122,7 +129,7 @@ class MapViewModelTest {
                 Result.success(location2),
             )
 
-        viewModel = MapViewModel(locationManager)
+        viewModel = MapViewModel(locationManager, deviceRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -135,6 +142,65 @@ class MapViewModelTest {
             assertNotNull(state.currentLocation)
             assertEquals(48.2, state.currentLocation!!.latitude, 0.0001)
             assertEquals(17.2, state.currentLocation!!.longitude, 0.0001)
+        }
+    }
+
+    @Test
+    fun `loadGroupMembers populates groupMembers in state`() = runTest {
+        // Given
+        val members =
+            listOf(
+                Device(
+                    deviceId = "device-001",
+                    displayName = "Member 1",
+                    lastLocation =
+                    DeviceLocation(
+                        latitude = 48.15,
+                        longitude = 17.15,
+                        timestamp = Instant.parse("2025-11-25T12:00:00Z"),
+                    ),
+                    lastSeenAt = Instant.parse("2025-11-25T12:00:00Z"),
+                ),
+            )
+        coEvery { deviceRepository.getGroupMembers() } returns Result.success(members)
+        coEvery { locationManager.getCurrentLocation() } returns Result.success(null)
+
+        // When
+        viewModel = MapViewModel(locationManager, deviceRepository)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertEquals(1, state.groupMembers.size)
+            assertEquals("Member 1", state.groupMembers[0].displayName)
+        }
+    }
+
+    @Test
+    fun `loadGroupMembers filters are handled by repository`() = runTest {
+        // Given - repository returns filtered list (excludes current device)
+        val members =
+            listOf(
+                Device(
+                    deviceId = "device-002",
+                    displayName = "Other Device",
+                    lastLocation = null, // AC E3.2.5: null location handled in UI
+                    lastSeenAt = null,
+                ),
+            )
+        coEvery { deviceRepository.getGroupMembers() } returns Result.success(members)
+        coEvery { locationManager.getCurrentLocation() } returns Result.success(null)
+
+        // When
+        viewModel = MapViewModel(locationManager, deviceRepository)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertEquals(1, state.groupMembers.size)
+            assertNull(state.groupMembers[0].lastLocation) // Will be filtered in UI
         }
     }
 }

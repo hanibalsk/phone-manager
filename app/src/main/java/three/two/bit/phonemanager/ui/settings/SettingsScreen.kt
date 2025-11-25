@@ -41,10 +41,11 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Show success message and navigate back (AC E1.3.2, E1.3.3)
+    // Show success message with delay before navigation (AC E1.3.2, E1.3.3)
     LaunchedEffect(uiState.saveSuccess) {
         if (uiState.saveSuccess) {
             snackbarHostState.showSnackbar("Settings saved successfully")
+            kotlinx.coroutines.delay(500) // Allow user to see success message
             onNavigateBack()
         }
     }
@@ -83,12 +84,31 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 CircularProgressIndicator()
             }
 
+            // Device ID Display (read-only for transparency)
+            OutlinedTextField(
+                value = viewModel.deviceId,
+                onValueChange = {},
+                label = { Text("Device ID") },
+                enabled = false,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                supportingText = { Text("Unique identifier for this device") },
+            )
+
             // Display Name TextField (AC E1.3.2)
             OutlinedTextField(
                 value = uiState.displayName,
                 onValueChange = viewModel::onDisplayNameChanged,
                 label = { Text("Display Name") },
                 enabled = !uiState.isLoading,
+                isError = uiState.displayNameError != null,
+                supportingText = {
+                    if (uiState.displayNameError != null) {
+                        Text(uiState.displayNameError!!)
+                    } else {
+                        Text("How your device appears to others")
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -99,6 +119,14 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 onValueChange = viewModel::onGroupIdChanged,
                 label = { Text("Group ID") },
                 enabled = !uiState.isLoading,
+                isError = uiState.groupIdError != null,
+                supportingText = {
+                    if (uiState.groupIdError != null) {
+                        Text(uiState.groupIdError!!)
+                    } else {
+                        Text("Devices with the same Group ID can see each other")
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
             )
@@ -113,11 +141,36 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
             // Save Button (AC E1.3.2, E1.3.3)
             Button(
                 onClick = viewModel::onSaveClicked,
-                enabled = !uiState.isLoading && uiState.hasChanges,
+                enabled = !uiState.isLoading && uiState.hasChanges && uiState.isFormValid,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Save Changes")
             }
         }
+    }
+
+    // Group Change Confirmation Dialog
+    if (uiState.showGroupChangeConfirmation) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = viewModel::onDismissGroupChangeConfirmation,
+            title = { Text("Change Group?") },
+            text = {
+                Text(
+                    "Changing your Group ID will move you to a different group. " +
+                        "You will no longer see devices from your current group, " +
+                        "and will only see devices in the new group.",
+                )
+            },
+            confirmButton = {
+                Button(onClick = viewModel::onConfirmGroupChange) {
+                    Text("Change Group")
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = viewModel::onDismissGroupChangeConfirmation) {
+                    Text("Cancel")
+                }
+            },
+        )
     }
 }

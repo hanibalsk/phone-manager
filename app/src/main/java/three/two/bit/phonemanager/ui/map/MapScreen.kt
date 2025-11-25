@@ -28,12 +28,20 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
 
 /**
- * Story E3.1: Map Screen
+ * Story E3.1/E3.2: Map Screen
  *
- * Displays Google Map with current device location
- * ACs: E3.1.1, E3.1.2, E3.1.3, E3.1.4
+ * Story E3.1: Displays Google Map with current device location
+ * Story E3.2: Displays group member locations on map
+ * ACs: E3.1.1, E3.1.2, E3.1.3, E3.1.4, E3.2.1, E3.2.2, E3.2.3, E3.2.4, E3.2.5
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -111,7 +119,7 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> U
                             zoomGesturesEnabled = true, // AC E3.1.4: Pinch zoom
                         ),
                     ) {
-                        // AC E3.1.2: Current location marker with distinctive blue color
+                        // AC E3.1.2, E3.2.3: Current location marker with distinctive blue color
                         uiState.currentLocation?.let { location ->
                             Marker(
                                 state = MarkerState(position = location),
@@ -120,9 +128,55 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> U
                                 icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                             )
                         }
+
+                        // Story E3.2: Group member markers (AC E3.2.1, E3.2.2, E3.2.3, E3.2.4, E3.2.5)
+                        uiState.groupMembers.forEach { member ->
+                            // AC E3.2.5: Filter out members with null lastLocation
+                            member.lastLocation?.let { location ->
+                                Marker(
+                                    state =
+                                    MarkerState(
+                                        position =
+                                        LatLng(
+                                            location.latitude,
+                                            location.longitude,
+                                        ),
+                                    ),
+                                    // AC E3.2.2: Display name as title
+                                    title = member.displayName,
+                                    // AC E3.2.4: Info window with last update time
+                                    snippet =
+                                    member.lastSeenAt?.let { lastSeen ->
+                                        "Last seen: ${formatRelativeTime(lastSeen)}"
+                                    } ?: "Location unknown",
+                                    // AC E3.2.3: Visual distinction - orange for group members
+                                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE),
+                                )
+                            }
+                        }
                     }
                 }
             }
+        }
+    }
+}
+
+/**
+ * Format timestamp as relative time (AC E3.2.4)
+ * Examples: "Just now", "2 min ago", "3h ago", "2d ago"
+ */
+private fun formatRelativeTime(instant: Instant): String {
+    val now = Clock.System.now()
+    val duration = now - instant
+    return when {
+        duration < 1.minutes -> "Just now"
+        duration < 1.hours -> "${duration.inWholeMinutes} min ago"
+        duration < 1.days -> "${duration.inWholeHours}h ago"
+        duration < 7.days -> "${duration.inWholeDays}d ago"
+        else -> {
+            // For older dates, show the actual date
+            instant.toLocalDateTime(TimeZone.currentSystemDefault())
+                .date.toString()
         }
     }
 }
