@@ -18,8 +18,10 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import three.two.bit.phonemanager.MainActivity
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.model.HealthStatus
@@ -34,11 +36,12 @@ import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Story 0.2.1/0.2.3/0.2.4: LocationTrackingService - Foreground service for location tracking
+ * Story 0.2.1/0.2.3/0.2.4/E2.2: LocationTrackingService - Foreground service for location tracking
  *
  * Story 0.2.1: Implements periodic location capture
  * Story 0.2.3: Integrates upload queue and WorkManager
  * Story 0.2.4: Integrates service health watchdog
+ * Story E2.2: Discreet notifications in secret mode
  * Epic 1: Provides service infrastructure for UI layer
  */
 @AndroidEntryPoint
@@ -59,6 +62,9 @@ class LocationTrackingService : Service() {
     @Inject
     lateinit var watchdogManager: WatchdogManager
 
+    @Inject
+    lateinit var preferencesRepository: three.two.bit.phonemanager.data.preferences.PreferencesRepository
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var currentLocationCount = 0
@@ -73,7 +79,8 @@ class LocationTrackingService : Service() {
         const val EXTRA_INTERVAL_MINUTES = "interval_minutes"
 
         private const val NOTIFICATION_ID = 1001
-        private const val CHANNEL_ID = "location_tracking_channel"
+        private const val CHANNEL_ID_NORMAL = "location_tracking_channel"
+        private const val CHANNEL_ID_SECRET = "background_service_channel"
 
         // Error recovery constants
         private const val MAX_CONSECUTIVE_FAILURES = 5
@@ -111,8 +118,8 @@ class LocationTrackingService : Service() {
     private fun startForegroundTracking() {
         Timber.d("Starting foreground tracking")
 
-        // Create notification channel
-        createNotificationChannel()
+        // Story E2.2: Create notification channels (normal and secret)
+        createNotificationChannels()
 
         // Start foreground with notification
         val notification = createNotification()
@@ -131,6 +138,13 @@ class LocationTrackingService : Service() {
         serviceScope.launch {
             locationRepository.observeLocationCount().collectLatest { count ->
                 currentLocationCount = count
+                updateNotification()
+            }
+        }
+
+        // Story E2.2: Observe secret mode changes and update notification (AC E2.2.6)
+        serviceScope.launch {
+            preferencesRepository.isSecretModeEnabled.collectLatest { _ ->
                 updateNotification()
             }
         }
@@ -316,10 +330,17 @@ class LocationTrackingService : Service() {
         updateNotification()
     }
 
-    private fun createNotificationChannel() {
+    /**
+     * Story E2.2: Create dual notification channels for normal and secret modes
+     * AC E2.2.3, E2.2.4
+     */
+    private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
+            val notificationManager = getSystemService(NotificationManager::class.java)
+
+            // Normal mode channel (AC E2.2.5)
+            val normalChannel = NotificationChannel(
+                CHANNEL_ID_NORMAL,
                 "Location Tracking",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
@@ -327,11 +348,26 @@ class LocationTrackingService : Service() {
                 setShowBadge(false)
             }
 
-            val notificationManager = getSystemService(NotificationManager::class.java)
-            notificationManager.createNotificationChannel(channel)
+            // Secret mode channel (AC E2.2.3, E2.2.4)
+            val secretChannel = NotificationChannel(
+                CHANNEL_ID_SECRET,
+                "Background Service",
+                NotificationManager.IMPORTANCE_MIN,
+            ).apply {
+                description = "Background service"
+                setShowBadge(false)
+                setSound(null, null) // AC E2.2.4: Silent
+                enableVibration(false) // AC E2.2.4: No vibration
+            }
+
+            notificationManager.createNotificationChannels(listOf(normalChannel, secretChannel))
         }
     }
 
+    /**
+     * Story E2.2: Create notification based on secret mode state
+     * AC E2.2.1, E2.2.2, E2.2.3, E2.2.4, E2.2.5
+     */
     private fun createNotification(): Notification {
         // Main activity intent
         val contentIntent = PendingIntent.getActivity(
@@ -351,20 +387,44 @@ class LocationTrackingService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Location Tracking Active")
-            .setContentText(getNotificationText())
-            .setSmallIcon(android.R.drawable.ic_menu_mylocation) // Using system icon for now
-            .setOngoing(true)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .setCategory(NotificationCompat.CATEGORY_SERVICE)
-            .setContentIntent(contentIntent)
-            .addAction(
-                android.R.drawable.ic_delete,
-                "Stop Tracking",
-                stopIntent,
-            )
-            .build()
+        // Story E2.2: Check secret mode and build appropriate notification
+        // Note: We use runBlocking here as this is called from main thread context
+        // and we need synchronous access to the current secret mode state
+        val isSecretMode = runCatching {
+            runBlocking {
+                preferencesRepository.isSecretModeEnabled.first()
+            }
+        }.getOrDefault(false)
+
+        return if (isSecretMode) {
+            // AC E2.2.1, E2.2.2, E2.2.3, E2.2.4: Discreet notification
+            NotificationCompat.Builder(this, CHANNEL_ID_SECRET)
+                .setContentTitle("Service running") // AC E2.2.1: Generic title
+                .setContentText("Active")
+                .setSmallIcon(R.drawable.ic_service_neutral) // AC E2.2.2: Neutral icon
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_MIN) // AC E2.2.3: Low importance
+                .setSilent(true) // AC E2.2.4: Silent
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setContentIntent(contentIntent)
+                .build()
+        } else {
+            // AC E2.2.5: Normal mode notification
+            NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
+                .setContentTitle("Location Tracking Active")
+                .setContentText(getNotificationText())
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setContentIntent(contentIntent)
+                .addAction(
+                    android.R.drawable.ic_delete,
+                    "Stop Tracking",
+                    stopIntent,
+                )
+                .build()
+        }
     }
 
     private fun updateNotification() {
