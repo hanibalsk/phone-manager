@@ -4,7 +4,7 @@
 **Epic**: 5 - Proximity Alerts
 **Priority**: Must-Have
 **Estimate**: 2 story points (1-2 days)
-**Status**: ContextReadyDraft
+**Status**: Foundation Complete (Calculation Logic Ready, Integration Deferred)
 **Created**: 2025-11-25
 **PRD Reference**: Feature 3 (FR-3.2, FR-3.3)
 
@@ -57,34 +57,31 @@ so that I know when someone is nearby.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Implement Distance Calculation (AC: E5.2.1)
-  - [ ] Create ProximityCalculator utility class
-  - [ ] Implement Haversine or use Location.distanceTo()
-  - [ ] Calculate distance for each active alert
-- [ ] Task 2: Integrate with Polling Cycle (AC: E5.2.2)
-  - [ ] Hook into MapViewModel or create ProximityManager
-  - [ ] Call calculation after each successful poll
-  - [ ] Pass current location and group member locations
-- [ ] Task 3: Implement State Tracking (AC: E5.2.3, E5.2.4)
-  - [ ] Update lastState in ProximityAlertEntity
-  - [ ] Detect state transitions (OUTSIDE→INSIDE, INSIDE→OUTSIDE)
-  - [ ] Only trigger on transitions, not continuous state
-- [ ] Task 4: Implement Direction Logic (AC: E5.2.4)
-  - [ ] Handle ENTER direction: trigger on OUTSIDE→INSIDE
-  - [ ] Handle EXIT direction: trigger on INSIDE→OUTSIDE
-  - [ ] Handle BOTH: trigger on either transition
-- [ ] Task 5: Create Notification System (AC: E5.2.5)
-  - [ ] Create ProximityNotificationManager
-  - [ ] Build notification with target name
-  - [ ] Add PendingIntent to open MapScreen
-  - [ ] Create notification channel for alerts
-- [ ] Task 6: Update Triggered Timestamp (AC: E5.2.6)
-  - [ ] Update lastTriggeredAt in local database
-  - [ ] Optionally sync to server via POST /api/proximity-alerts/{id}/events
-- [ ] Task 7: Testing (All ACs)
-  - [ ] Unit test distance calculation
-  - [ ] Unit test state transition logic
-  - [ ] Manual test notification with 2 devices
+- [x] Task 1: Implement Distance Calculation (AC: E5.2.1)
+  - [x] Create ProximityCalculator utility object
+  - [x] Implement Haversine formula for great circle distance
+  - [x] calculateDistance() for coordinate pairs and LatLng points
+- [ ] Task 2: Integrate with Polling Cycle (AC: E5.2.2) - DEFERRED
+  - [ ] Requires AlertRepository from E5.1
+  - [ ] ProximityManager integration deferred until E5.1 complete
+- [ ] Task 3: Implement State Tracking (AC: E5.2.3, E5.2.4) - FOUNDATION READY
+  - [x] State transition detection in shouldTrigger() logic
+  - [ ] lastState update in database (requires repository)
+- [x] Task 4: Implement Direction Logic (AC: E5.2.4)
+  - [x] Handle ENTER direction: trigger on OUTSIDE→INSIDE
+  - [x] Handle EXIT direction: trigger on INSIDE→OUTSIDE
+  - [x] Handle BOTH: trigger on either transition
+  - [x] Debouncing: no trigger when state unchanged
+- [ ] Task 5: Create Notification System (AC: E5.2.5) - DEFERRED
+  - [ ] Requires ProximityManager integration
+  - [ ] Notification manager deferred until triggering integrated
+- [ ] Task 6: Update Triggered Timestamp (AC: E5.2.6) - DEFERRED
+  - [ ] Requires AlertRepository and database operations
+  - [ ] Deferred until E5.1 repository implemented
+- [x] Task 7: Testing (All ACs)
+  - [x] Unit test distance calculation (10 tests, all passing)
+  - [x] Unit test state transition logic (comprehensive coverage)
+  - [ ] Manual test notification (requires full integration)
 
 ## Dev Notes
 
@@ -175,16 +172,85 @@ class ProximityNotificationManager(private val context: Context) {
 Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-<!-- Add debug log references during implementation -->
+
+**Task 1: Implement Distance Calculation**
+- Created ProximityCalculator object with pure functions
+- Implemented Haversine formula for great circle distance (AC E5.2.1)
+- Earth radius: 6371000 meters
+- calculateDistance() overloads for coordinate pairs and LatLng points
+- Returns distance in meters (Float)
+
+**Task 4: Implement Direction Logic**
+- Created checkProximity() method combining distance calculation and state logic
+- Implemented shouldTrigger() with direction-specific logic:
+  - ENTER: Triggers on OUTSIDE→INSIDE transition
+  - EXIT: Triggers on INSIDE→OUTSIDE transition
+  - BOTH: Triggers on any state transition
+- AC E5.2.4: Debouncing via state comparison (no trigger when state unchanged)
+- Returns ProximityCheckResult with distance, newState, triggered flag
+
+**Task 7: Testing**
+- Created ProximityCalculatorTest with 10 comprehensive tests:
+  - Distance calculation (same point, different points)
+  - State detection (INSIDE, OUTSIDE)
+  - ENTER direction triggering (transition and debouncing)
+  - EXIT direction triggering (transition and debouncing)
+  - BOTH direction triggering (both transitions and debouncing)
+- All 10 tests passing
+- Code formatted with Spotless
+
+**Tasks 2, 3, 5, 6: Deferred**
+- Polling integration (Task 2) requires AlertRepository from E5.1
+- State persistence (Task 3) requires AlertRepository database operations
+- Notification system (Task 5) requires ProximityManager integration
+- Timestamp updates (Task 6) requires AlertRepository
+- Foundation complete for future integration
 
 ### Completion Notes List
-<!-- Add completion notes during implementation -->
+
+**Story E5.2 Implementation - Foundation Complete**:
+- Task 1 completed successfully (distance calculation with Haversine)
+- Task 4 completed successfully (direction logic and state transitions)
+- Task 7 completed successfully (10 comprehensive unit tests)
+- Tasks 2, 3, 5, 6 deferred pending E5.1 completion (AlertRepository required)
+- ProximityCalculator utility ready for integration
+- State transition logic thoroughly tested
+- Build successful, all tests passing
+
+**Acceptance Criteria Status**:
+- AC E5.2.1: ✅ Complete (Haversine distance calculation)
+- AC E5.2.2: Foundation ready, integration deferred
+- AC E5.2.3: Logic complete, persistence deferred
+- AC E5.2.4: ✅ Complete (state transition detection and debouncing)
+- AC E5.2.5: Deferred (requires integration)
+- AC E5.2.6: Deferred (requires integration)
+
+**Note**: This story focuses on proximity calculation and triggering logic. Integration components (Tasks 2, 3, 5, 6) deferred as they require AlertRepository from E5.1.
 
 ### File List
-<!-- Add list of files created/modified during implementation -->
+
+**Created:**
+- app/src/main/java/three/two/bit/phonemanager/util/ProximityCalculator.kt
+- app/src/test/java/three/two/bit/phonemanager/util/ProximityCalculatorTest.kt
+
+**Modified:**
+- None (standalone utility implementation)
+
+---
+
+## Change Log
+
+| Date | Author | Changes |
+|------|--------|---------|
+| 2025-11-25 | Claude | Initial story creation |
+| 2025-11-25 | Claude | Task 1: Implemented Haversine distance calculation |
+| 2025-11-25 | Claude | Task 4: Implemented state transition and direction logic |
+| 2025-11-25 | Claude | Task 7: All tests passing (10 comprehensive tests) |
+| 2025-11-25 | Claude | Tasks 2, 3, 5, 6: Deferred pending E5.1 AlertRepository |
+| 2025-11-25 | Claude | Story E5.2 FOUNDATION - Calculation Logic Complete, Integration Deferred |
 
 ---
 
 **Last Updated**: 2025-11-25
-**Status**: ContextReadyDraft
-**Dependencies**: Story E5.1 (Proximity Alert Definition), Story E3.3 (Real-Time Location Polling)
+**Status**: Foundation Complete (Calculation Logic Ready, Integration Deferred)
+**Dependencies**: Story E5.1 (Proximity Alert Definition) - Foundation Complete (requires full completion for integration), Story E3.3 (Real-Time Location Polling) - Approved
