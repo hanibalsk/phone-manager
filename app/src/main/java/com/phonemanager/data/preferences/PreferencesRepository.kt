@@ -33,6 +33,7 @@ interface PreferencesRepository {
     suspend fun setServiceRunningState(isRunning: Boolean)
     val lastLocationUpdateTime: Flow<Long?>
     suspend fun setLastLocationUpdateTime(timestamp: Long)
+    suspend fun clearLastLocationUpdateTime()
 }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -41,6 +42,11 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 class PreferencesRepositoryImpl @Inject constructor(
     @ApplicationContext private val context: Context
 ) : PreferencesRepository {
+
+    companion object {
+        /** Default tracking interval in minutes */
+        const val DEFAULT_TRACKING_INTERVAL_MINUTES = 5
+    }
 
     private object PreferencesKeys {
         val TRACKING_ENABLED = booleanPreferencesKey("tracking_enabled")
@@ -72,12 +78,12 @@ class PreferencesRepositoryImpl @Inject constructor(
 
     override val trackingInterval: Flow<Int> = context.dataStore.data
         .map { preferences ->
-            preferences[PreferencesKeys.TRACKING_INTERVAL] ?: 5 // default 5 minutes
+            preferences[PreferencesKeys.TRACKING_INTERVAL] ?: DEFAULT_TRACKING_INTERVAL_MINUTES
         }
         .catch { exception ->
             if (exception is IOException) {
                 Timber.e(exception, "Error reading tracking interval preference")
-                emit(5)
+                emit(DEFAULT_TRACKING_INTERVAL_MINUTES)
             } else {
                 throw exception
             }
@@ -131,5 +137,12 @@ class PreferencesRepositoryImpl @Inject constructor(
             preferences[PreferencesKeys.LAST_LOCATION_UPDATE] = timestamp
         }
         Timber.d("Last location update time persisted: $timestamp")
+    }
+
+    override suspend fun clearLastLocationUpdateTime() {
+        context.dataStore.edit { preferences ->
+            preferences.remove(PreferencesKeys.LAST_LOCATION_UPDATE)
+        }
+        Timber.d("Last location update time cleared")
     }
 }

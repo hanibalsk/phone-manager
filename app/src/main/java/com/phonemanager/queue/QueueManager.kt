@@ -14,6 +14,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.min
 import kotlin.math.pow
+import kotlin.random.Random
 
 /**
  * Story 0.2.3: QueueManager - Manages location upload queue and retry logic
@@ -208,7 +209,7 @@ class QueueManager @Inject constructor(
      */
     private fun calculateBackoff(retryCount: Int): Long {
         val exponentialBackoff = INITIAL_BACKOFF_MS * (2.0.pow(retryCount.toDouble())).toLong()
-        val jitter = (Math.random() * INITIAL_BACKOFF_MS).toLong()
+        val jitter = (Random.nextDouble() * INITIAL_BACKOFF_MS).toLong()
         val backoff = exponentialBackoff + jitter
 
         return min(backoff, MAX_BACKOFF_MS)

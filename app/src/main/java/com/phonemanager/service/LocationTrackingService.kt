@@ -14,6 +14,7 @@ import com.phonemanager.MainActivity
 import com.phonemanager.R
 import com.phonemanager.data.model.HealthStatus
 import com.phonemanager.data.model.ServiceHealth
+import com.phonemanager.data.preferences.PreferencesRepositoryImpl
 import com.phonemanager.data.repository.LocationRepositoryImpl
 import com.phonemanager.location.LocationManager
 import com.phonemanager.queue.QueueManager
@@ -61,7 +62,7 @@ class LocationTrackingService : Service() {
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var currentLocationCount = 0
-    private var currentInterval = 5 // minutes
+    private var currentInterval = PreferencesRepositoryImpl.DEFAULT_TRACKING_INTERVAL_MINUTES
     private var trackingJob: Job? = null
     private var consecutiveFailures = 0
 
@@ -96,7 +97,7 @@ class LocationTrackingService : Service() {
                 stopTracking()
             }
             ACTION_UPDATE_INTERVAL -> {
-                val newInterval = intent.getIntExtra(EXTRA_INTERVAL_MINUTES, 5)
+                val newInterval = intent.getIntExtra(EXTRA_INTERVAL_MINUTES, PreferencesRepositoryImpl.DEFAULT_TRACKING_INTERVAL_MINUTES)
                 updateTrackingInterval(newInterval)
             }
         }

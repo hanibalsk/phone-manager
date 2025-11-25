@@ -112,8 +112,11 @@ class LocationRepositoryImpl @Inject constructor(
         repositoryScope.launch {
             try {
                 preferencesRepository.setServiceRunningState(health.isRunning)
-                health.lastLocationUpdate?.let {
-                    preferencesRepository.setLastLocationUpdateTime(it)
+                if (health.isRunning && health.lastLocationUpdate != null) {
+                    preferencesRepository.setLastLocationUpdateTime(health.lastLocationUpdate)
+                } else if (!health.isRunning) {
+                    // Clear stale timestamp when service stops
+                    preferencesRepository.clearLastLocationUpdateTime()
                 }
                 Timber.d("Service health persisted successfully")
             } catch (e: Exception) {
