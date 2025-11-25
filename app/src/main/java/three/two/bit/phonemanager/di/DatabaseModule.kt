@@ -13,7 +13,9 @@ import three.two.bit.phonemanager.data.database.LocationQueueDao
 import javax.inject.Singleton
 
 /**
- * Story 0.2.3: DatabaseModule - Provides Room database and DAOs
+ * Story 0.2.3/E4.2: DatabaseModule - Provides Room database and DAOs
+ *
+ * Story E4.2: Add migration for sync tracking fields
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -26,6 +28,7 @@ object DatabaseModule {
         AppDatabase::class.java,
         AppDatabase.DATABASE_NAME,
     )
+        .addMigrations(AppDatabase.MIGRATION_2_3)
         .fallbackToDestructiveMigration()
         .build()
 

@@ -4,8 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Epic 0.2.2: LocationEntity - Database entity for storing location data
- * Stub implementation for Epic 1 development
+ * Epic 0.2.2/E4.2: LocationEntity - Database entity for storing location data
+ *
+ * Story E4.2 additions: Sync tracking fields
  */
 @Entity(tableName = "locations")
 data class LocationEntity(
@@ -19,4 +20,7 @@ data class LocationEntity(
     val bearing: Float? = null,
     val speed: Float? = null,
     val provider: String? = null,
+    // Story E4.2: Sync tracking (AC E4.2.4)
+    val isSynced: Boolean = false,
+    val syncedAt: Long? = null,
 )

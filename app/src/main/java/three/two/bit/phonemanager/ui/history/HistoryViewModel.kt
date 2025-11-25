@@ -18,14 +18,16 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.data.database.LocationDao
 import three.two.bit.phonemanager.data.model.LocationEntity
+import three.two.bit.phonemanager.util.PolylineUtils
 import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Story E4.1: HistoryViewModel
+ * Story E4.1/E4.2: HistoryViewModel
  *
- * Manages location history display with date filtering
- * ACs: E4.1.1, E4.1.3, E4.1.4, E4.1.5, E4.1.6
+ * Story E4.1: Manages location history display with date filtering
+ * Story E4.2: Adds downsampling for performance
+ * ACs: E4.1.1, E4.1.3, E4.1.4, E4.1.5, E4.1.6, E4.2.2
  */
 @HiltViewModel
 class HistoryViewModel
@@ -86,16 +88,26 @@ constructor(private val locationDao: LocationDao) : ViewModel() {
             try {
                 val locations = locationDao.getLocationsBetween(startTime, endTime)
 
+                // Story E4.2: Downsample for performance (AC E4.2.2)
+                val allPoints = locations.map { loc -> LatLng(loc.latitude, loc.longitude) }
+                val downsampledPoints = if (allPoints.size > 500) {
+                    PolylineUtils.downsample(allPoints, targetCount = 300)
+                } else {
+                    allPoints
+                }
+
                 _uiState.update {
                     it.copy(
                         locations = locations,
-                        polylinePoints = locations.map { loc -> LatLng(loc.latitude, loc.longitude) },
+                        polylinePoints = downsampledPoints,
                         isLoading = false,
                         isEmpty = locations.isEmpty(),
                     )
                 }
 
-                Timber.d("Loaded ${locations.size} locations for history")
+                Timber.d(
+                    "Loaded ${locations.size} locations, downsampled to ${downsampledPoints.size} points for history",
+                )
             } catch (e: Exception) {
                 Timber.e(e, "Failed to load location history")
                 _uiState.update {
