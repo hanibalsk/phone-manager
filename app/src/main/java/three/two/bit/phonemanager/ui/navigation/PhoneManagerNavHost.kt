@@ -6,6 +6,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import three.two.bit.phonemanager.ui.alerts.AlertsScreen
 import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
+import three.two.bit.phonemanager.ui.geofences.CreateGeofenceScreen
+import three.two.bit.phonemanager.ui.geofences.GeofencesScreen
 import three.two.bit.phonemanager.ui.group.GroupMembersScreen
 import three.two.bit.phonemanager.ui.history.HistoryScreen
 import three.two.bit.phonemanager.ui.home.HomeScreen
@@ -23,6 +25,8 @@ sealed class Screen(val route: String) {
     object History : Screen("history")
     object Alerts : Screen("alerts")
     object CreateAlert : Screen("create_alert")
+    object Geofences : Screen("geofences")
+    object CreateGeofence : Screen("create_geofence")
 }
 
 @Composable
@@ -72,6 +76,9 @@ fun PhoneManagerNavHost(
                 onNavigateToAlerts = {
                     navController.navigate(Screen.Alerts.route)
                 },
+                onNavigateToGeofences = {
+                    navController.navigate(Screen.Geofences.route)
+                },
             )
         }
         composable(Screen.GroupMembers.route) {
@@ -104,6 +111,19 @@ fun PhoneManagerNavHost(
         }
         composable(Screen.CreateAlert.route) {
             CreateAlertScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(Screen.Geofences.route) {
+            GeofencesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCreate = {
+                    navController.navigate(Screen.CreateGeofence.route)
+                },
+            )
+        }
+        composable(Screen.CreateGeofence.route) {
+            CreateGeofenceScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

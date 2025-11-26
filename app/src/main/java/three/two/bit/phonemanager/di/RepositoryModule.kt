@@ -8,6 +8,8 @@ import three.two.bit.phonemanager.data.repository.AlertRepository
 import three.two.bit.phonemanager.data.repository.AlertRepositoryImpl
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepositoryImpl
+import three.two.bit.phonemanager.data.repository.GeofenceRepository
+import three.two.bit.phonemanager.data.repository.GeofenceRepositoryImpl
 import three.two.bit.phonemanager.data.repository.LocationRepository
 import three.two.bit.phonemanager.data.repository.LocationRepositoryImpl
 import javax.inject.Singleton
@@ -33,4 +35,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAlertRepository(impl: AlertRepositoryImpl): AlertRepository
+
+    /**
+     * Story E6.1: Geofence Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindGeofenceRepository(impl: GeofenceRepositoryImpl): GeofenceRepository
 }

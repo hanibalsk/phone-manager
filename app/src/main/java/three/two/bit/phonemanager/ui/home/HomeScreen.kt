@@ -57,6 +57,7 @@ fun HomeScreen(
     onNavigateToMap: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
     onNavigateToAlerts: () -> Unit = {},
+    onNavigateToGeofences: () -> Unit = {},
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -174,6 +175,14 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Proximity Alerts")
+            }
+
+            // Navigate to Geofences screen (Story E6.1)
+            Button(
+                onClick = onNavigateToGeofences,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Geofences")
             }
 
             Spacer(modifier = Modifier.height(16.dp))
