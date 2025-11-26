@@ -9,6 +9,20 @@
 
 | Date | Story | Epic | Type | Severity | Owner | Status | Notes |
 |------|-------|------|------|----------|-------|--------|-------|
+| 2025-11-26 | E5.1 | 5 | Enhancement | Medium | TBD | Open | Add radius validation to ProximityAlert domain model - Add init block: require(radiusMeters in 50..10_000). File: ProximityAlert.kt, AC: E5.1.2 |
+| 2025-11-26 | E5.1 | 5 | Enhancement | Medium | TBD | Open | Implement server integration when backend ready - Implement AlertRepository, AlertApiService, and UI components (AlertsScreen, CreateAlertScreen, AlertsViewModel). Files: Multiple, AC: E5.1.4, E5.1.5, E5.1.6 |
+| 2025-11-26 | E5.1 | 5 | Testing | Low | TBD | Open | Add unit tests for domain model and mappers - Test ProximityAlert instantiation, enum values, toDomain/toEntity functions. File: ProximityAlertTest.kt (new) |
+| 2025-11-26 | E5.1 | 5 | Testing | Low | TBD | Open | Add DAO instrumented tests - Test CRUD operations, Flow queries, data integrity. File: ProximityAlertDaoTest.kt (new) |
+| 2025-11-26 | E5.1 | 5 | Testing | Low | TBD | Open | Add Room migration test - Validate MIGRATION_3_4 creates proximity_alerts table correctly. File: AppDatabase migration test suite (new) |
+| 2025-11-25 | E4.2 | 4 | Enhancement | Medium | TBD | Open | Implement server integration features when backend ready - Add getDeviceHistory() endpoint, device selector UI, server fetch logic. Files: DeviceApiService.kt, HistoryScreen.kt, HistoryViewModel.kt, AC: E4.2.1, E4.2.3, E4.2.5 |
+| 2025-11-25 | E4.2 | 4 | Enhancement | Medium | TBD | Open | Update upload worker to mark records as synced - Set isSynced=true and syncedAt=timestamp after successful upload. File: Upload worker implementation (future), AC: E4.2.4 |
+| 2025-11-25 | E4.2 | 4 | Testing | Low | TBD | Open | Add integration test for downsampling in HistoryViewModel - Test with >500 location points to verify downsampling triggers. File: HistoryViewModelTest.kt |
+| 2025-11-25 | E4.2 | 4 | Testing | Low | TBD | Open | Add Room migration test - Create AppDatabaseMigrationTest with schema validation for MIGRATION_2_3. File: New test file for AppDatabase migrations |
+| 2025-11-25 | E4.2 | 4 | Documentation | Low | TBD | Open | Update dev notes to reflect actual algorithm - Replace Douglas-Peucker reference with interval-based sampling description. File: story-E4.2.md:96-105 |
+| 2025-11-25 | E4.1 | 4 | Enhancement | Medium | TBD | Open | Add Custom Date Range UI with date picker - Add DatePickerDialog for custom range. File: HistoryScreen.kt, AC: E4.1.5 |
+| 2025-11-25 | E4.1 | 4 | Enhancement | Low | TBD | Open | Add retry button to error state - Add Button calling viewModel.setDateFilter(). File: HistoryScreen.kt:108-113 |
+| 2025-11-25 | E4.1 | 4 | Enhancement | Low | TBD | Open | Use camera animation for filter changes - Replace direct position with animate(). File: HistoryScreen.kt:62-66 |
+| 2025-11-25 | E4.1 | 4 | Testing | Low | TBD | Open | Add tests for date range calculations - Verify Today/Yesterday/Last7Days math. File: HistoryViewModelTest.kt |
 | 2025-11-25 | E3.3 | 3 | Enhancement | Medium | TBD | Open | Add Settings UI for polling interval configuration - Add dropdown/slider for 10, 15, 20, 30s selection. File: SettingsScreen.kt, AC: E3.3.5 |
 | 2025-11-25 | E3.3 | 3 | Testing | Low | TBD | Open | Add unit tests for polling lifecycle - Test startPolling(), stopPolling(), interval execution. File: MapViewModelTest.kt |
 | 2025-11-25 | E3.1 | 3 | Enhancement | Low | TBD | Open | Use camera animation for smooth transitions - Replace direct position with animate(). File: MapScreen.kt:72-79 |

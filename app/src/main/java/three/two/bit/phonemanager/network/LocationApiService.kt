@@ -75,8 +75,8 @@ class LocationApiServiceImpl @Inject constructor(
 data class ApiConfiguration(
     val baseUrl: String,
     val apiKey: String,
-    val uploadEndpoint: String = "$baseUrl/api/locations",
-    val batchUploadEndpoint: String = "$baseUrl/api/locations/batch",
+    val uploadEndpoint: String = "$baseUrl/api/v1/locations",
+    val batchUploadEndpoint: String = "$baseUrl/api/v1/locations/batch",
     val connectionTimeout: Long = 30_000L,
     val requestTimeout: Long = 30_000L,
 )

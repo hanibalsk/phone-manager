@@ -79,10 +79,13 @@ so that I get alerts for specific places.
   - [x] Create GeofenceDao with CRUD operations
   - [x] Add to AppDatabase (version 5, migration 4→5)
   - [x] Create toDomain() and toEntity() mappers
-- [ ] Task 3: Create Network Models (AC: E6.1.4) - DEFERRED
-  - [ ] Requires server API implementation
-- [ ] Task 4: Create GeofenceRepository (AC: E6.1.4) - DEFERRED
-  - [ ] Requires server API for sync logic
+- [x] Task 3: Create Network Models (AC: E6.1.4)
+  - [x] Backend API now available (2025-11-26)
+  - [x] GeofenceApiService created with full CRUD operations
+  - [x] Network models: CreateGeofenceRequest, UpdateGeofenceRequest, GeofenceDto, ListGeofencesResponse, GeofenceEventType
+- [ ] Task 4: Create GeofenceRepository (AC: E6.1.4)
+  - [ ] Server API now available for sync logic
+  - [ ] Repository can be created to combine local + remote data
 - [ ] Task 5: Implement Android Geofencing Registration (AC: E6.1.3) - DEFERRED
   - [ ] Requires GeofenceRepository and permissions
 - [ ] Task 6: Create GeofencesScreen UI (AC: E6.1.5) - DEFERRED
@@ -221,6 +224,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 |------|--------|---------|
 | 2025-11-25 | Claude | Tasks 1-2: Geofence data layer foundation complete |
 | 2025-11-25 | Claude | Story E6.1 FOUNDATION Complete |
+| 2025-11-26 | Claude | Backend API available - Added GeofenceApiService with full CRUD |
 
 ---
 

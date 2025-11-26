@@ -1,0 +1,81 @@
+package three.two.bit.phonemanager.network.models
+
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+
+/**
+ * Story E6.1: Geofence API models
+ *
+ * Models for /api/v1/geofences endpoints
+ */
+
+/**
+ * Geofence event types matching backend (serialized as lowercase)
+ */
+@Serializable
+enum class GeofenceEventType {
+    @SerialName("enter")
+    ENTER,
+
+    @SerialName("exit")
+    EXIT,
+
+    @SerialName("dwell")
+    DWELL,
+}
+
+/**
+ * Create geofence request
+ * POST /api/v1/geofences
+ */
+@Serializable
+data class CreateGeofenceRequest(
+    val deviceId: String,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val radiusMeters: Double,
+    val eventTypes: List<GeofenceEventType> = listOf(GeofenceEventType.ENTER, GeofenceEventType.EXIT),
+    val active: Boolean = true,
+    val metadata: Map<String, String>? = null,
+)
+
+/**
+ * Update geofence request (partial update)
+ * PATCH /api/v1/geofences/{geofenceId}
+ */
+@Serializable
+data class UpdateGeofenceRequest(
+    val name: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val radiusMeters: Double? = null,
+    val eventTypes: List<GeofenceEventType>? = null,
+    val active: Boolean? = null,
+    val metadata: Map<String, String>? = null,
+)
+
+/**
+ * Geofence response
+ */
+@Serializable
+data class GeofenceDto(
+    val geofenceId: String,
+    val deviceId: String,
+    val name: String,
+    val latitude: Double,
+    val longitude: Double,
+    val radiusMeters: Double,
+    val eventTypes: List<GeofenceEventType>,
+    val active: Boolean,
+    val metadata: Map<String, String>? = null,
+    val createdAt: String,
+    val updatedAt: String,
+)
+
+/**
+ * List geofences response
+ * GET /api/v1/geofences?deviceId={id}
+ */
+@Serializable
+data class ListGeofencesResponse(val geofences: List<GeofenceDto>, val total: Int)
