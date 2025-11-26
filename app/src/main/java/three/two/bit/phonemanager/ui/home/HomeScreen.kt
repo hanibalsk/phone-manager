@@ -56,6 +56,7 @@ fun HomeScreen(
     onNavigateToSettings: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
+    onNavigateToAlerts: () -> Unit = {},
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -165,6 +166,14 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("View Location History")
+            }
+
+            // Navigate to Alerts screen (Story E5.1)
+            Button(
+                onClick = onNavigateToAlerts,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Proximity Alerts")
             }
 
             Spacer(modifier = Modifier.height(16.dp))

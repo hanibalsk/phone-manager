@@ -4,6 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import three.two.bit.phonemanager.ui.alerts.AlertsScreen
+import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
 import three.two.bit.phonemanager.ui.group.GroupMembersScreen
 import three.two.bit.phonemanager.ui.history.HistoryScreen
 import three.two.bit.phonemanager.ui.home.HomeScreen
@@ -19,6 +21,8 @@ sealed class Screen(val route: String) {
     object Settings : Screen("settings")
     object Map : Screen("map")
     object History : Screen("history")
+    object Alerts : Screen("alerts")
+    object CreateAlert : Screen("create_alert")
 }
 
 @Composable
@@ -65,6 +69,9 @@ fun PhoneManagerNavHost(
                 onNavigateToHistory = {
                     navController.navigate(Screen.History.route)
                 },
+                onNavigateToAlerts = {
+                    navController.navigate(Screen.Alerts.route)
+                },
             )
         }
         composable(Screen.GroupMembers.route) {
@@ -84,6 +91,19 @@ fun PhoneManagerNavHost(
         }
         composable(Screen.History.route) {
             HistoryScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(Screen.Alerts.route) {
+            AlertsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCreate = {
+                    navController.navigate(Screen.CreateAlert.route)
+                },
+            )
+        }
+        composable(Screen.CreateAlert.route) {
+            CreateAlertScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

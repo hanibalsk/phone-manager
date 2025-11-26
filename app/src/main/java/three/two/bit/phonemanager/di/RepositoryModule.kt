@@ -4,6 +4,8 @@ import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import three.two.bit.phonemanager.data.repository.AlertRepository
+import three.two.bit.phonemanager.data.repository.AlertRepositoryImpl
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepositoryImpl
 import three.two.bit.phonemanager.data.repository.LocationRepository
@@ -24,4 +26,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindDeviceRepository(impl: DeviceRepositoryImpl): DeviceRepository
+
+    /**
+     * Story E5.1: Alert Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindAlertRepository(impl: AlertRepositoryImpl): AlertRepository
 }
