@@ -10,6 +10,7 @@ import three.two.bit.phonemanager.data.model.toDomain
 import three.two.bit.phonemanager.data.model.toEntity
 import three.two.bit.phonemanager.domain.model.Geofence
 import three.two.bit.phonemanager.domain.model.TransitionType
+import three.two.bit.phonemanager.geofence.GeofenceManager
 import three.two.bit.phonemanager.network.GeofenceApiService
 import three.two.bit.phonemanager.network.NetworkException
 import three.two.bit.phonemanager.network.NetworkManager
@@ -84,6 +85,7 @@ class GeofenceRepositoryImpl @Inject constructor(
     private val geofenceApiService: GeofenceApiService,
     private val networkManager: NetworkManager,
     private val secureStorage: SecureStorage,
+    private val geofenceManager: GeofenceManager,
 ) : GeofenceRepository {
 
     private val deviceId: String
@@ -129,6 +131,20 @@ class GeofenceRepositoryImpl @Inject constructor(
         // Save locally first
         geofenceDao.insert(geofence.toEntity())
         Timber.d("Geofence created locally: $geofenceId")
+
+        // Register with Android Geofencing API if permissions available
+        if (geofenceManager.hasRequiredPermissions()) {
+            geofenceManager.addGeofence(geofence).fold(
+                onSuccess = {
+                    Timber.i("Geofence registered with Android API: $geofenceId")
+                },
+                onFailure = { error ->
+                    Timber.w(error, "Failed to register geofence with Android API")
+                },
+            )
+        } else {
+            Timber.d("Background location permission not granted, skipping Android Geofencing registration")
+        }
 
         // Sync to server if network available
         if (networkManager.isNetworkAvailable()) {
@@ -207,6 +223,31 @@ class GeofenceRepositoryImpl @Inject constructor(
         geofenceDao.update(updatedEntity)
         Timber.d("Geofence ${if (active) "activated" else "deactivated"}: $geofenceId")
 
+        // Update Android Geofencing API registration
+        if (geofenceManager.hasRequiredPermissions()) {
+            if (active) {
+                // Register with Android API when activating
+                geofenceManager.addGeofence(updatedEntity.toDomain()).fold(
+                    onSuccess = {
+                        Timber.i("Geofence registered with Android API: $geofenceId")
+                    },
+                    onFailure = { error ->
+                        Timber.w(error, "Failed to register geofence with Android API")
+                    },
+                )
+            } else {
+                // Remove from Android API when deactivating
+                geofenceManager.removeGeofence(geofenceId).fold(
+                    onSuccess = {
+                        Timber.i("Geofence removed from Android API: $geofenceId")
+                    },
+                    onFailure = { error ->
+                        Timber.w(error, "Failed to remove geofence from Android API")
+                    },
+                )
+            }
+        }
+
         // Sync to server
         if (networkManager.isNetworkAvailable()) {
             geofenceApiService.updateGeofence(geofenceId, UpdateGeofenceRequest(active = active))
@@ -225,6 +266,18 @@ class GeofenceRepositoryImpl @Inject constructor(
         // Delete locally
         geofenceDao.delete(existing)
         Timber.d("Geofence deleted locally: $geofenceId")
+
+        // Remove from Android Geofencing API
+        if (geofenceManager.hasRequiredPermissions()) {
+            geofenceManager.removeGeofence(geofenceId).fold(
+                onSuccess = {
+                    Timber.i("Geofence removed from Android API: $geofenceId")
+                },
+                onFailure = { error ->
+                    Timber.w(error, "Failed to remove geofence from Android API")
+                },
+            )
+        }
 
         // Delete from server
         if (networkManager.isNetworkAvailable()) {
@@ -245,6 +298,7 @@ class GeofenceRepositoryImpl @Inject constructor(
      * Sync geofences from server
      *
      * Strategy: Replace local geofences with server data (server is source of truth)
+     * Also re-registers active geofences with Android Geofencing API
      */
     override suspend fun syncFromServer(): Result<Int> {
         if (!networkManager.isNetworkAvailable()) {
@@ -254,12 +308,42 @@ class GeofenceRepositoryImpl @Inject constructor(
         return geofenceApiService.listGeofences(deviceId, includeInactive = true).map { response ->
             Timber.d("Fetched ${response.total} geofences from server")
 
+            // Remove all existing geofences from Android API
+            if (geofenceManager.hasRequiredPermissions()) {
+                geofenceManager.removeAllGeofences().fold(
+                    onSuccess = {
+                        Timber.d("Removed all geofences from Android API before sync")
+                    },
+                    onFailure = { error ->
+                        Timber.w(error, "Failed to remove geofences from Android API before sync")
+                    },
+                )
+            }
+
             // Clear local and replace with server data
             geofenceDao.deleteAllByDevice(deviceId)
 
+            val activeGeofences = mutableListOf<Geofence>()
             response.geofences.forEach { dto ->
                 val entity = dto.toEntity()
                 geofenceDao.insert(entity)
+
+                // Collect active geofences for Android API registration
+                if (dto.active) {
+                    activeGeofences.add(dto.toDomain())
+                }
+            }
+
+            // Register active geofences with Android API
+            if (geofenceManager.hasRequiredPermissions() && activeGeofences.isNotEmpty()) {
+                geofenceManager.addGeofences(activeGeofences).fold(
+                    onSuccess = {
+                        Timber.i("Registered ${activeGeofences.size} active geofences with Android API")
+                    },
+                    onFailure = { error ->
+                        Timber.w(error, "Failed to register geofences with Android API after sync")
+                    },
+                )
             }
 
             Timber.i("Synced ${response.total} geofences from server")

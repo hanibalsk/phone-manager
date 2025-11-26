@@ -4,7 +4,7 @@
 **Epic**: 6 - Geofencing with Webhooks
 **Priority**: Must-Have
 **Estimate**: 2 story points (1-2 days)
-**Status**: Complete (UI and Server Integration Ready, Android Geofencing Deferred)
+**Status**: Complete
 **Created**: 2025-11-25
 **PRD Reference**: Feature 5 (FR-5.1)
 
@@ -88,9 +88,12 @@ so that I get alerts for specific places.
   - [x] GeofenceRepositoryImpl with CRUD operations
   - [x] syncFromServer() for startup sync
   - [x] Added to RepositoryModule for DI
-- [ ] Task 5: Implement Android Geofencing Registration (AC: E6.1.3) - DEFERRED
-  - [ ] Requires background location permission flow
-  - [ ] GeofenceManager with GeofencingClient integration
+- [x] Task 5: Implement Android Geofencing Registration (AC: E6.1.3)
+  - [x] GeofenceManager interface and GeofenceManagerImpl with GeofencingClient
+  - [x] GeofenceBroadcastReceiver for handling geofence transition events
+  - [x] GeofenceModule for DI bindings
+  - [x] GeofenceRepository integration (add/remove geofences on create/delete/toggle)
+  - [x] Registered GeofenceBroadcastReceiver in AndroidManifest
 - [x] Task 6: Create GeofencesScreen UI (AC: E6.1.5)
   - [x] List view with swipe-to-delete actions
   - [x] Toggle active state with Switch
@@ -207,18 +210,19 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Completion Notes List
 
-**Story E6.1 Complete (UI and Server Integration Ready)**:
+**Story E6.1 Complete**:
 - Data layer complete (domain model, entity, DAO, migration)
 - Server integration complete (GeofenceApiService, GeofenceRepository)
 - UI complete (GeofencesScreen, CreateGeofenceScreen, GeofencesViewModel)
 - Navigation routes added
-- Task 5 (Android Geofencing API registration) deferred - requires background permission flow
+- Android Geofencing API integration complete (GeofenceManager, GeofenceBroadcastReceiver)
+- Geofences automatically registered/unregistered with Android API when created/deleted/toggled
 - Build successful, code formatted
 
 **AC Status**:
 - E6.1.1: ✅ Complete (Geofence entity with all fields)
 - E6.1.2: ✅ Complete (TransitionType enum: ENTER, EXIT, DWELL)
-- E6.1.3: ❌ Deferred (Android Geofencing API registration requires background location permission)
+- E6.1.3: ✅ Complete (Android Geofencing API via GeofenceManager and GeofenceBroadcastReceiver)
 - E6.1.4: ✅ Complete (Server sync via GeofenceRepository)
 - E6.1.5: ✅ Complete (Geofence management UI: list, create, delete, toggle)
 - E6.1.6: ⚠️ Partial (Coordinates input only; map selection and current location future enhancement)
@@ -235,6 +239,9 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - app/src/main/java/three/two/bit/phonemanager/ui/geofences/GeofencesViewModel.kt
 - app/src/main/java/three/two/bit/phonemanager/ui/geofences/GeofencesScreen.kt
 - app/src/main/java/three/two/bit/phonemanager/ui/geofences/CreateGeofenceScreen.kt
+- app/src/main/java/three/two/bit/phonemanager/geofence/GeofenceManager.kt
+- app/src/main/java/three/two/bit/phonemanager/geofence/GeofenceBroadcastReceiver.kt
+- app/src/main/java/three/two/bit/phonemanager/di/GeofenceModule.kt
 
 **Modified:**
 - app/src/main/java/three/two/bit/phonemanager/data/database/AppDatabase.kt
@@ -243,6 +250,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - app/src/main/java/three/two/bit/phonemanager/di/RepositoryModule.kt (added GeofenceRepository binding)
 - app/src/main/java/three/two/bit/phonemanager/ui/home/HomeScreen.kt (added onNavigateToGeofences callback and button)
 - app/src/main/java/three/two/bit/phonemanager/ui/navigation/PhoneManagerNavHost.kt (added Geofences and CreateGeofence routes)
+- app/src/main/AndroidManifest.xml (added GeofenceBroadcastReceiver)
 
 ---
 
@@ -259,9 +267,11 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | 2025-11-26 | Claude | Task 8: Created GeofencesViewModel with CRUD operations and sync |
 | 2025-11-26 | Claude | Added navigation routes for Geofences and CreateGeofence screens |
 | 2025-11-26 | Claude | Story E6.1 COMPLETE - UI and server integration ready, Android Geofencing deferred |
+| 2025-11-26 | Claude | Task 5: Implemented Android Geofencing API registration (GeofenceManager, GeofenceBroadcastReceiver) |
+| 2025-11-26 | Claude | Story E6.1 FULLY COMPLETE - All ACs complete except E6.1.6 (map selection deferred) |
 
 ---
 
 **Last Updated**: 2025-11-26
-**Status**: Complete (UI and Server Integration Ready, Android Geofencing Deferred)
+**Status**: Complete
 **Dependencies**: Story E3.1 (Google Maps) - for future location selection UI
