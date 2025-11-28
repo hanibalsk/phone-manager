@@ -107,8 +107,8 @@ so that I can automate actions in Home Assistant or n8n.
   - [x] Document expected backend behavior (in Dev Notes)
   - [x] Document HMAC signing process (in Dev Notes)
   - [x] Provide sample n8n/Home Assistant config (in Dev Notes)
-- [ ] Task 11: Testing (All ACs)
-  - [ ] Unit test WebhookRepository
+- [x] Task 11: Testing (All ACs)
+  - [x] Unit test WebhookRepository (20 tests in WebhookRepositoryTest.kt)
   - [x] Manual test webhook creation (build verified)
   - [ ] Integration test with n8n (if available)
 
@@ -243,6 +243,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - app/src/main/java/three.two.bit/phonemanager/ui/webhooks/WebhooksViewModel.kt
 - app/src/main/java/three.two.bit/phonemanager/ui/webhooks/CreateWebhookScreen.kt
 - app/src/main/java/three.two.bit/phonemanager/ui/webhooks/CreateWebhookViewModel.kt
+- app/src/test/java/three/two/bit/phonemanager/data/repository/WebhookRepositoryTest.kt
 
 **Modified:**
 - app/src/main/java/three.two.bit/phonemanager/data/database/AppDatabase.kt (version 7, MIGRATION_6_7)
@@ -263,9 +264,10 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 |------|--------|---------|
 | 2025-11-25 | Claude | Webhook domain model created |
 | 2025-11-26 | Claude | Full E6.3 implementation: data layer, API, repository, UI, navigation |
+| 2025-11-28 | Claude | Added WebhookRepositoryTest.kt with 20 unit tests (Task 11) |
 
 ---
 
-**Last Updated**: 2025-11-26
+**Last Updated**: 2025-11-28
 **Status**: Complete
 **Dependencies**: Story E6.1 (Geofence Definition) - Complete, Story E6.2 (Geofence Events) - Complete

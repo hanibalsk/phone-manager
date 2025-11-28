@@ -55,4 +55,18 @@ interface LocationDao {
     """,
     )
     suspend fun getLocationsBetween(startTime: Long, endTime: Long): List<LocationEntity>
+
+    /**
+     * Story E4.2: Mark location as synced after successful upload (AC E4.2.4)
+     * @param id Location ID
+     * @param syncedAt Timestamp when synced
+     */
+    @Query("UPDATE locations SET isSynced = 1, syncedAt = :syncedAt WHERE id = :id")
+    suspend fun markAsSynced(id: Long, syncedAt: Long)
+
+    /**
+     * Story E4.2: Get count of unsynced locations (AC E4.2.4)
+     */
+    @Query("SELECT COUNT(*) FROM locations WHERE isSynced = 0")
+    fun observeUnsyncedCount(): Flow<Int>
 }

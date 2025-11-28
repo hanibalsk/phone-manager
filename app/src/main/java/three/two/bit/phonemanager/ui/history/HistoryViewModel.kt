@@ -295,16 +295,22 @@ constructor(
         }
     }
 
+    companion object {
+        /** Default tolerance for server-side downsampling in meters (medium detail) */
+        const val DEFAULT_TOLERANCE_METERS = 50f
+    }
+
     /**
-     * Load location history from server for a remote device (AC E4.2.1)
+     * Load location history from server for a remote device (AC E4.2.1, E4.2.5)
      */
     private suspend fun loadRemoteHistory(deviceId: String, startTime: Long, endTime: Long) {
         deviceApiService.getLocationHistory(
             deviceId = deviceId,
             from = startTime,
             to = endTime,
-            limit = 1000, // Fetch up to 1000 points, will downsample
+            limit = 1000, // Fetch up to 1000 points, will downsample if needed
             order = "asc", // Chronological order for polyline
+            tolerance = DEFAULT_TOLERANCE_METERS, // AC E4.2.5: Server-side downsampling (50m = medium detail)
         )
             .onSuccess { response ->
                 // Convert API response to LatLng points

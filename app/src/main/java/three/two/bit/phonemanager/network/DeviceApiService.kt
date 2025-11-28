@@ -31,6 +31,9 @@ interface DeviceApiService {
     /**
      * Story E4.2: Get location history for a device
      * GET /api/v1/devices/{deviceId}/locations
+     *
+     * AC E4.2.5: Optional tolerance parameter for server-side downsampling
+     * @param tolerance Downsampling tolerance in meters (e.g., 10m fine, 50m medium, 100m coarse)
      */
     suspend fun getLocationHistory(
         deviceId: String,
@@ -39,6 +42,7 @@ interface DeviceApiService {
         cursor: String? = null,
         limit: Int? = null,
         order: String? = null,
+        tolerance: Float? = null,
     ): Result<LocationHistoryResponse>
 }
 
@@ -95,6 +99,7 @@ class DeviceApiServiceImpl @Inject constructor(
      * GET /api/v1/devices/{deviceId}/locations
      *
      * AC E4.2.1: Fetch history from server with cursor-based pagination
+     * AC E4.2.5: Optional tolerance parameter for server-side downsampling (meters)
      */
     override suspend fun getLocationHistory(
         deviceId: String,
@@ -103,8 +108,9 @@ class DeviceApiServiceImpl @Inject constructor(
         cursor: String?,
         limit: Int?,
         order: String?,
+        tolerance: Float?,
     ): Result<LocationHistoryResponse> = try {
-        Timber.d("Fetching location history for deviceId=$deviceId")
+        Timber.d("Fetching location history for deviceId=$deviceId, tolerance=$tolerance")
 
         val response: LocationHistoryResponse = httpClient.get(
             "${apiConfig.baseUrl}/api/v1/devices/$deviceId/locations",
@@ -115,6 +121,7 @@ class DeviceApiServiceImpl @Inject constructor(
             cursor?.let { parameter("cursor", it) }
             limit?.let { parameter("limit", it) }
             order?.let { parameter("order", it) }
+            tolerance?.let { parameter("tolerance", it) }
         }.body()
 
         Timber.i(

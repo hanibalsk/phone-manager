@@ -246,6 +246,7 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - app/src/main/java/three/two/bit/phonemanager/ui/alerts/AlertsViewModel.kt
 - app/src/main/java/three/two/bit/phonemanager/ui/alerts/AlertsScreen.kt
 - app/src/main/java/three/two/bit/phonemanager/ui/alerts/CreateAlertScreen.kt
+- app/src/test/java/three/two/bit/phonemanager/data/repository/AlertRepositoryTest.kt
 
 **Modified:**
 - app/src/main/java/three/two/bit/phonemanager/data/database/AppDatabase.kt (version 4, migration 3→4, added DAO)
@@ -277,10 +278,11 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | 2025-11-26 | Claude | Task 7: Created AlertsViewModel with CRUD operations and sync |
 | 2025-11-26 | Claude | Added navigation routes for Alerts and CreateAlert screens |
 | 2025-11-26 | Claude | Story E5.1 COMPLETE - All UI and server integration ready |
+| 2025-11-28 | Claude | Added AlertRepositoryTest.kt with 17 unit tests |
 
 ---
 
-**Last Updated**: 2025-11-26
+**Last Updated**: 2025-11-28
 **Status**: Complete
 **Dependencies**: Story E1.2 (Group Member Discovery) - for target device selection when UI implemented
 
@@ -369,18 +371,26 @@ This is a foundation-focused story where server integration and UI components ar
 ### Test Coverage and Gaps
 
 **Unit Tests Implemented**:
-- ✅ None - All tests deferred
+- ✅ `AlertRepositoryTest.kt` - Comprehensive repository tests (17 tests)
+  - createAlert tests: local save, default values, server sync, network unavailable handling
+  - getAlert tests: found and not found scenarios
+  - toggleAlertActive tests: update, non-existent alert, server sync
+  - deleteAlert tests: local removal, non-existent alert, server sync
+  - syncFromServer tests: network unavailable handling
+  - updateLastTriggered tests: database update, non-existent alert
+  - updateProximityState tests: database update, non-existent alert
+  - observeAlerts/observeActiveAlerts tests: Flow from DAO
 
-**Test Quality**: N/A (no tests implemented yet)
+**Test Quality**: Good - Uses MockK for mocking, runTest for coroutines, covers success and failure paths
 
 **Gaps Identified**:
 1. **No domain model tests** - Should test ProximityAlert instantiation, enum values, edge cases
 2. **No mapper tests** - Should verify toDomain() and toEntity() conversion correctness
-3. **No DAO tests** - Should validate CRUD operations, Flow emissions, queries
+3. **No DAO integration tests** - Should validate actual Room operations
 4. **No migration test** - Should validate MIGRATION_3_4 creates table correctly
 5. **No radius validation tests** - Should verify 50-10,000 range enforcement (when implemented)
 
-**Estimated Coverage**: 0% (no tests; below 80% target)
+**Estimated Coverage**: ~60% (repository layer covered; domain/mapper/DAO tests remaining)
 
 **Recommendation**: Add comprehensive test suite when repository and ViewModel are implemented. Prioritize domain model and mapper tests as they're currently testable.
 

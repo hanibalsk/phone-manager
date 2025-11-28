@@ -145,11 +145,16 @@ class QueueManager @Inject constructor(
             val result = networkManager.uploadLocation(location)
 
             result.onSuccess { response ->
+                val syncedAt = System.currentTimeMillis()
                 Timber.i("Location ${queueItem.locationId} uploaded successfully")
+
+                // Story E4.2: Mark location as synced (AC E4.2.4)
+                locationDao.markAsSynced(queueItem.locationId, syncedAt)
+
                 locationQueueDao.update(
                     queueItem.copy(
                         status = QueueStatus.UPLOADED,
-                        lastAttemptTime = System.currentTimeMillis(),
+                        lastAttemptTime = syncedAt,
                     ),
                 )
                 return true
