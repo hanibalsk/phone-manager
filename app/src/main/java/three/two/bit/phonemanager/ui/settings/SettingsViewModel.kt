@@ -6,21 +6,27 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import javax.inject.Inject
 
 /**
- * Story E1.3: SettingsViewModel
+ * Story E1.3/E3.3: SettingsViewModel
  *
  * Manages device settings (displayName, groupId) and handles re-registration
- * ACs: E1.3.2, E1.3.3, E1.3.4
+ * Story E3.3: Also manages map polling interval setting (AC E3.3.5)
+ * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5
  */
 @HiltViewModel
 class SettingsViewModel
 @Inject
-constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
+constructor(
+    private val deviceRepository: DeviceRepository,
+    private val preferencesRepository: PreferencesRepository,
+) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
@@ -31,6 +37,7 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
 
     init {
         loadCurrentSettings()
+        loadPollingInterval()
     }
 
     /**
@@ -51,6 +58,27 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
                     isLoading = false,
                 )
             }
+        }
+    }
+
+    /**
+     * Load map polling interval from preferences (AC E3.3.5)
+     */
+    private fun loadPollingInterval() {
+        viewModelScope.launch {
+            val interval = preferencesRepository.mapPollingIntervalSeconds.first()
+            _uiState.update { it.copy(mapPollingIntervalSeconds = interval) }
+        }
+    }
+
+    /**
+     * Handle polling interval change (AC E3.3.5)
+     * Saves immediately since this is an independent setting
+     */
+    fun onPollingIntervalChanged(seconds: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setMapPollingIntervalSeconds(seconds)
+            _uiState.update { it.copy(mapPollingIntervalSeconds = seconds) }
         }
     }
 
@@ -212,6 +240,7 @@ constructor(private val deviceRepository: DeviceRepository) : ViewModel() {
  * @property saveSuccess True when settings saved successfully
  * @property hasChanges True when values differ from original
  * @property showGroupChangeConfirmation True when group ID change confirmation needed
+ * @property mapPollingIntervalSeconds Map polling interval in seconds (AC E3.3.5)
  */
 data class SettingsUiState(
     val displayName: String = "",
@@ -224,4 +253,5 @@ data class SettingsUiState(
     val saveSuccess: Boolean = false,
     val hasChanges: Boolean = false,
     val showGroupChangeConfirmation: Boolean = false,
+    val mapPollingIntervalSeconds: Int = 15,
 )

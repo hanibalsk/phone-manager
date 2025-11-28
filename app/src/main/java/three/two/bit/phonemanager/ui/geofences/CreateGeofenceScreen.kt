@@ -81,8 +81,10 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
     // Validate form
     val latitude = latitudeText.toDoubleOrNull()
     val longitude = longitudeText.toDoubleOrNull()
-    val isValidLocation = latitude != null && longitude != null &&
-        latitude in -90.0..90.0 && longitude in -180.0..180.0
+    val isValidLocation = latitude != null &&
+        longitude != null &&
+        latitude in -90.0..90.0 &&
+        longitude in -180.0..180.0
     val hasTransitionType = enterSelected || exitSelected || dwellSelected
     val isFormValid = name.isNotBlank() && isValidLocation && hasTransitionType
 

@@ -85,7 +85,7 @@ so that I see near real-time positions.
   - [ ] Test lifecycle-aware polling (requires device)
 
 ### Review Follow-ups (AI)
-- [ ] [AI-Review][Medium] Add Settings UI for polling interval configuration (AC: E3.3.5)
+- [x] [AI-Review][Medium] Add Settings UI for polling interval configuration (AC: E3.3.5) - DONE 2025-11-28
 - [ ] [AI-Review][Low] Add unit tests for polling lifecycle (Test coverage)
 
 ## Dev Notes

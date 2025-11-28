@@ -103,6 +103,101 @@ constructor(
     }
 
     /**
+     * Show the custom date range picker flow (AC E4.1.5)
+     * First shows start date picker, then end date picker
+     */
+    fun onCustomRangeClicked() {
+        val timeZone = TimeZone.currentSystemDefault()
+        val now = Clock.System.now()
+        val today = now.toLocalDateTime(timeZone).date
+        val sevenDaysAgo = today.plus(-7, DateTimeUnit.DAY)
+
+        // Initialize with sensible defaults (last 7 days)
+        _uiState.update {
+            it.copy(
+                customStartDate = sevenDaysAgo,
+                customEndDate = today,
+                showStartDatePicker = true,
+            )
+        }
+    }
+
+    /**
+     * Handle start date selection (AC E4.1.5)
+     */
+    fun onStartDateSelected(dateMillis: Long?) {
+        if (dateMillis != null) {
+            val timeZone = TimeZone.currentSystemDefault()
+            val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(dateMillis)
+            val date = instant.toLocalDateTime(timeZone).date
+
+            _uiState.update {
+                it.copy(
+                    customStartDate = date,
+                    showStartDatePicker = false,
+                    showEndDatePicker = true, // Move to end date selection
+                )
+            }
+        } else {
+            // User cancelled, reset to previous filter
+            _uiState.update {
+                it.copy(
+                    showStartDatePicker = false,
+                    customStartDate = null,
+                    customEndDate = null,
+                )
+            }
+        }
+    }
+
+    /**
+     * Handle end date selection and apply custom filter (AC E4.1.5)
+     */
+    fun onEndDateSelected(dateMillis: Long?) {
+        val startDate = _uiState.value.customStartDate
+
+        if (dateMillis != null && startDate != null) {
+            val timeZone = TimeZone.currentSystemDefault()
+            val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(dateMillis)
+            val endDate = instant.toLocalDateTime(timeZone).date
+
+            // Ensure end date is not before start date
+            val validEndDate = if (endDate < startDate) startDate else endDate
+
+            _uiState.update {
+                it.copy(
+                    showEndDatePicker = false,
+                    customEndDate = validEndDate,
+                )
+            }
+
+            // Apply the custom filter
+            setDateFilter(DateFilter.Custom(startDate, validEndDate))
+        } else {
+            // User cancelled, reset
+            _uiState.update {
+                it.copy(
+                    showEndDatePicker = false,
+                    customStartDate = null,
+                    customEndDate = null,
+                )
+            }
+        }
+    }
+
+    /**
+     * Dismiss date pickers (AC E4.1.5)
+     */
+    fun dismissDatePicker() {
+        _uiState.update {
+            it.copy(
+                showStartDatePicker = false,
+                showEndDatePicker = false,
+            )
+        }
+    }
+
+    /**
      * Set date filter and load history (AC E4.1.4, E4.1.5)
      */
     fun setDateFilter(filter: DateFilter) {
@@ -261,6 +356,10 @@ constructor(
  * @property isEmpty True when no locations found for selected range
  * @property isLoading True when fetching history
  * @property error Error message if fetch failed
+ * @property showStartDatePicker True when start date picker should be shown (AC E4.1.5)
+ * @property showEndDatePicker True when end date picker should be shown (AC E4.1.5)
+ * @property customStartDate Temporary start date selection for custom range (AC E4.1.5)
+ * @property customEndDate Temporary end date selection for custom range (AC E4.1.5)
  */
 data class HistoryUiState(
     val locations: List<LocationEntity> = emptyList(),
@@ -271,6 +370,10 @@ data class HistoryUiState(
     val isEmpty: Boolean = false,
     val isLoading: Boolean = true,
     val error: String? = null,
+    val showStartDatePicker: Boolean = false,
+    val showEndDatePicker: Boolean = false,
+    val customStartDate: LocalDate? = null,
+    val customEndDate: LocalDate? = null,
 )
 
 /**

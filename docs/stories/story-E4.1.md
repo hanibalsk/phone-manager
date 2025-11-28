@@ -75,7 +75,7 @@ so that I can see where I've been.
   - [x] Update query on selection via setDateFilter()
 - [x] Task 5: Implement Custom Date Range (AC: E4.1.5)
   - [x] DateFilter.Custom sealed class variant defined
-  - [ ] Date picker UI deferred (infrastructure complete)
+  - [x] Date picker UI with Material3 DatePickerDialog (start + end date selection)
 - [x] Task 6: Handle Empty State (AC: E4.1.6)
   - [x] Detect empty result set (isEmpty flag)
   - [x] Show empty state message with icon and helper text
@@ -86,7 +86,7 @@ so that I can see where I've been.
   - [ ] Test offline functionality (already works - Room database)
 
 ### Review Follow-ups (AI)
-- [ ] [AI-Review][Medium] Add Custom Date Range UI with date picker (AC: E4.1.5)
+- [x] [AI-Review][Medium] Add Custom Date Range UI with date picker (AC: E4.1.5) - DONE 2025-11-28
 - [ ] [AI-Review][Low] Add retry button to error state (Error recovery)
 - [ ] [AI-Review][Low] Use camera animation for filter changes (UX)
 - [ ] [AI-Review][Low] Add unit tests for PolylineUtils (Test coverage E4.2)

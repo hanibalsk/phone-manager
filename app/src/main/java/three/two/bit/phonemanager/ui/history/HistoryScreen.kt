@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.ui.history
 
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +12,15 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -27,8 +32,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SelectableDates
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,6 +57,8 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 
 /**
  * Story E4.1/E4.2: History Screen
@@ -104,10 +114,11 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
                 )
             }
 
-            // AC E4.1.4: Date filter chips
+            // AC E4.1.4, E4.1.5: Date filter chips
             DateFilterRow(
                 selectedFilter = uiState.selectedFilter,
                 onFilterSelected = viewModel::setDateFilter,
+                onCustomRangeClicked = viewModel::onCustomRangeClicked,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             )
 
@@ -165,6 +176,87 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
             }
         }
     }
+
+    // AC E4.1.5: Start Date Picker Dialog
+    if (uiState.showStartDatePicker) {
+        val initialDateMillis = uiState.customStartDate?.let {
+            it.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        }
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initialDateMillis,
+            selectableDates = PastSelectableDates,
+        )
+
+        DatePickerDialog(
+            onDismissRequest = viewModel::dismissDatePicker,
+            confirmButton = {
+                TextButton(onClick = { viewModel.onStartDateSelected(datePickerState.selectedDateMillis) }) {
+                    Text("Next")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissDatePicker) {
+                    Text("Cancel")
+                }
+            },
+        ) {
+            DatePicker(
+                state = datePickerState,
+                title = { Text("Select Start Date", modifier = Modifier.padding(16.dp)) },
+            )
+        }
+    }
+
+    // AC E4.1.5: End Date Picker Dialog
+    if (uiState.showEndDatePicker) {
+        val initialDateMillis = uiState.customEndDate?.let {
+            it.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        }
+        val startDateMillis = uiState.customStartDate?.let {
+            it.atStartOfDayIn(TimeZone.currentSystemDefault()).toEpochMilliseconds()
+        } ?: 0L
+
+        val datePickerState = rememberDatePickerState(
+            initialSelectedDateMillis = initialDateMillis,
+            selectableDates = EndDateSelectableDates(startDateMillis),
+        )
+
+        DatePickerDialog(
+            onDismissRequest = viewModel::dismissDatePicker,
+            confirmButton = {
+                TextButton(onClick = { viewModel.onEndDateSelected(datePickerState.selectedDateMillis) }) {
+                    Text("Apply")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = viewModel::dismissDatePicker) {
+                    Text("Cancel")
+                }
+            },
+        ) {
+            DatePicker(
+                state = datePickerState,
+                title = { Text("Select End Date", modifier = Modifier.padding(16.dp)) },
+            )
+        }
+    }
+}
+
+/**
+ * SelectableDates that only allows past dates (AC E4.1.5)
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private object PastSelectableDates : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean = utcTimeMillis <= System.currentTimeMillis()
+}
+
+/**
+ * SelectableDates for end date - must be on or after start date and not in future (AC E4.1.5)
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+private class EndDateSelectableDates(private val startDateMillis: Long) : SelectableDates {
+    override fun isSelectableDate(utcTimeMillis: Long): Boolean =
+        utcTimeMillis >= startDateMillis && utcTimeMillis <= System.currentTimeMillis()
 }
 
 /**
@@ -239,16 +331,19 @@ private fun DeviceSelector(
 }
 
 /**
- * Date filter row with preset chips (AC E4.1.4)
+ * Date filter row with preset and custom chips (AC E4.1.4, E4.1.5)
  */
 @Composable
 private fun DateFilterRow(
     selectedFilter: DateFilter,
     onFilterSelected: (DateFilter) -> Unit,
+    onCustomRangeClicked: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier = modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         FilterChip(
@@ -266,7 +361,25 @@ private fun DateFilterRow(
             onClick = { onFilterSelected(DateFilter.Last7Days) },
             label = { Text("Last 7 Days") },
         )
-        // Note: Custom date range picker deferred for future enhancement (AC E4.1.5)
+        // AC E4.1.5: Custom date range chip
+        FilterChip(
+            selected = selectedFilter is DateFilter.Custom,
+            onClick = onCustomRangeClicked,
+            label = {
+                if (selectedFilter is DateFilter.Custom) {
+                    Text("${selectedFilter.startDate} - ${selectedFilter.endDate}")
+                } else {
+                    Text("Custom")
+                }
+            },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.DateRange,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                )
+            },
+        )
     }
 }
 

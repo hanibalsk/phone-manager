@@ -9,7 +9,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -22,7 +27,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -138,6 +145,23 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            // Divider between device settings and app settings
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Story E3.3: Map Polling Interval Selector (AC E3.3.5)
+            Text(
+                text = "Map Settings",
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            PollingIntervalSelector(
+                selectedInterval = uiState.mapPollingIntervalSeconds,
+                onIntervalSelected = viewModel::onPollingIntervalChanged,
+                enabled = !uiState.isLoading,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             // Save Button (AC E1.3.2, E1.3.3)
             Button(
                 onClick = viewModel::onSaveClicked,
@@ -172,5 +196,59 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 }
             },
         )
+    }
+}
+
+/**
+ * Story E3.3: Polling Interval Selector (AC E3.3.5)
+ *
+ * Allows users to choose between 10, 15, 20, or 30 second polling intervals
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun PollingIntervalSelector(
+    selectedInterval: Int,
+    onIntervalSelected: (Int) -> Unit,
+    enabled: Boolean,
+    modifier: Modifier = Modifier,
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    // Available polling interval options (AC E3.3.5)
+    val intervalOptions = listOf(10, 15, 20, 30)
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { if (enabled) expanded = it },
+        modifier = modifier,
+    ) {
+        OutlinedTextField(
+            value = "$selectedInterval seconds",
+            onValueChange = {},
+            readOnly = true,
+            enabled = enabled,
+            label = { Text("Map Polling Interval") },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+            supportingText = { Text("How often to refresh group member locations on the map") },
+            modifier = Modifier
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
+                .fillMaxWidth(),
+        )
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+        ) {
+            intervalOptions.forEach { interval ->
+                DropdownMenuItem(
+                    text = { Text("$interval seconds") },
+                    onClick = {
+                        onIntervalSelected(interval)
+                        expanded = false
+                    },
+                    contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+                )
+            }
+        }
     }
 }
