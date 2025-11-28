@@ -49,6 +49,10 @@ class WeatherApiServiceImpl @Inject constructor(private val httpClient: HttpClie
      * - forecast_days: Number of forecast days (5)
      */
     override suspend fun getWeather(latitude: Double, longitude: Double): Result<Weather> = try {
+        // Validate coordinates
+        require(latitude in -90.0..90.0) { "Latitude must be between -90 and 90, got $latitude" }
+        require(longitude in -180.0..180.0) { "Longitude must be between -180 and 180, got $longitude" }
+
         Timber.d("Fetching weather for lat=$latitude, lon=$longitude")
 
         val response: OpenMeteoResponse = httpClient.get(BASE_URL) {

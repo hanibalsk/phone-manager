@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -40,6 +41,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.DailyForecast
 import three.two.bit.phonemanager.domain.model.Weather
 import kotlin.math.roundToInt
@@ -61,10 +63,10 @@ fun WeatherScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Weather Forecast") },
+                title = { Text(stringResource(R.string.weather_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.weather_title))
                     }
                 },
             )
@@ -88,7 +90,7 @@ fun WeatherScreen(
                     ) {
                         CircularProgressIndicator()
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("Loading weather...")
+                        Text(stringResource(R.string.weather_loading))
                     }
                 }
 
@@ -108,7 +110,7 @@ fun WeatherScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.refreshWeather() }) {
-                            Text("Retry")
+                            Text(stringResource(R.string.weather_retry))
                         }
                     }
                 }
@@ -157,7 +159,7 @@ private fun WeatherContent(
         item {
             // AC E7.3.2: 5-day forecast title
             Text(
-                text = "5-Day Forecast",
+                text = stringResource(R.string.weather_forecast_title),
                 style = MaterialTheme.typography.titleMedium,
             )
         }
@@ -175,9 +177,9 @@ private fun WeatherContent(
             // AC E7.3.3: Last updated indicator
             Text(
                 text = if (isOffline) {
-                    "Offline - showing cached data"
+                    stringResource(R.string.weather_offline_indicator)
                 } else {
-                    "Updated $lastUpdatedText"
+                    stringResource(R.string.weather_last_updated, lastUpdatedText)
                 },
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -230,7 +232,7 @@ private fun CurrentConditionsCard(weather: Weather, modifier: Modifier = Modifie
 
             // Feels like
             Text(
-                text = "Feels like ${weather.current.feelsLike.roundToInt()}°C",
+                text = stringResource(R.string.weather_feels_like, weather.current.feelsLike.roundToInt()),
                 style = MaterialTheme.typography.bodyMedium,
             )
 
@@ -243,14 +245,17 @@ private fun CurrentConditionsCard(weather: Weather, modifier: Modifier = Modifie
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "💧", fontSize = 24.sp)
-                    Text(text = "${weather.current.humidity}%", style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        text = stringResource(R.string.weather_humidity, weather.current.humidity),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
                     Text(text = "Humidity", style = MaterialTheme.typography.bodySmall)
                 }
 
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Text(text = "💨", fontSize = 24.sp)
                     Text(
-                        text = "${weather.current.windSpeed.roundToInt()} km/h",
+                        text = stringResource(R.string.weather_wind, weather.current.windSpeed),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Text(text = "Wind", style = MaterialTheme.typography.bodySmall)
@@ -310,6 +315,7 @@ private fun ForecastListItem(forecast: DailyForecast, modifier: Modifier = Modif
 
 /**
  * AC E7.3.2: Format day name (Today, Tomorrow, day of week)
+ * Note: Day names are in English (not localized) - consider adding string resources for full i18n
  */
 private fun formatDayName(date: LocalDate): String {
     val tz = TimeZone.currentSystemDefault()
@@ -328,7 +334,6 @@ private fun formatDayName(date: LocalDate): String {
             DayOfWeek.FRIDAY -> "Friday"
             DayOfWeek.SATURDAY -> "Saturday"
             DayOfWeek.SUNDAY -> "Sunday"
-            else -> date.toString()
         }
     }
 }

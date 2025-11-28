@@ -78,6 +78,10 @@ class LocationTrackingService : Service() {
     private var trackingJob: Job? = null
     private var consecutiveFailures = 0
 
+    // Story E7.2: Cached weather state for notification (avoids runBlocking)
+    @Volatile
+    private var cachedWeatherForNotification: three.two.bit.phonemanager.domain.model.Weather? = null
+
     companion object {
         const val ACTION_START_TRACKING = "three.two.bit.phonemanager.action.START_TRACKING"
         const val ACTION_STOP_TRACKING = "three.two.bit.phonemanager.action.STOP_TRACKING"
@@ -169,7 +173,9 @@ class LocationTrackingService : Service() {
             locationRepository.observeLastLocation().collectLatest { lastLocation ->
                 if (lastLocation != null) {
                     // Fetch weather for current location
-                    weatherRepository.getWeather(lastLocation.latitude, lastLocation.longitude)
+                    val weather = weatherRepository.getWeather(lastLocation.latitude, lastLocation.longitude)
+                    // Cache weather for notification (avoids runBlocking in createNotification)
+                    cachedWeatherForNotification = weather
                     // Update notification with new weather data
                     updateNotification()
                 }
@@ -358,21 +364,24 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * Story E2.2: Create dual notification channels for normal and secret modes
-     * AC E2.2.3, E2.2.4
+     * Story E2.2/E7.2: Create dual notification channels for normal and secret modes
+     * AC E2.2.3, E2.2.4, E7.2.3
      */
     private fun createNotificationChannels() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val notificationManager = getSystemService(NotificationManager::class.java)
 
-            // Normal mode channel (AC E2.2.5)
+            // Normal mode channel (AC E2.2.5, E7.2.3)
             val normalChannel = NotificationChannel(
                 CHANNEL_ID_NORMAL,
                 "Location Tracking",
-                NotificationManager.IMPORTANCE_LOW,
+                NotificationManager.IMPORTANCE_MIN, // AC E7.2.3: Minimal prominence
             ).apply {
                 description = "Ongoing location tracking service"
                 setShowBadge(false)
+                setSound(null, null) // AC E7.2.3: No sound
+                enableVibration(false) // AC E7.2.3: No vibration
+                lockscreenVisibility = Notification.VISIBILITY_SECRET // AC E7.2.3: Hide on lock screen
             }
 
             // Secret mode channel (AC E2.2.3, E2.2.4)
@@ -430,15 +439,8 @@ class LocationTrackingService : Service() {
             }
         }.getOrDefault(true)
 
-        // AC E7.2.1, E7.2.2: Get current weather for notification (from cache only)
-        val weather = runCatching {
-            runBlocking {
-                // Get last location and fetch weather (uses cache if valid)
-                locationRepository.getLatestLocation().first()?.let { lastLocation ->
-                    weatherRepository.getWeather(lastLocation.latitude, lastLocation.longitude)
-                }
-            }
-        }.getOrNull()
+        // AC E7.2.1, E7.2.2: Use pre-fetched weather (updated by observer, avoids blocking I/O)
+        val weather = cachedWeatherForNotification
 
         return if (isSecretMode) {
             // AC E2.2.1, E2.2.2, E2.2.3, E2.2.4: Discreet notification

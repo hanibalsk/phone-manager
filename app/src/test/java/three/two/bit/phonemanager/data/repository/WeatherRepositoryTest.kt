@@ -71,8 +71,7 @@ class WeatherRepositoryTest {
     @Test
     fun `getWeather returns valid cached data without API call`() = runBlocking {
         // Given: Valid cache available
-        coEvery { weatherCache.getWeather() } returns testWeather
-        coEvery { weatherCache.isCacheValid() } returns true
+        coEvery { weatherCache.getValidWeather() } returns testWeather
 
         // When: Get weather
         val result = repository.getWeather(testLatitude, testLongitude)
@@ -81,7 +80,7 @@ class WeatherRepositoryTest {
         assertNotNull(result)
         assertEquals(testWeather, result)
         coVerify(exactly = 0) { weatherApiService.getWeather(any(), any()) }
-        coVerify { weatherCache.getWeather() }
+        coVerify { weatherCache.getValidWeather() }
     }
 
     /**
@@ -90,8 +89,7 @@ class WeatherRepositoryTest {
     @Test
     fun `getWeather fetches from API when cache expired and network available`() = runBlocking {
         // Given: Cache expired, network available
-        coEvery { weatherCache.getWeather() } returns null
-        coEvery { weatherCache.isCacheValid() } returns false
+        coEvery { weatherCache.getValidWeather() } returns null
         every { networkManager.isNetworkAvailable() } returns true
         coEvery { weatherApiService.getWeather(testLatitude, testLongitude) } returns Result.success(testWeather)
 
@@ -110,9 +108,9 @@ class WeatherRepositoryTest {
      */
     @Test
     fun `getWeather returns cached data when API fails`() = runBlocking {
-        // Given: Cache available but expired, API call fails
+        // Given: Valid cache expired, API call fails
+        coEvery { weatherCache.getValidWeather() } returns null
         coEvery { weatherCache.getWeather() } returns testWeather
-        coEvery { weatherCache.isCacheValid() } returns false
         every { networkManager.isNetworkAvailable() } returns true
         coEvery { weatherApiService.getWeather(testLatitude, testLongitude) } returns
             Result.failure(Exception("Network error"))
@@ -131,8 +129,8 @@ class WeatherRepositoryTest {
     @Test
     fun `getWeather returns null when no cache and API fails`() = runBlocking {
         // Given: No cache, API call fails
+        coEvery { weatherCache.getValidWeather() } returns null
         coEvery { weatherCache.getWeather() } returns null
-        coEvery { weatherCache.isCacheValid() } returns false
         every { networkManager.isNetworkAvailable() } returns true
         coEvery { weatherApiService.getWeather(testLatitude, testLongitude) } returns
             Result.failure(Exception("Network error"))
@@ -149,9 +147,9 @@ class WeatherRepositoryTest {
      */
     @Test
     fun `getWeather returns cached data when offline even if expired`() = runBlocking {
-        // Given: Cache available but expired, no network
+        // Given: Valid cache expired but any cache available, no network
+        coEvery { weatherCache.getValidWeather() } returns null
         coEvery { weatherCache.getWeather() } returns testWeather
-        coEvery { weatherCache.isCacheValid() } returns false
         every { networkManager.isNetworkAvailable() } returns false
 
         // When: Get weather
@@ -169,8 +167,8 @@ class WeatherRepositoryTest {
     @Test
     fun `getWeather returns null when offline and no cache`() = runBlocking {
         // Given: No cache, no network
+        coEvery { weatherCache.getValidWeather() } returns null
         coEvery { weatherCache.getWeather() } returns null
-        coEvery { weatherCache.isCacheValid() } returns false
         every { networkManager.isNetworkAvailable() } returns false
 
         // When: Get weather

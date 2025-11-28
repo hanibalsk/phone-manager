@@ -71,7 +71,8 @@ class WeatherViewModel @Inject constructor(
                 val location = locationRepository.getLatestLocation().first()
 
                 if (location == null) {
-                    _uiState.value = WeatherUiState.Error("No location data available")
+                    _uiState.value =
+                        WeatherUiState.Error("No location data available. Please enable location tracking.")
                     return@launch
                 }
 
@@ -86,8 +87,11 @@ class WeatherViewModel @Inject constructor(
                         isOffline = isOffline,
                     )
                 } else {
-                    _uiState.value = WeatherUiState.Error("Unable to load weather")
+                    _uiState.value = WeatherUiState.Error("Unable to load weather. Check network connection.")
                 }
+            } catch (e: SecurityException) {
+                // Handle location permission denied
+                _uiState.value = WeatherUiState.Error("Location permission required to display weather")
             } catch (e: Exception) {
                 _uiState.value = WeatherUiState.Error(e.message ?: "Unknown error")
             }

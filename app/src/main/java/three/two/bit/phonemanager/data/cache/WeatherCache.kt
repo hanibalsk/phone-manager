@@ -35,12 +35,20 @@ interface WeatherCache {
     suspend fun saveWeather(weather: Weather)
 
     /**
-     * Get cached weather if not expired
+     * Get cached weather regardless of expiration
+     * AC E7.1.4: Returns cached data even if expired (for offline fallback)
+     *
+     * @return Weather if cache exists, null if no cached data
+     */
+    suspend fun getWeather(): Weather?
+
+    /**
+     * Get cached weather only if not expired
      * AC E7.1.4: Check TTL (30 minutes) before returning cached data
      *
      * @return Weather if cache is valid, null if expired or missing
      */
-    suspend fun getWeather(): Weather?
+    suspend fun getValidWeather(): Weather?
 
     /**
      * Clear weather cache
@@ -92,9 +100,30 @@ class WeatherCacheImpl @Inject constructor(@ApplicationContext private val conte
     }
 
     /**
-     * AC E7.1.4: Check TTL before returning cached data
+     * Get cached weather regardless of expiration (for offline fallback)
      */
     override suspend fun getWeather(): Weather? = try {
+        val preferences = context.weatherDataStore.data.first()
+
+        val weatherJson = preferences[WEATHER_DATA_KEY]
+
+        if (weatherJson == null) {
+            Timber.d("No cached weather found")
+            null
+        } else {
+            val weather = json.decodeFromString<Weather>(weatherJson)
+            Timber.d("Cached weather retrieved: temp=${weather.current.temperature}°C")
+            weather
+        }
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to read weather from cache")
+        null
+    }
+
+    /**
+     * AC E7.1.4: Check TTL before returning cached data
+     */
+    override suspend fun getValidWeather(): Weather? = try {
         val preferences = context.weatherDataStore.data.first()
 
         val weatherJson = preferences[WEATHER_DATA_KEY]
@@ -113,7 +142,7 @@ class WeatherCacheImpl @Inject constructor(@ApplicationContext private val conte
                 null
             } else {
                 val weather = json.decodeFromString<Weather>(weatherJson)
-                Timber.d("Cached weather retrieved: temp=${weather.current.temperature}°C, age=$age")
+                Timber.d("Valid cached weather retrieved: temp=${weather.current.temperature}°C, age=$age")
                 weather
             }
         }

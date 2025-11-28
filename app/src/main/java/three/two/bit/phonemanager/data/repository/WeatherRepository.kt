@@ -45,19 +45,20 @@ class WeatherRepositoryImpl @Inject constructor(
      * AC E7.1.6: Graceful error handling, return cache on failure
      */
     override suspend fun getWeather(latitude: Double, longitude: Double): Weather? {
-        // AC E7.1.3: Check cache first
-        val cachedWeather = weatherCache.getWeather()
+        // AC E7.1.3: Check cache first (only valid, non-expired data)
+        val validCachedWeather = weatherCache.getValidWeather()
 
-        if (cachedWeather != null && weatherCache.isCacheValid()) {
-            Timber.d("Returning valid cached weather: temp=${cachedWeather.current.temperature}°C")
-            return cachedWeather
+        if (validCachedWeather != null) {
+            Timber.d("Returning valid cached weather: temp=${validCachedWeather.current.temperature}°C")
+            return validCachedWeather
         }
 
         // AC E7.1.3: Cache expired or missing, try to fetch fresh data
         if (!networkManager.isNetworkAvailable()) {
             Timber.w("No network available, returning stale cache if available")
-            // AC E7.1.6: Return cached data if offline, even if expired
-            return cachedWeather
+            // AC E7.1.6: Return any cached data if offline, even if expired
+            val staleCachedWeather = weatherCache.getWeather()
+            return staleCachedWeather
         }
 
         // Fetch from API
@@ -69,9 +70,9 @@ class WeatherRepositoryImpl @Inject constructor(
                 weather
             },
             onFailure = { error ->
-                // AC E7.1.6: On failure, return cached data if available
+                // AC E7.1.6: On failure, return any cached data if available (even expired)
                 Timber.e(error, "Failed to fetch weather, falling back to cache")
-                cachedWeather // May be null or expired, but better than nothing
+                weatherCache.getWeather() // Returns even expired cache
             },
         )
     }
