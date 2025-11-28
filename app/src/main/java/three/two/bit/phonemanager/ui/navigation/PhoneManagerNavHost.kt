@@ -15,6 +15,8 @@ import three.two.bit.phonemanager.ui.map.MapScreen
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.registration.RegistrationScreen
 import three.two.bit.phonemanager.ui.settings.SettingsScreen
+import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
+import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
 
 sealed class Screen(val route: String) {
     object Registration : Screen("registration")
@@ -27,6 +29,8 @@ sealed class Screen(val route: String) {
     object CreateAlert : Screen("create_alert")
     object Geofences : Screen("geofences")
     object CreateGeofence : Screen("create_geofence")
+    object Webhooks : Screen("webhooks")
+    object CreateWebhook : Screen("create_webhook")
 }
 
 @Composable
@@ -79,6 +83,9 @@ fun PhoneManagerNavHost(
                 onNavigateToGeofences = {
                     navController.navigate(Screen.Geofences.route)
                 },
+                onNavigateToWebhooks = {
+                    navController.navigate(Screen.Webhooks.route)
+                },
             )
         }
         composable(Screen.GroupMembers.route) {
@@ -124,6 +131,19 @@ fun PhoneManagerNavHost(
         }
         composable(Screen.CreateGeofence.route) {
             CreateGeofenceScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(Screen.Webhooks.route) {
+            WebhooksScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToCreateWebhook = {
+                    navController.navigate(Screen.CreateWebhook.route)
+                },
+            )
+        }
+        composable(Screen.CreateWebhook.route) {
+            CreateWebhookScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

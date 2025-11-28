@@ -11,8 +11,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.GeofenceRepository
+import three.two.bit.phonemanager.data.repository.WebhookRepository
 import three.two.bit.phonemanager.domain.model.Geofence
 import three.two.bit.phonemanager.domain.model.TransitionType
+import three.two.bit.phonemanager.domain.model.Webhook
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -23,7 +25,10 @@ import javax.inject.Inject
  * AC E6.1.5: Geofence management (list, create, edit, delete, toggle)
  */
 @HiltViewModel
-class GeofencesViewModel @Inject constructor(private val geofenceRepository: GeofenceRepository) : ViewModel() {
+class GeofencesViewModel @Inject constructor(
+    private val geofenceRepository: GeofenceRepository,
+    private val webhookRepository: WebhookRepository,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GeofencesUiState())
     val uiState: StateFlow<GeofencesUiState> = _uiState.asStateFlow()
@@ -32,6 +37,16 @@ class GeofencesViewModel @Inject constructor(private val geofenceRepository: Geo
      * Observable geofences from repository
      */
     val geofences: StateFlow<List<Geofence>> = geofenceRepository.observeGeofences()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = emptyList(),
+        )
+
+    /**
+     * Story E6.3: Observable webhooks for geofence linking (AC E6.3.2)
+     */
+    val webhooks: StateFlow<List<Webhook>> = webhookRepository.observeWebhooks()
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -70,7 +85,9 @@ class GeofencesViewModel @Inject constructor(private val geofenceRepository: Geo
     }
 
     /**
-     * Create a new geofence (AC E6.1.5)
+     * Create a new geofence (AC E6.1.5, AC E6.3.2)
+     *
+     * @param webhookId Optional webhook to link for event delivery
      */
     fun createGeofence(
         name: String,
@@ -78,6 +95,7 @@ class GeofencesViewModel @Inject constructor(private val geofenceRepository: Geo
         longitude: Double,
         radiusMeters: Int,
         transitionTypes: Set<TransitionType>,
+        webhookId: String? = null,
     ) {
         viewModelScope.launch {
             _uiState.update { it.copy(isCreating = true) }
@@ -87,6 +105,7 @@ class GeofencesViewModel @Inject constructor(private val geofenceRepository: Geo
                 longitude = longitude,
                 radiusMeters = radiusMeters,
                 transitionTypes = transitionTypes,
+                webhookId = webhookId,
             ).fold(
                 onSuccess = { geofence ->
                     Timber.i("Geofence created: ${geofence.id}")

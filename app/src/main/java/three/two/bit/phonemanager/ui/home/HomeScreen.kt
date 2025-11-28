@@ -58,6 +58,7 @@ fun HomeScreen(
     onNavigateToHistory: () -> Unit = {},
     onNavigateToAlerts: () -> Unit = {},
     onNavigateToGeofences: () -> Unit = {},
+    onNavigateToWebhooks: () -> Unit = {},
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
@@ -183,6 +184,14 @@ fun HomeScreen(
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Geofences")
+            }
+
+            // Navigate to Webhooks screen (Story E6.3)
+            Button(
+                onClick = onNavigateToWebhooks,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text("Webhooks")
             }
 
             Spacer(modifier = Modifier.height(16.dp))

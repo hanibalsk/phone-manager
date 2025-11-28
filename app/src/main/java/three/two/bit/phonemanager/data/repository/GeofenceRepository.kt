@@ -56,6 +56,7 @@ interface GeofenceRepository {
         longitude: Double,
         radiusMeters: Int,
         transitionTypes: Set<TransitionType>,
+        webhookId: String? = null,
     ): Result<Geofence>
 
     /**
@@ -109,11 +110,12 @@ class GeofenceRepositoryImpl @Inject constructor(
         longitude: Double,
         radiusMeters: Int,
         transitionTypes: Set<TransitionType>,
+        webhookId: String?,
     ): Result<Geofence> {
         val now = Clock.System.now()
         val geofenceId = UUID.randomUUID().toString()
 
-        // Create domain model
+        // Create domain model (AC E6.3.2: Link to webhook)
         val geofence = Geofence(
             id = geofenceId,
             deviceId = deviceId,
@@ -122,7 +124,7 @@ class GeofenceRepositoryImpl @Inject constructor(
             longitude = longitude,
             radiusMeters = radiusMeters,
             transitionTypes = transitionTypes,
-            webhookId = null,
+            webhookId = webhookId,
             active = true,
             createdAt = now,
             updatedAt = now,

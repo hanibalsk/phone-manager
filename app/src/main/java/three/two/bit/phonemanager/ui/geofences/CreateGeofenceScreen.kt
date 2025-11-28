@@ -1,6 +1,7 @@
 package three.two.bit.phonemanager.ui.geofences
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -14,10 +15,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.domain.model.TransitionType
+import three.two.bit.phonemanager.domain.model.Webhook
 import kotlin.math.roundToInt
 
 /**
@@ -51,11 +57,13 @@ import kotlin.math.roundToInt
  * Form for creating new geofences
  * AC E6.1.2: Transition type selection (ENTER, EXIT, DWELL)
  * AC E6.1.6: Location selection (coordinates)
+ * AC E6.3.2: Webhook linking
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavigateBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val webhooks by viewModel.webhooks.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Form state
@@ -66,6 +74,7 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
     var enterSelected by rememberSaveable { mutableStateOf(true) }
     var exitSelected by rememberSaveable { mutableStateOf(true) }
     var dwellSelected by rememberSaveable { mutableStateOf(false) }
+    var selectedWebhookId by rememberSaveable { mutableStateOf<String?>(null) }
 
     // Convert slider value to meters (50-10,000 logarithmic scale)
     val radiusMeters = sliderToRadius(radiusSliderValue)
@@ -111,6 +120,7 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
                                     longitude = longitude,
                                     radiusMeters = radiusMeters,
                                     transitionTypes = transitionTypes,
+                                    webhookId = selectedWebhookId,
                                 )
                                 onNavigateBack()
                             }
@@ -170,6 +180,15 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
                 onExitChange = { exitSelected = it },
                 onDwellChange = { dwellSelected = it },
             )
+
+            // Webhook section (AC E6.3.2)
+            if (webhooks.isNotEmpty()) {
+                WebhookSection(
+                    webhooks = webhooks,
+                    selectedWebhookId = selectedWebhookId,
+                    onWebhookSelected = { selectedWebhookId = it },
+                )
+            }
         }
     }
 }
@@ -423,4 +442,87 @@ private fun sliderToRadius(sliderValue: Float): Int {
 private fun formatRadius(meters: Int): String = when {
     meters >= 1000 -> "${meters / 1000.0}km".replace(".0km", "km")
     else -> "${meters}m"
+}
+
+/**
+ * Story E6.3: Webhook selector section (AC E6.3.2)
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun WebhookSection(
+    webhooks: List<Webhook>,
+    selectedWebhookId: String?,
+    onWebhookSelected: (String?) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val selectedWebhook = webhooks.find { it.id == selectedWebhookId }
+
+    Column {
+        Text(
+            text = "Webhook (Optional)",
+            style = MaterialTheme.typography.titleMedium,
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = "Link a webhook to send events to external services",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Spacer(modifier = Modifier.height(12.dp))
+
+        ExposedDropdownMenuBox(
+            expanded = expanded,
+            onExpandedChange = { expanded = it },
+        ) {
+            OutlinedTextField(
+                value = selectedWebhook?.name ?: "None",
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Webhook") },
+                leadingIcon = {
+                    Icon(Icons.Default.Link, contentDescription = null)
+                },
+                trailingIcon = {
+                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .menuAnchor(),
+            )
+
+            ExposedDropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false },
+            ) {
+                // None option
+                DropdownMenuItem(
+                    text = { Text("None") },
+                    onClick = {
+                        onWebhookSelected(null)
+                        expanded = false
+                    },
+                )
+
+                // Available webhooks
+                webhooks.forEach { webhook ->
+                    DropdownMenuItem(
+                        text = {
+                            Column {
+                                Text(webhook.name)
+                                Text(
+                                    text = webhook.targetUrl,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        },
+                        onClick = {
+                            onWebhookSelected(webhook.id)
+                            expanded = false
+                        },
+                    )
+                }
+            }
+        }
+    }
 }

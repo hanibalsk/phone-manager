@@ -12,6 +12,8 @@ import three.two.bit.phonemanager.data.repository.GeofenceRepository
 import three.two.bit.phonemanager.data.repository.GeofenceRepositoryImpl
 import three.two.bit.phonemanager.data.repository.LocationRepository
 import three.two.bit.phonemanager.data.repository.LocationRepositoryImpl
+import three.two.bit.phonemanager.data.repository.WebhookRepository
+import three.two.bit.phonemanager.data.repository.WebhookRepositoryImpl
 import javax.inject.Singleton
 
 /**
@@ -42,4 +44,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindGeofenceRepository(impl: GeofenceRepositoryImpl): GeofenceRepository
+
+    /**
+     * Story E6.3: Webhook Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindWebhookRepository(impl: WebhookRepositoryImpl): WebhookRepository
 }

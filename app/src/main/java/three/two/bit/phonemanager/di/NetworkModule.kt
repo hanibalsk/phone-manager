@@ -23,10 +23,14 @@ import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.network.DeviceApiServiceImpl
 import three.two.bit.phonemanager.network.GeofenceApiService
 import three.two.bit.phonemanager.network.GeofenceApiServiceImpl
+import three.two.bit.phonemanager.network.GeofenceEventApiService
+import three.two.bit.phonemanager.network.GeofenceEventApiServiceImpl
 import three.two.bit.phonemanager.network.LocationApiService
 import three.two.bit.phonemanager.network.LocationApiServiceImpl
 import three.two.bit.phonemanager.network.ProximityAlertApiService
 import three.two.bit.phonemanager.network.ProximityAlertApiServiceImpl
+import three.two.bit.phonemanager.network.WebhookApiService
+import three.two.bit.phonemanager.network.WebhookApiServiceImpl
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import javax.inject.Singleton
@@ -134,4 +138,20 @@ object NetworkModule {
     @Singleton
     fun provideGeofenceApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): GeofenceApiService =
         GeofenceApiServiceImpl(httpClient, apiConfig)
+
+    /**
+     * Story E6.2: Geofence Event API Service
+     */
+    @Provides
+    @Singleton
+    fun provideGeofenceEventApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): GeofenceEventApiService =
+        GeofenceEventApiServiceImpl(httpClient, apiConfig)
+
+    /**
+     * Story E6.3: Webhook API Service
+     */
+    @Provides
+    @Singleton
+    fun provideWebhookApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): WebhookApiService =
+        WebhookApiServiceImpl(httpClient, apiConfig)
 }

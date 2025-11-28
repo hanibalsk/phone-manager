@@ -16,23 +16,45 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import three.two.bit.phonemanager.MainActivity
 import three.two.bit.phonemanager.R
+import three.two.bit.phonemanager.data.database.GeofenceEventDao
+import three.two.bit.phonemanager.data.model.GeofenceEventEntity
 import three.two.bit.phonemanager.data.repository.GeofenceRepository
+import three.two.bit.phonemanager.domain.model.TransitionType
+import three.two.bit.phonemanager.network.GeofenceEventApiService
+import three.two.bit.phonemanager.network.models.CreateGeofenceEventRequest
+import three.two.bit.phonemanager.network.models.GeofenceEventType
+import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
+import java.util.UUID
 import javax.inject.Inject
 
 /**
- * Story E6.1: GeofenceBroadcastReceiver - Handles geofence transition events
+ * Story E6.1/E6.2: GeofenceBroadcastReceiver - Handles geofence transition events
  *
  * AC E6.1.3: Receives callbacks from Android Geofencing API
- * Sends notifications when geofence transitions occur
+ * AC E6.2.1: Extract geofence ID and transition type
+ * AC E6.2.2: Local notification on event
+ * AC E6.2.3: Send event to backend
+ * AC E6.2.5: Event logging to database
+ * AC E6.2.6: Handle multiple geofences
  */
 @AndroidEntryPoint
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     @Inject
     lateinit var geofenceRepository: GeofenceRepository
+
+    @Inject
+    lateinit var geofenceEventDao: GeofenceEventDao
+
+    @Inject
+    lateinit var geofenceEventApiService: GeofenceEventApiService
+
+    @Inject
+    lateinit var secureStorage: SecureStorage
 
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -59,28 +81,57 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         }
 
         val transitionType = when (geofenceTransition) {
-            Geofence.GEOFENCE_TRANSITION_ENTER -> "entered"
-            Geofence.GEOFENCE_TRANSITION_EXIT -> "exited"
-            Geofence.GEOFENCE_TRANSITION_DWELL -> "dwelling in"
+            Geofence.GEOFENCE_TRANSITION_ENTER -> TransitionType.ENTER
+            Geofence.GEOFENCE_TRANSITION_EXIT -> TransitionType.EXIT
+            Geofence.GEOFENCE_TRANSITION_DWELL -> TransitionType.DWELL
             else -> {
                 Timber.w("Unknown geofence transition type: $geofenceTransition")
                 return
             }
         }
 
-        Timber.i("Geofence transition: $transitionType, count: ${triggeringGeofences.size}")
+        // Get triggering location (AC E6.2.4)
+        val triggeringLocation = geofencingEvent.triggeringLocation
+        val latitude = triggeringLocation?.latitude ?: 0.0
+        val longitude = triggeringLocation?.longitude ?: 0.0
 
-        // Process each triggered geofence
+        Timber.i("Geofence transition: ${transitionType.name}, count: ${triggeringGeofences.size}")
+
+        // Process each triggered geofence (AC E6.2.6)
         triggeringGeofences.forEach { geofence ->
             val geofenceId = geofence.requestId
-            Timber.d("Processing geofence: $geofenceId, transition: $transitionType")
+            Timber.d("Processing geofence: $geofenceId, transition: ${transitionType.name}")
 
-            // Look up geofence name from repository
+            // Look up geofence name and process event
             scope.launch {
                 val domainGeofence = geofenceRepository.getGeofence(geofenceId)
                 val geofenceName = domainGeofence?.name ?: "Unknown location"
 
-                // Send notification
+                // Create and save event (AC E6.2.5)
+                val eventId = UUID.randomUUID().toString()
+                val now = Clock.System.now()
+                val deviceId = secureStorage.getDeviceId()
+
+                val eventEntity = GeofenceEventEntity(
+                    id = eventId,
+                    deviceId = deviceId,
+                    geofenceId = geofenceId,
+                    eventType = transitionType.name,
+                    timestamp = now.toEpochMilliseconds(),
+                    latitude = latitude,
+                    longitude = longitude,
+                    webhookDelivered = false,
+                    webhookResponseCode = null,
+                )
+
+                // Save to local database
+                geofenceEventDao.insert(eventEntity)
+                Timber.d("Geofence event saved locally: $eventId")
+
+                // Send to backend (AC E6.2.3)
+                sendEventToBackend(eventId, deviceId, geofenceId, transitionType, now, latitude, longitude)
+
+                // Send notification (AC E6.2.2)
                 sendNotification(
                     context = context,
                     geofenceId = geofenceId,
@@ -91,11 +142,60 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
+    /**
+     * Send geofence event to backend server (AC E6.2.3)
+     */
+    private suspend fun sendEventToBackend(
+        eventId: String,
+        deviceId: String,
+        geofenceId: String,
+        transitionType: TransitionType,
+        timestamp: kotlinx.datetime.Instant,
+        latitude: Double,
+        longitude: Double,
+    ) {
+        val request = CreateGeofenceEventRequest(
+            deviceId = deviceId,
+            geofenceId = geofenceId,
+            eventType = transitionType.toEventType(),
+            timestamp = timestamp.toString(),
+            latitude = latitude,
+            longitude = longitude,
+        )
+
+        geofenceEventApiService.createEvent(request).fold(
+            onSuccess = { response ->
+                Timber.i("Geofence event sent to backend: ${response.eventId}")
+                // Update local record with webhook status if returned
+                if (response.webhookDelivered) {
+                    val updated = geofenceEventDao.getById(eventId)?.copy(
+                        webhookDelivered = response.webhookDelivered,
+                        webhookResponseCode = response.webhookResponseCode,
+                    )
+                    updated?.let { geofenceEventDao.update(it) }
+                }
+            },
+            onFailure = { error ->
+                Timber.w(error, "Failed to send geofence event to backend: $eventId")
+                // Event is saved locally for retry later
+            },
+        )
+    }
+
+    /**
+     * Convert domain TransitionType to API GeofenceEventType
+     */
+    private fun TransitionType.toEventType(): GeofenceEventType = when (this) {
+        TransitionType.ENTER -> GeofenceEventType.ENTER
+        TransitionType.EXIT -> GeofenceEventType.EXIT
+        TransitionType.DWELL -> GeofenceEventType.DWELL
+    }
+
     private fun sendNotification(
         context: Context,
         geofenceId: String,
         geofenceName: String,
-        transitionType: String,
+        transitionType: TransitionType,
     ) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
@@ -123,19 +223,17 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         }
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
 
-        // Build notification
+        // Build notification (AC E6.2.2)
         val title = when (transitionType) {
-            "entered" -> "Entered: $geofenceName"
-            "exited" -> "Left: $geofenceName"
-            "dwelling in" -> "At: $geofenceName"
-            else -> "Geofence: $geofenceName"
+            TransitionType.ENTER -> "Entered: $geofenceName"
+            TransitionType.EXIT -> "Left: $geofenceName"
+            TransitionType.DWELL -> "At: $geofenceName"
         }
 
         val text = when (transitionType) {
-            "entered" -> "You have entered the $geofenceName area"
-            "exited" -> "You have left the $geofenceName area"
-            "dwelling in" -> "You are staying in the $geofenceName area"
-            else -> "Geofence event at $geofenceName"
+            TransitionType.ENTER -> "You have entered the $geofenceName area"
+            TransitionType.EXIT -> "You have left the $geofenceName area"
+            TransitionType.DWELL -> "You are staying in the $geofenceName area"
         }
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
@@ -147,7 +245,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             .setContentIntent(pendingIntent)
             .build()
 
-        // Use geofence ID hash as notification ID to allow multiple notifications
+        // Use geofence ID hash as notification ID to allow multiple notifications (AC E6.2.6)
         val notificationId = geofenceId.hashCode()
         notificationManager.notify(notificationId, notification)
 
