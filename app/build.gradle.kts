@@ -11,16 +11,18 @@ plugins {
 }
 
 // Load local.properties
-val localProperties = Properties().apply {
-    val localPropertiesFile = rootProject.file("local.properties")
-    if (localPropertiesFile.exists()) {
-        load(localPropertiesFile.inputStream())
+val localProperties =
+    Properties().apply {
+        val localPropertiesFile = rootProject.file("local.properties")
+        if (localPropertiesFile.exists()) {
+            load(localPropertiesFile.inputStream())
+        }
     }
-}
 
-fun getLocalProperty(key: String, defaultValue: String = ""): String {
-    return localProperties.getProperty(key) ?: project.findProperty(key)?.toString() ?: defaultValue
-}
+fun getLocalProperty(
+    key: String,
+    defaultValue: String = "",
+): String = localProperties.getProperty(key) ?: project.findProperty(key)?.toString() ?: defaultValue
 
 android {
     namespace = "three.two.bit.phonemanager"
@@ -49,12 +51,14 @@ android {
     buildTypes {
         debug {
             // Debug builds can use test endpoints
-            val debugBaseUrl = getLocalProperty("API_BASE_URL_DEBUG").ifBlank {
-                getLocalProperty("API_BASE_URL").ifBlank { "https://api-dev.phonemanager.example.com" }
-            }
-            val debugApiKey = getLocalProperty("API_KEY_DEBUG").ifBlank {
-                getLocalProperty("API_KEY")
-            }
+            val debugBaseUrl =
+                getLocalProperty("API_BASE_URL_DEBUG").ifBlank {
+                    getLocalProperty("API_BASE_URL").ifBlank { "https://api-dev.phonemanager.example.com" }
+                }
+            val debugApiKey =
+                getLocalProperty("API_KEY_DEBUG").ifBlank {
+                    getLocalProperty("API_KEY")
+                }
             buildConfigField("String", "API_BASE_URL", "\"$debugBaseUrl\"")
             buildConfigField("String", "API_KEY", "\"$debugApiKey\"")
         }

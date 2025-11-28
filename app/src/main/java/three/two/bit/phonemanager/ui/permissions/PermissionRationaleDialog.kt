@@ -59,9 +59,11 @@ fun PermissionRationaleDialog(
                     text = when (type) {
                         PermissionType.LOCATION ->
                             "Phone Manager needs access to your location to track your device's position."
+
                         PermissionType.BACKGROUND ->
                             "To continue tracking your location when the app is closed or in the background, " +
                                 "please allow location access \"All the time\" on the next screen."
+
                         PermissionType.NOTIFICATION ->
                             "A persistent notification is required while location tracking is active. " +
                                 "This helps you know when tracking is running and provides quick access to stop it."

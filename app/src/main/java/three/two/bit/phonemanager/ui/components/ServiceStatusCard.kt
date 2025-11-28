@@ -103,10 +103,13 @@ fun ServiceStatusCard(serviceState: EnhancedServiceState, modifier: Modifier = M
                         serviceState.errorMessage != null -> serviceState.errorMessage
                         serviceState.healthStatus == HealthStatus.GPS_UNAVAILABLE ->
                             "Location services are disabled"
+
                         serviceState.healthStatus == HealthStatus.GPS_ACQUIRING ->
                             "Waiting for GPS signal..."
+
                         serviceState.status == ServiceStatus.RUNNING ->
                             "Collecting locations every ${serviceState.currentInterval.toMinutes()} minutes"
+
                         else -> "Ready to start tracking"
                     },
                     style = MaterialTheme.typography.bodySmall,

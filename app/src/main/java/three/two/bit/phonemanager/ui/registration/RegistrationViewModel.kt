@@ -100,6 +100,7 @@ class RegistrationViewModel @Inject constructor(private val deviceRepository: De
             state.groupId.trim().length > 50 -> "Group ID must be 50 characters or less"
             !state.groupId.trim().matches(groupIdRegex) ->
                 "Group ID can only contain letters, numbers, and hyphens"
+
             else -> null
         }
 

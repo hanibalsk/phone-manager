@@ -214,18 +214,21 @@ constructor(
                     val end = now
                     start.toEpochMilliseconds() to end.toEpochMilliseconds()
                 }
+
                 is DateFilter.Yesterday -> {
                     val yesterday = today.plus(-1, DateTimeUnit.DAY)
                     val start = yesterday.atStartOfDayIn(timeZone)
                     val end = today.atStartOfDayIn(timeZone)
                     start.toEpochMilliseconds() to end.toEpochMilliseconds()
                 }
+
                 is DateFilter.Last7Days -> {
                     val sevenDaysAgo = today.plus(-7, DateTimeUnit.DAY)
                     val start = sevenDaysAgo.atStartOfDayIn(timeZone)
                     val end = now
                     start.toEpochMilliseconds() to end.toEpochMilliseconds()
                 }
+
                 is DateFilter.Custom -> {
                     val start = filter.startDate.atStartOfDayIn(timeZone)
                     val end = filter.endDate.plus(1, DateTimeUnit.DAY).atStartOfDayIn(timeZone)

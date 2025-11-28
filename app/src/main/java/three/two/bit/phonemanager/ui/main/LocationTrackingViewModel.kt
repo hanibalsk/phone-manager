@@ -140,6 +140,7 @@ class LocationTrackingViewModel @Inject constructor(
                     Timber.w("Cannot restore service: permissions not granted, corrected persisted state")
                 }
             }
+
             !persistedEnabled && isServiceActuallyRunning -> {
                 // State desync: shouldn't be running but is - stop and correct
                 Timber.w("State desync detected: persisted=OFF, actual=ON - stopping service")
@@ -155,9 +156,11 @@ class LocationTrackingViewModel @Inject constructor(
                         Timber.e(error, "Failed to stop service after desync")
                     }
             }
+
             persistedEnabled && isServiceActuallyRunning -> {
                 _trackingState.value = TrackingState.Active()
             }
+
             else -> {
                 _trackingState.value = TrackingState.Stopped
             }
@@ -173,6 +176,7 @@ class LocationTrackingViewModel @Inject constructor(
                     // Ignore rapid taps during transition
                     Timber.d("Ignoring toggle during transition state")
                 }
+
                 is TrackingState.Error -> startTracking() // Allow retry from error state
             }
         }

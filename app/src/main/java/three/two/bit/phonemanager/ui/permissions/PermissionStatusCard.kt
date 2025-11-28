@@ -102,14 +102,19 @@ fun PermissionStatusCard(
                     text = when (permissionState) {
                         is PermissionState.AllGranted ->
                             "Location tracking is available"
+
                         is PermissionState.LocationDenied ->
                             "Grant location permission to enable tracking"
+
                         is PermissionState.BackgroundDenied ->
                             "Tracking only works when app is open"
+
                         is PermissionState.NotificationDenied ->
                             "Notification required for tracking service"
+
                         is PermissionState.PermanentlyDenied ->
                             "Enable permission in Settings"
+
                         else -> "Loading..."
                     },
                     style = MaterialTheme.typography.bodySmall,

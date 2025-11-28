@@ -2,7 +2,10 @@ package three.two.bit.phonemanager.watchdog
 
 import android.content.Context
 import androidx.work.WorkManager
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.After

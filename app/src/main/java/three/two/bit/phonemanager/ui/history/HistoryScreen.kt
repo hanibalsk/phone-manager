@@ -50,11 +50,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapUiSettings
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.datetime.TimeZone
@@ -75,14 +79,26 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
     val cameraPositionState =
         rememberCameraPositionState {
             val firstPoint = uiState.polylinePoints.firstOrNull() ?: LatLng(0.0, 0.0)
-            position = CameraPosition.fromLatLngZoom(firstPoint, 13f)
+            position = CameraPosition.fromLatLngZoom(firstPoint, 18f)
         }
 
-    // Center camera when polyline changes
+    // Center camera when polyline changes and zoom to show all points
     LaunchedEffect(uiState.polylinePoints) {
         if (uiState.polylinePoints.isNotEmpty()) {
-            val firstPoint = uiState.polylinePoints.first()
-            cameraPositionState.position = CameraPosition.fromLatLngZoom(firstPoint, 13f)
+            if (uiState.polylinePoints.size == 1) {
+                // Single point - zoom in close
+                cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.polylinePoints.first(), 18f)
+            } else {
+                // Multiple points - create bounds to fit all points
+                val boundsBuilder = LatLngBounds.builder()
+                uiState.polylinePoints.forEach { boundsBuilder.include(it) }
+                val bounds = boundsBuilder.build()
+
+                // Animate camera to show all points with padding
+                cameraPositionState.animate(
+                    com.google.android.gms.maps.CameraUpdateFactory.newLatLngBounds(bounds, 100),
+                )
+            }
         }
     }
 
@@ -167,8 +183,26 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
                                 Polyline(
                                     points = uiState.polylinePoints,
                                     color = Color(0xFF2196F3), // Blue color
-                                    width = 8f,
+                                    width = 10f,
                                 )
+
+                                // Add start marker (green)
+                                Marker(
+                                    state = MarkerState(position = uiState.polylinePoints.first()),
+                                    title = "Start",
+                                    snippet = "Beginning of path",
+                                    icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
+                                )
+
+                                // Add end marker (red) if different from start
+                                if (uiState.polylinePoints.size > 1) {
+                                    Marker(
+                                        state = MarkerState(position = uiState.polylinePoints.last()),
+                                        title = "End",
+                                        snippet = "Most recent location",
+                                        icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
+                                    )
+                                }
                             }
                         }
                     }

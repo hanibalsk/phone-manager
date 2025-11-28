@@ -124,12 +124,15 @@ fun HomeScreen(
                         is PermissionState.LocationDenied -> {
                             permissionViewModel.requestLocationPermission(context as Activity)
                         }
+
                         is PermissionState.BackgroundDenied -> {
                             onRequestBackgroundPermission()
                         }
+
                         is PermissionState.NotificationDenied -> {
                             permissionViewModel.requestNotificationPermission()
                         }
+
                         else -> {
                             // For any other state, default to location permission
                             permissionViewModel.requestLocationPermission(context as Activity)

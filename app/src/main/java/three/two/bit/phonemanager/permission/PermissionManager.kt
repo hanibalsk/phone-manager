@@ -87,9 +87,11 @@ class PermissionManagerImpl @Inject constructor(@ApplicationContext private val 
             !hasBackgroundLocationPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
                 PermissionState.BackgroundDenied(foregroundGranted = true)
             }
+
             !hasNotificationPermission() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU -> {
                 PermissionState.NotificationDenied
             }
+
             else -> PermissionState.AllGranted
         }
 

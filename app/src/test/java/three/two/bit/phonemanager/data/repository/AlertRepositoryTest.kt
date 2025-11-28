@@ -254,9 +254,11 @@ class AlertRepositoryTest {
         repository.updateLastTriggered("alert-1", triggeredAt)
 
         coVerify {
-            proximityAlertDao.update(match {
-                it.lastTriggeredAt == triggeredAt.toEpochMilliseconds()
-            })
+            proximityAlertDao.update(
+                match {
+                    it.lastTriggeredAt == triggeredAt.toEpochMilliseconds()
+                },
+            )
         }
     }
 
@@ -281,9 +283,11 @@ class AlertRepositoryTest {
         repository.updateProximityState("alert-1", ProximityState.INSIDE)
 
         coVerify {
-            proximityAlertDao.update(match {
-                it.lastState == ProximityState.INSIDE.name
-            })
+            proximityAlertDao.update(
+                match {
+                    it.lastState == ProximityState.INSIDE.name
+                },
+            )
         }
     }
 
@@ -336,10 +340,7 @@ class AlertRepositoryTest {
 
     // Helper functions
 
-    private fun createTestAlertEntity(
-        id: String,
-        active: Boolean = true,
-    ) = ProximityAlertEntity(
+    private fun createTestAlertEntity(id: String, active: Boolean = true) = ProximityAlertEntity(
         id = id,
         ownerDeviceId = testDeviceId,
         targetDeviceId = testTargetDeviceId,

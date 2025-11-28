@@ -3,7 +3,10 @@ package three.two.bit.phonemanager.util
 import android.app.AlarmManager
 import android.content.Context
 import android.os.PowerManager
-import io.mockk.*
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

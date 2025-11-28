@@ -63,6 +63,7 @@ fun LocationTrackingToggle(viewModel: LocationTrackingViewModel = hiltViewModel(
                         } else {
                             "Location permissions required"
                         }
+
                         is TrackingState.Starting -> "Starting..."
                         is TrackingState.Active -> "Active"
                         is TrackingState.Stopping -> "Stopping..."

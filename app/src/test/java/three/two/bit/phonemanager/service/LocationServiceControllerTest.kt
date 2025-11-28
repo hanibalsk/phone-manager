@@ -2,7 +2,10 @@ package three.two.bit.phonemanager.service
 
 import android.app.ActivityManager
 import android.content.Context
-import io.mockk.*
+import io.mockk.coEvery
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.unmockkAll
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest

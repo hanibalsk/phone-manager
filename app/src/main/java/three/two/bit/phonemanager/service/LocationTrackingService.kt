@@ -100,9 +100,11 @@ class LocationTrackingService : Service() {
             ACTION_START_TRACKING -> {
                 startForegroundTracking()
             }
+
             ACTION_STOP_TRACKING -> {
                 stopTracking()
             }
+
             ACTION_UPDATE_INTERVAL -> {
                 val newInterval = intent.getIntExtra(
                     EXTRA_INTERVAL_MINUTES,

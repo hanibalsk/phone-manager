@@ -1,6 +1,8 @@
 package three.two.bit.phonemanager.analytics
 
-import io.mockk.*
+import io.mockk.spyk
+import io.mockk.unmockkAll
+import io.mockk.verify
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import org.junit.After
 import org.junit.Before

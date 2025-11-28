@@ -342,10 +342,7 @@ class WebhookRepositoryTest {
 
     // Helper functions
 
-    private fun createTestWebhookEntity(
-        id: String,
-        enabled: Boolean = true,
-    ) = WebhookEntity(
+    private fun createTestWebhookEntity(id: String, enabled: Boolean = true) = WebhookEntity(
         id = id,
         ownerDeviceId = testDeviceId,
         name = "Test Webhook",
