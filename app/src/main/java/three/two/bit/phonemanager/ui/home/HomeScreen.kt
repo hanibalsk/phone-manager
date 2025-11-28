@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
@@ -33,6 +35,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.permission.PermissionState
 import three.two.bit.phonemanager.ui.components.LocationStatsCard
 import three.two.bit.phonemanager.ui.components.LocationTrackingToggle
 import three.two.bit.phonemanager.ui.components.ServiceStatusCard
@@ -102,6 +105,7 @@ fun HomeScreen(
             modifier
                 .fillMaxSize()
                 .padding(paddingValues)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -116,7 +120,21 @@ fun HomeScreen(
             PermissionStatusCard(
                 permissionState = permissionState,
                 onGrantPermissions = {
-                    permissionViewModel.requestLocationPermission(context as Activity)
+                    when (permissionState) {
+                        is PermissionState.LocationDenied -> {
+                            permissionViewModel.requestLocationPermission(context as Activity)
+                        }
+                        is PermissionState.BackgroundDenied -> {
+                            onRequestBackgroundPermission()
+                        }
+                        is PermissionState.NotificationDenied -> {
+                            permissionViewModel.requestNotificationPermission()
+                        }
+                        else -> {
+                            // For any other state, default to location permission
+                            permissionViewModel.requestLocationPermission(context as Activity)
+                        }
+                    }
                 },
                 onOpenSettings = {
                     permissionViewModel.openAppSettings(context)

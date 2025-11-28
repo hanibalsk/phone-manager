@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +8,18 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.spotless)
+}
+
+// Load local.properties
+val localProperties = Properties().apply {
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        load(localPropertiesFile.inputStream())
+    }
+}
+
+fun getLocalProperty(key: String, defaultValue: String = ""): String {
+    return localProperties.getProperty(key) ?: project.findProperty(key)?.toString() ?: defaultValue
 }
 
 android {
@@ -25,28 +39,24 @@ android {
         }
 
         // API configuration - override in local.properties or CI environment
-        buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL") ?: ""}\"")
-        buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY") ?: ""}\"")
+        buildConfigField("String", "API_BASE_URL", "\"${getLocalProperty("API_BASE_URL")}\"")
+        buildConfigField("String", "API_KEY", "\"${getLocalProperty("API_KEY")}\"")
 
         // Story E3.1: Google Maps API key
-        manifestPlaceholders["MAPS_API_KEY"] = project.findProperty("MAPS_API_KEY") ?: ""
+        manifestPlaceholders["MAPS_API_KEY"] = getLocalProperty("MAPS_API_KEY")
     }
 
     buildTypes {
         debug {
             // Debug builds can use test endpoints
-            buildConfigField(
-                "String",
-                "API_BASE_URL",
-                "\"${project.findProperty(
-                    "API_BASE_URL_DEBUG",
-                ) ?: project.findProperty("API_BASE_URL") ?: "https://api-dev.phonemanager.example.com"}\"",
-            )
-            buildConfigField(
-                "String",
-                "API_KEY",
-                "\"${project.findProperty("API_KEY_DEBUG") ?: project.findProperty("API_KEY") ?: ""}\"",
-            )
+            val debugBaseUrl = getLocalProperty("API_BASE_URL_DEBUG").ifBlank {
+                getLocalProperty("API_BASE_URL").ifBlank { "https://api-dev.phonemanager.example.com" }
+            }
+            val debugApiKey = getLocalProperty("API_KEY_DEBUG").ifBlank {
+                getLocalProperty("API_KEY")
+            }
+            buildConfigField("String", "API_BASE_URL", "\"$debugBaseUrl\"")
+            buildConfigField("String", "API_KEY", "\"$debugApiKey\"")
         }
         release {
             isMinifyEnabled = true
@@ -55,8 +65,8 @@ android {
                 "proguard-rules.pro",
             )
             // Release builds require proper configuration
-            buildConfigField("String", "API_BASE_URL", "\"${project.findProperty("API_BASE_URL") ?: ""}\"")
-            buildConfigField("String", "API_KEY", "\"${project.findProperty("API_KEY") ?: ""}\"")
+            buildConfigField("String", "API_BASE_URL", "\"${getLocalProperty("API_BASE_URL")}\"")
+            buildConfigField("String", "API_KEY", "\"${getLocalProperty("API_KEY")}\"")
         }
     }
 
