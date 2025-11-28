@@ -1,7 +1,6 @@
 package three.two.bit.phonemanager.ui.geofences
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -449,11 +448,7 @@ private fun formatRadius(meters: Int): String = when {
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WebhookSection(
-    webhooks: List<Webhook>,
-    selectedWebhookId: String?,
-    onWebhookSelected: (String?) -> Unit,
-) {
+private fun WebhookSection(webhooks: List<Webhook>, selectedWebhookId: String?, onWebhookSelected: (String?) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     val selectedWebhook = webhooks.find { it.id == selectedWebhookId }
 

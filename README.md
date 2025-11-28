@@ -114,13 +114,13 @@ app/src/main/java/three/two/bit/phonemanager/
 
 | Epic | Feature | Status |
 |------|---------|--------|
-| 0 | Foundation Infrastructure | Complete |
-| 1 | Device Registration & Groups | Complete |
-| 2 | Secret Mode | In Progress |
-| 3 | Real-Time Map | In Progress |
-| 4 | Location History | In Progress |
-| 5 | Proximity Alerts | Complete |
-| 6 | Geofencing & Webhooks | Complete |
+| 0 | Foundation Infrastructure | ✅ Complete |
+| 1 | Device Registration & Groups | ✅ Complete |
+| 2 | Secret Mode | ⏳ Planned |
+| 3 | Real-Time Map | 🔄 Partial |
+| 4 | Location History | ✅ Complete |
+| 5 | Proximity Alerts | ✅ Complete |
+| 6 | Geofencing & Webhooks | ✅ Complete |
 
 ## Database Schema
 

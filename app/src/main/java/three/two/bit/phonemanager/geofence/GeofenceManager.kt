@@ -59,9 +59,7 @@ interface GeofenceManager {
 }
 
 @Singleton
-class GeofenceManagerImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
-) : GeofenceManager {
+class GeofenceManagerImpl @Inject constructor(@ApplicationContext private val context: Context) : GeofenceManager {
 
     private val geofencingClient: GeofencingClient = LocationServices.getGeofencingClient(context)
 
@@ -93,8 +91,7 @@ class GeofenceManagerImpl @Inject constructor(
         return hasFineLocation && hasBackgroundLocation
     }
 
-    override suspend fun addGeofence(geofence: DomainGeofence): Result<Unit> =
-        addGeofences(listOf(geofence))
+    override suspend fun addGeofence(geofence: DomainGeofence): Result<Unit> = addGeofences(listOf(geofence))
 
     override suspend fun addGeofences(geofences: List<DomainGeofence>): Result<Unit> {
         if (!hasRequiredPermissions()) {
@@ -130,8 +127,7 @@ class GeofenceManagerImpl @Inject constructor(
         }
     }
 
-    override suspend fun removeGeofence(geofenceId: String): Result<Unit> =
-        removeGeofences(listOf(geofenceId))
+    override suspend fun removeGeofence(geofenceId: String): Result<Unit> = removeGeofences(listOf(geofenceId))
 
     override suspend fun removeGeofences(geofenceIds: List<String>): Result<Unit> {
         if (geofenceIds.isEmpty()) {

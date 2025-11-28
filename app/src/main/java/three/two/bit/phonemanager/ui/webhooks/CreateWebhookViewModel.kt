@@ -21,9 +21,7 @@ import javax.inject.Inject
  * AC E6.3.6: URL validation (HTTPS required)
  */
 @HiltViewModel
-class CreateWebhookViewModel @Inject constructor(
-    private val webhookRepository: WebhookRepository,
-) : ViewModel() {
+class CreateWebhookViewModel @Inject constructor(private val webhookRepository: WebhookRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(CreateWebhookUiState())
     val uiState: StateFlow<CreateWebhookUiState> = _uiState.asStateFlow()
@@ -98,13 +96,11 @@ class CreateWebhookViewModel @Inject constructor(
         }
     }
 
-    private fun validateName(name: String): String? {
-        return when {
-            name.isBlank() -> "Name is required"
-            name.length < 2 -> "Name must be at least 2 characters"
-            name.length > 50 -> "Name must be at most 50 characters"
-            else -> null
-        }
+    private fun validateName(name: String): String? = when {
+        name.isBlank() -> "Name is required"
+        name.length < 2 -> "Name must be at least 2 characters"
+        name.length > 50 -> "Name must be at most 50 characters"
+        else -> null
     }
 
     /**

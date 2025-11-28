@@ -47,7 +47,4 @@ data class GeofenceEventDto(
  * GET /api/v1/geofence-events?deviceId={id}
  */
 @Serializable
-data class ListGeofenceEventsResponse(
-    val events: List<GeofenceEventDto>,
-    val total: Int,
-)
+data class ListGeofenceEventsResponse(val events: List<GeofenceEventDto>, val total: Int)

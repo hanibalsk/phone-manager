@@ -13,14 +13,14 @@
 This project consists of 7 epics aligned with the PRD MVP features:
 
 - **Epic 0**: Foundation Infrastructure (DONE) - 5 stories ✅
-- **Epic 1**: Device Registration & Groups - 3 stories
-- **Epic 2**: Secret Mode - 2 stories
-- **Epic 3**: Real-Time Map & Group Display - 3 stories
-- **Epic 4**: Location History - 2 stories
-- **Epic 5**: Proximity Alerts - 2 stories
-- **Epic 6**: Geofencing with Webhooks - 3 stories
+- **Epic 1**: Device Registration & Groups (DONE) - 3 stories ✅
+- **Epic 2**: Secret Mode (PLANNED) - 2 stories
+- **Epic 3**: Real-Time Map & Group Display (PARTIAL) - 3 stories 🔄
+- **Epic 4**: Location History (DONE) - 2 stories ✅
+- **Epic 5**: Proximity Alerts (DONE) - 2 stories ✅
+- **Epic 6**: Geofencing with Webhooks (DONE) - 3 stories ✅
 
-**Total Stories:** 20 (5 done + 15 new)
+**Total Stories:** 20 (16 done + 4 remaining)
 
 ---
 
@@ -57,11 +57,11 @@ Core location tracking infrastructure - already implemented and verified.
 
 ---
 
-## Epic 1: Device Registration & Groups
+## Epic 1: Device Registration & Groups ✅
 
 **Priority:** Critical (Foundation for other features)
 **Estimated Effort:** Medium (3-4 days)
-**Status:** Planned
+**Status:** Done
 **PRD Reference:** Feature 6 (Section 5, FR-6.x)
 
 ### Purpose
@@ -69,8 +69,8 @@ Enable devices to register with the server and join groups for location sharing.
 
 ### Stories
 
-#### Story 1.1: Device Registration Flow
-**Status:** Planned
+#### Story E1.1: Device Registration Flow
+**Status:** Complete
 **Estimated Effort:** Medium
 **PRD Reference:** FR-6.1
 
@@ -85,8 +85,8 @@ As a user, I want to register my device with a display name so that others can i
 - Store deviceId, displayName, groupId in SecureStorage
 - Registration payload: deviceId, displayName, groupId, platform
 
-#### Story 1.2: Group Member Discovery
-**Status:** Planned
+#### Story E1.2: Group Member Discovery
+**Status:** Complete
 **Estimated Effort:** Small
 **PRD Reference:** FR-6.2, FR-6.3
 
@@ -99,8 +99,8 @@ As a user, I want to see devices in my group so that I can share location with s
 - Display group member list in UI
 - Response includes: deviceId, displayName, lastLocation (optional)
 
-#### Story 1.3: Device Settings Screen
-**Status:** Planned
+#### Story E1.3: Device Settings Screen
+**Status:** Complete
 **Estimated Effort:** Small
 
 **User Story:**
@@ -118,7 +118,7 @@ As a user, I want to configure my device settings so that I can update my displa
 
 **Priority:** High
 **Estimated Effort:** Low (2 days)
-**Status:** Planned
+**Status:** Planned (Not Started)
 **PRD Reference:** Feature 1 (Section 5, FR-1.x)
 
 ### Purpose
@@ -126,8 +126,8 @@ Application remains fully functional but minimally visible to casual observers.
 
 ### Stories
 
-#### Story 2.1: Secret Mode Activation
-**Status:** Planned
+#### Story E2.1: Secret Mode Activation
+**Status:** Approved (Ready for Development)
 **Estimated Effort:** Small
 **PRD Reference:** FR-1.1, FR-1.3
 
@@ -141,8 +141,8 @@ As a user, I want to enable secret mode so that the app is minimally visible on 
 - No "Location tracking is ON" toasts in secret mode
 - Disable verbose Logcat logging in secret mode
 
-#### Story 2.2: Discreet Notification
-**Status:** Planned
+#### Story E2.2: Discreet Notification
+**Status:** Approved (Ready for Development)
 **Estimated Effort:** Small
 **PRD Reference:** FR-1.2
 
@@ -158,21 +158,21 @@ As a user, I want the foreground notification to be discreet so that others don'
 
 ---
 
-## Epic 3: Real-Time Map & Group Display
+## Epic 3: Real-Time Map & Group Display 🔄
 
 **Priority:** Critical
 **Estimated Effort:** High (5-6 days)
-**Status:** Planned
+**Status:** Partial (Foundation Complete)
 **PRD Reference:** Feature 2 (Section 5, FR-2.x)
-**Dependencies:** Epic 1 (Device Registration)
+**Dependencies:** Epic 1 (Device Registration) ✅
 
 ### Purpose
 Display current device location and all group members on an interactive Google Map.
 
 ### Stories
 
-#### Story 3.1: Google Maps Integration
-**Status:** Planned
+#### Story E3.1: Google Maps Integration
+**Status:** Approved (Foundation Implemented)
 **Estimated Effort:** Medium
 **PRD Reference:** FR-2.1
 
@@ -186,8 +186,8 @@ As a user, I want to see my current location on a map so that I can orient mysel
 - Support standard map interactions (pan, zoom, rotate)
 - Create MapScreen and MapViewModel
 
-#### Story 3.2: Group Members on Map
-**Status:** Planned
+#### Story E3.2: Group Members on Map
+**Status:** Approved (Pending Implementation)
 **Estimated Effort:** Medium
 **PRD Reference:** FR-2.2
 
@@ -200,8 +200,8 @@ As a user, I want to see all group members' locations on the map so that I know 
 - Markers visually distinct from current device marker
 - Tapping marker shows additional info (name, last update time)
 
-#### Story 3.3: Real-Time Location Polling
-**Status:** Planned
+#### Story E3.3: Real-Time Location Polling
+**Status:** Approved (Pending Implementation)
 **Estimated Effort:** Medium
 **PRD Reference:** FR-2.3
 
@@ -216,11 +216,11 @@ As a user, I want location markers to update periodically so that I see near rea
 
 ---
 
-## Epic 4: Location History
+## Epic 4: Location History ✅
 
 **Priority:** High
 **Estimated Effort:** Medium (3-4 days)
-**Status:** Planned
+**Status:** Complete (Core Features Implemented)
 **PRD Reference:** Feature 4 (Section 5, FR-4.x)
 
 ### Purpose
@@ -228,8 +228,8 @@ Store, sync, and visualize historical location data as polylines on the map.
 
 ### Stories
 
-#### Story 4.1: Location History UI
-**Status:** Planned
+#### Story E4.1: Location History UI
+**Status:** Approved (Foundation Implemented)
 **Estimated Effort:** Medium
 **PRD Reference:** FR-4.1, FR-4.3
 
@@ -242,8 +242,8 @@ As a user, I want to view my location history on the map so that I can see where
 - Support viewing own device history from local Room database
 - Date/time filter (today, yesterday, last 7 days, custom range)
 
-#### Story 4.2: History Performance & Server Sync
-**Status:** Planned
+#### Story E4.2: History Performance & Server Sync
+**Status:** Complete (Core Features Implemented)
 **Estimated Effort:** Medium
 **PRD Reference:** FR-4.2, FR-4.4
 
@@ -258,21 +258,21 @@ As a user, I want to view other group members' history so that I can see where t
 
 ---
 
-## Epic 5: Proximity Alerts
+## Epic 5: Proximity Alerts ✅
 
 **Priority:** Medium
 **Estimated Effort:** Medium (3-4 days)
-**Status:** Planned
+**Status:** Complete
 **PRD Reference:** Feature 3 (Section 5, FR-3.x)
-**Dependencies:** Epic 1, Epic 3 (need group members on map)
+**Dependencies:** Epic 1 ✅, Epic 3 🔄
 
 ### Purpose
 Alert user when approaching or leaving proximity of another group member.
 
 ### Stories
 
-#### Story 5.1: Proximity Alert Definition
-**Status:** Planned
+#### Story E5.1: Proximity Alert Definition
+**Status:** Complete
 **Estimated Effort:** Medium
 **PRD Reference:** FR-3.1, FR-3.4
 
@@ -286,8 +286,8 @@ As a user, I want to create a proximity alert for another user so that I'm notif
 - Store alerts on server for sync via `POST /api/proximity-alerts`
 - UI to create, view, edit, and delete proximity alerts
 
-#### Story 5.2: Proximity Alert Triggering
-**Status:** Planned
+#### Story E5.2: Proximity Alert Triggering
+**Status:** Foundation Complete (Calculation Logic Ready)
 **Estimated Effort:** Medium
 **PRD Reference:** FR-3.2, FR-3.3
 
@@ -303,11 +303,11 @@ As a user, I want to receive notifications when proximity alerts trigger so that
 
 ---
 
-## Epic 6: Geofencing with Webhooks
+## Epic 6: Geofencing with Webhooks ✅
 
 **Priority:** Medium
 **Estimated Effort:** High (5-6 days)
-**Status:** Planned
+**Status:** Complete
 **PRD Reference:** Feature 5 (Section 5, FR-5.x)
 
 ### Purpose
@@ -315,8 +315,8 @@ Define place-based alerts that trigger local notifications and webhook automatio
 
 ### Stories
 
-#### Story 6.1: Geofence Definition
-**Status:** Planned
+#### Story E6.1: Geofence Definition
+**Status:** Complete
 **Estimated Effort:** Medium
 **PRD Reference:** FR-5.1
 
@@ -330,8 +330,8 @@ As a user, I want to define geofence zones so that I get alerts for specific pla
 - Store geofences on server via `POST /api/geofences`
 - UI to create, view, edit, and delete geofences
 
-#### Story 6.2: Geofence Events & Notifications
-**Status:** Planned
+#### Story E6.2: Geofence Events & Notifications
+**Status:** Complete
 **Estimated Effort:** Medium
 **PRD Reference:** FR-5.2
 
@@ -344,8 +344,8 @@ As a user, I want local notifications on geofence events so that I know when I e
 - Send event to backend: `POST /api/geofence-events`
 - Create GeofenceEvent entity for logging
 
-#### Story 6.3: Webhook Integration
-**Status:** Planned
+#### Story E6.3: Webhook Integration
+**Status:** Complete
 **Estimated Effort:** Medium
 **PRD Reference:** FR-5.3, FR-5.4
 

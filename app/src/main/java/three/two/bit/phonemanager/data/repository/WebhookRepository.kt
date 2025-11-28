@@ -47,11 +47,7 @@ interface WebhookRepository {
     /**
      * Create a new webhook (AC E6.3.1)
      */
-    suspend fun createWebhook(
-        name: String,
-        targetUrl: String,
-        secret: String,
-    ): Result<Webhook>
+    suspend fun createWebhook(name: String, targetUrl: String, secret: String): Result<Webhook>
 
     /**
      * Update a webhook
@@ -94,9 +90,7 @@ class WebhookRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getWebhook(webhookId: String): Webhook? {
-        return webhookDao.getById(webhookId)?.toDomain()
-    }
+    override suspend fun getWebhook(webhookId: String): Webhook? = webhookDao.getById(webhookId)?.toDomain()
 
     override suspend fun getAllWebhooks(): List<Webhook> {
         val deviceId = secureStorage.getDeviceId()
@@ -108,11 +102,7 @@ class WebhookRepositoryImpl @Inject constructor(
         return webhookDao.getEnabledByDevice(deviceId).map { it.toDomain() }
     }
 
-    override suspend fun createWebhook(
-        name: String,
-        targetUrl: String,
-        secret: String,
-    ): Result<Webhook> {
+    override suspend fun createWebhook(name: String, targetUrl: String, secret: String): Result<Webhook> {
         val deviceId = secureStorage.getDeviceId()
         val now = Clock.System.now()
 

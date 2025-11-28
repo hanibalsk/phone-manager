@@ -54,7 +54,4 @@ data class WebhookDto(
  * GET /api/v1/webhooks?ownerDeviceId={id}
  */
 @Serializable
-data class ListWebhooksResponse(
-    val webhooks: List<WebhookDto>,
-    val total: Int,
-)
+data class ListWebhooksResponse(val webhooks: List<WebhookDto>, val total: Int)

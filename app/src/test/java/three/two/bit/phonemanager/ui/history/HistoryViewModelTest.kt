@@ -2,6 +2,7 @@ package three.two.bit.phonemanager.ui.history
 
 import app.cash.turbine.test
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -12,6 +13,8 @@ import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.database.LocationDao
 import three.two.bit.phonemanager.data.model.LocationEntity
+import three.two.bit.phonemanager.data.repository.DeviceRepository
+import three.two.bit.phonemanager.network.DeviceApiService
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -19,6 +22,8 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModelTest {
     private lateinit var locationDao: LocationDao
+    private lateinit var deviceRepository: DeviceRepository
+    private lateinit var deviceApiService: DeviceApiService
     private lateinit var viewModel: HistoryViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -27,6 +32,13 @@ class HistoryViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         locationDao = mockk(relaxed = true)
+        deviceRepository = mockk(relaxed = true)
+        deviceApiService = mockk(relaxed = true)
+
+        // Default mock setup for device repository
+        every { deviceRepository.getDeviceId() } returns "test-device-id"
+        every { deviceRepository.getDisplayName() } returns "Test Device"
+        coEvery { deviceRepository.getGroupMembers() } returns Result.success(emptyList())
     }
 
     @Test
@@ -46,7 +58,7 @@ class HistoryViewModelTest {
         coEvery { locationDao.getLocationsBetween(any(), any()) } returns locations
 
         // When
-        viewModel = HistoryViewModel(locationDao)
+        viewModel = HistoryViewModel(locationDao, deviceRepository, deviceApiService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -63,7 +75,7 @@ class HistoryViewModelTest {
     fun `setDateFilter to YESTERDAY loads yesterday's data`() = runTest {
         // Given
         coEvery { locationDao.getLocationsBetween(any(), any()) } returns emptyList()
-        viewModel = HistoryViewModel(locationDao)
+        viewModel = HistoryViewModel(locationDao, deviceRepository, deviceApiService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -83,7 +95,7 @@ class HistoryViewModelTest {
         coEvery { locationDao.getLocationsBetween(any(), any()) } returns emptyList()
 
         // When
-        viewModel = HistoryViewModel(locationDao)
+        viewModel = HistoryViewModel(locationDao, deviceRepository, deviceApiService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -120,7 +132,7 @@ class HistoryViewModelTest {
         coEvery { locationDao.getLocationsBetween(any(), any()) } returns locations
 
         // When
-        viewModel = HistoryViewModel(locationDao)
+        viewModel = HistoryViewModel(locationDao, deviceRepository, deviceApiService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -138,7 +150,7 @@ class HistoryViewModelTest {
         coEvery { locationDao.getLocationsBetween(any(), any()) } throws Exception("Database error")
 
         // When
-        viewModel = HistoryViewModel(locationDao)
+        viewModel = HistoryViewModel(locationDao, deviceRepository, deviceApiService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -146,6 +158,52 @@ class HistoryViewModelTest {
             val state = awaitItem()
             assertEquals("Database error", state.error)
             assertFalse(state.isLoading)
+        }
+    }
+
+    @Test
+    fun `init loads current device as selected device`() = runTest {
+        // Given
+        coEvery { locationDao.getLocationsBetween(any(), any()) } returns emptyList()
+        every { deviceRepository.getDeviceId() } returns "my-device-id"
+        every { deviceRepository.getDisplayName() } returns "My Phone"
+
+        // When
+        viewModel = HistoryViewModel(locationDao, deviceRepository, deviceApiService)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertEquals("my-device-id", state.selectedDevice?.deviceId)
+            assertEquals("My Phone", state.selectedDevice?.displayName)
+            assertTrue(state.selectedDevice?.isCurrentDevice == true)
+            assertTrue(state.availableDevices.isNotEmpty())
+        }
+    }
+
+    @Test
+    fun `selectDevice changes selected device`() = runTest {
+        // Given
+        coEvery { locationDao.getLocationsBetween(any(), any()) } returns emptyList()
+        viewModel = HistoryViewModel(locationDao, deviceRepository, deviceApiService)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        val newDevice = HistoryDevice(
+            deviceId = "other-device-id",
+            displayName = "Other Phone",
+            isCurrentDevice = false,
+        )
+
+        // When
+        viewModel.selectDevice(newDevice)
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        // Then
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertEquals("other-device-id", state.selectedDevice?.deviceId)
+            assertFalse(state.selectedDevice?.isCurrentDevice == true)
         }
     }
 }

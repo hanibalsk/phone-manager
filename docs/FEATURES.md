@@ -337,16 +337,16 @@ Discreet operation mode with hidden UI elements and generic notifications.
 
 | Feature | Status | Offline Support | Notifications |
 |---------|--------|-----------------|---------------|
-| Device Registration | Complete | No | - |
-| Location Tracking | Complete | Yes | Yes |
-| Group Members | Complete | Cached | - |
-| Settings | Complete | Yes | - |
-| Real-Time Map | Complete | Cached | - |
-| Location History | Complete | Yes | - |
-| Proximity Alerts | Complete | Yes | Yes |
-| Geofences | Complete | Yes | Yes |
-| Webhooks | Complete | Synced | - |
-| Secret Mode | Complete | Yes | Modified |
+| Device Registration | ✅ Complete | No | - |
+| Location Tracking | ✅ Complete | Yes | Yes |
+| Group Members | ✅ Complete | Cached | - |
+| Settings | ✅ Complete | Yes | - |
+| Real-Time Map | 🔄 Partial | Cached | - |
+| Location History | ✅ Complete | Yes | - |
+| Proximity Alerts | ✅ Complete | Yes | Yes |
+| Geofences | ✅ Complete | Yes | Yes |
+| Webhooks | ✅ Complete | Synced | - |
+| Secret Mode | ⏳ Planned | Yes | Modified |
 
 ---
 

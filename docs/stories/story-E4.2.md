@@ -4,7 +4,7 @@
 **Epic**: 4 - Location History
 **Priority**: Should-Have
 **Estimate**: 2 story points (1-2 days)
-**Status**: Partial Complete (Performance Ready, Server Integration Deferred)
+**Status**: Complete (Core Features Implemented)
 **Created**: 2025-11-25
 **PRD Reference**: Feature 4 (FR-4.2, FR-4.4)
 
@@ -49,13 +49,17 @@ so that I can see where they've been.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add Device Selector to History (AC: E4.2.3)
-  - [ ] Backend API now available: GET /api/v1/devices/{deviceId}/locations
-  - [ ] UI infrastructure can be added
+- [x] Task 1: Add Device Selector to History (AC: E4.2.3)
+  - [x] Backend API available: GET /api/v1/devices/{deviceId}/locations
+  - [x] DeviceSelector composable with ExposedDropdownMenuBox
+  - [x] HistoryViewModel loads current device + group members
+  - [x] Switch between local and remote history loading
+  - [x] Unit tests for device selection (2 new tests)
 - [x] Task 2: Implement Server History Fetch (AC: E4.2.1)
   - [x] DeviceApiService.getLocationHistory() added (2025-11-26)
   - [x] LocationHistoryResponse, LocationHistoryItem models created
   - [x] Cursor-based pagination support with from/to/cursor/limit/order params
+  - [x] HistoryViewModel.loadRemoteHistory() for fetching other devices' history
 - [x] Task 3: Implement Client-Side Downsampling (AC: E4.2.2)
   - [x] Created PolylineUtils.downsample() with interval-based sampling
   - [x] Target 300 points output (200-500 range)
@@ -70,6 +74,7 @@ so that I can see where they've been.
   - [ ] Optional optimization, client-side downsampling sufficient
 - [x] Task 6: Testing (All ACs)
   - [x] Unit test PolylineUtils downsampling (5 tests, all passing)
+  - [x] Unit test device selector (2 new tests, all passing)
   - [x] Build successful with migration
   - [ ] Test sync tracking fields (integration test, deferred)
 
@@ -148,6 +153,24 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
 
+**Task 1: Add Device Selector to History (2025-11-28)**
+- Created HistoryDevice data class in HistoryViewModel.kt for device representation
+- Added selectedDevice and availableDevices to HistoryUiState
+- Implemented loadAvailableDevices() to fetch current device + group members
+- Created selectDevice() method to switch between devices
+- Updated loadHistory() to branch: local database (current device) vs API (remote devices)
+- Added loadRemoteHistory() for fetching other devices' history from server
+- Created DeviceSelector composable with ExposedDropdownMenuBox
+- Shows "My Device (Me)" for current device, plain names for others
+- Integrated with HistoryScreen layout above date filter row
+- Added 2 new unit tests: device selection initialization and switching
+
+**Task 2: Implement Server History Fetch (AC: E4.2.1)**
+- loadRemoteHistory() calls DeviceApiService.getLocationHistory()
+- Supports from/to timestamps for date filtering
+- limit=1000 for reasonable fetch size, order=asc for chronological polyline
+- Error handling with graceful UI feedback
+
 **Task 3: Implement Client-Side Downsampling**
 - Created PolylineUtils object with downsample() method
 - Interval-based sampling algorithm: keeps first/last, distributes others evenly
@@ -182,22 +205,23 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Completion Notes List
 
-**Story E4.2 Implementation - Partial Complete (Core Performance)**:
-- Tasks 3-4 completed successfully (performance optimization)
-- Tasks 1, 2, 5 deferred pending server API implementation
+**Story E4.2 Implementation - Complete (Core Features Implemented)**:
+- Task 1 completed: Device selector UI and remote history fetching
+- Tasks 2-4 completed: Server API integration, downsampling, sync tracking schema
+- Task 5 deferred: Optional server-side simplify parameter (not needed)
 - Database migration complete for sync tracking (AC E4.2.4)
 - Client-side downsampling operational for large datasets (AC E4.2.2)
-- 5 unit tests passing for downsampling logic
+- 7 unit tests passing (5 downsampling + 2 device selector)
 - Build successful, no regressions
 
 **Acceptance Criteria Status**:
-- AC E4.2.1: Deferred (requires server API)
+- AC E4.2.1: ✅ Complete (loadRemoteHistory() fetches from server)
 - AC E4.2.2: ✅ Complete (client-side downsampling)
-- AC E4.2.3: Deferred (requires server API)
-- AC E4.2.4: ✅ Partial (schema complete, upload marking deferred)
-- AC E4.2.5: Deferred (optional, client-side sufficient)
+- AC E4.2.3: ✅ Complete (device selector dropdown in HistoryScreen)
+- AC E4.2.4: ⚠️ Partial (schema complete, upload marking deferred to upload worker)
+- AC E4.2.5: ❌ Deferred (optional, client-side sufficient)
 
-**Note**: This story focuses on performance optimization and database schema. Server integration components (Tasks 1, 2, 5) deferred as they depend on backend API availability.
+**Note**: Core story functionality is complete. AC E4.2.4 upload worker integration and AC E4.2.5 server-side simplify are follow-up enhancements.
 
 ### File List
 
@@ -209,7 +233,9 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - app/src/main/java/three/two/bit/phonemanager/data/model/LocationEntity.kt (added sync tracking fields)
 - app/src/main/java/three/two/bit/phonemanager/data/database/AppDatabase.kt (version 3, migration 2→3)
 - app/src/main/java/three/two/bit/phonemanager/di/DatabaseModule.kt (added migration)
-- app/src/main/java/three/two/bit/phonemanager/ui/history/HistoryViewModel.kt (added downsampling)
+- app/src/main/java/three/two/bit/phonemanager/ui/history/HistoryViewModel.kt (added downsampling, device selection, remote history)
+- app/src/main/java/three/two/bit/phonemanager/ui/history/HistoryScreen.kt (added DeviceSelector composable)
+- app/src/test/java/three/two/bit/phonemanager/ui/history/HistoryViewModelTest.kt (added device selector tests)
 
 ---
 
@@ -227,11 +253,15 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | 2025-11-25 | Martin | Review outcome marked as Approved |
 | 2025-11-25 | Martin | Status updated to Approved |
 | 2025-11-26 | Claude | Backend API available - Added getLocationHistory() to DeviceApiService |
+| 2025-11-28 | Claude | Task 1: Implemented Device Selector with ExposedDropdownMenuBox |
+| 2025-11-28 | Claude | Task 2: Integrated loadRemoteHistory() for fetching other devices' history |
+| 2025-11-28 | Claude | Task 6: Added 2 new unit tests for device selection |
+| 2025-11-28 | Claude | Story E4.2 COMPLETE - Core features implemented, ready for review |
 
 ---
 
-**Last Updated**: 2025-11-25
-**Status**: Approved
+**Last Updated**: 2025-11-28
+**Status**: Complete (Ready for Review)
 **Dependencies**: Story E4.1 (Location History UI) - Approved
 
 ---

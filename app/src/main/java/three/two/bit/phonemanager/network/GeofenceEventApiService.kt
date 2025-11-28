@@ -33,7 +33,11 @@ interface GeofenceEventApiService {
      * List geofence events for a device
      * GET /api/v1/geofence-events?deviceId={id}
      */
-    suspend fun listEvents(deviceId: String, geofenceId: String? = null, limit: Int = 50): Result<ListGeofenceEventsResponse>
+    suspend fun listEvents(
+        deviceId: String,
+        geofenceId: String? = null,
+        limit: Int = 50,
+    ): Result<ListGeofenceEventsResponse>
 
     /**
      * Get a single event by ID

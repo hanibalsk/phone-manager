@@ -20,9 +20,7 @@ import javax.inject.Inject
  * AC E6.3.5: Webhook CRUD operations
  */
 @HiltViewModel
-class WebhooksViewModel @Inject constructor(
-    private val webhookRepository: WebhookRepository,
-) : ViewModel() {
+class WebhooksViewModel @Inject constructor(private val webhookRepository: WebhookRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(WebhooksUiState())
     val uiState: StateFlow<WebhooksUiState> = _uiState.asStateFlow()

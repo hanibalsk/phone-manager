@@ -167,11 +167,7 @@ private fun EmptyWebhooksState(onCreateClick: () -> Unit) {
 }
 
 @Composable
-private fun WebhooksList(
-    webhooks: List<Webhook>,
-    onToggle: (Webhook) -> Unit,
-    onDelete: (Webhook) -> Unit,
-) {
+private fun WebhooksList(webhooks: List<Webhook>, onToggle: (Webhook) -> Unit, onDelete: (Webhook) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = androidx.compose.foundation.layout.PaddingValues(16.dp),
@@ -189,11 +185,7 @@ private fun WebhooksList(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun WebhookItem(
-    webhook: Webhook,
-    onToggle: () -> Unit,
-    onDelete: () -> Unit,
-) {
+private fun WebhookItem(webhook: Webhook, onToggle: () -> Unit, onDelete: () -> Unit) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             if (dismissValue == SwipeToDismissBoxValue.EndToStart) {

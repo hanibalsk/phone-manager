@@ -48,10 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateWebhookScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: CreateWebhookViewModel = hiltViewModel(),
-) {
+fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
