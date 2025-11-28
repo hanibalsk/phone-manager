@@ -31,17 +31,20 @@ import three.two.bit.phonemanager.data.repository.LocationRepositoryImpl
 import three.two.bit.phonemanager.location.LocationManager
 import three.two.bit.phonemanager.queue.QueueManager
 import three.two.bit.phonemanager.queue.WorkManagerScheduler
+import three.two.bit.phonemanager.util.toNotificationText
+import three.two.bit.phonemanager.util.toNotificationTitle
 import three.two.bit.phonemanager.watchdog.WatchdogManager
 import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Story 0.2.1/0.2.3/0.2.4/E2.2: LocationTrackingService - Foreground service for location tracking
+ * Story 0.2.1/0.2.3/0.2.4/E2.2/E7.2: LocationTrackingService - Foreground service for location tracking
  *
  * Story 0.2.1: Implements periodic location capture
  * Story 0.2.3: Integrates upload queue and WorkManager
  * Story 0.2.4: Integrates service health watchdog
  * Story E2.2: Discreet notifications in secret mode
+ * Story E7.2: Weather display in notifications
  * Epic 1: Provides service infrastructure for UI layer
  */
 @AndroidEntryPoint
@@ -64,6 +67,9 @@ class LocationTrackingService : Service() {
 
     @Inject
     lateinit var preferencesRepository: three.two.bit.phonemanager.data.preferences.PreferencesRepository
+
+    @Inject
+    lateinit var weatherRepository: three.two.bit.phonemanager.data.repository.WeatherRepository
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
@@ -155,6 +161,18 @@ class LocationTrackingService : Service() {
         serviceScope.launch {
             preferencesRepository.showWeatherInNotification.collectLatest { _ ->
                 updateNotification()
+            }
+        }
+
+        // Story E7.2: Periodically fetch weather to keep notification fresh (AC E7.2.5)
+        serviceScope.launch {
+            locationRepository.observeLastLocation().collectLatest { lastLocation ->
+                if (lastLocation != null) {
+                    // Fetch weather for current location
+                    weatherRepository.getWeather(lastLocation.latitude, lastLocation.longitude)
+                    // Update notification with new weather data
+                    updateNotification()
+                }
             }
         }
 
@@ -374,8 +392,8 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * Story E2.2/E7.4: Create notification based on secret mode and weather toggle state
-     * AC E2.2.1, E2.2.2, E2.2.3, E2.2.4, E2.2.5, E7.4.3, E7.4.4
+     * Story E2.2/E7.2/E7.4: Create notification based on secret mode, weather, and settings
+     * AC E2.2.1-E2.2.5, E7.2.1-E7.2.7, E7.4.3, E7.4.4
      */
     private fun createNotification(): Notification {
         // Main activity intent
@@ -396,10 +414,10 @@ class LocationTrackingService : Service() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
-        // Story E2.2: Check secret mode and build appropriate notification
-        // Story E7.4: Check weather notification toggle (AC E7.4.3, E7.4.4)
+        // Story E2.2: Check secret mode
+        // Story E7.4: Check weather notification toggle
+        // Story E7.2: Get weather data for notification
         // Note: We use runBlocking here as this is called from main thread context
-        // and we need synchronous access to the current preference states
         val isSecretMode = runCatching {
             runBlocking {
                 preferencesRepository.isSecretModeEnabled.first()
@@ -411,6 +429,16 @@ class LocationTrackingService : Service() {
                 preferencesRepository.showWeatherInNotification.first()
             }
         }.getOrDefault(true)
+
+        // AC E7.2.1, E7.2.2: Get current weather for notification (from cache only)
+        val weather = runCatching {
+            runBlocking {
+                // Get last location and fetch weather (uses cache if valid)
+                locationRepository.getLatestLocation().first()?.let { lastLocation ->
+                    weatherRepository.getWeather(lastLocation.latitude, lastLocation.longitude)
+                }
+            }
+        }.getOrNull()
 
         return if (isSecretMode) {
             // AC E2.2.1, E2.2.2, E2.2.3, E2.2.4: Discreet notification
@@ -424,15 +452,29 @@ class LocationTrackingService : Service() {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentIntent(contentIntent)
                 .build()
+        } else if (showWeatherInNotification && weather != null) {
+            // AC E7.2.1, E7.2.2: Weather notification
+            NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
+                .setContentTitle(weather.toNotificationTitle()) // AC E7.2.1: "{icon} {temp}°C"
+                .setContentText(weather.toNotificationText()) // AC E7.2.2: Weather condition
+                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_MIN) // AC E7.2.3: Low importance
+                .setSilent(true) // AC E7.2.3: No sound/vibration
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setContentIntent(contentIntent)
+                .addAction(
+                    android.R.drawable.ic_delete,
+                    "Stop Tracking",
+                    stopIntent,
+                )
+                .build()
         } else {
-            // AC E2.2.5: Normal mode notification
-            // Story E7.4: Weather display logic will be implemented in Story E7.2
-            // When E7.2 is complete, this will show weather info if showWeatherInNotification is true
-            // AC E7.4.3 (enabled): Title: "{icon} {temp}°C", Text: "{condition}"
-            // AC E7.4.4 (disabled): Title: "Location Tracking Active", Text: "{count} locations • Interval: {n} min"
+            // AC E7.2.7: Fallback to original notification
+            // AC E7.4.4: Original notification when weather disabled
             NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
                 .setContentTitle("Location Tracking Active")
-                .setContentText(getNotificationText())
+                .setContentText(getNotificationText()) // "{count} locations • Interval: {n} min"
                 .setSmallIcon(android.R.drawable.ic_menu_mylocation)
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)

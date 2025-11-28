@@ -15,6 +15,7 @@ import three.two.bit.phonemanager.ui.map.MapScreen
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.registration.RegistrationScreen
 import three.two.bit.phonemanager.ui.settings.SettingsScreen
+import three.two.bit.phonemanager.ui.weather.WeatherScreen
 import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
 import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
 
@@ -31,6 +32,7 @@ sealed class Screen(val route: String) {
     object CreateGeofence : Screen("create_geofence")
     object Webhooks : Screen("webhooks")
     object CreateWebhook : Screen("create_webhook")
+    object Weather : Screen("weather")
 }
 
 @Composable
@@ -85,6 +87,9 @@ fun PhoneManagerNavHost(
                 },
                 onNavigateToWebhooks = {
                     navController.navigate(Screen.Webhooks.route)
+                },
+                onNavigateToWeather = {
+                    navController.navigate(Screen.Weather.route)
                 },
             )
         }
@@ -144,6 +149,11 @@ fun PhoneManagerNavHost(
         }
         composable(Screen.CreateWebhook.route) {
             CreateWebhookScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+        composable(Screen.Weather.route) {
+            WeatherScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
         }

@@ -62,6 +62,7 @@ fun HomeScreen(
     onNavigateToAlerts: () -> Unit = {},
     onNavigateToGeofences: () -> Unit = {},
     onNavigateToWebhooks: () -> Unit = {},
+    onNavigateToWeather: () -> Unit = {},
     modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {

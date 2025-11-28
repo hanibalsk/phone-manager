@@ -5,4 +5,19 @@
     <!-- Story E7.4: Weather notification toggle -->
     <string name="settings_weather_notification">Show weather in notification</string>
     <string name="settings_weather_notification_summary">Display current weather instead of tracking status</string>
+
+    <!-- Story E7.3: Weather screen -->
+    <string name="weather_title">Weather Forecast</string>
+    <string name="weather_loading">Loading weather…</string>
+    <string name="weather_error">Unable to load weather</string>
+    <string name="weather_retry">Retry</string>
+    <string name="weather_last_updated">Updated %1$s ago</string>
+    <string name="weather_feels_like">Feels like %1$d°</string>
+    <string name="weather_humidity">%1$d%%</string>
+    <string name="weather_wind">%1$.0f km/h</string>
+    <string name="weather_forecast_title">5-Day Forecast</string>
+    <string name="weather_today">Today</string>
+    <string name="weather_tomorrow">Tomorrow</string>
+    <string name="weather_unavailable">Weather unavailable</string>
+    <string name="weather_offline_indicator">Offline - showing cached data</string>
 </resources>
