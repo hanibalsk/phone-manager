@@ -18,6 +18,7 @@ import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.DeviceLocation
 import three.two.bit.phonemanager.location.LocationManager
+import three.two.bit.phonemanager.proximity.ProximityManager
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
@@ -28,6 +29,7 @@ class MapViewModelTest {
     private lateinit var locationManager: LocationManager
     private lateinit var deviceRepository: DeviceRepository
     private lateinit var preferencesRepository: PreferencesRepository
+    private lateinit var proximityManager: ProximityManager
     private lateinit var viewModel: MapViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -38,6 +40,7 @@ class MapViewModelTest {
         locationManager = mockk(relaxed = true)
         deviceRepository = mockk(relaxed = true)
         preferencesRepository = mockk(relaxed = true)
+        proximityManager = mockk(relaxed = true)
         coEvery { deviceRepository.getGroupMembers() } returns Result.success(emptyList())
         coEvery { preferencesRepository.mapPollingIntervalSeconds } returns flowOf(15)
     }
@@ -56,7 +59,7 @@ class MapViewModelTest {
         coEvery { locationManager.getCurrentLocation() } returns Result.success(testLocation)
 
         // When
-        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository)
+        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository, proximityManager)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -79,7 +82,7 @@ class MapViewModelTest {
             )
 
         // When
-        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository)
+        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository, proximityManager)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -97,7 +100,7 @@ class MapViewModelTest {
         coEvery { locationManager.getCurrentLocation() } returns Result.success(null)
 
         // When
-        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository)
+        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository, proximityManager)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -134,7 +137,7 @@ class MapViewModelTest {
                 Result.success(location2),
             )
 
-        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository)
+        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository, proximityManager)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -171,7 +174,7 @@ class MapViewModelTest {
         coEvery { locationManager.getCurrentLocation() } returns Result.success(null)
 
         // When
-        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository)
+        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository, proximityManager)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -198,7 +201,7 @@ class MapViewModelTest {
         coEvery { locationManager.getCurrentLocation() } returns Result.success(null)
 
         // When
-        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository)
+        viewModel = MapViewModel(locationManager, deviceRepository, preferencesRepository, proximityManager)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then

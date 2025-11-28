@@ -19,16 +19,18 @@ import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.location.LocationManager
+import three.two.bit.phonemanager.proximity.ProximityManager
 import timber.log.Timber
 import javax.inject.Inject
 
 /**
- * Story E3.1/E3.2/E3.3: MapViewModel
+ * Story E3.1/E3.2/E3.3/E5.2: MapViewModel
  *
  * Story E3.1: Manages map state and current location
  * Story E3.2: Manages group member locations on map
  * Story E3.3: Implements real-time location polling
- * ACs: E3.1.2, E3.1.3, E3.1.5, E3.2.1, E3.3.1, E3.3.3, E3.3.4, E3.3.5, E3.3.6
+ * Story E5.2: Integrates proximity alert checking during polling
+ * ACs: E3.1.2, E3.1.3, E3.1.5, E3.2.1, E3.3.1, E3.3.3, E3.3.4, E3.3.5, E3.3.6, E5.2.2
  */
 @HiltViewModel
 class MapViewModel
@@ -37,6 +39,7 @@ constructor(
     private val locationManager: LocationManager,
     private val deviceRepository: DeviceRepository,
     private val preferencesRepository: PreferencesRepository,
+    private val proximityManager: ProximityManager,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(MapUiState())
     val uiState: StateFlow<MapUiState> = _uiState.asStateFlow()
@@ -147,7 +150,7 @@ constructor(
     }
 
     /**
-     * Story E3.3: Fetch group members during polling (AC E3.3.1, E3.3.2, E3.3.3, E3.3.4)
+     * Story E3.3/E5.2: Fetch group members during polling (AC E3.3.1, E3.3.2, E3.3.3, E3.3.4, E5.2.2)
      */
     private suspend fun fetchGroupMembersForPolling() {
         val result = deviceRepository.getGroupMembers()
@@ -159,6 +162,17 @@ constructor(
                         groupMembers = devices,
                         lastPolledAt = Clock.System.now(), // AC E3.3.3: Track last update time
                     )
+                }
+
+                // Story E5.2: Check proximity alerts after getting group member locations (AC E5.2.2)
+                val currentLocation = _uiState.value.currentLocation
+                if (currentLocation != null && devices.isNotEmpty()) {
+                    try {
+                        proximityManager.checkProximityAlerts(currentLocation, devices)
+                    } catch (e: Exception) {
+                        // Don't let proximity check failure break polling
+                        Timber.e(e, "Failed to check proximity alerts")
+                    }
                 }
             },
             onFailure = { exception ->

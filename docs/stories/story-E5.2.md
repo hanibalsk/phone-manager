@@ -4,7 +4,7 @@
 **Epic**: 5 - Proximity Alerts
 **Priority**: Must-Have
 **Estimate**: 2 story points (1-2 days)
-**Status**: Foundation Complete (Calculation Logic Ready, Integration Deferred)
+**Status**: Complete
 **Created**: 2025-11-25
 **PRD Reference**: Feature 3 (FR-3.2, FR-3.3)
 
@@ -61,27 +61,30 @@ so that I know when someone is nearby.
   - [x] Create ProximityCalculator utility object
   - [x] Implement Haversine formula for great circle distance
   - [x] calculateDistance() for coordinate pairs and LatLng points
-- [ ] Task 2: Integrate with Polling Cycle (AC: E5.2.2) - DEFERRED
-  - [ ] Requires AlertRepository from E5.1
-  - [ ] ProximityManager integration deferred until E5.1 complete
-- [ ] Task 3: Implement State Tracking (AC: E5.2.3, E5.2.4) - FOUNDATION READY
+- [x] Task 2: Integrate with Polling Cycle (AC: E5.2.2)
+  - [x] ProximityManager created with AlertRepository integration
+  - [x] MapViewModel.fetchGroupMembersForPolling() calls proximityManager.checkProximityAlerts()
+  - [x] Automatic proximity checks during each polling cycle
+- [x] Task 3: Implement State Tracking (AC: E5.2.3, E5.2.4)
   - [x] State transition detection in shouldTrigger() logic
-  - [ ] lastState update in database (requires repository)
+  - [x] lastState update in database via AlertRepository.updateProximityState()
+  - [x] State persists across app restarts (Room database)
 - [x] Task 4: Implement Direction Logic (AC: E5.2.4)
   - [x] Handle ENTER direction: trigger on OUTSIDE→INSIDE
   - [x] Handle EXIT direction: trigger on INSIDE→OUTSIDE
   - [x] Handle BOTH: trigger on either transition
   - [x] Debouncing: no trigger when state unchanged
-- [ ] Task 5: Create Notification System (AC: E5.2.5) - DEFERRED
-  - [ ] Requires ProximityManager integration
-  - [ ] Notification manager deferred until triggering integrated
-- [ ] Task 6: Update Triggered Timestamp (AC: E5.2.6) - DEFERRED
-  - [ ] Requires AlertRepository and database operations
-  - [ ] Deferred until E5.1 repository implemented
+- [x] Task 5: Create Notification System (AC: E5.2.5)
+  - [x] ProximityNotificationManager with notification channel
+  - [x] Shows notification with target name and distance
+  - [x] Actionable notification (tap to open map)
+- [x] Task 6: Update Triggered Timestamp (AC: E5.2.6)
+  - [x] AlertRepository.updateLastTriggered() called on trigger
+  - [x] Timestamp persisted to database
 - [x] Task 7: Testing (All ACs)
   - [x] Unit test distance calculation (10 tests, all passing)
   - [x] Unit test state transition logic (comprehensive coverage)
-  - [ ] Manual test notification (requires full integration)
+  - [ ] Manual test notification (requires device)
 
 ## Dev Notes
 
@@ -219,22 +222,24 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 **Acceptance Criteria Status**:
 - AC E5.2.1: ✅ Complete (Haversine distance calculation)
-- AC E5.2.2: Foundation ready, integration deferred
-- AC E5.2.3: Logic complete, persistence deferred
+- AC E5.2.2: ✅ Complete (polling integration via ProximityManager)
+- AC E5.2.3: ✅ Complete (state tracking with database persistence)
 - AC E5.2.4: ✅ Complete (state transition detection and debouncing)
-- AC E5.2.5: Deferred (requires integration)
-- AC E5.2.6: Deferred (requires integration)
+- AC E5.2.5: ✅ Complete (local notification with ProximityNotificationManager)
+- AC E5.2.6: ✅ Complete (lastTriggeredAt update via AlertRepository)
 
-**Note**: This story focuses on proximity calculation and triggering logic. Integration components (Tasks 2, 3, 5, 6) deferred as they require AlertRepository from E5.1.
+**Note**: All acceptance criteria implemented. Manual device testing required to verify notifications.
 
 ### File List
 
 **Created:**
 - app/src/main/java/three/two/bit/phonemanager/util/ProximityCalculator.kt
 - app/src/test/java/three/two/bit/phonemanager/util/ProximityCalculatorTest.kt
+- app/src/main/java/three/two/bit/phonemanager/proximity/ProximityManager.kt
+- app/src/main/java/three/two/bit/phonemanager/notification/ProximityNotificationManager.kt
 
 **Modified:**
-- None (standalone utility implementation)
+- app/src/main/java/three/two/bit/phonemanager/ui/map/MapViewModel.kt (added ProximityManager integration)
 
 ---
 
@@ -248,9 +253,11 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | 2025-11-25 | Claude | Task 7: All tests passing (10 comprehensive tests) |
 | 2025-11-25 | Claude | Tasks 2, 3, 5, 6: Deferred pending E5.1 AlertRepository |
 | 2025-11-25 | Claude | Story E5.2 FOUNDATION - Calculation Logic Complete, Integration Deferred |
+| 2025-11-28 | Claude | Tasks 2,3,5,6: Full integration completed with ProximityManager and ProximityNotificationManager |
+| 2025-11-28 | Claude | Story E5.2 COMPLETE - All ACs implemented |
 
 ---
 
-**Last Updated**: 2025-11-25
-**Status**: Foundation Complete (Calculation Logic Ready, Integration Deferred)
-**Dependencies**: Story E5.1 (Proximity Alert Definition) - Foundation Complete (requires full completion for integration), Story E3.3 (Real-Time Location Polling) - Approved
+**Last Updated**: 2025-11-28
+**Status**: Complete
+**Dependencies**: Story E5.1 (Proximity Alert Definition) - Complete, Story E3.3 (Real-Time Location Polling) - Approved
