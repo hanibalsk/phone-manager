@@ -151,6 +151,13 @@ class LocationTrackingService : Service() {
             }
         }
 
+        // Story E7.4: Observe weather notification toggle and update notification (AC E7.4.5)
+        serviceScope.launch {
+            preferencesRepository.showWeatherInNotification.collectLatest { _ ->
+                updateNotification()
+            }
+        }
+
         // Story 0.2.1: Start periodic location capture
         startLocationCapture()
 
@@ -367,8 +374,8 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * Story E2.2: Create notification based on secret mode state
-     * AC E2.2.1, E2.2.2, E2.2.3, E2.2.4, E2.2.5
+     * Story E2.2/E7.4: Create notification based on secret mode and weather toggle state
+     * AC E2.2.1, E2.2.2, E2.2.3, E2.2.4, E2.2.5, E7.4.3, E7.4.4
      */
     private fun createNotification(): Notification {
         // Main activity intent
@@ -390,13 +397,20 @@ class LocationTrackingService : Service() {
         )
 
         // Story E2.2: Check secret mode and build appropriate notification
+        // Story E7.4: Check weather notification toggle (AC E7.4.3, E7.4.4)
         // Note: We use runBlocking here as this is called from main thread context
-        // and we need synchronous access to the current secret mode state
+        // and we need synchronous access to the current preference states
         val isSecretMode = runCatching {
             runBlocking {
                 preferencesRepository.isSecretModeEnabled.first()
             }
         }.getOrDefault(false)
+
+        val showWeatherInNotification = runCatching {
+            runBlocking {
+                preferencesRepository.showWeatherInNotification.first()
+            }
+        }.getOrDefault(true)
 
         return if (isSecretMode) {
             // AC E2.2.1, E2.2.2, E2.2.3, E2.2.4: Discreet notification
@@ -412,6 +426,10 @@ class LocationTrackingService : Service() {
                 .build()
         } else {
             // AC E2.2.5: Normal mode notification
+            // Story E7.4: Weather display logic will be implemented in Story E7.2
+            // When E7.2 is complete, this will show weather info if showWeatherInNotification is true
+            // AC E7.4.3 (enabled): Title: "{icon} {temp}°C", Text: "{condition}"
+            // AC E7.4.4 (disabled): Title: "Location Tracking Active", Text: "{count} locations • Interval: {n} min"
             NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
                 .setContentTitle("Location Tracking Active")
                 .setContentText(getNotificationText())

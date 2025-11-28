@@ -1,16 +1,16 @@
 # Phone Manager - Epic Breakdown
 
 **Author:** Martin
-**Date:** 2025-11-25
+**Date:** 2025-11-28
 **Project Level:** 2
-**Target Scale:** 18 stories across 7 epics
+**Target Scale:** 24 stories across 8 epics
 **Source:** PRD Phone Manager v1.1 (2025-11-25)
 
 ---
 
 ## Epic Overview
 
-This project consists of 7 epics aligned with the PRD MVP features:
+This project consists of 8 epics aligned with the PRD MVP features:
 
 - **Epic 0**: Foundation Infrastructure (DONE) - 5 stories ✅
 - **Epic 1**: Device Registration & Groups (DONE) - 3 stories ✅
@@ -19,8 +19,9 @@ This project consists of 7 epics aligned with the PRD MVP features:
 - **Epic 4**: Location History (DONE) - 2 stories ✅
 - **Epic 5**: Proximity Alerts (DONE) - 2 stories ✅
 - **Epic 6**: Geofencing with Webhooks (DONE) - 3 stories ✅
+- **Epic 7**: Weather Forecast (NEW) - 4 stories 🆕
 
-**Total Stories:** 20 (16 done + 4 remaining)
+**Total Stories:** 24 (16 done + 8 remaining)
 
 ---
 
@@ -362,10 +363,88 @@ As a user, I want geofence events to trigger webhooks so that I can automate act
 
 ---
 
+## Epic 7: Weather Forecast Integration 🆕
+
+**Priority:** Medium
+**Estimated Effort:** Medium (3-4 days)
+**Status:** Draft (New Feature)
+**PRD Reference:** Enhancement (Post-MVP)
+**Dependencies:** Epic 0 ✅ (uses existing Ktor, DataStore, LocationManager)
+
+### Purpose
+Transform the foreground service notification from a generic "Service running" message into useful weather information. Provides dual value: less intrusive notification + useful weather forecast feature.
+
+### Stories
+
+#### Story E7.1: Weather API Integration & Caching
+**Status:** Draft
+**Estimated Effort:** Medium (1 day)
+
+**User Story:**
+As a developer, I want to integrate the Open-Meteo weather API so that I can retrieve weather data using the device's location
+
+**Acceptance Criteria:**
+- Create WeatherApiService with Ktor client
+- Implement Open-Meteo API integration (free, no API key)
+- Create Weather domain model and WeatherRepository
+- Implement DataStore-based cache with 30-minute TTL
+- Add WeatherModule to Hilt DI
+
+#### Story E7.2: Notification Weather Display
+**Status:** Draft
+**Estimated Effort:** Medium (1 day)
+
+**User Story:**
+As a user, I want to see current weather in my tracking notification so that the notification provides useful information
+
+**Acceptance Criteria:**
+- Display weather in notification title (e.g., "☀️ 24°C")
+- Display condition in notification text (e.g., "Partly Cloudy")
+- Use IMPORTANCE_MIN channel (silent, no badge)
+- Notification tap opens WeatherScreen
+- Respect settings toggle
+
+#### Story E7.3: Weather Screen UI
+**Status:** Draft
+**Estimated Effort:** Medium (1 day)
+
+**User Story:**
+As a user, I want to view detailed weather forecast so that I can plan my day
+
+**Acceptance Criteria:**
+- Create WeatherScreen with current conditions card
+- Display 5-day forecast list
+- Show "Last updated X ago" indicator
+- Implement pull-to-refresh
+- Add navigation from notification and HomeScreen
+
+#### Story E7.4: Weather Settings Toggle
+**Status:** Draft
+**Estimated Effort:** Small (0.5 day)
+
+**User Story:**
+As a user, I want to toggle weather display in notifications so that I can choose between weather info and standard notification
+
+**Acceptance Criteria:**
+- Add toggle in SettingsScreen: "Show weather in notification"
+- Default: enabled (weather shown)
+- When disabled: show "Location Tracking Active"
+- Persist preference in DataStore
+
+### Technical Notes
+- **API**: Open-Meteo (free, unlimited, no API key)
+- **Cache**: 30-minute TTL in DataStore
+- **Refresh**: Piggyback on existing location capture cycle
+- **Full spec**: See `/docs/product/Epic-E7-Weather-Forecast.md`
+
+---
+
 ## Dependencies
 
 ```
 Epic 0 (Foundation) ✅ DONE
+    │
+    ├──► Epic 7 (Weather Forecast) 🆕  [Independent - uses existing location]
     │
     ▼
 Epic 1 (Device Registration) ─────┐
@@ -384,6 +463,7 @@ Epic 3 (Map Display) ◄────────────┘
 ```
 
 **Critical Path:** Epic 0 → Epic 1 → Epic 3 → Epic 5/6
+**Independent:** Epic 7 (Weather) can be implemented anytime after Epic 0
 
 ---
 
@@ -397,6 +477,7 @@ Epic 3 (Map Display) ◄────────────┘
 | 4 | Epic 4: Location History | Extends map with historical data |
 | 5 | Epic 5: Proximity Alerts | Requires group member locations |
 | 6 | Epic 6: Geofencing + Webhooks | Most complex, requires backend webhook dispatcher |
+| 7 | Epic 7: Weather Forecast | Independent, can be done anytime; enhances notification UX |
 
 ---
 
@@ -416,3 +497,4 @@ Epic 3 (Map Display) ◄────────────┘
 |------|--------|---------|
 | 2025-10-28 | Martin | Original epic breakdown |
 | 2025-11-25 | Martin | Complete rewrite to align with PRD v1.1 MVP features |
+| 2025-11-28 | John (PM) | Added Epic 7: Weather Forecast Integration (4 stories) |

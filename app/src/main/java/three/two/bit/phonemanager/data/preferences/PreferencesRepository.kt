@@ -18,11 +18,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Story 1.1/1.4/E2.1/E3.3: PreferencesRepository - Manages app preferences using DataStore
+ * Story 1.1/1.4/E2.1/E3.3/E7.4: PreferencesRepository - Manages app preferences using DataStore
  *
  * Story 1.4 additions: Service state persistence for boot restoration
  * Story E2.1 additions: Secret mode setting
  * Story E3.3 additions: Map polling interval
+ * Story E7.4 additions: Weather notification toggle
  */
 interface PreferencesRepository {
     val isTrackingEnabled: Flow<Boolean>
@@ -44,6 +45,10 @@ interface PreferencesRepository {
     // Story E3.3: Map polling interval
     val mapPollingIntervalSeconds: Flow<Int>
     suspend fun setMapPollingIntervalSeconds(seconds: Int)
+
+    // Story E7.4: Weather notification toggle
+    val showWeatherInNotification: Flow<Boolean>
+    suspend fun setShowWeatherInNotification(enabled: Boolean)
 }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -73,6 +78,9 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
 
         // Story E3.3: Map polling interval key
         val MAP_POLLING_INTERVAL_SECONDS = intPreferencesKey("map_polling_interval_seconds")
+
+        // Story E7.4: Weather notification toggle key
+        val SHOW_WEATHER_IN_NOTIFICATION = booleanPreferencesKey("show_weather_in_notification")
     }
 
     override val isTrackingEnabled: Flow<Boolean> = context.dataStore.data
@@ -209,5 +217,27 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
             preferences[PreferencesKeys.MAP_POLLING_INTERVAL_SECONDS] = seconds
         }
         Timber.d("Map polling interval set to: $seconds seconds")
+    }
+
+    // Story E7.4: Weather notification toggle implementation
+
+    override val showWeatherInNotification: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.SHOW_WEATHER_IN_NOTIFICATION] ?: true
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading weather notification preference")
+                emit(true)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setShowWeatherInNotification(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_WEATHER_IN_NOTIFICATION] = enabled
+        }
+        Timber.d("Weather notification setting set to: $enabled")
     }
 }

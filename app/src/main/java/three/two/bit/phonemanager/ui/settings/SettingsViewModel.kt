@@ -4,9 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
@@ -14,11 +16,12 @@ import three.two.bit.phonemanager.data.repository.DeviceRepository
 import javax.inject.Inject
 
 /**
- * Story E1.3/E3.3: SettingsViewModel
+ * Story E1.3/E3.3/E7.4: SettingsViewModel
  *
  * Manages device settings (displayName, groupId) and handles re-registration
  * Story E3.3: Also manages map polling interval setting (AC E3.3.5)
- * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5
+ * Story E7.4: Also manages weather notification toggle (AC E7.4.5)
+ * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5, E7.4.5
  */
 @HiltViewModel
 class SettingsViewModel
@@ -31,6 +34,15 @@ constructor(
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     val deviceId: String = deviceRepository.getDeviceId()
+
+    // Story E7.4: Weather notification toggle state (AC E7.4.5)
+    val showWeatherInNotification: StateFlow<Boolean> =
+        preferencesRepository.showWeatherInNotification
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
 
     private var originalDisplayName: String = ""
     private var originalGroupId: String = ""
@@ -79,6 +91,16 @@ constructor(
         viewModelScope.launch {
             preferencesRepository.setMapPollingIntervalSeconds(seconds)
             _uiState.update { it.copy(mapPollingIntervalSeconds = seconds) }
+        }
+    }
+
+    /**
+     * Handle weather notification toggle change (AC E7.4.5)
+     * Saves immediately and triggers notification update in LocationTrackingService
+     */
+    fun setShowWeatherInNotification(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setShowWeatherInNotification(enabled)
         }
     }
 

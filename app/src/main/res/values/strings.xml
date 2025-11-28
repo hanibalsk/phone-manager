@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Phone Manager</string>
+
+    <!-- Story E7.4: Weather notification toggle -->
+    <string name="settings_weather_notification">Show weather in notification</string>
+    <string name="settings_weather_notification_summary">Display current weather instead of tracking status</string>
 </resources>
