@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Phone Manager</string>
+
+    <!-- Common -->
+    <string name="back">Späť</string>
+    <string name="delete">Zmazať</string>
+    <string name="refresh">Obnoviť</string>
+    <string name="save">Uložiť</string>
+    <string name="cancel">Zrušiť</string>
+    <string name="ok">OK</string>
+    <string name="error">Chyba</string>
+    <string name="loading">Načítava sa…</string>
+    <string name="last_seen">Naposledy videné: %1$s</string>
+
+    <!-- Days of week -->
+    <string name="day_today">Dnes</string>
+    <string name="day_tomorrow">Zajtra</string>
+    <string name="day_monday">Po</string>
+    <string name="day_tuesday">Ut</string>
+    <string name="day_wednesday">St</string>
+    <string name="day_thursday">Št</string>
+    <string name="day_friday">Pi</string>
+    <string name="day_saturday">So</string>
+    <string name="day_sunday">Ne</string>
+
+    <!-- Home Screen -->
+    <string name="home_location_tracking">Sledovanie polohy</string>
+
+    <!-- Registration Screen -->
+    <string name="registration_title">Registrácia zariadenia</string>
+    <string name="registration_subtitle">Zaregistrujte svoje zariadenie pre zdieľanie polohy so skupinou</string>
+    <string name="registration_group_id_hint">Všetky zariadenia s rovnakým ID skupiny môžu vidieť navzájom svoju polohu.</string>
+
+    <!-- Group Members Screen -->
+    <string name="group_no_members">Vo vašej skupine zatiaľ nie sú žiadne ďalšie zariadenia</string>
+    <string name="group_share_hint">Zdieľajte svoje ID skupiny s ostatnými, aby sa pridali do vašej skupiny</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_changes_hint">Zmeny sa prejavia po uložení</string>
+    <string name="settings_notification_settings">Nastavenia notifikácií</string>
+    <string name="settings_map_settings">Nastavenia mapy</string>
+
+    <!-- Weather notification toggle -->
+    <string name="settings_weather_notification">Zobraziť počasie v notifikácii</string>
+    <string name="settings_weather_notification_summary">Zobraziť aktuálne počasie namiesto stavu sledovania</string>
+
+    <!-- Weather screen -->
+    <string name="weather_title">Predpoveď počasia</string>
+    <string name="weather_loading">Načítava sa počasie…</string>
+    <string name="weather_error">Nepodarilo sa načítať počasie</string>
+    <string name="weather_retry">Skúsiť znova</string>
+    <string name="weather_last_updated">Aktualizované pred %1$s</string>
+    <string name="weather_feels_like">Pocitová teplota %1$d°</string>
+    <string name="weather_humidity">%1$d%%</string>
+    <string name="weather_wind">%1$.0f km/h</string>
+    <string name="weather_forecast_title">5-dňová predpoveď</string>
+    <string name="weather_today">Dnes</string>
+    <string name="weather_tomorrow">Zajtra</string>
+    <string name="weather_unavailable">Počasie nedostupné</string>
+    <string name="weather_offline_indicator">Offline - zobrazujú sa uložené dáta</string>
+    <string name="weather_humidity_label">Vlhkosť</string>
+    <string name="weather_wind_label">Vietor</string>
+
+    <!-- Alerts Screen -->
+    <string name="alerts_create">Vytvoriť upozornenie</string>
+    <string name="alerts_empty_title">Žiadne upozornenia na blízkosť</string>
+    <string name="alerts_empty_subtitle">Vytvorte upozornenie, aby ste boli informovaní, keď je člen skupiny nablízku</string>
+
+    <!-- Create Alert Screen -->
+    <string name="create_alert_target_device">Cieľové zariadenie</string>
+    <string name="create_alert_target_hint">Vyberte člena skupiny na sledovanie</string>
+    <string name="create_alert_no_members">Nie sú dostupní žiadni členovia skupiny. Uistite sa, že ste zaregistrovaní v skupine.</string>
+    <string name="create_alert_radius_title">Polomer upozornenia</string>
+    <string name="create_alert_radius_hint">Ako blízko by mali byť na spustenie upozornenia?</string>
+    <string name="create_alert_direction_title">Smer upozornenia</string>
+    <string name="create_alert_direction_hint">Kedy chcete byť upozornení?</string>
+
+    <!-- Geofences Screen -->
+    <string name="geofences_create">Vytvoriť geofence</string>
+    <string name="geofences_empty_title">Žiadne geofence</string>
+    <string name="geofences_empty_subtitle">Vytvorte geofence, aby ste boli upozornení pri vstupe alebo odchode z konkrétnych miest</string>
+
+    <!-- Create Geofence Screen -->
+    <string name="create_geofence_name_title">Názov geofence</string>
+    <string name="create_geofence_name_hint">Dajte geofence zapamätateľný názov</string>
+    <string name="create_geofence_location_title">Poloha</string>
+    <string name="create_geofence_location_hint">Zadajte stredové súradnice geofence</string>
+    <string name="create_geofence_invalid_coords">Zadajte platné súradnice (lat: -90 až 90, lng: -180 až 180)</string>
+    <string name="create_geofence_radius_title">Polomer geofence</string>
+    <string name="create_geofence_radius_hint">Aká veľká má byť oblasť geofence?</string>
+    <string name="create_geofence_trigger_title">Spúšťacie udalosti</string>
+    <string name="create_geofence_trigger_hint">Kedy sa má geofence aktivovať?</string>
+    <string name="create_geofence_trigger_enter">Vstup</string>
+    <string name="create_geofence_trigger_exit">Odchod</string>
+    <string name="create_geofence_trigger_dwell">Pobyt</string>
+    <string name="create_geofence_webhook_title">Webhook (voliteľné)</string>
+    <string name="create_geofence_webhook_hint">Prepojte webhook pre odosielanie udalostí do externých služieb</string>
+
+    <!-- Webhooks Screen -->
+    <string name="webhooks_create">Vytvoriť webhook</string>
+    <string name="webhooks_empty_title">Žiadne webhooky</string>
+    <string name="webhooks_empty_subtitle">Vytvorte webhook pre odosielanie udalostí geofence do externých služieb ako Home Assistant alebo n8n.</string>
+
+    <!-- Create Webhook Screen -->
+    <string name="create_webhook_secret_label">Tajný kľúč (pre HMAC podpisovanie)</string>
+    <string name="create_webhook_secret_hint">Uložte si tento tajný kľúč! Budete ho potrebovať na overenie podpisov webhookov.</string>
+    <string name="create_webhook_how_it_works">Ako to funguje</string>
+    <string name="create_webhook_description">Keď nastane udalosť geofence, server odošle HTTP POST požiadavku na vašu URL s detailmi udalosti vo formáte JSON. Dáta sú podpísané pomocou HMAC-SHA256 s vaším tajným kľúčom.</string>
+
+    <!-- Permissions -->
+    <string name="permission_privacy_notice">Vaše súkromie: Údaje o polohe sú uložené na vašom zariadení a odosielané len členom vašej skupiny. Nesledujeme ani neukladáme vašu polohu na našich serveroch.</string>
+
+    <!-- Location Stats -->
+    <string name="stats_title">Štatistiky polohy</string>
+    <string name="stats_today">Dnes</string>
+    <string name="stats_all_time">Celkovo</string>
+    <string name="stats_interval">Interval</string>
+    <string name="stats_last_update">Posledná aktualizácia</string>
+    <string name="stats_avg_accuracy">Priem. presnosť</string>
+
+    <!-- Location Tracking Toggle -->
+    <string name="location_tracking">Sledovanie polohy</string>
+
+    <!-- History Screen -->
+    <string name="history_empty_title">Žiadna história polohy pre toto obdobie</string>
+    <string name="history_empty_hint">Skúste vybrať iný rozsah dátumov</string>
+    <string name="history_start">Začiatok</string>
+    <string name="history_end">Koniec</string>
+
+    <!-- Create Alert Direction -->
+    <string name="alert_direction_enter">Vstup</string>
+    <string name="alert_direction_enter_desc">Upozorniť, keď prídu do dosahu</string>
+    <string name="alert_direction_exit">Odchod</string>
+    <string name="alert_direction_exit_desc">Upozorniť, keď opustia dosah</string>
+    <string name="alert_direction_both">Oboje</string>
+    <string name="alert_direction_both_desc">Upozorniť pri vstupe aj odchode</string>
+
+    <!-- Create Geofence Trigger Descriptions -->
+    <string name="create_geofence_trigger_enter_desc">Aktivovať pri vstupe do oblasti</string>
+    <string name="create_geofence_trigger_exit_desc">Aktivovať pri opustení oblasti</string>
+    <string name="create_geofence_trigger_dwell_desc">Aktivovať po zotrvaní v oblasti</string>
+
+    <!-- Create Webhook -->
+    <string name="create_webhook_regenerate">Vygenerovať nový kľúč</string>
+
+    <!-- Map Screen -->
+    <string name="map_marker_you">Vy</string>
+
+    <!-- Notification Channels -->
+    <string name="channel_tracking_description">Služba sledovania polohy</string>
+    <string name="channel_background_description">Služba na pozadí</string>
+    <string name="channel_geofence_description">Notifikácie pre udalosti vstupu/odchodu z geofence</string>
+</resources>
