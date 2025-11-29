@@ -52,13 +52,16 @@ fun PhoneManagerNavHost(
     val startDestination = if (isRegistered) Screen.Home.route else Screen.Registration.route
 
     // Story E7.2: Handle deep link navigation from notification (AC E7.2.4)
-    // Navigate to destination while keeping home screen in back stack
+    // Weather screen is top-level - back button closes app (hides notification)
     LaunchedEffect(initialDestination) {
         if (initialDestination != null && isRegistered) {
             // Wait for NavHost to be ready
             delay(100)
             navController.navigate(initialDestination) {
-                // Keep home screen in back stack so back button goes to home
+                // Clear back stack - weather is top screen, back closes app
+                popUpTo(navController.graph.startDestinationId) {
+                    inclusive = true
+                }
                 launchSingleTop = true
             }
         }

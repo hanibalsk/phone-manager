@@ -14,9 +14,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.LocationStats
 import three.two.bit.phonemanager.ui.theme.PhoneManagerTheme
 import java.time.Duration
@@ -52,7 +54,7 @@ fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifie
             ) {
                 Column {
                     Text(
-                        text = "Today",
+                        text = stringResource(R.string.stats_today),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -66,7 +68,7 @@ fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifie
 
                 Column {
                     Text(
-                        text = "All Time",
+                        text = stringResource(R.string.stats_all_time),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -79,7 +81,7 @@ fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifie
 
                 Column {
                     Text(
-                        text = "Interval",
+                        text = stringResource(R.string.stats_interval),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -101,7 +103,7 @@ fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifie
             ) {
                 Column {
                     Text(
-                        text = "Last Update",
+                        text = stringResource(R.string.stats_last_update),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -116,7 +118,7 @@ fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifie
                 locationStats.averageAccuracy?.let { accuracy ->
                     Column(horizontalAlignment = Alignment.End) {
                         Text(
-                            text = "Avg Accuracy",
+                            text = stringResource(R.string.stats_avg_accuracy),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )

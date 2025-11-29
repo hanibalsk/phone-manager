@@ -145,7 +145,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
 
             // Helper text
             Text(
-                text = "Changes will take effect after saving",
+                text = stringResource(R.string.settings_changes_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -155,7 +155,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
 
             // Story E7.4: Weather Notification Toggle (AC E7.4.1)
             Text(
-                text = "Notification Settings",
+                text = stringResource(R.string.settings_notification_settings),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -188,7 +188,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
 
             // Story E3.3: Map Polling Interval Selector (AC E3.3.5)
             Text(
-                text = "Map Settings",
+                text = stringResource(R.string.settings_map_settings),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
             )

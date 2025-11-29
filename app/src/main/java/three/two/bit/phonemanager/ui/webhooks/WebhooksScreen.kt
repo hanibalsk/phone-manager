@@ -45,9 +45,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Webhook
 
 /**
@@ -81,7 +83,7 @@ fun WebhooksScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -91,7 +93,7 @@ fun WebhooksScreen(
             FloatingActionButton(onClick = onNavigateToCreateWebhook) {
                 Icon(
                     imageVector = Icons.Default.Add,
-                    contentDescription = "Create Webhook",
+                    contentDescription = stringResource(R.string.webhooks_create),
                 )
             }
         },
@@ -147,12 +149,12 @@ private fun EmptyWebhooksState(onCreateClick: () -> Unit) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No Webhooks",
+            text = stringResource(R.string.webhooks_empty_title),
             style = MaterialTheme.typography.headlineSmall,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Create a webhook to send geofence events to external services like Home Assistant or n8n.",
+            text = stringResource(R.string.webhooks_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -160,7 +162,7 @@ private fun EmptyWebhooksState(onCreateClick: () -> Unit) {
         FloatingActionButton(onClick = onCreateClick) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Create Webhook",
+                contentDescription = stringResource(R.string.webhooks_create),
             )
         }
     }
@@ -209,7 +211,7 @@ private fun WebhookItem(webhook: Webhook, onToggle: () -> Unit, onDelete: () -> 
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.delete),
                     tint = MaterialTheme.colorScheme.onErrorContainer,
                 )
             }

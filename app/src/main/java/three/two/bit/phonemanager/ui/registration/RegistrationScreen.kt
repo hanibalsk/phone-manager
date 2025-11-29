@@ -29,11 +29,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 
 /**
  * Story E1.1: RegistrationScreen - Device registration UI
@@ -80,7 +82,7 @@ fun RegistrationScreen(
         ) {
             // Title
             Text(
-                text = "Device Registration",
+                text = stringResource(R.string.registration_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
@@ -89,7 +91,7 @@ fun RegistrationScreen(
 
             // Subtitle
             Text(
-                text = "Register your device to share location with your group",
+                text = stringResource(R.string.registration_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -177,7 +179,7 @@ fun RegistrationScreen(
 
             // Help text
             Text(
-                text = "All devices with the same Group ID can see each other's location.",
+                text = stringResource(R.string.registration_group_id_hint),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,

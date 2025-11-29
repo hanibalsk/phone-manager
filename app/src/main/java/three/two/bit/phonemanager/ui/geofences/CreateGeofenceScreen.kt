@@ -43,9 +43,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.TransitionType
 import three.two.bit.phonemanager.domain.model.Webhook
 import kotlin.math.roundToInt
@@ -201,12 +203,12 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
 private fun NameSection(name: String, onNameChange: (String) -> Unit) {
     Column {
         Text(
-            text = "Geofence Name",
+            text = stringResource(R.string.create_geofence_name_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Give your geofence a memorable name",
+            text = stringResource(R.string.create_geofence_name_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -236,12 +238,12 @@ private fun LocationSection(
 ) {
     Column {
         Text(
-            text = "Location",
+            text = stringResource(R.string.create_geofence_location_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Enter the center coordinates of your geofence",
+            text = stringResource(R.string.create_geofence_location_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -274,7 +276,7 @@ private fun LocationSection(
         if (!isValidLocation) {
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Please enter valid coordinates (lat: -90 to 90, lng: -180 to 180)",
+                text = stringResource(R.string.create_geofence_invalid_coords),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.error,
             )
@@ -302,12 +304,12 @@ private fun LocationSection(
 private fun RadiusSection(sliderValue: Float, radiusMeters: Int, onSliderChange: (Float) -> Unit) {
     Column {
         Text(
-            text = "Geofence Radius",
+            text = stringResource(R.string.create_geofence_radius_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "How large should the geofence area be?",
+            text = stringResource(R.string.create_geofence_radius_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -362,31 +364,31 @@ private fun TransitionTypesSection(
 ) {
     Column {
         Text(
-            text = "Trigger Events",
+            text = stringResource(R.string.create_geofence_trigger_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "When should the geofence trigger?",
+            text = stringResource(R.string.create_geofence_trigger_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         Spacer(modifier = Modifier.height(12.dp))
 
         TransitionTypeCheckbox(
-            label = "Enter",
+            label = stringResource(R.string.create_geofence_trigger_enter),
             description = "Trigger when entering the area",
             checked = enterSelected,
             onCheckedChange = onEnterChange,
         )
         TransitionTypeCheckbox(
-            label = "Exit",
+            label = stringResource(R.string.create_geofence_trigger_exit),
             description = "Trigger when leaving the area",
             checked = exitSelected,
             onCheckedChange = onExitChange,
         )
         TransitionTypeCheckbox(
-            label = "Dwell",
+            label = stringResource(R.string.create_geofence_trigger_dwell),
             description = "Trigger after staying in the area",
             checked = dwellSelected,
             onCheckedChange = onDwellChange,
@@ -456,12 +458,12 @@ private fun WebhookSection(webhooks: List<Webhook>, selectedWebhookId: String?, 
 
     Column {
         Text(
-            text = "Webhook (Optional)",
+            text = stringResource(R.string.create_geofence_webhook_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Link a webhook to send events to external services",
+            text = stringResource(R.string.create_geofence_webhook_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

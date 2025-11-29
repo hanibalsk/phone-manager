@@ -43,10 +43,12 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Geofence
 import three.two.bit.phonemanager.domain.model.TransitionType
 
@@ -82,7 +84,7 @@ fun GeofencesScreen(
                 onClick = onNavigateToCreate,
                 containerColor = MaterialTheme.colorScheme.primary,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Create Geofence")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.geofences_create))
             }
         },
     ) { paddingValues ->
@@ -168,7 +170,7 @@ private fun SwipeableGeofenceItem(geofence: Geofence, onToggleActive: (Boolean) 
             ) {
                 Icon(
                     Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.delete),
                     tint = Color.White,
                 )
             }
@@ -281,13 +283,13 @@ private fun EmptyGeofencesContent(modifier: Modifier = Modifier, onCreateClick: 
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No Geofences",
+            text = stringResource(R.string.geofences_empty_title),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Create a geofence to get notified when entering or leaving specific locations",
+            text = stringResource(R.string.geofences_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

@@ -2,6 +2,45 @@
 <resources>
     <string name="app_name">Phone Manager</string>
 
+    <!-- Common -->
+    <string name="back">Back</string>
+    <string name="delete">Delete</string>
+    <string name="refresh">Refresh</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">OK</string>
+    <string name="error">Error</string>
+    <string name="loading">Loading…</string>
+    <string name="last_seen">Last seen: %1$s</string>
+
+    <!-- Days of week -->
+    <string name="day_today">Today</string>
+    <string name="day_tomorrow">Tmrw</string>
+    <string name="day_monday">Mon</string>
+    <string name="day_tuesday">Tue</string>
+    <string name="day_wednesday">Wed</string>
+    <string name="day_thursday">Thu</string>
+    <string name="day_friday">Fri</string>
+    <string name="day_saturday">Sat</string>
+    <string name="day_sunday">Sun</string>
+
+    <!-- Home Screen -->
+    <string name="home_location_tracking">Location Tracking</string>
+
+    <!-- Registration Screen -->
+    <string name="registration_title">Device Registration</string>
+    <string name="registration_subtitle">Register your device to share location with your group</string>
+    <string name="registration_group_id_hint">All devices with the same Group ID can see each other\'s location.</string>
+
+    <!-- Group Members Screen -->
+    <string name="group_no_members">No other devices in your group yet</string>
+    <string name="group_share_hint">Share your Group ID with others to add them to your group</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_changes_hint">Changes will take effect after saving</string>
+    <string name="settings_notification_settings">Notification Settings</string>
+    <string name="settings_map_settings">Map Settings</string>
+
     <!-- Story E7.4: Weather notification toggle -->
     <string name="settings_weather_notification">Show weather in notification</string>
     <string name="settings_weather_notification_summary">Display current weather instead of tracking status</string>
@@ -20,4 +59,62 @@
     <string name="weather_tomorrow">Tomorrow</string>
     <string name="weather_unavailable">Weather unavailable</string>
     <string name="weather_offline_indicator">Offline - showing cached data</string>
+    <string name="weather_humidity_label">Humidity</string>
+    <string name="weather_wind_label">Wind</string>
+
+    <!-- Alerts Screen -->
+    <string name="alerts_create">Create Alert</string>
+    <string name="alerts_empty_title">No Proximity Alerts</string>
+    <string name="alerts_empty_subtitle">Create an alert to get notified when a group member is nearby</string>
+
+    <!-- Create Alert Screen -->
+    <string name="create_alert_target_device">Target Device</string>
+    <string name="create_alert_target_hint">Select a group member to monitor</string>
+    <string name="create_alert_no_members">No group members available. Make sure you\'re registered to a group.</string>
+    <string name="create_alert_radius_title">Alert Radius</string>
+    <string name="create_alert_radius_hint">How close should they be to trigger the alert?</string>
+    <string name="create_alert_direction_title">Alert Direction</string>
+    <string name="create_alert_direction_hint">When should you be notified?</string>
+
+    <!-- Geofences Screen -->
+    <string name="geofences_create">Create Geofence</string>
+    <string name="geofences_empty_title">No Geofences</string>
+    <string name="geofences_empty_subtitle">Create a geofence to get notified when entering or leaving specific locations</string>
+
+    <!-- Create Geofence Screen -->
+    <string name="create_geofence_name_title">Geofence Name</string>
+    <string name="create_geofence_name_hint">Give your geofence a memorable name</string>
+    <string name="create_geofence_location_title">Location</string>
+    <string name="create_geofence_location_hint">Enter the center coordinates of your geofence</string>
+    <string name="create_geofence_invalid_coords">Please enter valid coordinates (lat: -90 to 90, lng: -180 to 180)</string>
+    <string name="create_geofence_radius_title">Geofence Radius</string>
+    <string name="create_geofence_radius_hint">How large should the geofence area be?</string>
+    <string name="create_geofence_trigger_title">Trigger Events</string>
+    <string name="create_geofence_trigger_hint">When should the geofence trigger?</string>
+    <string name="create_geofence_trigger_enter">Enter</string>
+    <string name="create_geofence_trigger_exit">Exit</string>
+    <string name="create_geofence_trigger_dwell">Dwell</string>
+    <string name="create_geofence_webhook_title">Webhook (Optional)</string>
+    <string name="create_geofence_webhook_hint">Link a webhook to send events to external services</string>
+
+    <!-- Webhooks Screen -->
+    <string name="webhooks_create">Create Webhook</string>
+    <string name="webhooks_empty_title">No Webhooks</string>
+    <string name="webhooks_empty_subtitle">Create a webhook to send geofence events to external services like Home Assistant or n8n.</string>
+
+    <!-- Create Webhook Screen -->
+    <string name="create_webhook_secret_label">Secret (for HMAC signing)</string>
+    <string name="create_webhook_secret_hint">Save this secret! You\'ll need it to verify webhook signatures.</string>
+    <string name="create_webhook_how_it_works">How it works</string>
+    <string name="create_webhook_description">When a geofence event occurs, the server sends an HTTP POST request to your URL with event details in JSON format. The payload is signed with HMAC-SHA256 using your secret.</string>
+
+    <!-- Permissions -->
+    <string name="permission_privacy_notice">Your privacy: Location data is stored on your device and only sent to your group members. We do not track or store your location on our servers.</string>
+
+    <!-- Location Stats -->
+    <string name="stats_today">Today</string>
+    <string name="stats_all_time">All Time</string>
+    <string name="stats_interval">Interval</string>
+    <string name="stats_last_update">Last Update</string>
+    <string name="stats_avg_accuracy">Avg Accuracy</string>
 </resources>

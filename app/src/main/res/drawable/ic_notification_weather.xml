@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Story E7.2: Weather notification icon - Simplified for Android notifications -->
+<!-- Proper Android notification icon - simple filled circle -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <!-- Simple "W" for weather - guaranteed to render as white -->
+    <!-- Simple filled circle - guaranteed to work -->
     <path
         android:fillColor="#FFFFFFFF"
-        android:pathData="M4,4 L6,4 L8,16 L10,4 L12,4 L14,16 L16,4 L18,4 L15,20 L13,20 L11,8 L9,20 L7,20 Z" />
+        android:pathData="M12,2 A10,10 0,0 1,12 22 A10,10 0,0 1,12 2z" />
 </vector>

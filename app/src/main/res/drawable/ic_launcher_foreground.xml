@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Phone Manager app icon foreground - Cloud with sun design -->
+<!-- Safe zone: 66dp centered in 108dp, center at (54,54) -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Sun circle - center at (62, 44), radius 6 -->
+    <path
+        android:fillColor="#FFD54F"
+        android:pathData="M62,38 A6,6 0 1 1 62,50 A6,6 0 1 1 62,38 Z" />
+
+    <!-- Sun rays - aligned to center (62,44) -->
+    <path
+        android:strokeWidth="2"
+        android:strokeColor="#FFD54F"
+        android:strokeLineCap="round"
+        android:pathData="M62,32 L62,36 M62,52 L62,56 M52,44 L56,44 M68,44 L72,44 M54.5,36.5 L57.5,39.5 M66.5,39.5 L69.5,36.5 M54.5,51.5 L57.5,48.5 M66.5,48.5 L69.5,51.5" />
+
+    <!-- Cloud - centered at x=54 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M40,62 A5,5 0 0 1 45,58 A8,8 0 0 1 53,52 A9,9 0 0 1 62,60 L63,60 A4,4 0 0 1 67,64 A4,4 0 0 1 63,68 L40,68 A5,5 0 0 1 35,63 A5,5 0 0 1 40,62 Z" />
+</vector>

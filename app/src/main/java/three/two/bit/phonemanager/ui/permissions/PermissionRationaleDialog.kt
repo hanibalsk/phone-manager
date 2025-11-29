@@ -16,9 +16,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.ui.theme.PhoneManagerTheme
 
 /**
@@ -74,8 +76,7 @@ fun PermissionRationaleDialog(
                 Spacer(modifier = Modifier.height(4.dp))
 
                 Text(
-                    text = "Your privacy: Location data is stored on your device and only sent to " +
-                        "endpoints you configure.",
+                    text = stringResource(R.string.permission_privacy_notice),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontStyle = FontStyle.Italic,

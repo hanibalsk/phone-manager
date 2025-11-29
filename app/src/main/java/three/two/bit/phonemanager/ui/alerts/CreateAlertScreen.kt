@@ -47,10 +47,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.AlertDirection
 import three.two.bit.phonemanager.domain.model.Device
 import kotlin.math.roundToInt
@@ -169,12 +171,12 @@ private fun DeviceSelectorSection(
 
     Column {
         Text(
-            text = "Target Device",
+            text = stringResource(R.string.create_alert_target_device),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Select a group member to monitor",
+            text = stringResource(R.string.create_alert_target_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -197,7 +199,7 @@ private fun DeviceSelectorSection(
                 ),
             ) {
                 Text(
-                    text = "No group members available. Make sure you're registered to a group.",
+                    text = stringResource(R.string.create_alert_no_members),
                     modifier = Modifier.padding(16.dp),
                     color = MaterialTheme.colorScheme.onErrorContainer,
                 )
@@ -230,7 +232,7 @@ private fun DeviceSelectorSection(
                                     Text(device.displayName)
                                     device.lastSeenAt?.let {
                                         Text(
-                                            text = "Last seen: $it",
+                                            text = stringResource(R.string.last_seen, it),
                                             style = MaterialTheme.typography.bodySmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
@@ -256,12 +258,12 @@ private fun DeviceSelectorSection(
 private fun RadiusSection(sliderValue: Float, radiusMeters: Int, onSliderChange: (Float) -> Unit) {
     Column {
         Text(
-            text = "Alert Radius",
+            text = stringResource(R.string.create_alert_radius_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "How close should they be to trigger the alert?",
+            text = stringResource(R.string.create_alert_radius_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -309,12 +311,12 @@ private fun RadiusSection(sliderValue: Float, radiusMeters: Int, onSliderChange:
 private fun DirectionSection(selectedDirection: AlertDirection, onDirectionSelected: (AlertDirection) -> Unit) {
     Column {
         Text(
-            text = "Alert Direction",
+            text = stringResource(R.string.create_alert_direction_title),
             style = MaterialTheme.typography.titleMedium,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "When should you be notified?",
+            text = stringResource(R.string.create_alert_direction_hint),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

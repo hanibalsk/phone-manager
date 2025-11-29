@@ -159,6 +159,9 @@ dependencies {
     // Encrypted SharedPreferences for API keys
     implementation(libs.androidx.security.crypto)
 
+    // Lottie Animations
+    implementation(libs.lottie.compose)
+
     // WorkManager for background tasks
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)

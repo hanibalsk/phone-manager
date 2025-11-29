@@ -43,10 +43,12 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.AlertDirection
 import three.two.bit.phonemanager.domain.model.ProximityAlert
 
@@ -82,7 +84,7 @@ fun AlertsScreen(
                 onClick = onNavigateToCreate,
                 containerColor = MaterialTheme.colorScheme.primary,
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Create Alert")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.alerts_create))
             }
         },
     ) { paddingValues ->
@@ -168,7 +170,7 @@ private fun SwipeableAlertItem(alert: ProximityAlert, onToggleActive: (Boolean) 
             ) {
                 Icon(
                     Icons.Default.Delete,
-                    contentDescription = "Delete",
+                    contentDescription = stringResource(R.string.delete),
                     tint = Color.White,
                 )
             }
@@ -279,13 +281,13 @@ private fun EmptyAlertsContent(modifier: Modifier = Modifier, onCreateClick: () 
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No Proximity Alerts",
+            text = stringResource(R.string.alerts_empty_title),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Create an alert to get notified when a group member is nearby",
+            text = stringResource(R.string.alerts_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

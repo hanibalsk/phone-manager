@@ -448,28 +448,27 @@ class LocationTrackingService : Service() {
         // Priority: Weather (if enabled and available) > Secret Mode > Original
         return if (showWeatherInNotification && weather != null) {
             // AC E7.2.1, E7.2.2: Weather notification (shown even in secret mode for usefulness)
+            // Purpose: Tap to view detailed forecast; back to close (hide notification)
             val channelId = if (isSecretMode) CHANNEL_ID_SECRET else CHANNEL_ID_NORMAL
             NotificationCompat.Builder(this, channelId)
                 .setContentTitle(weather.toNotificationTitle()) // AC E7.2.1: "{icon} {temp}°C"
                 .setContentText(weather.toNotificationText()) // AC E7.2.2: Weather condition
-                .setSmallIcon(R.drawable.ic_weather_notification) // Weather forecast icon
+                .setSmallIcon(R.drawable.ic_foreground_service) // Custom foreground service icon
+                .setColor(getColor(R.color.notification_icon_color)) // Help system display icon
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_MIN) // AC E7.2.3: Low importance
                 .setSilent(true) // AC E7.2.3: No sound/vibration
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentIntent(contentIntent) // AC E7.2.4: Opens WeatherScreen
-                .addAction(
-                    android.R.drawable.ic_delete,
-                    "Stop Tracking",
-                    stopIntent,
-                )
+                // No stop action - weather screen is for viewing, not control
                 .build()
         } else if (isSecretMode) {
             // AC E2.2.1, E2.2.2, E2.2.3, E2.2.4: Secret mode fallback when no weather
             NotificationCompat.Builder(this, CHANNEL_ID_SECRET)
                 .setContentTitle("Service running") // AC E2.2.1: Generic title
                 .setContentText("Active")
-                .setSmallIcon(R.drawable.ic_service_neutral) // AC E2.2.2: Neutral icon
+                .setSmallIcon(R.drawable.ic_foreground_service) // AC E2.2.2: Neutral location icon
+                .setColor(getColor(R.color.notification_icon_color)) // Help system display icon
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_MIN) // AC E2.2.3: Low importance
                 .setSilent(true) // AC E2.2.4: Silent
@@ -482,7 +481,8 @@ class LocationTrackingService : Service() {
             NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
                 .setContentTitle("Location Tracking Active")
                 .setContentText(getNotificationText()) // "{count} locations • Interval: {n} min"
-                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
+                .setSmallIcon(R.drawable.ic_foreground_service)
+                .setColor(getColor(R.color.notification_icon_color)) // Help system display icon
                 .setOngoing(true)
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)

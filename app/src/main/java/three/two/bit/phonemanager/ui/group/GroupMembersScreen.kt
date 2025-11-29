@@ -31,6 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,6 +40,7 @@ import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Device
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
@@ -135,7 +137,7 @@ private fun DeviceCard(device: Device) {
             // Last seen time in human-readable format (AC E1.2.3)
             device.lastSeenAt?.let { lastSeen ->
                 Text(
-                    text = "Last seen: ${formatRelativeTime(lastSeen)}",
+                    text = stringResource(R.string.last_seen, formatRelativeTime(lastSeen)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -166,14 +168,14 @@ private fun EmptyGroupContent(modifier: Modifier = Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
             // Empty state message (AC E1.2.4)
             Text(
-                text = "No other devices in your group yet",
+                text = stringResource(R.string.group_no_members),
                 style = MaterialTheme.typography.titleMedium,
                 textAlign = TextAlign.Center,
             )
             Spacer(modifier = Modifier.height(8.dp))
             // Instructions on how to add devices (AC E1.2.4)
             Text(
-                text = "Share your Group ID with others to add them to your group",
+                text = stringResource(R.string.group_share_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

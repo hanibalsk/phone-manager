@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -63,6 +64,7 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import three.two.bit.phonemanager.R
 
 /**
  * Story E4.1/E4.2: History Screen
@@ -383,7 +385,7 @@ private fun DateFilterRow(
         FilterChip(
             selected = selectedFilter is DateFilter.Today,
             onClick = { onFilterSelected(DateFilter.Today) },
-            label = { Text("Today") },
+            label = { Text(stringResource(R.string.day_today)) },
         )
         FilterChip(
             selected = selectedFilter is DateFilter.Yesterday,

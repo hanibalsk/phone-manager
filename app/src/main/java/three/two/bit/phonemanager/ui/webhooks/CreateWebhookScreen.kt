@@ -35,10 +35,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 
 /**
  * Story E6.3: CreateWebhookScreen - UI for creating a new webhook
@@ -75,7 +77,7 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -139,7 +141,7 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
-                            text = "Secret (for HMAC signing)",
+                            text = stringResource(R.string.create_webhook_secret_label),
                             style = MaterialTheme.typography.titleSmall,
                             modifier = Modifier.weight(1f),
                         )
@@ -163,7 +165,7 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Save this secret! You'll need it to verify webhook signatures.",
+                        text = stringResource(R.string.create_webhook_secret_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -203,16 +205,14 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
                     modifier = Modifier.padding(16.dp),
                 ) {
                     Text(
-                        text = "How it works",
+                        text = stringResource(R.string.create_webhook_how_it_works),
                         style = MaterialTheme.typography.titleSmall,
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "When a geofence event occurs, the server sends an HTTP POST " +
-                            "to your target URL with event details. The X-Signature header " +
-                            "contains an HMAC-SHA256 signature for verification.",
+                        text = stringResource(R.string.create_webhook_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSecondaryContainer,
                     )
