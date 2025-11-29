@@ -89,10 +89,10 @@ fun CreateAlertScreen(viewModel: AlertsViewModel = hiltViewModel(), onNavigateBa
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Alert") },
+                title = { Text(stringResource(R.string.create_alert_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 actions = {

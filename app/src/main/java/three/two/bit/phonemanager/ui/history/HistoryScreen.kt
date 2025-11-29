@@ -107,10 +107,10 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Location History") },
+                title = { Text(stringResource(R.string.history_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )
@@ -227,18 +227,18 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
             onDismissRequest = viewModel::dismissDatePicker,
             confirmButton = {
                 TextButton(onClick = { viewModel.onStartDateSelected(datePickerState.selectedDateMillis) }) {
-                    Text("Next")
+                    Text(stringResource(R.string.history_next))
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::dismissDatePicker) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         ) {
             DatePicker(
                 state = datePickerState,
-                title = { Text("Select Start Date", modifier = Modifier.padding(16.dp)) },
+                title = { Text(stringResource(R.string.history_select_start_date), modifier = Modifier.padding(16.dp)) },
             )
         }
     }
@@ -261,18 +261,18 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
             onDismissRequest = viewModel::dismissDatePicker,
             confirmButton = {
                 TextButton(onClick = { viewModel.onEndDateSelected(datePickerState.selectedDateMillis) }) {
-                    Text("Apply")
+                    Text(stringResource(R.string.history_apply))
                 }
             },
             dismissButton = {
                 TextButton(onClick = viewModel::dismissDatePicker) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         ) {
             DatePicker(
                 state = datePickerState,
-                title = { Text("Select End Date", modifier = Modifier.padding(16.dp)) },
+                title = { Text(stringResource(R.string.history_select_end_date), modifier = Modifier.padding(16.dp)) },
             )
         }
     }
@@ -309,6 +309,7 @@ private fun DeviceSelector(
     modifier: Modifier = Modifier,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val myDeviceLabel = stringResource(R.string.history_my_device)
 
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -328,11 +329,10 @@ private fun DeviceSelector(
         ) {
             OutlinedTextField(
                 value = selectedDevice?.let {
-                    if (it.isCurrentDevice) "${it.displayName} (Me)" else it.displayName
-                } ?: "Select device",
+                    if (it.isCurrentDevice) myDeviceLabel else it.displayName
+                } ?: myDeviceLabel,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Device") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                 colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
                 modifier = Modifier
@@ -348,7 +348,7 @@ private fun DeviceSelector(
                         text = {
                             Text(
                                 if (device.isCurrentDevice) {
-                                    "${device.displayName} (Me)"
+                                    myDeviceLabel
                                 } else {
                                     device.displayName
                                 },
@@ -390,12 +390,12 @@ private fun DateFilterRow(
         FilterChip(
             selected = selectedFilter is DateFilter.Yesterday,
             onClick = { onFilterSelected(DateFilter.Yesterday) },
-            label = { Text("Yesterday") },
+            label = { Text(stringResource(R.string.history_yesterday)) },
         )
         FilterChip(
             selected = selectedFilter is DateFilter.Last7Days,
             onClick = { onFilterSelected(DateFilter.Last7Days) },
-            label = { Text("Last 7 Days") },
+            label = { Text(stringResource(R.string.history_last_7_days)) },
         )
         // AC E4.1.5: Custom date range chip
         FilterChip(
@@ -405,7 +405,7 @@ private fun DateFilterRow(
                 if (selectedFilter is DateFilter.Custom) {
                     Text("${selectedFilter.startDate} - ${selectedFilter.endDate}")
                 } else {
-                    Text("Custom")
+                    Text(stringResource(R.string.history_custom))
                 }
             },
             leadingIcon = {

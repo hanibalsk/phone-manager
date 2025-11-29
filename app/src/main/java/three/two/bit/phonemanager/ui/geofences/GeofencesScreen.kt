@@ -71,10 +71,10 @@ fun GeofencesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Geofences") },
+                title = { Text(stringResource(R.string.geofences_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )

@@ -61,14 +61,14 @@ fun LocationTrackingToggle(viewModel: LocationTrackingViewModel = hiltViewModel(
                 Text(
                     text = when (trackingState) {
                         is TrackingState.Stopped -> if (permissionState is PermissionState.AllGranted) {
-                            "Inactive"
+                            stringResource(R.string.tracking_inactive)
                         } else {
-                            "Location permissions required"
+                            stringResource(R.string.tracking_permissions_required)
                         }
 
-                        is TrackingState.Starting -> "Starting..."
-                        is TrackingState.Active -> "Active"
-                        is TrackingState.Stopping -> "Stopping..."
+                        is TrackingState.Starting -> stringResource(R.string.tracking_starting)
+                        is TrackingState.Active -> stringResource(R.string.tracking_active)
+                        is TrackingState.Stopping -> stringResource(R.string.tracking_stopping)
                         is TrackingState.Error -> (trackingState as TrackingState.Error).message
                     },
                     style = MaterialTheme.typography.bodySmall,
@@ -86,15 +86,17 @@ fun LocationTrackingToggle(viewModel: LocationTrackingViewModel = hiltViewModel(
                     strokeWidth = 2.dp,
                 )
             } else {
+                val stopHint = stringResource(R.string.tracking_toggle_stop_hint)
+                val startHint = stringResource(R.string.tracking_toggle_start_hint)
                 Switch(
                     checked = isChecked,
                     onCheckedChange = { viewModel.toggleTracking() },
                     enabled = isEnabled,
                     modifier = Modifier.semantics {
                         contentDescription = if (isChecked) {
-                            "Location tracking is active. Toggle to stop."
+                            stopHint
                         } else {
-                            "Location tracking is inactive. Toggle to start."
+                            startHint
                         }
                     },
                 )

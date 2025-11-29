@@ -60,10 +60,10 @@ fun GroupMembersScreen(viewModel: GroupMembersViewModel = hiltViewModel(), onNav
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Group Members") },
+                title = { Text(stringResource(R.string.group_members_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )

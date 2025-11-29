@@ -84,7 +84,7 @@ fun HomeScreen(
                 title = {
                     // Story E2.1: Long-press gesture on title to toggle secret mode (AC E2.1.2)
                     Text(
-                        "Phone Manager",
+                        stringResource(R.string.app_name),
                         modifier =
                         Modifier.pointerInput(Unit) {
                             detectTapGestures(
@@ -97,7 +97,7 @@ fun HomeScreen(
                 },
                 actions = {
                     IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, "Settings")
+                        Icon(Icons.Default.Settings, stringResource(R.string.settings))
                     }
                 },
             )
@@ -175,7 +175,7 @@ fun HomeScreen(
                 onClick = onNavigateToGroupMembers,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("View Group Members")
+                Text(stringResource(R.string.home_view_group_members))
             }
 
             // Navigate to Map screen (Story E3.1)
@@ -183,7 +183,7 @@ fun HomeScreen(
                 onClick = onNavigateToMap,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("View Map")
+                Text(stringResource(R.string.home_view_map))
             }
 
             // Navigate to History screen (Story E4.1)
@@ -191,7 +191,7 @@ fun HomeScreen(
                 onClick = onNavigateToHistory,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("View Location History")
+                Text(stringResource(R.string.home_view_history))
             }
 
             // Navigate to Alerts screen (Story E5.1)
@@ -199,7 +199,7 @@ fun HomeScreen(
                 onClick = onNavigateToAlerts,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Proximity Alerts")
+                Text(stringResource(R.string.home_proximity_alerts))
             }
 
             // Navigate to Geofences screen (Story E6.1)
@@ -207,7 +207,7 @@ fun HomeScreen(
                 onClick = onNavigateToGeofences,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Geofences")
+                Text(stringResource(R.string.home_geofences))
             }
 
             // Navigate to Webhooks screen (Story E6.3)
@@ -215,7 +215,7 @@ fun HomeScreen(
                 onClick = onNavigateToWebhooks,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Webhooks")
+                Text(stringResource(R.string.home_webhooks))
             }
 
             Spacer(modifier = Modifier.height(16.dp))

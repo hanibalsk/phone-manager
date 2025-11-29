@@ -110,7 +110,7 @@ fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifie
                     Text(
                         text = locationStats.lastLocation?.let {
                             formatTimestamp(Instant.ofEpochMilli(it.timestamp))
-                        } ?: "No locations yet",
+                        } ?: stringResource(R.string.stats_no_locations),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -143,8 +143,9 @@ private fun formatTimestamp(instant: Instant): String {
     val now = Instant.now()
     val duration = Duration.between(instant, now)
 
+    val justNow = stringResource(R.string.stats_just_now)
     return when {
-        duration.toMinutes() < 1 -> "Just now"
+        duration.toMinutes() < 1 -> justNow
         duration.toMinutes() < 60 -> "${duration.toMinutes()} min ago"
         duration.toHours() < 24 -> "${duration.toHours()} hours ago"
         else -> {

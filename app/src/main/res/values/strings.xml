@@ -147,8 +147,62 @@
     <!-- Map Screen -->
     <string name="map_marker_you">You</string>
 
-    <!-- Notification Channels (non-UI, but good to have) -->
+    <!-- Notification Channels -->
     <string name="channel_tracking_description">Ongoing location tracking service</string>
     <string name="channel_background_description">Background service</string>
     <string name="channel_geofence_description">Notifications for geofence enter/exit events</string>
+
+    <!-- Home Screen Buttons -->
+    <string name="home_view_group_members">View Group Members</string>
+    <string name="home_view_map">View Map</string>
+    <string name="home_view_history">View Location History</string>
+    <string name="home_proximity_alerts">Proximity Alerts</string>
+    <string name="home_geofences">Geofences</string>
+    <string name="home_webhooks">Webhooks</string>
+    <string name="settings">Settings</string>
+
+    <!-- Screen Titles -->
+    <string name="webhooks_title">Webhooks</string>
+    <string name="alerts_title">Proximity Alerts</string>
+    <string name="geofences_title">Geofences</string>
+    <string name="group_members_title">Group Members</string>
+    <string name="history_title">Location History</string>
+    <string name="map_title">Map</string>
+    <string name="settings_title">Settings</string>
+    <string name="create_alert_title">Create Alert</string>
+    <string name="create_geofence_title">Create Geofence</string>
+    <string name="create_webhook_title">Create Webhook</string>
+
+    <!-- Location Stats -->
+    <string name="stats_no_locations">No locations yet</string>
+    <string name="stats_just_now">Just now</string>
+
+    <!-- Location Tracking Toggle -->
+    <string name="tracking_inactive">Inactive</string>
+    <string name="tracking_permissions_required">Location permissions required</string>
+    <string name="tracking_starting">Starting...</string>
+    <string name="tracking_active">Active</string>
+    <string name="tracking_stopping">Stopping...</string>
+    <string name="tracking_toggle_stop_hint">Location tracking is active. Toggle to stop.</string>
+    <string name="tracking_toggle_start_hint">Location tracking is inactive. Toggle to start.</string>
+
+    <!-- Permission Dialogs -->
+    <string name="permission_location_title">Location Permission Required</string>
+    <string name="permission_background_title">Background Location Access</string>
+    <string name="permission_notification_title">Notification Permission</string>
+    <string name="permission_location_rationale">Phone Manager needs access to your location to track your device\'s position.</string>
+    <string name="permission_background_rationale">To continue tracking your location when the app is closed or in the background, please allow location access \"All the time\" on the next screen.</string>
+    <string name="permission_notification_rationale">This helps you know when tracking is running and provides quick access to stop it.</string>
+    <string name="permission_continue">Continue</string>
+    <string name="permission_not_now">Not Now</string>
+
+    <!-- History Screen -->
+    <string name="history_my_device">My Device</string>
+    <string name="history_yesterday">Yesterday</string>
+    <string name="history_last_7_days">Last 7 Days</string>
+    <string name="history_custom">Custom</string>
+    <string name="history_select_start_date">Select Start Date</string>
+    <string name="history_select_end_date">Select End Date</string>
+    <string name="history_next">Next</string>
+    <string name="history_apply">Apply</string>
 </resources>

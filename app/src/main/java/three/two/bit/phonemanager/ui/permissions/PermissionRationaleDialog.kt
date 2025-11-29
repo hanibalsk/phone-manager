@@ -49,9 +49,9 @@ fun PermissionRationaleDialog(
         title = {
             Text(
                 text = when (type) {
-                    PermissionType.LOCATION -> "Location Permission Required"
-                    PermissionType.BACKGROUND -> "Background Location Access"
-                    PermissionType.NOTIFICATION -> "Notification Permission"
+                    PermissionType.LOCATION -> stringResource(R.string.permission_location_title)
+                    PermissionType.BACKGROUND -> stringResource(R.string.permission_background_title)
+                    PermissionType.NOTIFICATION -> stringResource(R.string.permission_notification_title)
                 },
             )
         },
@@ -60,15 +60,13 @@ fun PermissionRationaleDialog(
                 Text(
                     text = when (type) {
                         PermissionType.LOCATION ->
-                            "Phone Manager needs access to your location to track your device's position."
+                            stringResource(R.string.permission_location_rationale)
 
                         PermissionType.BACKGROUND ->
-                            "To continue tracking your location when the app is closed or in the background, " +
-                                "please allow location access \"All the time\" on the next screen."
+                            stringResource(R.string.permission_background_rationale)
 
                         PermissionType.NOTIFICATION ->
-                            "A persistent notification is required while location tracking is active. " +
-                                "This helps you know when tracking is running and provides quick access to stop it."
+                            stringResource(R.string.permission_notification_rationale)
                     },
                     style = MaterialTheme.typography.bodyMedium,
                 )
@@ -85,12 +83,12 @@ fun PermissionRationaleDialog(
         },
         confirmButton = {
             Button(onClick = onAccept) {
-                Text("Continue")
+                Text(stringResource(R.string.permission_continue))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Not Now")
+                Text(stringResource(R.string.permission_not_now))
             }
         },
         modifier = modifier,

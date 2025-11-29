@@ -72,7 +72,7 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Webhook") },
+                title = { Text(stringResource(R.string.create_webhook_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(

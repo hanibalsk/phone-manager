@@ -151,4 +151,58 @@
     <string name="channel_tracking_description">Služba sledovania polohy</string>
     <string name="channel_background_description">Služba na pozadí</string>
     <string name="channel_geofence_description">Notifikácie pre udalosti vstupu/odchodu z geofence</string>
+
+    <!-- Home Screen Buttons -->
+    <string name="home_view_group_members">Zobraziť členov skupiny</string>
+    <string name="home_view_map">Zobraziť mapu</string>
+    <string name="home_view_history">Zobraziť históriu polohy</string>
+    <string name="home_proximity_alerts">Upozornenia na blízkosť</string>
+    <string name="home_geofences">Geofence</string>
+    <string name="home_webhooks">Webhooky</string>
+    <string name="settings">Nastavenia</string>
+
+    <!-- Screen Titles -->
+    <string name="webhooks_title">Webhooky</string>
+    <string name="alerts_title">Upozornenia na blízkosť</string>
+    <string name="geofences_title">Geofence</string>
+    <string name="group_members_title">Členovia skupiny</string>
+    <string name="history_title">História polohy</string>
+    <string name="map_title">Mapa</string>
+    <string name="settings_title">Nastavenia</string>
+    <string name="create_alert_title">Vytvoriť upozornenie</string>
+    <string name="create_geofence_title">Vytvoriť geofence</string>
+    <string name="create_webhook_title">Vytvoriť webhook</string>
+
+    <!-- Location Stats -->
+    <string name="stats_no_locations">Zatiaľ žiadne polohy</string>
+    <string name="stats_just_now">Práve teraz</string>
+
+    <!-- Location Tracking Toggle -->
+    <string name="tracking_inactive">Neaktívne</string>
+    <string name="tracking_permissions_required">Vyžaduje sa povolenie polohy</string>
+    <string name="tracking_starting">Spúšťa sa...</string>
+    <string name="tracking_active">Aktívne</string>
+    <string name="tracking_stopping">Zastavuje sa...</string>
+    <string name="tracking_toggle_stop_hint">Sledovanie polohy je aktívne. Prepnutím zastavíte.</string>
+    <string name="tracking_toggle_start_hint">Sledovanie polohy je neaktívne. Prepnutím spustíte.</string>
+
+    <!-- Permission Dialogs -->
+    <string name="permission_location_title">Vyžaduje sa povolenie polohy</string>
+    <string name="permission_background_title">Prístup k polohe na pozadí</string>
+    <string name="permission_notification_title">Povolenie notifikácií</string>
+    <string name="permission_location_rationale">Phone Manager potrebuje prístup k vašej polohe na sledovanie pozície zariadenia.</string>
+    <string name="permission_background_rationale">Pre pokračovanie sledovania polohy, keď je aplikácia zatvorená alebo na pozadí, povoľte prístup k polohe \"Vždy\" na ďalšej obrazovke.</string>
+    <string name="permission_notification_rationale">Pomáha vám vedieť, kedy sledovanie beží a poskytuje rýchly prístup na jeho zastavenie.</string>
+    <string name="permission_continue">Pokračovať</string>
+    <string name="permission_not_now">Teraz nie</string>
+
+    <!-- History Screen -->
+    <string name="history_my_device">Moje zariadenie</string>
+    <string name="history_yesterday">Včera</string>
+    <string name="history_last_7_days">Posledných 7 dní</string>
+    <string name="history_custom">Vlastné</string>
+    <string name="history_select_start_date">Vyberte začiatočný dátum</string>
+    <string name="history_select_end_date">Vyberte koncový dátum</string>
+    <string name="history_next">Ďalej</string>
+    <string name="history_apply">Použiť</string>
 </resources>

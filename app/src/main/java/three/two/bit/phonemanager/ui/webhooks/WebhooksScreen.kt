@@ -78,7 +78,7 @@ fun WebhooksScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Webhooks") },
+                title = { Text(stringResource(R.string.webhooks_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(

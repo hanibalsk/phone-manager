@@ -101,10 +101,10 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Create Geofence") },
+                title = { Text(stringResource(R.string.create_geofence_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 actions = {
