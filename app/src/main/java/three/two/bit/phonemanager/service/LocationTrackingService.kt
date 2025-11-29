@@ -405,11 +405,14 @@ class LocationTrackingService : Service() {
      * AC E2.2.1-E2.2.5, E7.2.1-E7.2.7, E7.4.3, E7.4.4
      */
     private fun createNotification(): Notification {
-        // Main activity intent
+        // Story E7.2: Main activity intent with deep link to weather screen (AC E7.2.4)
         val contentIntent = PendingIntent.getActivity(
             this,
             0,
-            Intent(this, MainActivity::class.java),
+            Intent(this, MainActivity::class.java).apply {
+                putExtra(MainActivity.EXTRA_NAVIGATE_TO, MainActivity.DESTINATION_WEATHER)
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
 
@@ -442,8 +445,27 @@ class LocationTrackingService : Service() {
         // AC E7.2.1, E7.2.2: Use pre-fetched weather (updated by observer, avoids blocking I/O)
         val weather = cachedWeatherForNotification
 
-        return if (isSecretMode) {
-            // AC E2.2.1, E2.2.2, E2.2.3, E2.2.4: Discreet notification
+        // Priority: Weather (if enabled and available) > Secret Mode > Original
+        return if (showWeatherInNotification && weather != null) {
+            // AC E7.2.1, E7.2.2: Weather notification (shown even in secret mode for usefulness)
+            val channelId = if (isSecretMode) CHANNEL_ID_SECRET else CHANNEL_ID_NORMAL
+            NotificationCompat.Builder(this, channelId)
+                .setContentTitle(weather.toNotificationTitle()) // AC E7.2.1: "{icon} {temp}°C"
+                .setContentText(weather.toNotificationText()) // AC E7.2.2: Weather condition
+                .setSmallIcon(R.drawable.ic_weather_notification) // Weather forecast icon
+                .setOngoing(true)
+                .setPriority(NotificationCompat.PRIORITY_MIN) // AC E7.2.3: Low importance
+                .setSilent(true) // AC E7.2.3: No sound/vibration
+                .setCategory(NotificationCompat.CATEGORY_SERVICE)
+                .setContentIntent(contentIntent) // AC E7.2.4: Opens WeatherScreen
+                .addAction(
+                    android.R.drawable.ic_delete,
+                    "Stop Tracking",
+                    stopIntent,
+                )
+                .build()
+        } else if (isSecretMode) {
+            // AC E2.2.1, E2.2.2, E2.2.3, E2.2.4: Secret mode fallback when no weather
             NotificationCompat.Builder(this, CHANNEL_ID_SECRET)
                 .setContentTitle("Service running") // AC E2.2.1: Generic title
                 .setContentText("Active")
@@ -454,26 +476,9 @@ class LocationTrackingService : Service() {
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentIntent(contentIntent)
                 .build()
-        } else if (showWeatherInNotification && weather != null) {
-            // AC E7.2.1, E7.2.2: Weather notification
-            NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
-                .setContentTitle(weather.toNotificationTitle()) // AC E7.2.1: "{icon} {temp}°C"
-                .setContentText(weather.toNotificationText()) // AC E7.2.2: Weather condition
-                .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-                .setOngoing(true)
-                .setPriority(NotificationCompat.PRIORITY_MIN) // AC E7.2.3: Low importance
-                .setSilent(true) // AC E7.2.3: No sound/vibration
-                .setCategory(NotificationCompat.CATEGORY_SERVICE)
-                .setContentIntent(contentIntent)
-                .addAction(
-                    android.R.drawable.ic_delete,
-                    "Stop Tracking",
-                    stopIntent,
-                )
-                .build()
         } else {
             // AC E7.2.7: Fallback to original notification
-            // AC E7.4.4: Original notification when weather disabled
+            // AC E7.4.4: Original notification when weather disabled or unavailable
             NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
                 .setContentTitle("Location Tracking Active")
                 .setContentText(getNotificationText()) // "{count} locations • Interval: {n} min"

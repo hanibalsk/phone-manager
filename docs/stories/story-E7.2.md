@@ -190,8 +190,10 @@ return if (isWeatherEnabled && weather != null) {
 1. Weather fetching triggered by location updates (not separate timer)
 2. Used extension functions (toNotificationTitle, toNotificationText) for clean formatting
 3. Weather channel config handled via existing CHANNEL_ID_NORMAL with adjusted priority
-4. Deep link navigation uses existing MainActivity contentIntent (Task 5 simplified)
-5. Fallback logic built into conditional chain: secretMode > weather > original
+4. **Deep link navigation implemented:** Intent extras + mutableStateOf + LaunchedEffect for WeatherScreen
+5. Fallback logic built into conditional chain: **weather > secretMode > original**
+6. **IMPORTANT:** Weather shown even in secret mode (uses secret channel for discretion)
+7. **Custom weather icon:** Created ic_weather_notification.xml (cloud with sun)
 
 **Integration Notes:**
 - Weather display respects E7.4 toggle setting
@@ -213,9 +215,12 @@ All 8 tasks completed. Weather now displays in notification when enabled and ava
 
 ### Created Files
 - `app/src/main/java/three/two/bit/phonemanager/util/WeatherUtils.kt`
+- `app/src/main/res/drawable/ic_weather_notification.xml`
 
 ### Modified Files
 - `app/src/main/java/three/two/bit/phonemanager/service/LocationTrackingService.kt`
+- `app/src/main/java/three/two/bit/phonemanager/MainActivity.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/navigation/PhoneManagerNavHost.kt`
 
 ---
 
@@ -226,6 +231,8 @@ All 8 tasks completed. Weather now displays in notification when enabled and ava
 | 2025-11-28 | John (PM) | Story created from Epic E7 feature spec |
 | 2025-11-28 | Dev Agent | Implemented all 8 tasks: weather injection, notification display, utils, testing |
 | 2025-11-28 | Martin (Reviewer) | Senior Developer Review notes appended - Approved |
+| 2025-11-28 | Martin | Added custom weather notification icon (ic_weather_notification.xml) |
+| 2025-11-28 | Martin | Implemented deep link navigation to WeatherScreen (MainActivity + NavHost) |
 
 ---
 
@@ -243,28 +250,35 @@ All 8 tasks completed. Weather now displays in notification when enabled and ava
 
 ### Summary
 
-Story E7.2 successfully integrates weather display into the foreground notification with clean implementation and proper integration with existing service infrastructure. The three-way notification logic (secret mode > weather > original) is well-structured. All 7 acceptance criteria are met with good architectural integration.
+Story E7.2 successfully integrates weather display into the foreground notification with clean implementation and proper integration with existing service infrastructure. The three-way notification logic has been **corrected to prioritize weather over secret mode** (weather > secret mode > original), ensuring weather is shown even when secret mode is active while maintaining discreet channel properties. All 7 acceptance criteria are met with good architectural integration.
 
 ### Key Findings
 
 **Strengths:**
 - ✅ Clean integration into existing LocationTrackingService
-- ✅ Proper three-way notification priority: secret mode > weather > original
+- ✅ **Corrected** three-way notification priority: **weather > secret mode > original**
+- ✅ Weather shown even in secret mode (uses discreet channel for privacy)
 - ✅ Extension functions (toNotificationTitle, toNotificationText) provide clean formatting
 - ✅ Automatic weather refresh when location updates (efficient, no separate timer)
 - ✅ Respects settings toggle from Story E7.4
 - ✅ Silent notification with PRIORITY_MIN (AC E7.2.3)
 - ✅ Graceful fallback when weather unavailable
 
-**Medium Priority Findings:**
-1. **Blocking I/O in notification creation**: `createNotification()` uses `runBlocking` to fetch weather synchronously, which could cause ANR if cache read is slow.
-   - **File:** `LocationTrackingService.kt:434-441`
-   - **Impact:** Medium - DataStore reads are usually fast but not guaranteed
-   - **Recommendation:** Consider pre-fetching weather into a local var updated by the observer
+**Medium Priority Findings (ALL FIXED):**
+1. ✅ **FIXED - Blocking I/O in notification creation**: `createNotification()` originally used `runBlocking`.
+   - **Fix Applied:** Added `@Volatile var cachedWeatherForNotification` and pre-fetch in observer
+   - **File:** `LocationTrackingService.kt:81-83, 178, 443`
+   - **Result:** No blocking I/O, prevents potential ANR
 
-2. **Missing notification channel update**: AC E7.2.3 specifies notification channel changes (IMPORTANCE_MIN, VISIBILITY_SECRET), but implementation reuses CHANNEL_ID_NORMAL which was created with IMPORTANCE_LOW.
-   - **File:** `LocationTrackingService.kt:343-351`
-   - **Recommendation:** Update existing normal channel or create separate weather channel
+2. ✅ **FIXED - Notification channel update**: AC E7.2.3 channel configuration updated.
+   - **Fix Applied:** Updated normal channel to IMPORTANCE_MIN with VISIBILITY_SECRET
+   - **File:** `LocationTrackingService.kt:369-379`
+   - **Result:** Matches AC E7.2.3 specification
+
+3. ✅ **FIXED - Priority logic correction**: Weather now shown even in secret mode.
+   - **Fix Applied:** Changed priority from (secret > weather > original) to (weather > secret > original)
+   - **File:** `LocationTrackingService.kt:446-493`
+   - **Result:** Weather displays in secret mode using discreet channel
 
 **Low Priority Notes:**
 - Weather observer triggers notification update but doesn't check if weather actually changed
@@ -320,13 +334,20 @@ Story E7.2 successfully integrates weather display into the foreground notificat
 
 ### Action Items
 
-**Medium Priority:**
-1. [Med] Update notification channel to IMPORTANCE_MIN with VISIBILITY_SECRET (LocationTrackingService.kt:343-351, AC E7.2.3)
-2. [Med] Refactor runBlocking in createNotification() to avoid potential ANR (LocationTrackingService.kt:434-441)
+**Medium Priority (ALL COMPLETED):**
+1. ✅ **DONE** - Update notification channel to IMPORTANCE_MIN with VISIBILITY_SECRET
+2. ✅ **DONE** - Refactor runBlocking in createNotification() to avoid potential ANR
+3. ✅ **DONE** - Correct priority logic to show weather even in secret mode
 
 **Low Priority:**
 3. [Low] Add unit tests for WeatherUtils extension functions
 4. [Low] Add tests for notification builder three-way logic
 5. [Low] Consider debouncing rapid notification updates
 
-**Recommendation:** Address Medium items for production quality. Low items enhance maintainability.
+**Status:** All medium-priority items addressed. Story is production-ready.
+
+**Device Verification:**
+- ✅ Tested on SM-A366B (Android API 36)
+- ✅ Weather showing in notification: "☁️ -1°C" / "Overcast"
+- ✅ Secret mode active with weather display (using discreet channel)
+- ✅ See `/docs/testing/epic-7-weather-in-secret-mode-verification.md`

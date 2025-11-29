@@ -1,6 +1,7 @@
 package three.two.bit.phonemanager
 
 import android.Manifest
+import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -10,6 +11,9 @@ import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -30,6 +34,9 @@ class MainActivity : ComponentActivity() {
     lateinit var secureStorage: SecureStorage
 
     private val permissionViewModel: PermissionViewModel by viewModels()
+
+    // Story E7.2: State for deep link navigation (AC E7.2.4)
+    private var navigationDestination by mutableStateOf<String?>(null)
 
     // Permission launchers - must be registered before onCreate
     private val locationPermissionLauncher = registerForActivityResult(
@@ -70,6 +77,9 @@ class MainActivity : ComponentActivity() {
 
         Timber.d("MainActivity created")
 
+        // Story E7.2: Extract navigation destination from intent (AC E7.2.4)
+        navigationDestination = intent?.getStringExtra(EXTRA_NAVIGATE_TO)
+
         setContent {
             PhoneManagerTheme {
                 Surface(
@@ -82,10 +92,30 @@ class MainActivity : ComponentActivity() {
                         onRequestBackgroundPermission = ::requestBackgroundPermission,
                         onRequestNotificationPermission = ::requestNotificationPermission,
                         isRegistered = secureStorage.isRegistered(),
+                        initialDestination = navigationDestination,
                     )
                 }
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Story E7.2: Handle notification tap when app is already running (AC E7.2.4)
+        val destination = intent.getStringExtra(EXTRA_NAVIGATE_TO)
+        Timber.d("onNewIntent called with destination: $destination")
+        if (destination != null) {
+            Timber.d("Deep link navigation to: $destination")
+            navigationDestination = destination
+            // Update the intent so it's available in onCreate after process recreation
+            setIntent(intent)
+        }
+    }
+
+    companion object {
+        // Story E7.2: Intent extra for deep link navigation
+        const val EXTRA_NAVIGATE_TO = "navigate_to"
+        const val DESTINATION_WEATHER = "weather"
     }
 
     override fun onResume() {

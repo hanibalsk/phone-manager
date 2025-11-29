@@ -1,9 +1,11 @@
 package three.two.bit.phonemanager.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import kotlinx.coroutines.delay
 import three.two.bit.phonemanager.ui.alerts.AlertsScreen
 import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
 import three.two.bit.phonemanager.ui.geofences.CreateGeofenceScreen
@@ -42,11 +44,25 @@ fun PhoneManagerNavHost(
     onRequestBackgroundPermission: () -> Unit,
     onRequestNotificationPermission: () -> Unit,
     isRegistered: Boolean,
+    initialDestination: String? = null,
 ) {
     val navController = rememberNavController()
 
     // Determine start destination based on registration status
     val startDestination = if (isRegistered) Screen.Home.route else Screen.Registration.route
+
+    // Story E7.2: Handle deep link navigation from notification (AC E7.2.4)
+    // Navigate to destination while keeping home screen in back stack
+    LaunchedEffect(initialDestination) {
+        if (initialDestination != null && isRegistered) {
+            // Wait for NavHost to be ready
+            delay(100)
+            navController.navigate(initialDestination) {
+                // Keep home screen in back stack so back button goes to home
+                launchSingleTop = true
+            }
+        }
+    }
 
     NavHost(
         navController = navController,

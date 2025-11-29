@@ -41,9 +41,11 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="${MAPS_API_KEY}" />
 
+        <!-- Story E7.2: MainActivity with singleTop for deep link navigation (AC E7.2.4) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:launchMode="singleTop"
             android:theme="@style/Theme.PhoneManager">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

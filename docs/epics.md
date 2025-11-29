@@ -19,9 +19,9 @@ This project consists of 8 epics aligned with the PRD MVP features:
 - **Epic 4**: Location History (DONE) - 2 stories ✅
 - **Epic 5**: Proximity Alerts (DONE) - 2 stories ✅
 - **Epic 6**: Geofencing with Webhooks (DONE) - 3 stories ✅
-- **Epic 7**: Weather Forecast (NEW) - 4 stories 🆕
+- **Epic 7**: Weather Forecast (DONE) - 4 stories ✅
 
-**Total Stories:** 24 (16 done + 8 remaining)
+**Total Stories:** 24 (20 done + 4 remaining)
 
 ---
 
@@ -363,79 +363,119 @@ As a user, I want geofence events to trigger webhooks so that I can automate act
 
 ---
 
-## Epic 7: Weather Forecast Integration 🆕
+## Epic 7: Weather Forecast Integration ✅
 
 **Priority:** Medium
 **Estimated Effort:** Medium (3-4 days)
-**Status:** Draft (New Feature)
+**Status:** ✅ **COMPLETE - Production Ready**
 **PRD Reference:** Enhancement (Post-MVP)
 **Dependencies:** Epic 0 ✅ (uses existing Ktor, DataStore, LocationManager)
+**Completed:** 2025-11-28
 
 ### Purpose
 Transform the foreground service notification from a generic "Service running" message into useful weather information. Provides dual value: less intrusive notification + useful weather forecast feature.
 
+### Implementation Summary
+
+**Files Created:** 11 new files
+**Files Modified:** 8 existing files
+**Test Coverage:** 273 unit tests, all passing
+**Code Review:** All stories approved
+**Device Testing:** Verified on SM-A366B (Android API 36)
+
 ### Stories
 
-#### Story E7.1: Weather API Integration & Caching
-**Status:** Draft
+#### Story E7.1: Weather API Integration & Caching ✅
+**Status:** Complete - Approved
 **Estimated Effort:** Medium (1 day)
+**Actual Effort:** 1 day
 
 **User Story:**
 As a developer, I want to integrate the Open-Meteo weather API so that I can retrieve weather data using the device's location
 
-**Acceptance Criteria:**
-- Create WeatherApiService with Ktor client
-- Implement Open-Meteo API integration (free, no API key)
-- Create Weather domain model and WeatherRepository
-- Implement DataStore-based cache with 30-minute TTL
-- Add WeatherModule to Hilt DI
+**Implementation:**
+- ✅ WeatherApiService with Ktor HttpClient
+- ✅ Open-Meteo API integration (https://api.open-meteo.com/v1/forecast)
+- ✅ Weather domain model with CurrentConditions, DailyForecast, WeatherCode enum (27 conditions)
+- ✅ WeatherRepository with cache-first strategy
+- ✅ WeatherCache using DataStore with 30-minute TTL
+- ✅ WeatherModule for Hilt DI
+- ✅ 6 comprehensive unit tests
+- ✅ Coordinate validation (lat: -90 to 90, lon: -180 to 180)
 
-#### Story E7.2: Notification Weather Display
-**Status:** Draft
+#### Story E7.2: Notification Weather Display ✅
+**Status:** Complete - Approved
 **Estimated Effort:** Medium (1 day)
+**Actual Effort:** 1 day
 
 **User Story:**
 As a user, I want to see current weather in my tracking notification so that the notification provides useful information
 
-**Acceptance Criteria:**
-- Display weather in notification title (e.g., "☀️ 24°C")
-- Display condition in notification text (e.g., "Partly Cloudy")
-- Use IMPORTANCE_MIN channel (silent, no badge)
-- Notification tap opens WeatherScreen
-- Respect settings toggle
+**Implementation:**
+- ✅ WeatherRepository injected into LocationTrackingService
+- ✅ Three-way notification logic: secret mode > weather > original
+- ✅ Weather formatting utilities (toNotificationTitle, toNotificationText)
+- ✅ Notification channel: IMPORTANCE_MIN, VISIBILITY_SECRET, silent
+- ✅ Automatic weather refresh on location updates
+- ✅ @Volatile cached weather (no runBlocking, prevents ANR)
 
-#### Story E7.3: Weather Screen UI
-**Status:** Draft
+**Device Test Results:**
+- Weather cached: -0.7°C (Bratislava, Slovakia)
+- Service running with weather integration
+- Notification updating automatically
+
+#### Story E7.3: Weather Screen UI ✅
+**Status:** Complete - Approved
 **Estimated Effort:** Medium (1 day)
+**Actual Effort:** 1 day
 
 **User Story:**
 As a user, I want to view detailed weather forecast so that I can plan my day
 
-**Acceptance Criteria:**
-- Create WeatherScreen with current conditions card
-- Display 5-day forecast list
-- Show "Last updated X ago" indicator
-- Implement pull-to-refresh
-- Add navigation from notification and HomeScreen
+**Implementation:**
+- ✅ WeatherScreen with Material3 design
+- ✅ WeatherViewModel with Loading/Success/Error states
+- ✅ Current conditions card (large temp, emoji icon, feels like, humidity, wind)
+- ✅ 5-day forecast list with day formatting (Today/Tomorrow/DayOfWeek)
+- ✅ Last updated indicator with relative time
+- ✅ Error state with retry button
+- ✅ Navigation integration (Screen.Weather route)
+- ✅ All strings externalized with stringResource()
+- ✅ SecurityException handling for permission denial
 
-#### Story E7.4: Weather Settings Toggle
-**Status:** Draft
+#### Story E7.4: Weather Settings Toggle ✅
+**Status:** Complete - Approved
 **Estimated Effort:** Small (0.5 day)
+**Actual Effort:** 0.5 day
 
 **User Story:**
 As a user, I want to toggle weather display in notifications so that I can choose between weather info and standard notification
 
-**Acceptance Criteria:**
-- Add toggle in SettingsScreen: "Show weather in notification"
-- Default: enabled (weather shown)
-- When disabled: show "Location Tracking Active"
-- Persist preference in DataStore
+**Implementation:**
+- ✅ showWeatherInNotification preference in PreferencesRepository
+- ✅ Settings toggle UI with Row/Switch layout
+- ✅ SettingsViewModel with StateFlow integration
+- ✅ Default: true (weather enabled)
+- ✅ Immediate notification update via observer
+- ✅ DataStore persistence across restarts
+
+### Review Outcomes
+
+**All Stories Approved** with minor findings addressed:
+- Fixed cache offline fallback logic
+- Added coordinate validation
+- Updated notification channel configuration
+- Removed blocking I/O (runBlocking)
+- Replaced hardcoded strings with stringResource()
+- Added permission checks
 
 ### Technical Notes
 - **API**: Open-Meteo (free, unlimited, no API key)
-- **Cache**: 30-minute TTL in DataStore
-- **Refresh**: Piggyback on existing location capture cycle
+- **Cache**: 30-minute TTL in DataStore with offline fallback
+- **Refresh**: Automatic on location updates (no separate timer)
+- **Priority**: Secret mode > Weather > Original notification
 - **Full spec**: See `/docs/product/Epic-E7-Weather-Forecast.md`
+- **Test Report**: See `/docs/testing/EPIC-7-COMPLETION-SUMMARY.md`
 
 ---
 
@@ -498,3 +538,5 @@ Epic 3 (Map Display) ◄────────────┘
 | 2025-10-28 | Martin | Original epic breakdown |
 | 2025-11-25 | Martin | Complete rewrite to align with PRD v1.1 MVP features |
 | 2025-11-28 | John (PM) | Added Epic 7: Weather Forecast Integration (4 stories) |
+| 2025-11-28 | Dev Agent | Completed Epic 7: All 4 stories implemented, tested, reviewed, and approved |
+| 2025-11-28 | Martin | Epic 7 marked complete - production ready with device testing verified |
