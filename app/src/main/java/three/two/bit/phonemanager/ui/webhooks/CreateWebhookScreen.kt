@@ -148,7 +148,7 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
                         IconButton(onClick = { viewModel.generateSecret() }) {
                             Icon(
                                 imageVector = Icons.Default.Refresh,
-                                contentDescription = "Regenerate Secret",
+                                contentDescription = stringResource(R.string.create_webhook_regenerate),
                             )
                         }
                     }

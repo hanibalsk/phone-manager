@@ -377,7 +377,7 @@ class LocationTrackingService : Service() {
                 "Location Tracking",
                 NotificationManager.IMPORTANCE_MIN, // AC E7.2.3: Minimal prominence
             ).apply {
-                description = "Ongoing location tracking service"
+                description = getString(R.string.channel_tracking_description)
                 setShowBadge(false)
                 setSound(null, null) // AC E7.2.3: No sound
                 enableVibration(false) // AC E7.2.3: No vibration
@@ -390,7 +390,7 @@ class LocationTrackingService : Service() {
                 "Background Service",
                 NotificationManager.IMPORTANCE_MIN,
             ).apply {
-                description = "Background service"
+                description = getString(R.string.channel_background_description)
                 setShowBadge(false)
                 setSound(null, null) // AC E2.2.4: Silent
                 enableVibration(false) // AC E2.2.4: No vibration

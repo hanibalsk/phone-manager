@@ -18,7 +18,9 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -133,7 +135,7 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> U
                         uiState.currentLocation?.let { location ->
                             Marker(
                                 state = MarkerState(position = location),
-                                title = "You",
+                                title = stringResource(R.string.map_marker_you),
                                 snippet = "Current Location",
                                 icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                             )

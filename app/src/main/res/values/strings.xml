@@ -112,9 +112,43 @@
     <string name="permission_privacy_notice">Your privacy: Location data is stored on your device and only sent to your group members. We do not track or store your location on our servers.</string>
 
     <!-- Location Stats -->
+    <string name="stats_title">Location Statistics</string>
     <string name="stats_today">Today</string>
     <string name="stats_all_time">All Time</string>
     <string name="stats_interval">Interval</string>
     <string name="stats_last_update">Last Update</string>
     <string name="stats_avg_accuracy">Avg Accuracy</string>
+
+    <!-- Location Tracking Toggle -->
+    <string name="location_tracking">Location Tracking</string>
+
+    <!-- History Screen -->
+    <string name="history_empty_title">No location history for this period</string>
+    <string name="history_empty_hint">Try selecting a different date range</string>
+    <string name="history_start">Start</string>
+    <string name="history_end">End</string>
+
+    <!-- Create Alert Direction -->
+    <string name="alert_direction_enter">Enter</string>
+    <string name="alert_direction_enter_desc">Notify when they come within range</string>
+    <string name="alert_direction_exit">Exit</string>
+    <string name="alert_direction_exit_desc">Notify when they leave the range</string>
+    <string name="alert_direction_both">Both</string>
+    <string name="alert_direction_both_desc">Notify on both entering and exiting</string>
+
+    <!-- Create Geofence Trigger Descriptions -->
+    <string name="create_geofence_trigger_enter_desc">Trigger when entering the area</string>
+    <string name="create_geofence_trigger_exit_desc">Trigger when leaving the area</string>
+    <string name="create_geofence_trigger_dwell_desc">Trigger after staying in the area</string>
+
+    <!-- Create Webhook -->
+    <string name="create_webhook_regenerate">Regenerate Secret</string>
+
+    <!-- Map Screen -->
+    <string name="map_marker_you">You</string>
+
+    <!-- Notification Channels (non-UI, but good to have) -->
+    <string name="channel_tracking_description">Ongoing location tracking service</string>
+    <string name="channel_background_description">Background service</string>
+    <string name="channel_geofence_description">Notifications for geofence enter/exit events</string>
 </resources>

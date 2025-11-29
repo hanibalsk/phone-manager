@@ -42,7 +42,7 @@ fun LocationStatsCard(locationStats: LocationStats, modifier: Modifier = Modifie
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Location Statistics",
+                text = stringResource(R.string.stats_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )

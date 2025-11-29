@@ -377,19 +377,19 @@ private fun TransitionTypesSection(
 
         TransitionTypeCheckbox(
             label = stringResource(R.string.create_geofence_trigger_enter),
-            description = "Trigger when entering the area",
+            description = stringResource(R.string.create_geofence_trigger_enter_desc),
             checked = enterSelected,
             onCheckedChange = onEnterChange,
         )
         TransitionTypeCheckbox(
             label = stringResource(R.string.create_geofence_trigger_exit),
-            description = "Trigger when leaving the area",
+            description = stringResource(R.string.create_geofence_trigger_exit_desc),
             checked = exitSelected,
             onCheckedChange = onExitChange,
         )
         TransitionTypeCheckbox(
             label = stringResource(R.string.create_geofence_trigger_dwell),
-            description = "Trigger after staying in the area",
+            description = stringResource(R.string.create_geofence_trigger_dwell_desc),
             checked = dwellSelected,
             onCheckedChange = onDwellChange,
         )

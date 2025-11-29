@@ -206,7 +206,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
                 "Geofence Alerts",
                 NotificationManager.IMPORTANCE_HIGH,
             ).apply {
-                description = "Notifications for geofence enter/exit events"
+                description = context.getString(R.string.channel_geofence_description)
                 enableVibration(true)
             }
             notificationManager.createNotificationChannel(channel)

@@ -191,7 +191,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
                                 // Add start marker (green)
                                 Marker(
                                     state = MarkerState(position = uiState.polylinePoints.first()),
-                                    title = "Start",
+                                    title = stringResource(R.string.history_start),
                                     snippet = "Beginning of path",
                                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
                                 )
@@ -200,7 +200,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
                                 if (uiState.polylinePoints.size > 1) {
                                     Marker(
                                         state = MarkerState(position = uiState.polylinePoints.last()),
-                                        title = "End",
+                                        title = stringResource(R.string.history_end),
                                         snippet = "Most recent location",
                                         icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
                                     )
@@ -436,13 +436,13 @@ private fun EmptyHistoryContent(modifier: Modifier = Modifier) {
         )
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "No location history for this period",
+            text = stringResource(R.string.history_empty_title),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Try selecting a different date range",
+            text = stringResource(R.string.history_empty_hint),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurfaceVariant,

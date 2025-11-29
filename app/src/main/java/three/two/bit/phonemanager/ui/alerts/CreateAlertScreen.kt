@@ -325,22 +325,22 @@ private fun DirectionSection(selectedDirection: AlertDirection, onDirectionSelec
         Column(modifier = Modifier.selectableGroup()) {
             DirectionOption(
                 direction = AlertDirection.ENTER,
-                title = "Enter",
-                description = "Notify when they come within range",
+                title = stringResource(R.string.alert_direction_enter),
+                description = stringResource(R.string.alert_direction_enter_desc),
                 selected = selectedDirection == AlertDirection.ENTER,
                 onClick = { onDirectionSelected(AlertDirection.ENTER) },
             )
             DirectionOption(
                 direction = AlertDirection.EXIT,
-                title = "Exit",
-                description = "Notify when they leave the range",
+                title = stringResource(R.string.alert_direction_exit),
+                description = stringResource(R.string.alert_direction_exit_desc),
                 selected = selectedDirection == AlertDirection.EXIT,
                 onClick = { onDirectionSelected(AlertDirection.EXIT) },
             )
             DirectionOption(
                 direction = AlertDirection.BOTH,
-                title = "Both",
-                description = "Notify on both entering and exiting",
+                title = stringResource(R.string.alert_direction_both),
+                description = stringResource(R.string.alert_direction_both_desc),
                 selected = selectedDirection == AlertDirection.BOTH,
                 onClick = { onDirectionSelected(AlertDirection.BOTH) },
             )
