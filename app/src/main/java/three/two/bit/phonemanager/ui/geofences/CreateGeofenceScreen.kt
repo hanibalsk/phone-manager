@@ -217,8 +217,8 @@ private fun NameSection(name: String, onNameChange: (String) -> Unit) {
         OutlinedTextField(
             value = name,
             onValueChange = onNameChange,
-            label = { Text("Name") },
-            placeholder = { Text("e.g., Home, Office, School") },
+            label = { Text(stringResource(R.string.label_name)) },
+            placeholder = { Text(stringResource(R.string.placeholder_geofence_name)) },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -256,8 +256,8 @@ private fun LocationSection(
             OutlinedTextField(
                 value = latitudeText,
                 onValueChange = onLatitudeChange,
-                label = { Text("Latitude") },
-                placeholder = { Text("e.g., 37.7749") },
+                label = { Text(stringResource(R.string.label_latitude)) },
+                placeholder = { Text(stringResource(R.string.placeholder_latitude)) },
                 singleLine = true,
                 isError = !isValidLocation,
                 modifier = Modifier.weight(1f),
@@ -265,8 +265,8 @@ private fun LocationSection(
             OutlinedTextField(
                 value = longitudeText,
                 onValueChange = onLongitudeChange,
-                label = { Text("Longitude") },
-                placeholder = { Text("e.g., -122.4194") },
+                label = { Text(stringResource(R.string.label_longitude)) },
+                placeholder = { Text(stringResource(R.string.placeholder_longitude)) },
                 singleLine = true,
                 isError = !isValidLocation,
                 modifier = Modifier.weight(1f),
@@ -292,7 +292,7 @@ private fun LocationSection(
         ) {
             Icon(Icons.Default.MyLocation, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Use Current Location (Coming Soon)")
+            Text(stringResource(R.string.button_use_current_location))
         }
     }
 }
@@ -474,10 +474,10 @@ private fun WebhookSection(webhooks: List<Webhook>, selectedWebhookId: String?, 
             onExpandedChange = { expanded = it },
         ) {
             OutlinedTextField(
-                value = selectedWebhook?.name ?: "None",
+                value = selectedWebhook?.name ?: stringResource(R.string.button_none),
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Webhook") },
+                label = { Text(stringResource(R.string.label_webhook)) },
                 leadingIcon = {
                     Icon(Icons.Default.Link, contentDescription = null)
                 },
@@ -495,7 +495,7 @@ private fun WebhookSection(webhooks: List<Webhook>, selectedWebhookId: String?, 
             ) {
                 // None option
                 DropdownMenuItem(
-                    text = { Text("None") },
+                    text = { Text(stringResource(R.string.button_none)) },
                     onClick = {
                         onWebhookSelected(null)
                         expanded = false

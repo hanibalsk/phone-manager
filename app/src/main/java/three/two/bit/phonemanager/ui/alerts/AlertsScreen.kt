@@ -296,7 +296,7 @@ private fun EmptyAlertsContent(modifier: Modifier = Modifier, onCreateClick: () 
         androidx.compose.material3.Button(onClick = onCreateClick) {
             Icon(Icons.Default.Add, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Create Alert")
+            Text(stringResource(R.string.button_create_alert))
         }
     }
 }

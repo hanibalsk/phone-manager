@@ -192,7 +192,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
                                 Marker(
                                     state = MarkerState(position = uiState.polylinePoints.first()),
                                     title = stringResource(R.string.history_start),
-                                    snippet = "Beginning of path",
+                                    snippet = stringResource(R.string.history_path_start),
                                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN),
                                 )
 
@@ -201,7 +201,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
                                     Marker(
                                         state = MarkerState(position = uiState.polylinePoints.last()),
                                         title = stringResource(R.string.history_end),
-                                        snippet = "Most recent location",
+                                        snippet = stringResource(R.string.history_path_end),
                                         icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED),
                                     )
                                 }

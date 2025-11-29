@@ -213,7 +213,7 @@ private fun ErrorContent(message: String, onRetry: () -> Unit, modifier: Modifie
             Spacer(modifier = Modifier.height(16.dp))
             // Retry button (AC E1.2.5)
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(stringResource(R.string.button_retry))
             }
         }
     }
@@ -223,14 +223,15 @@ private fun ErrorContent(message: String, onRetry: () -> Unit, modifier: Modifie
  * Format timestamp as relative time (AC E1.2.3)
  * Examples: "Just now", "2 min ago", "3h ago", "2d ago"
  */
+@Composable
 private fun formatRelativeTime(instant: Instant): String {
     val now = Clock.System.now()
     val duration = now - instant
     return when {
-        duration < 1.minutes -> "Just now"
-        duration < 1.hours -> "${duration.inWholeMinutes} min ago"
-        duration < 1.days -> "${duration.inWholeHours}h ago"
-        duration < 7.days -> "${duration.inWholeDays}d ago"
+        duration < 1.minutes -> stringResource(R.string.time_just_now)
+        duration < 1.hours -> stringResource(R.string.time_minutes_ago, duration.inWholeMinutes.toInt())
+        duration < 1.days -> stringResource(R.string.time_hours_ago, duration.inWholeHours.toInt())
+        duration < 7.days -> stringResource(R.string.time_days_ago, duration.inWholeDays.toInt())
         else -> {
             // For older dates, show the actual date
             instant.toLocalDateTime(TimeZone.currentSystemDefault())

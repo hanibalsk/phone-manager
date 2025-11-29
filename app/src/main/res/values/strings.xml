@@ -205,4 +205,59 @@
     <string name="history_select_end_date">Select End Date</string>
     <string name="history_next">Next</string>
     <string name="history_apply">Apply</string>
+    <string name="history_path_start">Beginning of path</string>
+    <string name="history_path_end">Most recent location</string>
+
+    <!-- Form Labels -->
+    <string name="label_name">Name</string>
+    <string name="label_display_name">Display Name</string>
+    <string name="label_device_id">Device ID</string>
+    <string name="label_group_id">Group ID</string>
+    <string name="label_latitude">Latitude</string>
+    <string name="label_longitude">Longitude</string>
+    <string name="label_webhook">Webhook</string>
+    <string name="label_target_url">Target URL</string>
+    <string name="label_map_polling_interval">Map Polling Interval</string>
+
+    <!-- Form Placeholders -->
+    <string name="placeholder_geofence_name">e.g., Home, Office, School</string>
+    <string name="placeholder_latitude">e.g., 37.7749</string>
+    <string name="placeholder_longitude">e.g., -122.4194</string>
+    <string name="placeholder_select_device">Select a device</string>
+    <string name="placeholder_webhook_name">e.g., Home Assistant, n8n Workflow</string>
+    <string name="placeholder_webhook_url">https://example.com/webhook</string>
+    <string name="placeholder_display_name">e.g., Martin\'s Phone</string>
+    <string name="placeholder_group_id">e.g., family</string>
+
+    <!-- Form Supporting Text -->
+    <string name="hint_device_id">Unique identifier for this device</string>
+    <string name="hint_display_name">How your device appears to others</string>
+    <string name="hint_group_id_share">Share this ID with others to form a group</string>
+    <string name="hint_group_id_visibility">Devices with the same Group ID can see each other</string>
+    <string name="hint_map_polling">How often to refresh group member locations on the map</string>
+    <string name="hint_https_required">HTTPS required for security</string>
+    <string name="hint_polling_interval">%1$d seconds</string>
+
+    <!-- Buttons -->
+    <string name="button_register">Register</string>
+    <string name="button_create_geofence">Create Geofence</string>
+    <string name="button_create_alert">Create Alert</string>
+    <string name="button_create_webhook">Create Webhook</string>
+    <string name="button_save_changes">Save Changes</string>
+    <string name="button_change_group">Change Group</string>
+    <string name="button_retry">Retry</string>
+    <string name="button_none">None</string>
+    <string name="button_use_current_location">Use Current Location (Coming Soon)</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_change_group_title">Change Group?</string>
+
+    <!-- Map Markers -->
+    <string name="marker_current_location">Current Location</string>
+
+    <!-- Time Formatting -->
+    <string name="time_just_now">Just now</string>
+    <string name="time_minutes_ago">%1$d min ago</string>
+    <string name="time_hours_ago">%1$dh ago</string>
+    <string name="time_days_ago">%1$dd ago</string>
 </resources>

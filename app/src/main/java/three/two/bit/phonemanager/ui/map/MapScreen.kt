@@ -136,7 +136,7 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> U
                             Marker(
                                 state = MarkerState(position = location),
                                 title = stringResource(R.string.map_marker_you),
-                                snippet = "Current Location",
+                                snippet = stringResource(R.string.marker_current_location),
                                 icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE),
                             )
                         }
@@ -145,6 +145,11 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> U
                         uiState.groupMembers.forEach { member ->
                             // AC E3.2.5: Filter out members with null lastLocation
                             member.lastLocation?.let { location ->
+                                // Precompute snippet for localization
+                                val memberSnippet = member.lastSeenAt?.let { lastSeen ->
+                                    stringResource(R.string.last_seen, formatRelativeTime(lastSeen))
+                                } ?: stringResource(R.string.loading)
+
                                 Marker(
                                     state =
                                     MarkerState(
@@ -157,10 +162,7 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> U
                                     // AC E3.2.2: Display name as title
                                     title = member.displayName,
                                     // AC E3.2.4: Info window with last update time
-                                    snippet =
-                                    member.lastSeenAt?.let { lastSeen ->
-                                        "Last seen: ${formatRelativeTime(lastSeen)}"
-                                    } ?: "Location unknown",
+                                    snippet = memberSnippet,
                                     // AC E3.2.3: Visual distinction - orange for group members
                                     icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ORANGE),
                                 )
@@ -177,14 +179,15 @@ fun MapScreen(viewModel: MapViewModel = hiltViewModel(), onNavigateBack: () -> U
  * Format timestamp as relative time (AC E3.2.4)
  * Examples: "Just now", "2 min ago", "3h ago", "2d ago"
  */
+@Composable
 private fun formatRelativeTime(instant: Instant): String {
     val now = Clock.System.now()
     val duration = now - instant
     return when {
-        duration < 1.minutes -> "Just now"
-        duration < 1.hours -> "${duration.inWholeMinutes} min ago"
-        duration < 1.days -> "${duration.inWholeHours}h ago"
-        duration < 7.days -> "${duration.inWholeDays}d ago"
+        duration < 1.minutes -> stringResource(R.string.time_just_now)
+        duration < 1.hours -> stringResource(R.string.time_minutes_ago, duration.inWholeMinutes.toInt())
+        duration < 1.days -> stringResource(R.string.time_hours_ago, duration.inWholeHours.toInt())
+        duration < 7.days -> stringResource(R.string.time_days_ago, duration.inWholeDays.toInt())
         else -> {
             // For older dates, show the actual date
             instant.toLocalDateTime(TimeZone.currentSystemDefault())

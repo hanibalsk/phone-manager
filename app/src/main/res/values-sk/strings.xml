@@ -205,4 +205,59 @@
     <string name="history_select_end_date">Vyberte koncový dátum</string>
     <string name="history_next">Ďalej</string>
     <string name="history_apply">Použiť</string>
+    <string name="history_path_start">Začiatok trasy</string>
+    <string name="history_path_end">Posledná poloha</string>
+
+    <!-- Form Labels -->
+    <string name="label_name">Názov</string>
+    <string name="label_display_name">Zobrazovaný názov</string>
+    <string name="label_device_id">ID zariadenia</string>
+    <string name="label_group_id">ID skupiny</string>
+    <string name="label_latitude">Zemepisná šírka</string>
+    <string name="label_longitude">Zemepisná dĺžka</string>
+    <string name="label_webhook">Webhook</string>
+    <string name="label_target_url">Cieľová URL</string>
+    <string name="label_map_polling_interval">Interval aktualizácie mapy</string>
+
+    <!-- Form Placeholders -->
+    <string name="placeholder_geofence_name">napr. Domov, Práca, Škola</string>
+    <string name="placeholder_latitude">napr. 37.7749</string>
+    <string name="placeholder_longitude">napr. -122.4194</string>
+    <string name="placeholder_select_device">Vyberte zariadenie</string>
+    <string name="placeholder_webhook_name">napr. Home Assistant, n8n Workflow</string>
+    <string name="placeholder_webhook_url">https://example.com/webhook</string>
+    <string name="placeholder_display_name">napr. Martinov telefón</string>
+    <string name="placeholder_group_id">napr. rodina</string>
+
+    <!-- Form Supporting Text -->
+    <string name="hint_device_id">Jedinečný identifikátor tohto zariadenia</string>
+    <string name="hint_display_name">Ako sa vaše zariadenie zobrazuje ostatným</string>
+    <string name="hint_group_id_share">Zdieľajte toto ID s ostatnými pre vytvorenie skupiny</string>
+    <string name="hint_group_id_visibility">Zariadenia s rovnakým ID skupiny sa navzájom vidia</string>
+    <string name="hint_map_polling">Ako často aktualizovať polohy členov skupiny na mape</string>
+    <string name="hint_https_required">HTTPS je vyžadované pre bezpečnosť</string>
+    <string name="hint_polling_interval">%1$d sekúnd</string>
+
+    <!-- Buttons -->
+    <string name="button_register">Zaregistrovať</string>
+    <string name="button_create_geofence">Vytvoriť geofence</string>
+    <string name="button_create_alert">Vytvoriť upozornenie</string>
+    <string name="button_create_webhook">Vytvoriť webhook</string>
+    <string name="button_save_changes">Uložiť zmeny</string>
+    <string name="button_change_group">Zmeniť skupinu</string>
+    <string name="button_retry">Skúsiť znova</string>
+    <string name="button_none">Žiadny</string>
+    <string name="button_use_current_location">Použiť aktuálnu polohu (Čoskoro)</string>
+
+    <!-- Dialogs -->
+    <string name="dialog_change_group_title">Zmeniť skupinu?</string>
+
+    <!-- Map Markers -->
+    <string name="marker_current_location">Aktuálna poloha</string>
+
+    <!-- Time Formatting -->
+    <string name="time_just_now">Práve teraz</string>
+    <string name="time_minutes_ago">pred %1$d min</string>
+    <string name="time_hours_ago">pred %1$dh</string>
+    <string name="time_days_ago">pred %1$dd</string>
 </resources>

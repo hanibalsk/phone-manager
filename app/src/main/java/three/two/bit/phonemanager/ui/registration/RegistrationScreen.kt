@@ -103,14 +103,14 @@ fun RegistrationScreen(
             OutlinedTextField(
                 value = uiState.displayName,
                 onValueChange = viewModel::updateDisplayName,
-                label = { Text("Display Name") },
-                placeholder = { Text("e.g., Martin's Phone") },
+                label = { Text(stringResource(R.string.label_display_name)) },
+                placeholder = { Text(stringResource(R.string.placeholder_display_name)) },
                 isError = uiState.displayNameError != null,
                 supportingText = {
                     if (uiState.displayNameError != null) {
                         Text(uiState.displayNameError!!)
                     } else {
-                        Text("How your device appears to others")
+                        Text(stringResource(R.string.hint_display_name))
                     }
                 },
                 singleLine = true,
@@ -130,14 +130,14 @@ fun RegistrationScreen(
             OutlinedTextField(
                 value = uiState.groupId,
                 onValueChange = viewModel::updateGroupId,
-                label = { Text("Group ID") },
-                placeholder = { Text("e.g., family") },
+                label = { Text(stringResource(R.string.label_group_id)) },
+                placeholder = { Text(stringResource(R.string.placeholder_group_id)) },
                 isError = uiState.groupIdError != null,
                 supportingText = {
                     if (uiState.groupIdError != null) {
                         Text(uiState.groupIdError!!)
                     } else {
-                        Text("Share this ID with others to form a group")
+                        Text(stringResource(R.string.hint_group_id_share))
                     }
                 },
                 singleLine = true,
@@ -171,7 +171,7 @@ fun RegistrationScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
-                    Text("Register")
+                    Text(stringResource(R.string.button_register))
                 }
             }
 

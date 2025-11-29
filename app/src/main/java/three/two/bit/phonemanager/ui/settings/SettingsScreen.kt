@@ -100,25 +100,25 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
             OutlinedTextField(
                 value = viewModel.deviceId,
                 onValueChange = {},
-                label = { Text("Device ID") },
+                label = { Text(stringResource(R.string.label_device_id)) },
                 enabled = false,
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                supportingText = { Text("Unique identifier for this device") },
+                supportingText = { Text(stringResource(R.string.hint_device_id)) },
             )
 
             // Display Name TextField (AC E1.3.2)
             OutlinedTextField(
                 value = uiState.displayName,
                 onValueChange = viewModel::onDisplayNameChanged,
-                label = { Text("Display Name") },
+                label = { Text(stringResource(R.string.label_display_name)) },
                 enabled = !uiState.isLoading,
                 isError = uiState.displayNameError != null,
                 supportingText = {
                     if (uiState.displayNameError != null) {
                         Text(uiState.displayNameError!!)
                     } else {
-                        Text("How your device appears to others")
+                        Text(stringResource(R.string.hint_display_name))
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -129,14 +129,14 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
             OutlinedTextField(
                 value = uiState.groupId,
                 onValueChange = viewModel::onGroupIdChanged,
-                label = { Text("Group ID") },
+                label = { Text(stringResource(R.string.label_group_id)) },
                 enabled = !uiState.isLoading,
                 isError = uiState.groupIdError != null,
                 supportingText = {
                     if (uiState.groupIdError != null) {
                         Text(uiState.groupIdError!!)
                     } else {
-                        Text("Devices with the same Group ID can see each other")
+                        Text(stringResource(R.string.hint_group_id_visibility))
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -206,7 +206,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 enabled = !uiState.isLoading && uiState.hasChanges && uiState.isFormValid,
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Save Changes")
+                Text(stringResource(R.string.button_save_changes))
             }
         }
     }
@@ -215,7 +215,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     if (uiState.showGroupChangeConfirmation) {
         androidx.compose.material3.AlertDialog(
             onDismissRequest = viewModel::onDismissGroupChangeConfirmation,
-            title = { Text("Change Group?") },
+            title = { Text(stringResource(R.string.dialog_change_group_title)) },
             text = {
                 Text(
                     "Changing your Group ID will move you to a different group. " +
@@ -225,12 +225,12 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
             },
             confirmButton = {
                 Button(onClick = viewModel::onConfirmGroupChange) {
-                    Text("Change Group")
+                    Text(stringResource(R.string.button_change_group))
                 }
             },
             dismissButton = {
                 androidx.compose.material3.TextButton(onClick = viewModel::onDismissGroupChangeConfirmation) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             },
         )
@@ -261,14 +261,14 @@ private fun PollingIntervalSelector(
         modifier = modifier,
     ) {
         OutlinedTextField(
-            value = "$selectedInterval seconds",
+            value = stringResource(R.string.hint_polling_interval, selectedInterval),
             onValueChange = {},
             readOnly = true,
             enabled = enabled,
-            label = { Text("Map Polling Interval") },
+            label = { Text(stringResource(R.string.label_map_polling_interval)) },
             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
             colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-            supportingText = { Text("How often to refresh group member locations on the map") },
+            supportingText = { Text(stringResource(R.string.hint_map_polling)) },
             modifier = Modifier
                 .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
                 .fillMaxWidth(),
@@ -279,7 +279,7 @@ private fun PollingIntervalSelector(
         ) {
             intervalOptions.forEach { interval ->
                 DropdownMenuItem(
-                    text = { Text("$interval seconds") },
+                    text = { Text(stringResource(R.string.hint_polling_interval, interval)) },
                     onClick = {
                         onIntervalSelected(interval)
                         expanded = false

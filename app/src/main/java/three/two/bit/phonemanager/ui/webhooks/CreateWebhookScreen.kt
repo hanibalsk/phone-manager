@@ -96,8 +96,8 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
             OutlinedTextField(
                 value = uiState.name,
                 onValueChange = { viewModel.updateName(it) },
-                label = { Text("Name") },
-                placeholder = { Text("e.g., Home Assistant, n8n Workflow") },
+                label = { Text(stringResource(R.string.label_name)) },
+                placeholder = { Text(stringResource(R.string.placeholder_webhook_name)) },
                 isError = uiState.nameError != null,
                 supportingText = uiState.nameError?.let { { Text(it) } },
                 singleLine = true,
@@ -110,14 +110,14 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
             OutlinedTextField(
                 value = uiState.targetUrl,
                 onValueChange = { viewModel.updateTargetUrl(it) },
-                label = { Text("Target URL") },
-                placeholder = { Text("https://example.com/webhook") },
+                label = { Text(stringResource(R.string.label_target_url)) },
+                placeholder = { Text(stringResource(R.string.placeholder_webhook_url)) },
                 isError = uiState.urlError != null,
                 supportingText = {
                     if (uiState.urlError != null) {
                         Text(uiState.urlError!!)
                     } else {
-                        Text("HTTPS required for security")
+                        Text(stringResource(R.string.hint_https_required))
                     }
                 },
                 singleLine = true,
@@ -188,7 +188,7 @@ fun CreateWebhookScreen(onNavigateBack: () -> Unit, viewModel: CreateWebhookView
                         strokeWidth = 2.dp,
                     )
                 } else {
-                    Text("Create Webhook")
+                    Text(stringResource(R.string.button_create_webhook))
                 }
             }
 

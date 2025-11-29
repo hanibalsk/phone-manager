@@ -213,7 +213,7 @@ private fun DeviceSelectorSection(
                     value = selectedDevice?.displayName ?: "",
                     onValueChange = {},
                     readOnly = true,
-                    placeholder = { Text("Select a device") },
+                    placeholder = { Text(stringResource(R.string.placeholder_select_device)) },
                     leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
                     modifier = Modifier
