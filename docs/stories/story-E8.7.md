@@ -91,14 +91,14 @@ so that all data is properly associated.
   - [x] Call tripManager.stopMonitoring() in stopMovementDetection()
   - [x] Ensure proper coroutine scope usage
 
-- [ ] Task 5: Update Notification with Trip Status (AC: E8.7.5) - DEFERRED
-  - [ ] Create getActiveTripNotificationText() method
-  - [ ] Format duration as "X min" or "X hr Y min"
-  - [ ] Format distance as "X.X km"
-  - [ ] Get mode icon for notification
-  - [ ] Update notification builder with trip info
-  - [ ] Show standard text when no active trip
-  - Note: Deferred to future enhancement - core functionality complete
+- [x] Task 5: Update Notification with Trip Status (AC: E8.7.5) - COMPLETED IN E8.14
+  - [x] Create getActiveTripNotificationText() method
+  - [x] Format duration as "X min" or "X hr Y min"
+  - [x] Format distance as "X.X km"
+  - [x] Get mode icon for notification
+  - [x] Update notification builder with trip info
+  - [x] Show standard text when no active trip
+  - Note: Originally deferred, now implemented via Story E8.14
 
 - [x] Task 6: Implement Error Handling (AC: E8.7.6)
   - [x] Wrap trip operations in try-catch
@@ -234,7 +234,7 @@ Implementation completed successfully:
 - Location capture enriched with transportation mode and trip context
 - Distance calculation and trip statistics update implemented
 - Error handling ensures location tracking continues on trip failures
-- Notification enhancement (Task 5) deferred to future work - core functionality complete
+- Notification enhancement (Task 5) completed via Story E8.14 - all ACs now satisfied
 
 ---
 
