@@ -4,7 +4,7 @@
 **Epic**: 3 - Real-Time Map & Group Display
 **Priority**: Must-Have
 **Estimate**: 2 story points (1-2 days)
-**Status**: Approved
+**Status**: Done
 **Created**: 2025-11-25
 **PRD Reference**: Feature 2 (FR-2.3)
 
@@ -86,7 +86,7 @@ so that I see near real-time positions.
 
 ### Review Follow-ups (AI)
 - [x] [AI-Review][Medium] Add Settings UI for polling interval configuration (AC: E3.3.5) - DONE 2025-11-28
-- [ ] [AI-Review][Low] Add unit tests for polling lifecycle (Test coverage)
+- [x] [AI-Review][Low] Add unit tests for polling lifecycle (Test coverage) - Verified 2025-11-30
 
 ## Dev Notes
 

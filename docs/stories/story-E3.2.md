@@ -4,7 +4,7 @@
 **Epic**: 3 - Real-Time Map & Group Display
 **Priority**: Must-Have
 **Estimate**: 2 story points (1-2 days)
-**Status**: Approved
+**Status**: Done
 **Created**: 2025-11-25
 **PRD Reference**: Feature 2 (FR-2.2)
 
