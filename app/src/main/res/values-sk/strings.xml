@@ -345,6 +345,23 @@
     <string name="yes">Áno</string>
     <string name="no">Nie</string>
 
+    <!-- Trip Detection Settings (Story E8.12) -->
+    <string name="settings_trip_detection">Detekcia ciest</string>
+    <string name="settings_trip_detection_enable">Povoliť detekciu ciest</string>
+    <string name="settings_trip_detection_summary">Automaticky detekovať a zaznamenávať cesty</string>
+    <string name="settings_trip_stationary_threshold">Ukončiť cestu po státí</string>
+    <string name="settings_trip_threshold_minutes">%1$d min</string>
+    <string name="settings_trip_minimum_duration">Minimálne trvanie cesty</string>
+    <string name="settings_trip_minimum_distance">Minimálna vzdialenosť cesty</string>
+    <string name="settings_trip_minutes">min</string>
+    <string name="settings_trip_meters">m</string>
+    <string name="settings_trip_auto_merge">Automaticky zlúčiť krátke zastávky</string>
+    <string name="settings_trip_auto_merge_summary">Spojiť cesty oddelené krátkymi zastávkami</string>
+    <string name="settings_view_trip_history">Zobraziť históriu ciest</string>
+    <string name="settings_view_movement_events">Zobraziť udalosti pohybu</string>
+    <string name="settings_trip_decrease">Znížiť</string>
+    <string name="settings_trip_increase">Zvýšiť</string>
+
     <!-- Movement Events Screen (Story E8.11) -->
     <string name="movement_events_title">Udalosti pohybu</string>
     <string name="movement_events_export">Exportovať udalosti</string>

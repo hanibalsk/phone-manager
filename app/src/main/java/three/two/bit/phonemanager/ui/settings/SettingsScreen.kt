@@ -12,8 +12,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.clickable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -52,13 +58,19 @@ import kotlin.math.roundToInt
 
 /**
  * Story E1.3: Settings Screen
+ * Story E8.12: Trip Detection Settings
  *
- * Allows users to update display name and group ID
- * ACs: E1.3.1, E1.3.2, E1.3.3, E1.3.4
+ * Allows users to update display name, group ID, and trip detection settings
+ * ACs: E1.3.1, E1.3.2, E1.3.3, E1.3.4, E8.12.1-E8.12.8
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBack: () -> Unit) {
+fun SettingsScreen(
+    viewModel: SettingsViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit,
+    onNavigateToTripHistory: () -> Unit = {},
+    onNavigateToMovementEvents: () -> Unit = {},
+) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val showWeatherInNotification by viewModel.showWeatherInNotification.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -71,6 +83,13 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     val vehicleIntervalMultiplier by viewModel.vehicleIntervalMultiplier.collectAsStateWithLifecycle()
     val defaultIntervalMultiplier by viewModel.defaultIntervalMultiplier.collectAsStateWithLifecycle()
     val movementPermissionState by viewModel.movementPermissionState.collectAsStateWithLifecycle()
+
+    // Story E8.12: Trip detection states
+    val isTripDetectionEnabled by viewModel.isTripDetectionEnabled.collectAsStateWithLifecycle()
+    val tripStationaryThreshold by viewModel.tripStationaryThreshold.collectAsStateWithLifecycle()
+    val tripMinimumDuration by viewModel.tripMinimumDuration.collectAsStateWithLifecycle()
+    val tripMinimumDistance by viewModel.tripMinimumDistance.collectAsStateWithLifecycle()
+    val isTripAutoMergeEnabled by viewModel.isTripAutoMergeEnabled.collectAsStateWithLifecycle()
 
     // Permission dialog state
     var showPermissionDialog by remember { mutableStateOf(false) }
@@ -331,6 +350,89 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 )
             }
 
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Story E8.12: Trip Detection Settings Section (AC E8.12.1)
+            Text(
+                text = stringResource(R.string.settings_trip_detection),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // Enable Trip Detection toggle (AC E8.12.2)
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.settings_trip_detection_enable),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = stringResource(R.string.settings_trip_detection_summary),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = isTripDetectionEnabled,
+                    onCheckedChange = viewModel::setTripDetectionEnabled,
+                )
+            }
+
+            // Trip detection sub-settings (only visible when enabled)
+            if (isTripDetectionEnabled) {
+                // Stationary threshold (AC E8.12.3)
+                StationaryThresholdSelector(
+                    selectedMinutes = tripStationaryThreshold,
+                    onMinutesSelected = viewModel::setTripStationaryThreshold,
+                )
+
+                // Minimum trip duration (AC E8.12.4)
+                SettingsStepperRow(
+                    title = stringResource(R.string.settings_trip_minimum_duration),
+                    value = tripMinimumDuration,
+                    unit = stringResource(R.string.settings_trip_minutes),
+                    minValue = 1,
+                    maxValue = 10,
+                    onValueChange = viewModel::setTripMinimumDuration,
+                )
+
+                // Minimum trip distance (AC E8.12.5)
+                SettingsStepperRow(
+                    title = stringResource(R.string.settings_trip_minimum_distance),
+                    value = tripMinimumDistance,
+                    unit = stringResource(R.string.settings_trip_meters),
+                    minValue = 50,
+                    maxValue = 500,
+                    step = 50,
+                    onValueChange = viewModel::setTripMinimumDistance,
+                )
+
+                // Auto-merge toggle (AC E8.12.6)
+                SettingsToggleRow(
+                    title = stringResource(R.string.settings_trip_auto_merge),
+                    summary = stringResource(R.string.settings_trip_auto_merge_summary),
+                    checked = isTripAutoMergeEnabled,
+                    onCheckedChange = viewModel::setTripAutoMergeEnabled,
+                )
+            }
+
+            // Navigation links (AC E8.12.7)
+            SettingsNavigationRow(
+                title = stringResource(R.string.settings_view_trip_history),
+                onClick = onNavigateToTripHistory,
+            )
+
+            SettingsNavigationRow(
+                title = stringResource(R.string.settings_view_movement_events),
+                onClick = onNavigateToMovementEvents,
+            )
+
             // Save Button (AC E1.3.2, E1.3.3)
             Button(
                 onClick = viewModel::onSaveClicked,
@@ -519,6 +621,139 @@ private fun IntervalMultiplierSlider(
             valueRange = valueRange,
             steps = ((valueRange.endInclusive - valueRange.start) * 10).roundToInt() - 1,
             modifier = Modifier.fillMaxWidth(),
+        )
+    }
+}
+
+/**
+ * Story E8.12: Stationary threshold selector with filter chips (AC E8.12.3)
+ */
+@Composable
+private fun StationaryThresholdSelector(
+    selectedMinutes: Int,
+    onMinutesSelected: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val options = listOf(1, 5, 10, 30)
+
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.settings_trip_stationary_threshold),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            options.forEach { minutes ->
+                FilterChip(
+                    selected = selectedMinutes == minutes,
+                    onClick = { onMinutesSelected(minutes) },
+                    label = {
+                        Text(
+                            stringResource(R.string.settings_trip_threshold_minutes, minutes),
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    ),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Story E8.12: Stepper row for numeric settings (AC E8.12.4, E8.12.5)
+ */
+@Composable
+private fun SettingsStepperRow(
+    title: String,
+    value: Int,
+    unit: String,
+    minValue: Int,
+    maxValue: Int,
+    onValueChange: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    step: Int = 1,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f),
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            IconButton(
+                onClick = { onValueChange((value - step).coerceAtLeast(minValue)) },
+                enabled = value > minValue,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Remove,
+                    contentDescription = stringResource(R.string.settings_trip_decrease),
+                )
+            }
+
+            Text(
+                text = "$value $unit",
+                style = MaterialTheme.typography.bodyLarge,
+            )
+
+            IconButton(
+                onClick = { onValueChange((value + step).coerceAtMost(maxValue)) },
+                enabled = value < maxValue,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.settings_trip_increase),
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Story E8.12: Navigation row for links to other screens (AC E8.12.7)
+ */
+@Composable
+private fun SettingsNavigationRow(
+    title: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.primary,
+        )
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
         )
     }
 }

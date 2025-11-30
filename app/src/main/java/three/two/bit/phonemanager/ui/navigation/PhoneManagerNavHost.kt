@@ -163,6 +163,12 @@ fun PhoneManagerNavHost(
         composable(Screen.Settings.route) {
             SettingsScreen(
                 onNavigateBack = { navController.popBackStack() },
+                onNavigateToTripHistory = {
+                    navController.navigate(Screen.TripHistory.route)
+                },
+                onNavigateToMovementEvents = {
+                    navController.navigate(Screen.MovementEvents.route)
+                },
             )
         }
         composable(Screen.Map.route) {

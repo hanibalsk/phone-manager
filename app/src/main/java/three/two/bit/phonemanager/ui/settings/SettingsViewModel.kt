@@ -97,6 +97,47 @@ constructor(
                 initialValue = 1.0f,
             )
 
+    // Story E8.12: Trip Detection settings
+    val isTripDetectionEnabled: StateFlow<Boolean> =
+        preferencesRepository.isTripDetectionEnabled
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
+    val tripStationaryThreshold: StateFlow<Int> =
+        preferencesRepository.tripStationaryThresholdMinutes
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 5,
+            )
+
+    val tripMinimumDuration: StateFlow<Int> =
+        preferencesRepository.tripMinimumDurationMinutes
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 2,
+            )
+
+    val tripMinimumDistance: StateFlow<Int> =
+        preferencesRepository.tripMinimumDistanceMeters
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 100,
+            )
+
+    val isTripAutoMergeEnabled: StateFlow<Boolean> =
+        preferencesRepository.isTripAutoMergeEnabled
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
     // Movement detection permission states
     private val _movementPermissionState = MutableStateFlow(MovementPermissionState())
     val movementPermissionState: StateFlow<MovementPermissionState> = _movementPermissionState.asStateFlow()
@@ -249,6 +290,53 @@ constructor(
     fun setDefaultIntervalMultiplier(multiplier: Float) {
         viewModelScope.launch {
             preferencesRepository.setDefaultIntervalMultiplier(multiplier.coerceIn(0.1f, 2.0f))
+        }
+    }
+
+    // Story E8.12: Trip Detection setting methods
+
+    /**
+     * Toggle trip detection on/off (AC E8.12.2)
+     */
+    fun setTripDetectionEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setTripDetectionEnabled(enabled)
+        }
+    }
+
+    /**
+     * Set stationary threshold for trip end (AC E8.12.3)
+     */
+    fun setTripStationaryThreshold(minutes: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setTripStationaryThresholdMinutes(minutes)
+        }
+    }
+
+    /**
+     * Set minimum trip duration (AC E8.12.4)
+     */
+    fun setTripMinimumDuration(minutes: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setTripMinimumDurationMinutes(minutes.coerceIn(1, 10))
+        }
+    }
+
+    /**
+     * Set minimum trip distance (AC E8.12.5)
+     */
+    fun setTripMinimumDistance(meters: Int) {
+        viewModelScope.launch {
+            preferencesRepository.setTripMinimumDistanceMeters(meters.coerceIn(50, 500))
+        }
+    }
+
+    /**
+     * Toggle trip auto-merge (AC E8.12.6)
+     */
+    fun setTripAutoMergeEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setTripAutoMergeEnabled(enabled)
         }
     }
 

@@ -341,6 +341,23 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
 
+    <!-- Trip Detection Settings (Story E8.12) -->
+    <string name="settings_trip_detection">Trip Detection</string>
+    <string name="settings_trip_detection_enable">Enable Trip Detection</string>
+    <string name="settings_trip_detection_summary">Automatically detect and log trips</string>
+    <string name="settings_trip_stationary_threshold">End Trip After Stationary</string>
+    <string name="settings_trip_threshold_minutes">%1$d min</string>
+    <string name="settings_trip_minimum_duration">Minimum Trip Duration</string>
+    <string name="settings_trip_minimum_distance">Minimum Trip Distance</string>
+    <string name="settings_trip_minutes">min</string>
+    <string name="settings_trip_meters">m</string>
+    <string name="settings_trip_auto_merge">Auto-Merge Brief Stops</string>
+    <string name="settings_trip_auto_merge_summary">Combine trips separated by short stops</string>
+    <string name="settings_view_trip_history">View Trip History</string>
+    <string name="settings_view_movement_events">View Movement Events</string>
+    <string name="settings_trip_decrease">Decrease</string>
+    <string name="settings_trip_increase">Increase</string>
+
     <!-- Movement Events Screen (Story E8.11) -->
     <string name="movement_events_title">Movement Events</string>
     <string name="movement_events_export">Export Events</string>
