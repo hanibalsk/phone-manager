@@ -179,6 +179,9 @@ class TransportationModeManager @Inject constructor(
             androidAutoDetector.startMonitoring()
         }
 
+        // Start sensor telemetry collection (E8-B2 fix)
+        sensorTelemetryCollector.startListening()
+
         _isMonitoring.value = true
 
         // Subscribe to state changes for logging and movement event recording (AC E8.6.1)
@@ -218,6 +221,9 @@ class TransportationModeManager @Inject constructor(
         activityRecognitionManager.stopMonitoring()
         bluetoothCarDetector.stopMonitoring()
         androidAutoDetector.stopMonitoring()
+
+        // Stop sensor telemetry collection (E8-B2 fix)
+        sensorTelemetryCollector.stopListening()
 
         _isMonitoring.value = false
     }

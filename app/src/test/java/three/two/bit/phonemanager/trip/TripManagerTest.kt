@@ -62,6 +62,16 @@ class TripManagerTest {
         coEvery { tripRepository.insert(any()) } returns Result.success("trip-id")
         coEvery { tripRepository.update(any()) } returns Result.success(Unit)
 
+        // E8-M1 fix: Stub all preference Flows to avoid NPE during TripManagerImpl.init()
+        // TripManagerImpl.observePreferences() is called in init block and requires these Flows
+        every { preferencesRepository.isTripDetectionEnabled } returns flowOf(true)
+        every { preferencesRepository.tripVehicleGraceSeconds } returns flowOf(90)
+        every { preferencesRepository.tripWalkingGraceSeconds } returns flowOf(60)
+        every { preferencesRepository.tripStationaryThresholdMinutes } returns flowOf(5)
+        every { preferencesRepository.tripMinimumDurationMinutes } returns flowOf(2)
+        every { preferencesRepository.tripMinimumDistanceMeters } returns flowOf(100)
+        every { preferencesRepository.isTripAutoMergeEnabled } returns flowOf(true)
+
         tripManager = TripManagerImpl(
             transportationModeManager = transportationModeManager,
             tripRepository = tripRepository,
