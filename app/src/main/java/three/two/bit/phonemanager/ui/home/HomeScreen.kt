@@ -57,6 +57,7 @@ fun HomeScreen(
     onRequestLocationPermission: () -> Unit,
     onRequestBackgroundPermission: () -> Unit,
     onRequestNotificationPermission: () -> Unit,
+    modifier: Modifier = Modifier,
     onNavigateToGroupMembers: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
@@ -65,7 +66,6 @@ fun HomeScreen(
     onNavigateToGeofences: () -> Unit = {},
     onNavigateToWebhooks: () -> Unit = {},
     onNavigateToWeather: () -> Unit = {},
-    modifier: Modifier = Modifier,
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current

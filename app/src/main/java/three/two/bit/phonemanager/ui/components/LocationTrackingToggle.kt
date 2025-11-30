@@ -33,7 +33,7 @@ import three.two.bit.phonemanager.ui.theme.PhoneManagerTheme
  * Story 1.1: LocationTrackingToggle - Material 3 toggle for starting/stopping tracking
  */
 @Composable
-fun LocationTrackingToggle(viewModel: LocationTrackingViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
+fun LocationTrackingToggle(modifier: Modifier = Modifier, viewModel: LocationTrackingViewModel = hiltViewModel()) {
     val trackingState by viewModel.trackingState.collectAsState()
     val permissionState by viewModel.permissionState.collectAsState()
 

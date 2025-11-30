@@ -199,28 +199,22 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
     ) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // Create notification channel for Android O+
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(
-                CHANNEL_ID,
-                "Geofence Alerts",
-                NotificationManager.IMPORTANCE_HIGH,
-            ).apply {
-                description = context.getString(R.string.channel_geofence_description)
-                enableVibration(true)
-            }
-            notificationManager.createNotificationChannel(channel)
+        // Create notification channel (required for Android O+, minSdk is 26)
+        val channel = NotificationChannel(
+            CHANNEL_ID,
+            "Geofence Alerts",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = context.getString(R.string.channel_geofence_description)
+            enableVibration(true)
         }
+        notificationManager.createNotificationChannel(channel)
 
         // Create intent to open app when notification is tapped
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
-        val pendingIntentFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
+        val pendingIntentFlags = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         val pendingIntent = PendingIntent.getActivity(context, 0, intent, pendingIntentFlags)
 
         // Build notification (AC E6.2.2)

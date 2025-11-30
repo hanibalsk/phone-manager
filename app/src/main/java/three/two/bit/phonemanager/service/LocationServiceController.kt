@@ -50,11 +50,8 @@ class LocationServiceControllerImpl @Inject constructor(
             action = LocationTrackingService.ACTION_START_TRACKING
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            context.startForegroundService(intent)
-        } else {
-            context.startService(intent)
-        }
+        // minSdk is 26 (O), so we can always use startForegroundService
+        context.startForegroundService(intent)
 
         serviceStateFlow.value = serviceStateFlow.value.copy(isRunning = true)
 

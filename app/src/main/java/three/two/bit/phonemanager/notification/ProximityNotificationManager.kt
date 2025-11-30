@@ -17,6 +17,7 @@ import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.AlertDirection
 import three.two.bit.phonemanager.domain.model.ProximityAlert
 import timber.log.Timber
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -89,7 +90,7 @@ class ProximityNotificationManager @Inject constructor(@ApplicationContext priva
         val distanceText = if (distance < 1000) {
             "${distance.toInt()}m away"
         } else {
-            String.format("%.1fkm away", distance / 1000)
+            String.format(Locale.getDefault(), "%.1fkm away", distance / 1000)
         }
 
         val text = when (alert.direction) {

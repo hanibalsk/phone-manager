@@ -45,8 +45,8 @@ import three.two.bit.phonemanager.R
 @Composable
 fun RegistrationScreen(
     onRegistrationComplete: () -> Unit,
-    viewModel: RegistrationViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
+    viewModel: RegistrationViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current

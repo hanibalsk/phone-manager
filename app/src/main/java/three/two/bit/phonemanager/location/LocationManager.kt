@@ -177,13 +177,20 @@ class LocationManager @Inject constructor(@ApplicationContext private val contex
     /**
      * Check if location services are enabled on device
      */
-    suspend fun isLocationEnabled(): Boolean = try {
-        val location = fusedLocationClient.getLastLocation().await()
-        // If we can get last location, services are enabled
-        true
-    } catch (e: Exception) {
-        Timber.w(e, "Location services may be disabled")
-        false
+    suspend fun isLocationEnabled(): Boolean {
+        if (!hasLocationPermission()) {
+            Timber.w("Location permission not granted")
+            return false
+        }
+        return try {
+            @Suppress("MissingPermission")
+            val location = fusedLocationClient.getLastLocation().await()
+            // If we can get last location, services are enabled
+            true
+        } catch (e: Exception) {
+            Timber.w(e, "Location services may be disabled")
+            false
+        }
     }
 }
 

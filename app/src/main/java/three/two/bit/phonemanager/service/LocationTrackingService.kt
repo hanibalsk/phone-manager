@@ -368,36 +368,35 @@ class LocationTrackingService : Service() {
      * AC E2.2.3, E2.2.4, E7.2.3
      */
     private fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = getSystemService(NotificationManager::class.java)
+        // minSdk is 26 (O), so notification channels are always required
+        val notificationManager = getSystemService(NotificationManager::class.java)
 
-            // Normal mode channel (AC E2.2.5, E7.2.3)
-            val normalChannel = NotificationChannel(
-                CHANNEL_ID_NORMAL,
-                "Location Tracking",
-                NotificationManager.IMPORTANCE_MIN, // AC E7.2.3: Minimal prominence
-            ).apply {
-                description = getString(R.string.channel_tracking_description)
-                setShowBadge(false)
-                setSound(null, null) // AC E7.2.3: No sound
-                enableVibration(false) // AC E7.2.3: No vibration
-                lockscreenVisibility = Notification.VISIBILITY_SECRET // AC E7.2.3: Hide on lock screen
-            }
-
-            // Secret mode channel (AC E2.2.3, E2.2.4)
-            val secretChannel = NotificationChannel(
-                CHANNEL_ID_SECRET,
-                "Background Service",
-                NotificationManager.IMPORTANCE_MIN,
-            ).apply {
-                description = getString(R.string.channel_background_description)
-                setShowBadge(false)
-                setSound(null, null) // AC E2.2.4: Silent
-                enableVibration(false) // AC E2.2.4: No vibration
-            }
-
-            notificationManager.createNotificationChannels(listOf(normalChannel, secretChannel))
+        // Normal mode channel (AC E2.2.5, E7.2.3)
+        val normalChannel = NotificationChannel(
+            CHANNEL_ID_NORMAL,
+            "Location Tracking",
+            NotificationManager.IMPORTANCE_MIN, // AC E7.2.3: Minimal prominence
+        ).apply {
+            description = getString(R.string.channel_tracking_description)
+            setShowBadge(false)
+            setSound(null, null) // AC E7.2.3: No sound
+            enableVibration(false) // AC E7.2.3: No vibration
+            lockscreenVisibility = Notification.VISIBILITY_SECRET // AC E7.2.3: Hide on lock screen
         }
+
+        // Secret mode channel (AC E2.2.3, E2.2.4)
+        val secretChannel = NotificationChannel(
+            CHANNEL_ID_SECRET,
+            "Background Service",
+            NotificationManager.IMPORTANCE_MIN,
+        ).apply {
+            description = getString(R.string.channel_background_description)
+            setShowBadge(false)
+            setSound(null, null) // AC E2.2.4: Silent
+            enableVibration(false) // AC E2.2.4: No vibration
+        }
+
+        notificationManager.createNotificationChannels(listOf(normalChannel, secretChannel))
     }
 
     /**
