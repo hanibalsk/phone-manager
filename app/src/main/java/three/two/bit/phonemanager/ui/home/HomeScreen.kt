@@ -10,6 +10,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -19,7 +20,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.rounded.Groups
+import androidx.compose.material.icons.rounded.History
+import androidx.compose.material.icons.rounded.Map
+import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.ShareLocation
+import androidx.compose.material.icons.rounded.Webhook
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -47,6 +53,7 @@ import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.permission.PermissionState
 import three.two.bit.phonemanager.ui.components.LocationStatsCard
 import three.two.bit.phonemanager.ui.components.LocationTrackingToggle
+import three.two.bit.phonemanager.ui.components.QuickActionCard
 import three.two.bit.phonemanager.ui.components.ServiceStatusCard
 import three.two.bit.phonemanager.ui.main.LocationTrackingViewModel
 import three.two.bit.phonemanager.ui.permissions.PermissionRationaleDialog
@@ -200,64 +207,75 @@ fun HomeScreen(
                 }
             }
 
-            // Hide Map/History/GroupMembers navigation in secret mode
+            // Quick Actions Grid - Row 1: Group Members + Map (hidden in secret mode)
             AnimatedVisibility(
                 visible = !isSecretMode,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
-                Column(
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                Row(
                     modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    // Navigate to Group Members screen (Story E1.2)
-                    Button(
+                    QuickActionCard(
+                        icon = Icons.Rounded.Groups,
+                        title = stringResource(R.string.home_quick_group),
                         onClick = onNavigateToGroupMembers,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(stringResource(R.string.home_view_group_members))
-                    }
-
-                    // Navigate to Map screen (Story E3.1)
-                    Button(
+                        modifier = Modifier.weight(1f),
+                    )
+                    QuickActionCard(
+                        icon = Icons.Rounded.Map,
+                        title = stringResource(R.string.home_quick_map),
                         onClick = onNavigateToMap,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(stringResource(R.string.home_view_map))
-                    }
-
-                    // Navigate to History screen (Story E4.1)
-                    Button(
-                        onClick = onNavigateToHistory,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(stringResource(R.string.home_view_history))
-                    }
+                        modifier = Modifier.weight(1f),
+                    )
                 }
             }
 
-            // Navigate to Alerts screen (Story E5.1) - KEEP VISIBLE in secret mode
-            Button(
-                onClick = onNavigateToAlerts,
+            // Quick Actions Grid - Row 2: History (hidden) + Alerts (visible)
+            Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(stringResource(R.string.home_proximity_alerts))
+                // History - hidden in secret mode
+                AnimatedVisibility(
+                    visible = !isSecretMode,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically(),
+                    modifier = Modifier.weight(1f),
+                ) {
+                    QuickActionCard(
+                        icon = Icons.Rounded.History,
+                        title = stringResource(R.string.home_quick_history),
+                        onClick = onNavigateToHistory,
+                    )
+                }
+                // Alerts - always visible
+                QuickActionCard(
+                    icon = Icons.Rounded.NotificationsActive,
+                    title = stringResource(R.string.home_quick_alerts),
+                    onClick = onNavigateToAlerts,
+                    modifier = if (isSecretMode) Modifier.fillMaxWidth() else Modifier.weight(1f),
+                )
             }
 
-            // Navigate to Geofences screen (Story E6.1)
-            Button(
-                onClick = onNavigateToGeofences,
+            // Quick Actions Grid - Row 3: Geofences + Webhooks (always visible)
+            Row(
                 modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(stringResource(R.string.home_geofences))
-            }
-
-            // Navigate to Webhooks screen (Story E6.3)
-            Button(
-                onClick = onNavigateToWebhooks,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.home_webhooks))
+                QuickActionCard(
+                    icon = Icons.Rounded.ShareLocation,
+                    title = stringResource(R.string.home_quick_geofences),
+                    onClick = onNavigateToGeofences,
+                    modifier = Modifier.weight(1f),
+                )
+                QuickActionCard(
+                    icon = Icons.Rounded.Webhook,
+                    title = stringResource(R.string.home_quick_webhooks),
+                    onClick = onNavigateToWebhooks,
+                    modifier = Modifier.weight(1f),
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))

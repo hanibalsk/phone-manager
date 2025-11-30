@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "WebSearch",
-      "mcp__MCP_DOCKER__create_new_file_with_text"
+      "mcp__MCP_DOCKER__create_new_file_with_text",
+      "mcp__MCP_DOCKER__execute_terminal_command",
+      "Bash(adb exec-out:*)",
+      "Bash(adb shell:*)"
     ],
     "deny": [],
     "ask": []

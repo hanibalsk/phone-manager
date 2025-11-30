@@ -153,7 +153,7 @@
     <string name="channel_background_description">Background service</string>
     <string name="channel_geofence_description">Notifications for geofence enter/exit events</string>
 
-    <!-- Home Screen Buttons -->
+    <!-- Home Screen Buttons (legacy) -->
     <string name="home_view_group_members">View Group Members</string>
     <string name="home_view_map">View Map</string>
     <string name="home_view_history">View Location History</string>
@@ -161,6 +161,14 @@
     <string name="home_geofences">Geofences</string>
     <string name="home_webhooks">Webhooks</string>
     <string name="settings">Settings</string>
+
+    <!-- Home Screen Quick Actions (short labels for grid) -->
+    <string name="home_quick_group">Group</string>
+    <string name="home_quick_map">Map</string>
+    <string name="home_quick_history">History</string>
+    <string name="home_quick_alerts">Alerts</string>
+    <string name="home_quick_geofences">Geofences</string>
+    <string name="home_quick_webhooks">Webhooks</string>
 
     <!-- Screen Titles -->
     <string name="webhooks_title">Webhooks</string>

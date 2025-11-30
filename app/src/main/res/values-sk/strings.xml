@@ -153,7 +153,7 @@
     <string name="channel_background_description">Služba na pozadí</string>
     <string name="channel_geofence_description">Notifikácie pre udalosti vstupu/odchodu z geofence</string>
 
-    <!-- Home Screen Buttons -->
+    <!-- Home Screen Buttons (legacy) -->
     <string name="home_view_group_members">Zobraziť členov skupiny</string>
     <string name="home_view_map">Zobraziť mapu</string>
     <string name="home_view_history">Zobraziť históriu polohy</string>
@@ -161,6 +161,14 @@
     <string name="home_geofences">Geofence</string>
     <string name="home_webhooks">Webhooky</string>
     <string name="settings">Nastavenia</string>
+
+    <!-- Home Screen Quick Actions (short labels for grid) -->
+    <string name="home_quick_group">Skupina</string>
+    <string name="home_quick_map">Mapa</string>
+    <string name="home_quick_history">História</string>
+    <string name="home_quick_alerts">Upozornenia</string>
+    <string name="home_quick_geofences">Geofence</string>
+    <string name="home_quick_webhooks">Webhooky</string>
 
     <!-- Screen Titles -->
     <string name="webhooks_title">Webhooky</string>
