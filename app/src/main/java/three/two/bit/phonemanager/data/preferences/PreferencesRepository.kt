@@ -5,6 +5,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -24,6 +25,7 @@ import javax.inject.Singleton
  * Story E2.1 additions: Secret mode setting
  * Story E3.3 additions: Map polling interval
  * Story E7.4 additions: Weather notification toggle
+ * Movement detection: Adaptive tracking interval based on transportation mode
  */
 interface PreferencesRepository {
     val isTrackingEnabled: Flow<Boolean>
@@ -49,6 +51,24 @@ interface PreferencesRepository {
     // Story E7.4: Weather notification toggle
     val showWeatherInNotification: Flow<Boolean>
     suspend fun setShowWeatherInNotification(enabled: Boolean)
+
+    // Movement detection: Adaptive tracking based on transportation mode
+    val isMovementDetectionEnabled: Flow<Boolean>
+    suspend fun setMovementDetectionEnabled(enabled: Boolean)
+    val isActivityRecognitionEnabled: Flow<Boolean>
+    suspend fun setActivityRecognitionEnabled(enabled: Boolean)
+    val isBluetoothCarDetectionEnabled: Flow<Boolean>
+    suspend fun setBluetoothCarDetectionEnabled(enabled: Boolean)
+    val isAndroidAutoDetectionEnabled: Flow<Boolean>
+    suspend fun setAndroidAutoDetectionEnabled(enabled: Boolean)
+
+    // Movement detection: Configurable interval multipliers
+    // Vehicle mode multiplier (0.1 to 1.0, lower = more frequent updates)
+    val vehicleIntervalMultiplier: Flow<Float>
+    suspend fun setVehicleIntervalMultiplier(multiplier: Float)
+    // Default mode multiplier for walking/cycling/stationary (0.1 to 2.0)
+    val defaultIntervalMultiplier: Flow<Float>
+    suspend fun setDefaultIntervalMultiplier(multiplier: Float)
 }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -56,14 +76,6 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 @Singleton
 class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context) :
     PreferencesRepository {
-
-    companion object {
-        /** Default tracking interval in minutes */
-        const val DEFAULT_TRACKING_INTERVAL_MINUTES = 5
-
-        /** Default map polling interval in seconds (Story E3.3) */
-        const val DEFAULT_MAP_POLLING_INTERVAL_SECONDS = 15
-    }
 
     private object PreferencesKeys {
         val TRACKING_ENABLED = booleanPreferencesKey("tracking_enabled")
@@ -81,6 +93,16 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
 
         // Story E7.4: Weather notification toggle key
         val SHOW_WEATHER_IN_NOTIFICATION = booleanPreferencesKey("show_weather_in_notification")
+
+        // Movement detection keys
+        val MOVEMENT_DETECTION_ENABLED = booleanPreferencesKey("movement_detection_enabled")
+        val ACTIVITY_RECOGNITION_ENABLED = booleanPreferencesKey("activity_recognition_enabled")
+        val BLUETOOTH_CAR_DETECTION_ENABLED = booleanPreferencesKey("bluetooth_car_detection_enabled")
+        val ANDROID_AUTO_DETECTION_ENABLED = booleanPreferencesKey("android_auto_detection_enabled")
+
+        // Movement detection interval multiplier keys
+        val VEHICLE_INTERVAL_MULTIPLIER = floatPreferencesKey("vehicle_interval_multiplier")
+        val DEFAULT_INTERVAL_MULTIPLIER = floatPreferencesKey("default_interval_multiplier")
     }
 
     override val isTrackingEnabled: Flow<Boolean> = context.dataStore.data
@@ -239,5 +261,145 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
             preferences[PreferencesKeys.SHOW_WEATHER_IN_NOTIFICATION] = enabled
         }
         Timber.d("Weather notification setting set to: $enabled")
+    }
+
+    // Movement detection implementation
+
+    override val isMovementDetectionEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.MOVEMENT_DETECTION_ENABLED] ?: false
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading movement detection preference")
+                emit(false)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setMovementDetectionEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MOVEMENT_DETECTION_ENABLED] = enabled
+        }
+        Timber.d("Movement detection enabled set to: $enabled")
+    }
+
+    override val isActivityRecognitionEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ACTIVITY_RECOGNITION_ENABLED] ?: true
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading activity recognition preference")
+                emit(true)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setActivityRecognitionEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ACTIVITY_RECOGNITION_ENABLED] = enabled
+        }
+        Timber.d("Activity recognition enabled set to: $enabled")
+    }
+
+    override val isBluetoothCarDetectionEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.BLUETOOTH_CAR_DETECTION_ENABLED] ?: true
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading Bluetooth car detection preference")
+                emit(true)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setBluetoothCarDetectionEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.BLUETOOTH_CAR_DETECTION_ENABLED] = enabled
+        }
+        Timber.d("Bluetooth car detection enabled set to: $enabled")
+    }
+
+    override val isAndroidAutoDetectionEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ANDROID_AUTO_DETECTION_ENABLED] ?: true
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading Android Auto detection preference")
+                emit(true)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setAndroidAutoDetectionEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ANDROID_AUTO_DETECTION_ENABLED] = enabled
+        }
+        Timber.d("Android Auto detection enabled set to: $enabled")
+    }
+
+    // Movement detection interval multipliers implementation
+
+    override val vehicleIntervalMultiplier: Flow<Float> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.VEHICLE_INTERVAL_MULTIPLIER] ?: DEFAULT_VEHICLE_INTERVAL_MULTIPLIER
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading vehicle interval multiplier preference")
+                emit(DEFAULT_VEHICLE_INTERVAL_MULTIPLIER)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setVehicleIntervalMultiplier(multiplier: Float) {
+        require(multiplier in 0.1f..1.0f) { "Vehicle interval multiplier must be between 0.1 and 1.0" }
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.VEHICLE_INTERVAL_MULTIPLIER] = multiplier
+        }
+        Timber.d("Vehicle interval multiplier set to: $multiplier")
+    }
+
+    override val defaultIntervalMultiplier: Flow<Float> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.DEFAULT_INTERVAL_MULTIPLIER] ?: DEFAULT_DEFAULT_INTERVAL_MULTIPLIER
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading default interval multiplier preference")
+                emit(DEFAULT_DEFAULT_INTERVAL_MULTIPLIER)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setDefaultIntervalMultiplier(multiplier: Float) {
+        require(multiplier in 0.1f..2.0f) { "Default interval multiplier must be between 0.1 and 2.0" }
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DEFAULT_INTERVAL_MULTIPLIER] = multiplier
+        }
+        Timber.d("Default interval multiplier set to: $multiplier")
+    }
+
+    companion object {
+        /** Default tracking interval in minutes */
+        const val DEFAULT_TRACKING_INTERVAL_MINUTES = 5
+
+        /** Default map polling interval in seconds (Story E3.3) */
+        const val DEFAULT_MAP_POLLING_INTERVAL_SECONDS = 15
+
+        /** Default vehicle interval multiplier (0.55 = 45% more frequent updates) */
+        const val DEFAULT_VEHICLE_INTERVAL_MULTIPLIER = 0.55f
+
+        /** Default interval multiplier for other modes (1.0 = no change) */
+        const val DEFAULT_DEFAULT_INTERVAL_MULTIPLIER = 1.0f
     }
 }

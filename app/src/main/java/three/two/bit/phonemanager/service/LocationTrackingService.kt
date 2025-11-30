@@ -19,6 +19,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -33,6 +34,8 @@ import three.two.bit.phonemanager.queue.QueueManager
 import three.two.bit.phonemanager.queue.WorkManagerScheduler
 import three.two.bit.phonemanager.util.toNotificationText
 import three.two.bit.phonemanager.util.toNotificationTitle
+import three.two.bit.phonemanager.movement.TransportationModeManager
+import three.two.bit.phonemanager.movement.TransportationState
 import three.two.bit.phonemanager.watchdog.WatchdogManager
 import timber.log.Timber
 import javax.inject.Inject
@@ -71,12 +74,22 @@ class LocationTrackingService : Service() {
     @Inject
     lateinit var weatherRepository: three.two.bit.phonemanager.data.repository.WeatherRepository
 
+    @Inject
+    lateinit var transportationModeManager: TransportationModeManager
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     private var currentLocationCount = 0
     private var currentInterval = PreferencesRepositoryImpl.DEFAULT_TRACKING_INTERVAL_MINUTES
     private var trackingJob: Job? = null
     private var consecutiveFailures = 0
+
+    // Movement detection: Current transportation state for adaptive intervals
+    @Volatile
+    private var currentTransportationState: TransportationState = TransportationState()
+
+    @Volatile
+    private var isMovementDetectionEnabled = false
 
     // Story E7.2: Cached weather state for notification (avoids runBlocking)
     @Volatile
@@ -182,6 +195,46 @@ class LocationTrackingService : Service() {
             }
         }
 
+        // Movement detection: Observe movement detection settings and start/stop monitoring
+        serviceScope.launch {
+            preferencesRepository.isMovementDetectionEnabled.collectLatest { enabled ->
+                isMovementDetectionEnabled = enabled
+                if (enabled) {
+                    startMovementDetection()
+                } else {
+                    stopMovementDetection()
+                    // Reset to default interval when disabled
+                    currentTransportationState = TransportationState()
+                }
+                Timber.d("Movement detection enabled: $enabled")
+            }
+        }
+
+        // Movement detection: Observe transportation state changes for adaptive intervals
+        serviceScope.launch {
+            transportationModeManager.transportationState.collectLatest { state ->
+                if (isMovementDetectionEnabled) {
+                    val previousState = currentTransportationState
+                    currentTransportationState = state
+
+                    // Log state change
+                    if (previousState.isInVehicle != state.isInVehicle) {
+                        Timber.i(
+                            "Transportation state changed: inVehicle=${state.isInVehicle}, " +
+                                "mode=${state.mode}, source=${state.source}, " +
+                                "multiplier=${state.intervalMultiplier}",
+                        )
+
+                        // Restart location capture to apply new interval
+                        if (trackingJob?.isActive == true) {
+                            Timber.d("Restarting location capture with new interval multiplier")
+                            startLocationCapture()
+                        }
+                    }
+                }
+            }
+        }
+
         // Story 0.2.1: Start periodic location capture
         startLocationCapture()
 
@@ -195,23 +248,69 @@ class LocationTrackingService : Service() {
     }
 
     /**
+     * Movement detection: Start movement detection monitoring based on preferences.
+     */
+    private suspend fun startMovementDetection() {
+        val activityEnabled = preferencesRepository.isActivityRecognitionEnabled.first()
+        val bluetoothEnabled = preferencesRepository.isBluetoothCarDetectionEnabled.first()
+        val androidAutoEnabled = preferencesRepository.isAndroidAutoDetectionEnabled.first()
+
+        Timber.i(
+            "Starting movement detection (activity=$activityEnabled, " +
+                "bluetooth=$bluetoothEnabled, androidAuto=$androidAutoEnabled)",
+        )
+
+        transportationModeManager.startMonitoring(
+            enableActivityRecognition = activityEnabled,
+            enableBluetoothDetection = bluetoothEnabled,
+            enableAndroidAutoDetection = androidAutoEnabled,
+        )
+    }
+
+    /**
+     * Movement detection: Stop movement detection monitoring.
+     */
+    private fun stopMovementDetection() {
+        Timber.i("Stopping movement detection")
+        transportationModeManager.stopMonitoring()
+    }
+
+    /**
+     * Calculate the effective tracking interval considering transportation mode.
+     *
+     * @return adjusted interval in minutes
+     */
+    private fun calculateEffectiveInterval(): Int {
+        return if (isMovementDetectionEnabled) {
+            currentTransportationState.calculateAdjustedInterval(currentInterval)
+        } else {
+            currentInterval
+        }
+    }
+
+    /**
      * Story 0.2.1: Periodically capture location and store to database
-     * Enhanced with error recovery and backoff logic
+     * Enhanced with error recovery, backoff logic, and adaptive intervals
      */
     private fun startLocationCapture() {
         trackingJob?.cancel()
         consecutiveFailures = 0
 
         trackingJob = serviceScope.launch {
-            Timber.d("Starting location capture loop with interval $currentInterval minutes")
+            val effectiveInterval = calculateEffectiveInterval()
+            Timber.d(
+                "Starting location capture loop with base interval $currentInterval minutes, " +
+                    "effective interval $effectiveInterval minutes " +
+                    "(inVehicle=${currentTransportationState.isInVehicle})",
+            )
 
             while (isActive) {
                 val captureSuccess = captureLocationWithRecovery()
 
-                // Calculate next interval based on success/failure
+                // Calculate next interval based on success/failure and transportation mode
                 val nextIntervalMinutes = if (captureSuccess) {
                     consecutiveFailures = 0
-                    currentInterval
+                    calculateEffectiveInterval()
                 } else {
                     consecutiveFailures++
                     calculateBackoffInterval()
@@ -332,6 +431,9 @@ class LocationTrackingService : Service() {
         // Cancel location capture
         trackingJob?.cancel()
         trackingJob = null
+
+        // Stop movement detection
+        stopMovementDetection()
 
         // Story 0.2.3: Cancel queue processing
         workManagerScheduler.cancelQueueProcessing()
@@ -509,6 +611,9 @@ class LocationTrackingService : Service() {
         // Cancel location capture
         trackingJob?.cancel()
         trackingJob = null
+
+        // Stop movement detection
+        stopMovementDetection()
 
         // Cancel service scope
         serviceScope.cancel()
