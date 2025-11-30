@@ -247,7 +247,7 @@
     <string name="button_change_group">Zmeniť skupinu</string>
     <string name="button_retry">Skúsiť znova</string>
     <string name="button_none">Žiadny</string>
-    <string name="button_use_current_location">Použiť aktuálnu polohu (Čoskoro)</string>
+    <string name="button_use_current_location">Použiť aktuálnu polohu</string>
 
     <!-- Dialogs -->
     <string name="dialog_change_group_title">Zmeniť skupinu?</string>

@@ -15,6 +15,7 @@ import three.two.bit.phonemanager.data.repository.WebhookRepository
 import three.two.bit.phonemanager.domain.model.Geofence
 import three.two.bit.phonemanager.domain.model.TransitionType
 import three.two.bit.phonemanager.domain.model.Webhook
+import three.two.bit.phonemanager.location.LocationManager
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -28,10 +29,14 @@ import javax.inject.Inject
 class GeofencesViewModel @Inject constructor(
     private val geofenceRepository: GeofenceRepository,
     private val webhookRepository: WebhookRepository,
+    private val locationManager: LocationManager,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(GeofencesUiState())
     val uiState: StateFlow<GeofencesUiState> = _uiState.asStateFlow()
+
+    private val _currentLocationState = MutableStateFlow(CurrentLocationState())
+    val currentLocationState: StateFlow<CurrentLocationState> = _currentLocationState.asStateFlow()
 
     /**
      * Observable geofences from repository
@@ -157,6 +162,48 @@ class GeofencesViewModel @Inject constructor(
     fun clearCreateError() {
         _uiState.update { it.copy(createError = null) }
     }
+
+    /**
+     * Fetch current device location for geofence creation
+     */
+    fun fetchCurrentLocation() {
+        viewModelScope.launch {
+            _currentLocationState.update { it.copy(isLoading = true, error = null) }
+            locationManager.getCurrentLocation().fold(
+                onSuccess = { locationEntity ->
+                    if (locationEntity != null) {
+                        Timber.i("Current location fetched: ${locationEntity.latitude}, ${locationEntity.longitude}")
+                        _currentLocationState.update {
+                            it.copy(
+                                isLoading = false,
+                                latitude = locationEntity.latitude,
+                                longitude = locationEntity.longitude,
+                                error = null,
+                            )
+                        }
+                    } else {
+                        Timber.w("Current location is null")
+                        _currentLocationState.update {
+                            it.copy(isLoading = false, error = "Location unavailable")
+                        }
+                    }
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to get current location")
+                    _currentLocationState.update {
+                        it.copy(isLoading = false, error = error.message ?: "Failed to get location")
+                    }
+                },
+            )
+        }
+    }
+
+    /**
+     * Clear current location state
+     */
+    fun clearLocationState() {
+        _currentLocationState.update { CurrentLocationState() }
+    }
 }
 
 /**
@@ -167,4 +214,14 @@ data class GeofencesUiState(
     val syncError: String? = null,
     val isCreating: Boolean = false,
     val createError: String? = null,
+)
+
+/**
+ * State for current location fetch
+ */
+data class CurrentLocationState(
+    val isLoading: Boolean = false,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val error: String? = null,
 )

@@ -1,5 +1,9 @@
 package three.two.bit.phonemanager.ui.geofences
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -8,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -43,8 +48,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.R
@@ -65,7 +72,9 @@ import kotlin.math.roundToInt
 fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavigateBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val webhooks by viewModel.webhooks.collectAsStateWithLifecycle()
+    val currentLocationState by viewModel.currentLocationState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = LocalContext.current
 
     // Form state
     var name by rememberSaveable { mutableStateOf("") }
@@ -76,6 +85,49 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
     var exitSelected by rememberSaveable { mutableStateOf(true) }
     var dwellSelected by rememberSaveable { mutableStateOf(false) }
     var selectedWebhookId by rememberSaveable { mutableStateOf<String?>(null) }
+
+    // Permission launcher for location
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.fetchCurrentLocation()
+        }
+    }
+
+    // Check if location permission is granted
+    fun hasLocationPermission(): Boolean = ContextCompat.checkSelfPermission(
+        context,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+    ) == PackageManager.PERMISSION_GRANTED
+
+    // Handle "Use Current Location" button click
+    fun onUseCurrentLocationClick() {
+        if (hasLocationPermission()) {
+            viewModel.fetchCurrentLocation()
+        } else {
+            locationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
+
+    // Auto-populate coordinates when location is fetched
+    LaunchedEffect(currentLocationState.latitude, currentLocationState.longitude) {
+        currentLocationState.latitude?.let { lat ->
+            currentLocationState.longitude?.let { lng ->
+                latitudeText = lat.toString()
+                longitudeText = lng.toString()
+                viewModel.clearLocationState()
+            }
+        }
+    }
+
+    // Show location error in snackbar
+    LaunchedEffect(currentLocationState.error) {
+        currentLocationState.error?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearLocationState()
+        }
+    }
 
     // Convert slider value to meters (50-10,000 logarithmic scale)
     val radiusMeters = sliderToRadius(radiusSliderValue)
@@ -165,6 +217,8 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
                 onLatitudeChange = { latitudeText = it },
                 onLongitudeChange = { longitudeText = it },
                 isValidLocation = isValidLocation || (latitudeText.isBlank() && longitudeText.isBlank()),
+                isLoadingLocation = currentLocationState.isLoading,
+                onUseCurrentLocationClick = ::onUseCurrentLocationClick,
             )
 
             // Radius section
@@ -235,6 +289,8 @@ private fun LocationSection(
     onLatitudeChange: (String) -> Unit,
     onLongitudeChange: (String) -> Unit,
     isValidLocation: Boolean,
+    isLoadingLocation: Boolean,
+    onUseCurrentLocationClick: () -> Unit,
 ) {
     Column {
         Text(
@@ -284,13 +340,20 @@ private fun LocationSection(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Use current location button (future enhancement)
+        // Use current location button
         OutlinedButton(
-            onClick = { /* TODO: Implement current location */ },
+            onClick = onUseCurrentLocationClick,
             modifier = Modifier.fillMaxWidth(),
-            enabled = false, // Disabled for now
+            enabled = !isLoadingLocation,
         ) {
-            Icon(Icons.Default.MyLocation, contentDescription = null)
+            if (isLoadingLocation) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Icon(Icons.Default.MyLocation, contentDescription = null)
+            }
             Spacer(modifier = Modifier.width(8.dp))
             Text(stringResource(R.string.button_use_current_location))
         }

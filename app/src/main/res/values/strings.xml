@@ -247,7 +247,7 @@
     <string name="button_change_group">Change Group</string>
     <string name="button_retry">Retry</string>
     <string name="button_none">None</string>
-    <string name="button_use_current_location">Use Current Location (Coming Soon)</string>
+    <string name="button_use_current_location">Use Current Location</string>
 
     <!-- Dialogs -->
     <string name="dialog_change_group_title">Change Group?</string>
