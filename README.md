@@ -10,12 +10,15 @@ Phone Manager is a comprehensive location tracking solution built with modern An
 
 - **Location Tracking**: Real-time GPS tracking with configurable intervals
 - **Device Groups**: Register devices and view group members' locations
-- **Real-Time Map**: Google Maps integration with live location updates
+- **Real-Time Map**: Google Maps integration with live location updates and polling
 - **Location History**: Historical location data with date filtering
+- **Movement Tracking**: Intelligent trip detection with transportation mode recognition
+- **Trip History**: View and manage recorded trips with filtering and day grouping
 - **Proximity Alerts**: Notifications when devices enter/exit defined ranges
 - **Geofencing**: Create geographic boundaries with event triggers
 - **Webhook Integration**: Automate actions via Home Assistant or n8n
 - **Secret Mode**: Discreet operation with hidden notifications
+- **Health Monitoring**: Service watchdog with automatic recovery
 
 ## Technology Stack
 
@@ -89,13 +92,16 @@ app/src/main/java/three/two/bit/phonemanager/
 ├── domain/         # Domain models
 ├── geofence/       # Geofencing implementation
 ├── location/       # Location capture logic
+├── movement/       # Transportation mode detection
 ├── network/        # API services (Ktor)
 ├── permission/     # Permission management
 ├── queue/          # Background work queue
 ├── security/       # Encrypted storage
 ├── service/        # Foreground location service
+├── trip/           # Trip detection and management
 ├── ui/             # Compose screens & ViewModels
-└── util/           # Utility classes
+├── util/           # Utility classes
+└── watchdog/       # Service health monitoring
 ```
 
 ## Documentation
@@ -117,14 +123,16 @@ app/src/main/java/three/two/bit/phonemanager/
 | 0 | Foundation Infrastructure | ✅ Complete |
 | 1 | Device Registration & Groups | ✅ Complete |
 | 2 | Secret Mode | ⏳ Planned |
-| 3 | Real-Time Map | 🔄 Partial |
+| 3 | Real-Time Map & Group Display | ✅ Complete |
 | 4 | Location History | ✅ Complete |
 | 5 | Proximity Alerts | ✅ Complete |
 | 6 | Geofencing & Webhooks | ✅ Complete |
+| 7 | Health Monitoring & Reliability | ✅ Complete |
+| 8 | Movement Tracking & Trip Detection | ✅ Complete |
 
 ## Database Schema
 
-Current version: **7**
+Current version: **8**
 
 | Table | Purpose |
 |-------|---------|
@@ -134,6 +142,8 @@ Current version: **7**
 | geofences | Geofence definitions |
 | geofence_events | Geofence trigger events |
 | webhooks | Webhook configurations |
+| trips | Trip records with mode and statistics |
+| movement_events | Transportation mode change events |
 
 ## API Endpoints
 
@@ -151,6 +161,8 @@ See [API Reference](docs/API_REFERENCE.md) for complete documentation.
 
 ## Testing
 
+**514 unit tests** covering ViewModels, repositories, and business logic.
+
 Run unit tests:
 ```bash
 ./gradlew test
@@ -164,6 +176,11 @@ Run instrumented tests:
 Check code style:
 ```bash
 ./gradlew spotlessCheck
+```
+
+Format code:
+```bash
+./gradlew spotlessApply
 ```
 
 ## Security
@@ -182,6 +199,7 @@ Check code style:
   - `ACCESS_FINE_LOCATION`
   - `ACCESS_COARSE_LOCATION`
   - `ACCESS_BACKGROUND_LOCATION`
+  - `ACTIVITY_RECOGNITION` (for movement tracking)
   - `FOREGROUND_SERVICE`
   - `POST_NOTIFICATIONS`
   - `INTERNET`
