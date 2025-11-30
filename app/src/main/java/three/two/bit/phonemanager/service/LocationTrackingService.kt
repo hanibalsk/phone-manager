@@ -7,6 +7,7 @@ import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.location.Location
 import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
@@ -26,9 +27,11 @@ import kotlinx.coroutines.runBlocking
 import three.two.bit.phonemanager.MainActivity
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.model.HealthStatus
+import three.two.bit.phonemanager.data.model.LocationEntity
 import three.two.bit.phonemanager.data.model.ServiceHealth
 import three.two.bit.phonemanager.data.preferences.PreferencesRepositoryImpl
 import three.two.bit.phonemanager.data.repository.LocationRepositoryImpl
+import three.two.bit.phonemanager.data.repository.TripRepository
 import three.two.bit.phonemanager.location.LocationManager
 import three.two.bit.phonemanager.queue.QueueManager
 import three.two.bit.phonemanager.queue.WorkManagerScheduler
@@ -36,6 +39,7 @@ import three.two.bit.phonemanager.util.toNotificationText
 import three.two.bit.phonemanager.util.toNotificationTitle
 import three.two.bit.phonemanager.movement.TransportationModeManager
 import three.two.bit.phonemanager.movement.TransportationState
+import three.two.bit.phonemanager.trip.TripManager
 import three.two.bit.phonemanager.watchdog.WatchdogManager
 import timber.log.Timber
 import javax.inject.Inject
@@ -77,7 +81,18 @@ class LocationTrackingService : Service() {
     @Inject
     lateinit var transportationModeManager: TransportationModeManager
 
+    // Story E8.7: TripManager and TripRepository integration (AC E8.7.1)
+    @Inject
+    lateinit var tripManager: TripManager
+
+    @Inject
+    lateinit var tripRepository: TripRepository
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+    // Story E8.7: Last location for distance calculation (AC E8.7.3)
+    @Volatile
+    private var lastCapturedLocation: LocationEntity? = null
 
     private var currentLocationCount = 0
     private var currentInterval = PreferencesRepositoryImpl.DEFAULT_TRACKING_INTERVAL_MINUTES
@@ -249,6 +264,7 @@ class LocationTrackingService : Service() {
 
     /**
      * Movement detection: Start movement detection monitoring based on preferences.
+     * Story E8.7: Also starts TripManager monitoring (AC E8.7.4)
      */
     private suspend fun startMovementDetection() {
         val activityEnabled = preferencesRepository.isActivityRecognitionEnabled.first()
@@ -265,14 +281,31 @@ class LocationTrackingService : Service() {
             enableBluetoothDetection = bluetoothEnabled,
             enableAndroidAutoDetection = androidAutoEnabled,
         )
+
+        // Story E8.7: Start TripManager monitoring (AC E8.7.4)
+        try {
+            tripManager.startMonitoring()
+            Timber.i("TripManager monitoring started")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to start TripManager monitoring")
+        }
     }
 
     /**
      * Movement detection: Stop movement detection monitoring.
+     * Story E8.7: Also stops TripManager monitoring (AC E8.7.4)
      */
     private fun stopMovementDetection() {
         Timber.i("Stopping movement detection")
         transportationModeManager.stopMonitoring()
+
+        // Story E8.7: Stop TripManager monitoring (AC E8.7.4)
+        try {
+            tripManager.stopMonitoring()
+            Timber.i("TripManager monitoring stopped")
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to stop TripManager monitoring")
+        }
     }
 
     /**
@@ -357,11 +390,49 @@ class LocationTrackingService : Service() {
         result.fold(
             onSuccess = { locationEntity ->
                 if (locationEntity != null) {
-                    // Story 0.2.1: Store location to database
-                    val id = locationRepository.insertLocation(locationEntity)
-                    Timber.i(
-                        "Location captured and stored: id=$id, lat=${locationEntity.latitude}, lon=${locationEntity.longitude}, accuracy=${locationEntity.accuracy}m",
+                    // Story E8.7: Enrich location with transportation mode and trip context (AC E8.7.2)
+                    val transportState = currentTransportationState
+                    val activeTrip = tripManager.activeTrip.value
+
+                    // Calculate distance from last location (AC E8.7.3)
+                    val distance = lastCapturedLocation?.let { last ->
+                        calculateDistance(
+                            last.latitude, last.longitude,
+                            locationEntity.latitude, locationEntity.longitude,
+                        )
+                    } ?: 0f
+
+                    // Derive confidence from detection source
+                    val modeConfidence = when (transportState.source) {
+                        three.two.bit.phonemanager.movement.DetectionSource.MULTIPLE -> 0.95f
+                        three.two.bit.phonemanager.movement.DetectionSource.ANDROID_AUTO -> 0.9f
+                        three.two.bit.phonemanager.movement.DetectionSource.BLUETOOTH_CAR -> 0.85f
+                        three.two.bit.phonemanager.movement.DetectionSource.ACTIVITY_RECOGNITION -> 0.8f
+                        three.two.bit.phonemanager.movement.DetectionSource.NONE -> null
+                    }
+
+                    // Create enriched location entity
+                    val enrichedLocation = locationEntity.copy(
+                        transportationMode = transportState.mode.name,
+                        detectionSource = transportState.source.name,
+                        modeConfidence = modeConfidence,
+                        tripId = activeTrip?.id,
                     )
+
+                    // Story 0.2.1: Store enriched location to database
+                    val id = locationRepository.insertLocation(enrichedLocation)
+                    Timber.i(
+                        "Location captured and stored: id=$id, lat=${enrichedLocation.latitude}, lon=${enrichedLocation.longitude}, " +
+                            "accuracy=${enrichedLocation.accuracy}m, mode=${enrichedLocation.transportationMode}, tripId=${enrichedLocation.tripId}",
+                    )
+
+                    // Update last captured location for distance calculation
+                    lastCapturedLocation = enrichedLocation
+
+                    // Story E8.7: Update trip statistics if active trip exists (AC E8.7.3)
+                    activeTrip?.let { trip ->
+                        updateTripStatistics(trip.id, distance, enrichedLocation)
+                    }
 
                     // Story 0.2.3: Enqueue location for upload
                     queueManager.enqueueLocation(id)
@@ -370,7 +441,7 @@ class LocationTrackingService : Service() {
                     locationRepository.updateServiceHealth(
                         ServiceHealth(
                             isRunning = true,
-                            lastLocationUpdate = locationEntity.timestamp,
+                            lastLocationUpdate = enrichedLocation.timestamp,
                             locationCount = currentLocationCount + 1,
                             healthStatus = HealthStatus.HEALTHY,
                         ),
@@ -623,5 +694,37 @@ class LocationTrackingService : Service() {
 
     override fun onBind(intent: Intent?): IBinder? {
         return null // We don't support binding
+    }
+
+    /**
+     * Story E8.7: Calculate distance between two points in meters (AC E8.7.3)
+     * Uses Android's Location.distanceBetween for accurate results.
+     */
+    private fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Float {
+        val results = FloatArray(1)
+        Location.distanceBetween(lat1, lon1, lat2, lon2, results)
+        return results[0]
+    }
+
+    /**
+     * Story E8.7: Update trip statistics with new location (AC E8.7.3)
+     * AC E8.7.6: Handles errors without crashing the service
+     */
+    private fun updateTripStatistics(tripId: String, distance: Float, location: LocationEntity) {
+        serviceScope.launch {
+            try {
+                // Update TripManager with new location
+                tripManager.updateLocation(location.latitude, location.longitude)
+
+                // Increment location count and add distance
+                if (distance > 0) {
+                    tripManager.addDistance(tripId, distance.toDouble())
+                    Timber.d("Trip $tripId: Added distance ${distance}m, total locations updated")
+                }
+            } catch (e: Exception) {
+                // AC E8.7.6: Log errors but don't crash
+                Timber.e(e, "Failed to update trip statistics for trip $tripId")
+            }
+        }
     }
 }

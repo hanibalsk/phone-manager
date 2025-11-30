@@ -1,6 +1,7 @@
 package three.two.bit.phonemanager.movement
 
 import android.content.Context
+import android.location.LocationManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -11,12 +12,24 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
+import three.two.bit.phonemanager.data.repository.MovementEventRepository
+import three.two.bit.phonemanager.domain.model.DeviceState
+import three.two.bit.phonemanager.domain.model.EventLocation
+import three.two.bit.phonemanager.domain.model.NetworkType
+import three.two.bit.phonemanager.domain.model.SensorTelemetry
+import three.two.bit.phonemanager.trip.SensorTelemetryCollector
+import three.two.bit.phonemanager.trip.TripManager
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import dagger.Lazy
+import three.two.bit.phonemanager.domain.model.DetectionSource as DomainDetectionSource
 
 /**
  * Data class representing the current transportation state.
@@ -78,8 +91,19 @@ class TransportationModeManager @Inject constructor(
     private val bluetoothCarDetector: BluetoothCarDetector,
     private val androidAutoDetector: AndroidAutoDetector,
     private val preferencesRepository: PreferencesRepository,
+    private val movementEventRepository: MovementEventRepository,
+    private val sensorTelemetryCollector: SensorTelemetryCollector,
+    private val tripManagerLazy: Lazy<TripManager>,
 ) {
     private val managerScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+    private val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
+
+    // State tracking for movement event recording (AC E8.6.1)
+    @Volatile
+    private var lastState: TransportationState? = null
+
+    @Volatile
+    private var lastStateTimestamp: Long = 0L
 
     private val _isMonitoring = MutableStateFlow(false)
     val isMonitoring: StateFlow<Boolean> = _isMonitoring.asStateFlow()
@@ -157,15 +181,28 @@ class TransportationModeManager @Inject constructor(
 
         _isMonitoring.value = true
 
-        // Log state changes for debugging
-        managerScope.launch {
-            transportationState.collect { state ->
+        // Subscribe to state changes for logging and movement event recording (AC E8.6.1)
+        transportationState
+            .distinctUntilChanged { old, new -> old.mode == new.mode }
+            .onEach { newState ->
+                val previousState = lastState
+                val previousTimestamp = lastStateTimestamp
+
+                // Update tracking variables
+                lastState = newState
+                lastStateTimestamp = System.currentTimeMillis()
+
                 Timber.d(
-                    "Transportation state changed: mode=${state.mode}, inVehicle=${state.isInVehicle}, " +
-                        "source=${state.source}, multiplier=${state.intervalMultiplier}",
+                    "Transportation state changed: mode=${newState.mode}, inVehicle=${newState.isInVehicle}, " +
+                        "source=${newState.source}, multiplier=${newState.intervalMultiplier}",
                 )
+
+                // Record movement event if mode actually changed (AC E8.6.2)
+                if (previousState != null && previousState.mode != newState.mode) {
+                    recordMovementEvent(previousState, newState, previousTimestamp)
+                }
             }
-        }
+            .launchIn(managerScope)
     }
 
     /**
@@ -275,4 +312,144 @@ class TransportationModeManager @Inject constructor(
         "bluetooth" to bluetoothCarDetector.isMonitoring.value,
         "android_auto" to androidAutoDetector.isMonitoring.value,
     )
+
+    /**
+     * Record a movement event when transportation mode changes.
+     *
+     * AC E8.6.2: Records event with telemetry when mode changes
+     * AC E8.6.3: Populates all event fields
+     * AC E8.6.4: Calculates detection latency
+     * AC E8.6.5: Includes tripId from active trip
+     * AC E8.6.6: Handles errors asynchronously
+     */
+    private fun recordMovementEvent(
+        previousState: TransportationState,
+        newState: TransportationState,
+        previousTimestamp: Long,
+    ) {
+        managerScope.launch {
+            try {
+                // Collect sensor telemetry (AC E8.6.3)
+                val telemetrySnapshot = sensorTelemetryCollector.collect()
+
+                // Get location (AC E8.6.3)
+                val eventLocation = getLastKnownLocation()
+
+                // Calculate detection latency (AC E8.6.4)
+                val detectionLatencyMs = System.currentTimeMillis() - previousTimestamp
+                Timber.d("Movement event detection latency: ${detectionLatencyMs}ms")
+
+                // Map detection source to domain model
+                val domainSource = mapDetectionSource(newState.source)
+
+                // Derive confidence from source (multiple sources = higher confidence)
+                val confidence = when (newState.source) {
+                    DetectionSource.MULTIPLE -> 0.95f
+                    DetectionSource.ANDROID_AUTO -> 0.9f
+                    DetectionSource.BLUETOOTH_CAR -> 0.85f
+                    DetectionSource.ACTIVITY_RECOGNITION -> 0.8f
+                    DetectionSource.NONE -> 0.5f
+                }
+
+                // Build device state from telemetry
+                val deviceState = DeviceState(
+                    batteryLevel = telemetrySnapshot.batteryLevel,
+                    batteryCharging = telemetrySnapshot.batteryCharging,
+                    networkType = mapNetworkType(telemetrySnapshot.networkType),
+                    networkStrength = telemetrySnapshot.networkStrength,
+                )
+
+                // Build sensor telemetry domain object
+                val sensorTelemetry = SensorTelemetry(
+                    accelerometerMagnitude = telemetrySnapshot.accelerometerMagnitude,
+                    accelerometerVariance = telemetrySnapshot.accelerometerVariance,
+                    accelerometerPeakFrequency = telemetrySnapshot.accelerometerPeakFrequency,
+                    gyroscopeMagnitude = telemetrySnapshot.gyroscopeMagnitude,
+                    stepCount = telemetrySnapshot.stepCount,
+                    significantMotion = telemetrySnapshot.significantMotion,
+                    activityType = newState.mode.name,
+                    activityConfidence = (confidence * 100).toInt(),
+                )
+
+                // Get active trip ID (AC E8.6.5)
+                val tripId = tripManagerLazy.get().activeTrip.value?.id
+
+                // Record event via repository (AC E8.6.2)
+                val result = movementEventRepository.recordEvent(
+                    tripId = tripId,
+                    previousMode = previousState.mode,
+                    newMode = newState.mode,
+                    detectionSource = domainSource,
+                    confidence = confidence,
+                    detectionLatencyMs = detectionLatencyMs,
+                    location = eventLocation,
+                    deviceState = deviceState,
+                    sensorTelemetry = sensorTelemetry,
+                    movementContext = null, // Context can be added in future enhancement
+                )
+
+                result.onSuccess { eventId ->
+                    Timber.i(
+                        "Recorded movement event #$eventId: ${previousState.mode} → ${newState.mode} " +
+                            "(latency=${detectionLatencyMs}ms, tripId=$tripId)",
+                    )
+                }.onFailure { e ->
+                    Timber.e(e, "Failed to record movement event")
+                }
+            } catch (e: Exception) {
+                // AC E8.6.6: Log errors but don't crash
+                Timber.e(e, "Error recording movement event")
+            }
+        }
+    }
+
+    /**
+     * Get the last known location for event recording.
+     */
+    @Suppress("MissingPermission")
+    private fun getLastKnownLocation(): EventLocation? {
+        return try {
+            val location = locationManager?.getLastKnownLocation(LocationManager.FUSED_PROVIDER)
+                ?: locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+                ?: locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+
+            location?.let {
+                EventLocation(
+                    latitude = it.latitude,
+                    longitude = it.longitude,
+                    accuracy = it.accuracy,
+                    speed = if (it.hasSpeed()) it.speed else null,
+                )
+            }
+        } catch (e: Exception) {
+            Timber.w(e, "Failed to get last known location for movement event")
+            null
+        }
+    }
+
+    /**
+     * Map movement DetectionSource to domain model DetectionSource.
+     */
+    private fun mapDetectionSource(source: DetectionSource): DomainDetectionSource {
+        return when (source) {
+            DetectionSource.ACTIVITY_RECOGNITION -> DomainDetectionSource.ACTIVITY_RECOGNITION
+            DetectionSource.BLUETOOTH_CAR -> DomainDetectionSource.SENSOR_FUSION
+            DetectionSource.ANDROID_AUTO -> DomainDetectionSource.SENSOR_FUSION
+            DetectionSource.MULTIPLE -> DomainDetectionSource.SENSOR_FUSION
+            DetectionSource.NONE -> DomainDetectionSource.UNKNOWN
+        }
+    }
+
+    /**
+     * Map network type string to domain model NetworkType.
+     */
+    private fun mapNetworkType(networkType: String?): NetworkType? {
+        return when (networkType) {
+            "WIFI" -> NetworkType.WIFI
+            "MOBILE" -> NetworkType.CELLULAR
+            "NONE" -> NetworkType.NONE
+            "UNKNOWN" -> NetworkType.UNKNOWN
+            else -> null
+        }
+    }
 }

@@ -14,6 +14,10 @@ import three.two.bit.phonemanager.data.repository.LocationRepository
 import three.two.bit.phonemanager.data.repository.LocationRepositoryImpl
 import three.two.bit.phonemanager.data.repository.WebhookRepository
 import three.two.bit.phonemanager.data.repository.WebhookRepositoryImpl
+import three.two.bit.phonemanager.data.repository.TripRepository
+import three.two.bit.phonemanager.data.repository.TripRepositoryImpl
+import three.two.bit.phonemanager.data.repository.MovementEventRepository
+import three.two.bit.phonemanager.data.repository.MovementEventRepositoryImpl
 import javax.inject.Singleton
 
 /**
@@ -51,4 +55,18 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindWebhookRepository(impl: WebhookRepositoryImpl): WebhookRepository
+
+    /**
+     * Story E8.3: Trip Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindTripRepository(impl: TripRepositoryImpl): TripRepository
+
+    /**
+     * Story E8.3: Movement Event Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindMovementEventRepository(impl: MovementEventRepositoryImpl): MovementEventRepository
 }

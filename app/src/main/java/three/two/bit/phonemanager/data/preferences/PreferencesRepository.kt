@@ -69,6 +69,28 @@ interface PreferencesRepository {
     // Default mode multiplier for walking/cycling/stationary (0.1 to 2.0)
     val defaultIntervalMultiplier: Flow<Float>
     suspend fun setDefaultIntervalMultiplier(multiplier: Float)
+
+    // Story E8.8: Trip detection preferences
+    val isTripDetectionEnabled: Flow<Boolean>
+    suspend fun setTripDetectionEnabled(enabled: Boolean)
+
+    val tripStationaryThresholdMinutes: Flow<Int>
+    suspend fun setTripStationaryThresholdMinutes(minutes: Int)
+
+    val tripMinimumDurationMinutes: Flow<Int>
+    suspend fun setTripMinimumDurationMinutes(minutes: Int)
+
+    val tripMinimumDistanceMeters: Flow<Int>
+    suspend fun setTripMinimumDistanceMeters(meters: Int)
+
+    val isTripAutoMergeEnabled: Flow<Boolean>
+    suspend fun setTripAutoMergeEnabled(enabled: Boolean)
+
+    val tripVehicleGraceSeconds: Flow<Int>
+    suspend fun setTripVehicleGraceSeconds(seconds: Int)
+
+    val tripWalkingGraceSeconds: Flow<Int>
+    suspend fun setTripWalkingGraceSeconds(seconds: Int)
 }
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
@@ -103,6 +125,15 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
         // Movement detection interval multiplier keys
         val VEHICLE_INTERVAL_MULTIPLIER = floatPreferencesKey("vehicle_interval_multiplier")
         val DEFAULT_INTERVAL_MULTIPLIER = floatPreferencesKey("default_interval_multiplier")
+
+        // Story E8.8: Trip detection preference keys
+        val TRIP_DETECTION_ENABLED = booleanPreferencesKey("trip_detection_enabled")
+        val TRIP_STATIONARY_THRESHOLD_MINUTES = intPreferencesKey("trip_stationary_threshold_minutes")
+        val TRIP_MINIMUM_DURATION_MINUTES = intPreferencesKey("trip_minimum_duration_minutes")
+        val TRIP_MINIMUM_DISTANCE_METERS = intPreferencesKey("trip_minimum_distance_meters")
+        val TRIP_AUTO_MERGE_ENABLED = booleanPreferencesKey("trip_auto_merge_enabled")
+        val TRIP_VEHICLE_GRACE_SECONDS = intPreferencesKey("trip_vehicle_grace_seconds")
+        val TRIP_WALKING_GRACE_SECONDS = intPreferencesKey("trip_walking_grace_seconds")
     }
 
     override val isTrackingEnabled: Flow<Boolean> = context.dataStore.data
@@ -389,6 +420,158 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
         Timber.d("Default interval multiplier set to: $multiplier")
     }
 
+    // Story E8.8: Trip detection preferences implementation
+
+    override val isTripDetectionEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRIP_DETECTION_ENABLED] ?: true
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading trip detection enabled preference")
+                emit(true)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setTripDetectionEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TRIP_DETECTION_ENABLED] = enabled
+        }
+        Timber.d("Trip detection enabled set to: $enabled")
+    }
+
+    override val tripStationaryThresholdMinutes: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRIP_STATIONARY_THRESHOLD_MINUTES]
+                ?: DEFAULT_TRIP_STATIONARY_THRESHOLD_MINUTES
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading trip stationary threshold preference")
+                emit(DEFAULT_TRIP_STATIONARY_THRESHOLD_MINUTES)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setTripStationaryThresholdMinutes(minutes: Int) {
+        val validatedMinutes = minutes.coerceIn(1, 30)
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TRIP_STATIONARY_THRESHOLD_MINUTES] = validatedMinutes
+        }
+        Timber.d("Trip stationary threshold set to: $validatedMinutes minutes")
+    }
+
+    override val tripMinimumDurationMinutes: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRIP_MINIMUM_DURATION_MINUTES]
+                ?: DEFAULT_TRIP_MINIMUM_DURATION_MINUTES
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading trip minimum duration preference")
+                emit(DEFAULT_TRIP_MINIMUM_DURATION_MINUTES)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setTripMinimumDurationMinutes(minutes: Int) {
+        val validatedMinutes = minutes.coerceIn(1, 10)
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TRIP_MINIMUM_DURATION_MINUTES] = validatedMinutes
+        }
+        Timber.d("Trip minimum duration set to: $validatedMinutes minutes")
+    }
+
+    override val tripMinimumDistanceMeters: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRIP_MINIMUM_DISTANCE_METERS]
+                ?: DEFAULT_TRIP_MINIMUM_DISTANCE_METERS
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading trip minimum distance preference")
+                emit(DEFAULT_TRIP_MINIMUM_DISTANCE_METERS)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setTripMinimumDistanceMeters(meters: Int) {
+        val validatedMeters = meters.coerceIn(50, 500)
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TRIP_MINIMUM_DISTANCE_METERS] = validatedMeters
+        }
+        Timber.d("Trip minimum distance set to: $validatedMeters meters")
+    }
+
+    override val isTripAutoMergeEnabled: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRIP_AUTO_MERGE_ENABLED] ?: true
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading trip auto-merge preference")
+                emit(true)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setTripAutoMergeEnabled(enabled: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TRIP_AUTO_MERGE_ENABLED] = enabled
+        }
+        Timber.d("Trip auto-merge enabled set to: $enabled")
+    }
+
+    override val tripVehicleGraceSeconds: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRIP_VEHICLE_GRACE_SECONDS]
+                ?: DEFAULT_TRIP_VEHICLE_GRACE_SECONDS
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading trip vehicle grace period preference")
+                emit(DEFAULT_TRIP_VEHICLE_GRACE_SECONDS)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setTripVehicleGraceSeconds(seconds: Int) {
+        val validatedSeconds = seconds.coerceIn(30, 180)
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TRIP_VEHICLE_GRACE_SECONDS] = validatedSeconds
+        }
+        Timber.d("Trip vehicle grace period set to: $validatedSeconds seconds")
+    }
+
+    override val tripWalkingGraceSeconds: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.TRIP_WALKING_GRACE_SECONDS]
+                ?: DEFAULT_TRIP_WALKING_GRACE_SECONDS
+        }
+        .catch { exception ->
+            if (exception is IOException) {
+                Timber.e(exception, "Error reading trip walking grace period preference")
+                emit(DEFAULT_TRIP_WALKING_GRACE_SECONDS)
+            } else {
+                throw exception
+            }
+        }
+
+    override suspend fun setTripWalkingGraceSeconds(seconds: Int) {
+        val validatedSeconds = seconds.coerceIn(30, 120)
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.TRIP_WALKING_GRACE_SECONDS] = validatedSeconds
+        }
+        Timber.d("Trip walking grace period set to: $validatedSeconds seconds")
+    }
+
     companion object {
         /** Default tracking interval in minutes */
         const val DEFAULT_TRACKING_INTERVAL_MINUTES = 5
@@ -401,5 +584,21 @@ class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private 
 
         /** Default interval multiplier for other modes (1.0 = no change) */
         const val DEFAULT_DEFAULT_INTERVAL_MULTIPLIER = 1.0f
+
+        // Story E8.8: Trip detection defaults
+        /** Default stationary threshold in minutes before ending trip */
+        const val DEFAULT_TRIP_STATIONARY_THRESHOLD_MINUTES = 5
+
+        /** Default minimum trip duration in minutes */
+        const val DEFAULT_TRIP_MINIMUM_DURATION_MINUTES = 2
+
+        /** Default minimum trip distance in meters */
+        const val DEFAULT_TRIP_MINIMUM_DISTANCE_METERS = 100
+
+        /** Default vehicle grace period in seconds */
+        const val DEFAULT_TRIP_VEHICLE_GRACE_SECONDS = 90
+
+        /** Default walking grace period in seconds */
+        const val DEFAULT_TRIP_WALKING_GRACE_SECONDS = 60
     }
 }
