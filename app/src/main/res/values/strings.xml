@@ -340,4 +340,25 @@
     <string name="in_progress">In Progress</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+
+    <!-- Movement Events Screen (Story E8.11) -->
+    <string name="movement_events_title">Movement Events</string>
+    <string name="movement_events_export">Export Events</string>
+    <string name="movement_events_clear">Clear Old Events</string>
+    <string name="movement_events_live_mode">Live Mode</string>
+    <string name="movement_events_count">%1$d events</string>
+    <string name="movement_events_unsynced">%1$d unsynced</string>
+    <string name="movement_events_empty_title">No movement events</string>
+    <string name="movement_events_empty_subtitle">Events will appear here when movement is detected</string>
+    <string name="movement_events_clear_title">Clear Old Events?</string>
+    <string name="movement_events_clear_message">This will delete all events older than 7 days. This action cannot be undone.</string>
+    <string name="movement_events_location">Location</string>
+    <string name="movement_events_battery">Battery</string>
+    <string name="movement_events_network">Network</string>
+    <string name="movement_events_accelerometer">Accelerometer</string>
+    <string name="movement_events_steps">Steps</string>
+    <string name="movement_events_latency">Detection Latency</string>
+    <string name="load_more">Load More</string>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
 </resources>

@@ -27,6 +27,7 @@ import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
 import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
+import three.two.bit.phonemanager.ui.movementevents.MovementEventsScreen
 
 sealed class Screen(val route: String) {
     object Registration : Screen("registration")
@@ -46,6 +47,7 @@ sealed class Screen(val route: String) {
     object TripDetail : Screen("trip_detail/{tripId}") {
         fun createRoute(tripId: String) = "trip_detail/$tripId"
     }
+    object MovementEvents : Screen("movement_events")
 }
 
 /**
@@ -234,6 +236,13 @@ fun PhoneManagerNavHost(
         composable(Screen.TripDetail.route) {
             SecretModeProtectedRoute(isSecretMode, navController) {
                 TripDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
+        }
+        composable(Screen.MovementEvents.route) {
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                MovementEventsScreen(
                     onNavigateBack = { navController.popBackStack() },
                 )
             }

@@ -344,4 +344,25 @@
     <string name="in_progress">Prebieha</string>
     <string name="yes">Áno</string>
     <string name="no">Nie</string>
+
+    <!-- Movement Events Screen (Story E8.11) -->
+    <string name="movement_events_title">Udalosti pohybu</string>
+    <string name="movement_events_export">Exportovať udalosti</string>
+    <string name="movement_events_clear">Vymazať staré udalosti</string>
+    <string name="movement_events_live_mode">Živý režim</string>
+    <string name="movement_events_count">%1$d udalostí</string>
+    <string name="movement_events_unsynced">%1$d nesynchronizovaných</string>
+    <string name="movement_events_empty_title">Žiadne udalosti pohybu</string>
+    <string name="movement_events_empty_subtitle">Udalosti sa zobrazia tu, keď bude detekovaný pohyb</string>
+    <string name="movement_events_clear_title">Vymazať staré udalosti?</string>
+    <string name="movement_events_clear_message">Vymažú sa všetky udalosti staršie ako 7 dní. Táto akcia sa nedá vrátiť späť.</string>
+    <string name="movement_events_location">Poloha</string>
+    <string name="movement_events_battery">Batéria</string>
+    <string name="movement_events_network">Sieť</string>
+    <string name="movement_events_accelerometer">Akcelerometer</string>
+    <string name="movement_events_steps">Kroky</string>
+    <string name="movement_events_latency">Oneskorenie detekcie</string>
+    <string name="load_more">Načítať viac</string>
+    <string name="collapse">Zbaliť</string>
+    <string name="expand">Rozbaliť</string>
 </resources>
