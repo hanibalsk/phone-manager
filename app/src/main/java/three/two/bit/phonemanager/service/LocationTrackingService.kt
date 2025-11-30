@@ -40,7 +40,9 @@ import three.two.bit.phonemanager.util.toNotificationTitle
 import three.two.bit.phonemanager.movement.TransportationModeManager
 import three.two.bit.phonemanager.movement.TransportationState
 import three.two.bit.phonemanager.trip.TripManager
+import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.watchdog.WatchdogManager
+import kotlinx.datetime.Clock
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -109,6 +111,10 @@ class LocationTrackingService : Service() {
     // Story E7.2: Cached weather state for notification (avoids runBlocking)
     @Volatile
     private var cachedWeatherForNotification: three.two.bit.phonemanager.domain.model.Weather? = null
+
+    // Story E8.14: Cached active trip for notification (AC E8.14.1)
+    @Volatile
+    private var cachedActiveTripForNotification: Trip? = null
 
     companion object {
         const val ACTION_START_TRACKING = "three.two.bit.phonemanager.action.START_TRACKING"
@@ -207,6 +213,15 @@ class LocationTrackingService : Service() {
                     // Update notification with new weather data
                     updateNotification()
                 }
+            }
+        }
+
+        // Story E8.14: Observe active trip changes for notification (AC E8.14.1, E8.14.6)
+        serviceScope.launch {
+            tripManager.activeTrip.collectLatest { trip ->
+                cachedActiveTripForNotification = trip
+                updateNotification()
+                Timber.d("Active trip updated in notification: ${trip?.id}")
             }
         }
 
@@ -617,6 +632,9 @@ class LocationTrackingService : Service() {
         // AC E7.2.1, E7.2.2: Use pre-fetched weather (updated by observer, avoids blocking I/O)
         val weather = cachedWeatherForNotification
 
+        // Story E8.14: Get active trip for notification content (AC E8.14.1)
+        val activeTrip = cachedActiveTripForNotification
+
         // Priority: Weather (if enabled and available) > Secret Mode > Original
         return if (showWeatherInNotification && weather != null) {
             // AC E7.2.1, E7.2.2: Weather notification (shown even in secret mode for usefulness)
@@ -650,9 +668,16 @@ class LocationTrackingService : Service() {
         } else {
             // AC E7.2.7: Fallback to original notification
             // AC E7.4.4: Original notification when weather disabled or unavailable
+            // Story E8.14: Show trip status when active (AC E8.14.1, E8.14.5, E8.14.6)
+            val contentText = if (activeTrip != null) {
+                buildTripNotificationContent(activeTrip)
+            } else {
+                buildStandardNotificationContent()
+            }
+
             NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
                 .setContentTitle("Location Tracking Active")
-                .setContentText(getNotificationText()) // "{count} locations • Interval: {n} min"
+                .setContentText(contentText)
                 .setSmallIcon(R.drawable.ic_foreground_service)
                 .setColor(getColor(R.color.notification_icon_color)) // Help system display icon
                 .setOngoing(true)
@@ -672,6 +697,92 @@ class LocationTrackingService : Service() {
         val notification = createNotification()
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(NOTIFICATION_ID, notification)
+    }
+
+    /**
+     * Story E8.14: Build notification content when trip is active (AC E8.14.1, E8.14.6)
+     * Format: "🚗 Trip in progress • 23 min • 8.2 km"
+     */
+    private fun buildTripNotificationContent(trip: Trip): String {
+        val emoji = getModeEmoji(trip.dominantMode)
+        val duration = formatTripDuration(trip.startTime.epochSeconds)
+        val distance = formatTripDistance(trip.totalDistanceMeters)
+        return "$emoji Trip in progress • $duration • $distance"
+    }
+
+    /**
+     * Story E8.14: Build notification content when no trip active (AC E8.14.5)
+     * Format: "Walking • 95% confidence" or original "{count} locations • Interval: {n} min"
+     */
+    private fun buildStandardNotificationContent(): String {
+        val transportState = currentTransportationState
+        return if (isMovementDetectionEnabled && transportState.source != three.two.bit.phonemanager.movement.DetectionSource.NONE) {
+            val modeName = when (transportState.mode) {
+                three.two.bit.phonemanager.movement.TransportationMode.WALKING -> "Walking"
+                three.two.bit.phonemanager.movement.TransportationMode.RUNNING -> "Running"
+                three.two.bit.phonemanager.movement.TransportationMode.CYCLING -> "Cycling"
+                three.two.bit.phonemanager.movement.TransportationMode.IN_VEHICLE -> "Driving"
+                three.two.bit.phonemanager.movement.TransportationMode.STATIONARY -> "Stationary"
+                three.two.bit.phonemanager.movement.TransportationMode.UNKNOWN -> "Unknown"
+            }
+            // Derive confidence from detection source
+            val confidence = when (transportState.source) {
+                three.two.bit.phonemanager.movement.DetectionSource.MULTIPLE -> 95
+                three.two.bit.phonemanager.movement.DetectionSource.ANDROID_AUTO -> 90
+                three.two.bit.phonemanager.movement.DetectionSource.BLUETOOTH_CAR -> 85
+                three.two.bit.phonemanager.movement.DetectionSource.ACTIVITY_RECOGNITION -> 80
+                three.two.bit.phonemanager.movement.DetectionSource.NONE -> 0
+            }
+            "$modeName • $confidence% confidence"
+        } else {
+            getNotificationText()
+        }
+    }
+
+    /**
+     * Story E8.14: Get mode emoji for notification (AC E8.14.2)
+     */
+    private fun getModeEmoji(mode: three.two.bit.phonemanager.movement.TransportationMode): String = when (mode) {
+        three.two.bit.phonemanager.movement.TransportationMode.WALKING -> "🚶"
+        three.two.bit.phonemanager.movement.TransportationMode.RUNNING -> "🏃"
+        three.two.bit.phonemanager.movement.TransportationMode.CYCLING -> "🚲"
+        three.two.bit.phonemanager.movement.TransportationMode.IN_VEHICLE -> "🚗"
+        three.two.bit.phonemanager.movement.TransportationMode.STATIONARY -> "📍"
+        three.two.bit.phonemanager.movement.TransportationMode.UNKNOWN -> "❓"
+    }
+
+    /**
+     * Story E8.14: Format trip duration (AC E8.14.3)
+     * Format: "X min" or "X hr Y min"
+     */
+    private fun formatTripDuration(startEpochSeconds: Long): String {
+        val now = Clock.System.now().epochSeconds
+        val durationSeconds = now - startEpochSeconds
+
+        return when {
+            durationSeconds >= 3600 -> {
+                val hours = durationSeconds / 3600
+                val minutes = (durationSeconds % 3600) / 60
+                "${hours}h ${minutes}m"
+            }
+            durationSeconds >= 60 -> {
+                val minutes = durationSeconds / 60
+                "${minutes} min"
+            }
+            else -> "<1 min"
+        }
+    }
+
+    /**
+     * Story E8.14: Format trip distance (AC E8.14.4)
+     * Format: "X.X km"
+     */
+    private fun formatTripDistance(distanceMeters: Double): String {
+        return if (distanceMeters >= 1000) {
+            String.format("%.1f km", distanceMeters / 1000.0)
+        } else {
+            String.format("%.0f m", distanceMeters)
+        }
     }
 
     private fun getNotificationText(): String = "$currentLocationCount locations • Interval: $currentInterval min"
