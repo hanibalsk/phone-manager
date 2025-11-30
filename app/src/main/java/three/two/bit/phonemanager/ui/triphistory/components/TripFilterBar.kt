@@ -168,23 +168,19 @@ private fun ModeFilterChip(
 }
 
 @Composable
-private fun getQuickFilterLabel(filter: QuickDateFilter): String {
-    return when (filter) {
-        QuickDateFilter.TODAY -> stringResource(R.string.trip_filter_today)
-        QuickDateFilter.THIS_WEEK -> stringResource(R.string.trip_filter_this_week)
-        QuickDateFilter.THIS_MONTH -> stringResource(R.string.trip_filter_this_month)
-        QuickDateFilter.ALL -> stringResource(R.string.trip_filter_all)
-    }
+private fun getQuickFilterLabel(filter: QuickDateFilter): String = when (filter) {
+    QuickDateFilter.TODAY -> stringResource(R.string.trip_filter_today)
+    QuickDateFilter.THIS_WEEK -> stringResource(R.string.trip_filter_this_week)
+    QuickDateFilter.THIS_MONTH -> stringResource(R.string.trip_filter_this_month)
+    QuickDateFilter.ALL -> stringResource(R.string.trip_filter_all)
 }
 
 @Composable
-private fun getModeLabel(mode: TransportationMode): String {
-    return when (mode) {
-        TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
-        TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
-        TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
-        TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
-        TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
-        TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
-    }
+private fun getModeLabel(mode: TransportationMode): String = when (mode) {
+    TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
+    TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
+    TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
+    TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
+    TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
+    TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
 }

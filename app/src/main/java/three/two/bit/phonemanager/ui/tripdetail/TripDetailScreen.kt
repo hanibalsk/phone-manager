@@ -63,10 +63,7 @@ import three.two.bit.phonemanager.ui.tripdetail.components.TripStatisticsCard
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TripDetailScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: TripDetailViewModel = hiltViewModel(),
-) {
+fun TripDetailScreen(onNavigateBack: () -> Unit, viewModel: TripDetailViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -200,10 +197,7 @@ private fun TripDetailContent(
 }
 
 @Composable
-private fun TripInfoCard(
-    trip: Trip,
-    modifier: Modifier = Modifier,
-) {
+private fun TripInfoCard(trip: Trip, modifier: Modifier = Modifier) {
     val timeZone = TimeZone.currentSystemDefault()
     val startDateTime = trip.startTime.toLocalDateTime(timeZone)
     val endDateTime = trip.endTime?.toLocalDateTime(timeZone)
@@ -268,11 +262,7 @@ private fun TripInfoCard(
 }
 
 @Composable
-private fun StatColumn(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+private fun StatColumn(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -291,11 +281,7 @@ private fun StatColumn(
 }
 
 @Composable
-private fun TimeColumn(
-    label: String,
-    time: String,
-    modifier: Modifier = Modifier,
-) {
+private fun TimeColumn(label: String, time: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier) {
         Text(
             text = label,
@@ -363,11 +349,7 @@ private fun ActionButtons(
 }
 
 @Composable
-private fun EditTripNameDialog(
-    currentName: String,
-    onConfirm: (String) -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun EditTripNameDialog(currentName: String, onConfirm: (String) -> Unit, onDismiss: () -> Unit) {
     var name by remember { mutableStateOf(currentName) }
 
     AlertDialog(
@@ -399,10 +381,7 @@ private fun EditTripNameDialog(
 }
 
 @Composable
-private fun DeleteConfirmationDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun DeleteConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.trip_delete_title)) },
@@ -434,11 +413,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ErrorState(
-    message: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -465,15 +440,13 @@ private fun ErrorState(
     }
 }
 
-private fun getTripName(trip: Trip): String {
-    return when (trip.dominantMode) {
-        TransportationMode.WALKING -> "Walk"
-        TransportationMode.RUNNING -> "Run"
-        TransportationMode.CYCLING -> "Bike Ride"
-        TransportationMode.IN_VEHICLE -> "Drive"
-        TransportationMode.STATIONARY -> "Stationary"
-        TransportationMode.UNKNOWN -> "Trip"
-    }
+private fun getTripName(trip: Trip): String = when (trip.dominantMode) {
+    TransportationMode.WALKING -> "Walk"
+    TransportationMode.RUNNING -> "Run"
+    TransportationMode.CYCLING -> "Bike Ride"
+    TransportationMode.IN_VEHICLE -> "Drive"
+    TransportationMode.STATIONARY -> "Stationary"
+    TransportationMode.UNKNOWN -> "Trip"
 }
 
 private fun formatDate(dateTime: kotlinx.datetime.LocalDateTime): String {
@@ -496,7 +469,13 @@ private fun formatDate(dateTime: kotlinx.datetime.LocalDateTime): String {
 }
 
 private fun formatTime(dateTime: kotlinx.datetime.LocalDateTime): String {
-    val hour = if (dateTime.hour > 12) dateTime.hour - 12 else if (dateTime.hour == 0) 12 else dateTime.hour
+    val hour = if (dateTime.hour > 12) {
+        dateTime.hour - 12
+    } else if (dateTime.hour == 0) {
+        12
+    } else {
+        dateTime.hour
+    }
     val amPm = if (dateTime.hour >= 12) "PM" else "AM"
     return String.format("%d:%02d %s", hour, dateTime.minute, amPm)
 }

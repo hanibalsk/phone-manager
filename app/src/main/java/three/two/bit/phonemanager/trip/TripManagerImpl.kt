@@ -195,20 +195,14 @@ class TripManagerImpl @Inject constructor(
         return finalizeTrip(TripTrigger.MANUAL)
     }
 
-    override suspend fun getTripById(id: String): Trip? {
-        return tripRepository.getTripById(id)
-    }
+    override suspend fun getTripById(id: String): Trip? = tripRepository.getTripById(id)
 
-    override suspend fun getTripsInRange(startTime: Long, endTime: Long): List<Trip> {
-        return tripRepository.getTripsBetween(
-            start = Instant.fromEpochMilliseconds(startTime),
-            end = Instant.fromEpochMilliseconds(endTime),
-        )
-    }
+    override suspend fun getTripsInRange(startTime: Long, endTime: Long): List<Trip> = tripRepository.getTripsBetween(
+        start = Instant.fromEpochMilliseconds(startTime),
+        end = Instant.fromEpochMilliseconds(endTime),
+    )
 
-    override suspend fun getRecentTrips(limit: Int): List<Trip> {
-        return tripRepository.observeRecentTrips(limit).first()
-    }
+    override suspend fun getRecentTrips(limit: Int): List<Trip> = tripRepository.observeRecentTrips(limit).first()
 
     /**
      * Handle transportation state changes from TransportationModeManager.
@@ -340,7 +334,9 @@ class TripManagerImpl @Inject constructor(
         // This provides additional validation when we have location data
         // For initial implementation, we trust the duration check as primary validation
 
-        Timber.d("Trip start validation passed (minDuration=${minimumDurationMinutes}min, minDistance=${minimumDistanceMeters}m)")
+        Timber.d(
+            "Trip start validation passed (minDuration=${minimumDurationMinutes}min, minDistance=${minimumDistanceMeters}m)",
+        )
         return true
     }
 
@@ -445,7 +441,8 @@ class TripManagerImpl @Inject constructor(
 
         if (!isManualTrip && (!meetsMinimumDuration || !meetsMinimumDistance)) {
             Timber.d(
-                "Trip ${finalizedTrip.id} below threshold: duration=${tripDurationMinutes}min (min=$minimumDurationMinutes), " +
+                "Trip ${finalizedTrip.id} below threshold: " +
+                    "duration=${tripDurationMinutes}min (min=$minimumDurationMinutes), " +
                     "distance=${tripDistanceMeters}m (min=$minimumDistanceMeters)",
             )
 
@@ -562,11 +559,9 @@ class TripManagerImpl @Inject constructor(
      *
      * Story E8.8: Uses configurable grace periods from preferences.
      */
-    private fun getGraceSeconds(mode: TransportationMode): Long {
-        return when (mode) {
-            TransportationMode.IN_VEHICLE -> vehicleGraceSeconds.toLong()
-            else -> walkingGraceSeconds.toLong()
-        }
+    private fun getGraceSeconds(mode: TransportationMode): Long = when (mode) {
+        TransportationMode.IN_VEHICLE -> vehicleGraceSeconds.toLong()
+        else -> walkingGraceSeconds.toLong()
     }
 
     /**
@@ -636,14 +631,12 @@ class TripManagerImpl @Inject constructor(
     /**
      * Check if the mode represents movement.
      */
-    private fun isMovementMode(mode: TransportationMode): Boolean {
-        return mode in listOf(
-            TransportationMode.WALKING,
-            TransportationMode.RUNNING,
-            TransportationMode.CYCLING,
-            TransportationMode.IN_VEHICLE,
-        )
-    }
+    private fun isMovementMode(mode: TransportationMode): Boolean = mode in listOf(
+        TransportationMode.WALKING,
+        TransportationMode.RUNNING,
+        TransportationMode.CYCLING,
+        TransportationMode.IN_VEHICLE,
+    )
 
     /**
      * Start a new mode segment.
@@ -692,9 +685,8 @@ class TripManagerImpl @Inject constructor(
     /**
      * Find the dominant mode from mode breakdown.
      */
-    private fun findDominantMode(breakdown: Map<TransportationMode, Long>): TransportationMode {
-        return breakdown.maxByOrNull { it.value }?.key ?: TransportationMode.UNKNOWN
-    }
+    private fun findDominantMode(breakdown: Map<TransportationMode, Long>): TransportationMode =
+        breakdown.maxByOrNull { it.value }?.key ?: TransportationMode.UNKNOWN
 
     /**
      * Update trip statistics (called during active trip).

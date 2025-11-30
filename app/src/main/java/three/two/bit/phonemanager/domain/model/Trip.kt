@@ -48,8 +48,11 @@ data class Trip(
      */
     val averageSpeedKmh: Double?
         get() = durationSeconds?.let { duration ->
-            if (duration > 0) (totalDistanceMeters / 1000.0) / (duration / 3600.0)
-            else null
+            if (duration > 0) {
+                (totalDistanceMeters / 1000.0) / (duration / 3600.0)
+            } else {
+                null
+            }
         }
 
     /**
@@ -150,10 +153,7 @@ enum class TripTrigger {
 /**
  * Simple latitude/longitude coordinate.
  */
-data class LatLng(
-    val latitude: Double,
-    val longitude: Double,
-)
+data class LatLng(val latitude: Double, val longitude: Double)
 
 /**
  * Statistics for trips in a time period (e.g., today).

@@ -12,12 +12,12 @@ import three.two.bit.phonemanager.data.repository.GeofenceRepository
 import three.two.bit.phonemanager.data.repository.GeofenceRepositoryImpl
 import three.two.bit.phonemanager.data.repository.LocationRepository
 import three.two.bit.phonemanager.data.repository.LocationRepositoryImpl
-import three.two.bit.phonemanager.data.repository.WebhookRepository
-import three.two.bit.phonemanager.data.repository.WebhookRepositoryImpl
-import three.two.bit.phonemanager.data.repository.TripRepository
-import three.two.bit.phonemanager.data.repository.TripRepositoryImpl
 import three.two.bit.phonemanager.data.repository.MovementEventRepository
 import three.two.bit.phonemanager.data.repository.MovementEventRepositoryImpl
+import three.two.bit.phonemanager.data.repository.TripRepository
+import three.two.bit.phonemanager.data.repository.TripRepositoryImpl
+import three.two.bit.phonemanager.data.repository.WebhookRepository
+import three.two.bit.phonemanager.data.repository.WebhookRepositoryImpl
 import javax.inject.Singleton
 
 /**

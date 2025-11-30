@@ -121,8 +121,11 @@ fun MovementEventEntity.toDomain(): MovementEvent = MovementEvent(
     } else {
         null
     },
-    sensorTelemetry = if (accelerometerMagnitude != null || gyroscopeMagnitude != null ||
-        stepCount != null || significantMotion != null || activityType != null
+    sensorTelemetry = if (accelerometerMagnitude != null ||
+        gyroscopeMagnitude != null ||
+        stepCount != null ||
+        significantMotion != null ||
+        activityType != null
     ) {
         SensorTelemetry(
             accelerometerMagnitude = accelerometerMagnitude,

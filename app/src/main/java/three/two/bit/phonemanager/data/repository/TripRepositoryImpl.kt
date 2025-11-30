@@ -24,9 +24,7 @@ import javax.inject.Singleton
  * AC E8.3.4: Complete TripRepositoryImpl with entity mapping
  */
 @Singleton
-class TripRepositoryImpl @Inject constructor(
-    private val tripDao: TripDao,
-) : TripRepository {
+class TripRepositoryImpl @Inject constructor(private val tripDao: TripDao) : TripRepository {
 
     override suspend fun insert(trip: Trip): Result<String> = runCatching {
         Timber.d("Inserting trip: ${trip.id}")
@@ -39,46 +37,32 @@ class TripRepositoryImpl @Inject constructor(
         tripDao.update(trip.toEntity())
     }
 
-    override suspend fun getTripById(id: String): Trip? {
-        return tripDao.getTripById(id)?.toDomain()
+    override suspend fun getTripById(id: String): Trip? = tripDao.getTripById(id)?.toDomain()
+
+    override fun observeTripById(id: String): Flow<Trip?> = tripDao.observeTripById(id).map { it?.toDomain() }
+
+    override suspend fun getActiveTrip(): Trip? = tripDao.getActiveTrip()?.toDomain()
+
+    override fun observeActiveTrip(): Flow<Trip?> = tripDao.observeActiveTrip().map { it?.toDomain() }
+
+    override fun observeRecentTrips(limit: Int): Flow<List<Trip>> = tripDao.observeRecentTrips(limit).map { entities ->
+        entities.map { it.toDomain() }
     }
 
-    override fun observeTripById(id: String): Flow<Trip?> {
-        return tripDao.observeTripById(id).map { it?.toDomain() }
-    }
-
-    override suspend fun getActiveTrip(): Trip? {
-        return tripDao.getActiveTrip()?.toDomain()
-    }
-
-    override fun observeActiveTrip(): Flow<Trip?> {
-        return tripDao.observeActiveTrip().map { it?.toDomain() }
-    }
-
-    override fun observeRecentTrips(limit: Int): Flow<List<Trip>> {
-        return tripDao.observeRecentTrips(limit).map { entities ->
+    override fun observeCompletedTrips(limit: Int): Flow<List<Trip>> =
+        tripDao.observeCompletedTrips(limit).map { entities ->
             entities.map { it.toDomain() }
         }
-    }
 
-    override fun observeCompletedTrips(limit: Int): Flow<List<Trip>> {
-        return tripDao.observeCompletedTrips(limit).map { entities ->
+    override suspend fun getTripsBetween(start: Instant, end: Instant): List<Trip> = tripDao.getTripsBetween(
+        startTime = start.toEpochMilliseconds(),
+        endTime = end.toEpochMilliseconds(),
+    ).map { it.toDomain() }
+
+    override fun observeTripsByMode(mode: TransportationMode): Flow<List<Trip>> =
+        tripDao.observeTripsByMode(mode.name).map { entities ->
             entities.map { it.toDomain() }
         }
-    }
-
-    override suspend fun getTripsBetween(start: Instant, end: Instant): List<Trip> {
-        return tripDao.getTripsBetween(
-            startTime = start.toEpochMilliseconds(),
-            endTime = end.toEpochMilliseconds(),
-        ).map { it.toDomain() }
-    }
-
-    override fun observeTripsByMode(mode: TransportationMode): Flow<List<Trip>> {
-        return tripDao.observeTripsByMode(mode.name).map { entities ->
-            entities.map { it.toDomain() }
-        }
-    }
 
     override suspend fun incrementLocationCount(tripId: String, distance: Double) {
         tripDao.incrementLocationCount(
@@ -116,17 +100,15 @@ class TripRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun observeTotalDistanceSince(since: Instant): Flow<Double> {
-        return tripDao.observeTotalDistanceSince(since.toEpochMilliseconds())
+    override fun observeTotalDistanceSince(since: Instant): Flow<Double> =
+        tripDao.observeTotalDistanceSince(since.toEpochMilliseconds())
             .map { it ?: 0.0 }
-    }
 
-    override fun observeTripCountSince(since: Instant): Flow<Int> {
-        return tripDao.observeTripCountSince(since.toEpochMilliseconds())
-    }
+    override fun observeTripCountSince(since: Instant): Flow<Int> =
+        tripDao.observeTripCountSince(since.toEpochMilliseconds())
 
-    override suspend fun getUnsyncedTrips(limit: Int): List<Trip> {
-        return tripDao.getUnsyncedTrips(limit).map { it.toDomain() }
+    override suspend fun getUnsyncedTrips(limit: Int): List<Trip> = tripDao.getUnsyncedTrips(limit).map {
+        it.toDomain()
     }
 
     override suspend fun markAsSynced(tripId: String, syncedAt: Instant, serverId: String?) {
@@ -137,9 +119,7 @@ class TripRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun deleteOldTrips(before: Instant): Int {
-        return tripDao.deleteOldTrips(before.toEpochMilliseconds())
-    }
+    override suspend fun deleteOldTrips(before: Instant): Int = tripDao.deleteOldTrips(before.toEpochMilliseconds())
 
     override suspend fun deleteTrip(tripId: String) {
         tripDao.deleteTrip(tripId)
@@ -148,12 +128,10 @@ class TripRepositoryImpl @Inject constructor(
     /**
      * Get start of today in milliseconds.
      */
-    private fun getStartOfDayMillis(): Long {
-        return LocalDate.now()
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant()
-            .toEpochMilli()
-    }
+    private fun getStartOfDayMillis(): Long = LocalDate.now()
+        .atStartOfDay(ZoneId.systemDefault())
+        .toInstant()
+        .toEpochMilli()
 
     /**
      * Find dominant transportation mode from a list of trips.

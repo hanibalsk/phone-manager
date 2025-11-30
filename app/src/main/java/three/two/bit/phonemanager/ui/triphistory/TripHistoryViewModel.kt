@@ -29,9 +29,7 @@ import javax.inject.Inject
  * ACs: E8.9.1, E8.9.2, E8.9.4, E8.9.5, E8.9.6, E8.9.7, E8.9.8
  */
 @HiltViewModel
-class TripHistoryViewModel @Inject constructor(
-    private val tripRepository: TripRepository,
-) : ViewModel() {
+class TripHistoryViewModel @Inject constructor(private val tripRepository: TripRepository) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TripHistoryUiState())
     val uiState: StateFlow<TripHistoryUiState> = _uiState.asStateFlow()
@@ -352,13 +350,15 @@ class TripHistoryViewModel @Inject constructor(
                 yesterday -> TripDayGroup.Yesterday
                 else -> TripDayGroup.Date(tripDate)
             }
-        }.toSortedMap(compareByDescending {
-            when (it) {
-                is TripDayGroup.Today -> Long.MAX_VALUE
-                is TripDayGroup.Yesterday -> Long.MAX_VALUE - 1
-                is TripDayGroup.Date -> it.date.toEpochDays().toLong()
-            }
-        })
+        }.toSortedMap(
+            compareByDescending {
+                when (it) {
+                    is TripDayGroup.Today -> Long.MAX_VALUE
+                    is TripDayGroup.Yesterday -> Long.MAX_VALUE - 1
+                    is TripDayGroup.Date -> it.date.toEpochDays().toLong()
+                }
+            },
+        )
     }
 }
 
@@ -394,15 +394,13 @@ sealed class TripDayGroup : Comparable<TripDayGroup> {
     data object Yesterday : TripDayGroup()
     data class Date(val date: LocalDate) : TripDayGroup()
 
-    override fun compareTo(other: TripDayGroup): Int {
-        return when {
-            this is Today && other !is Today -> -1
-            this !is Today && other is Today -> 1
-            this is Yesterday && other is Date -> -1
-            this is Date && other is Yesterday -> 1
-            this is Date && other is Date -> other.date.compareTo(this.date)
-            else -> 0
-        }
+    override fun compareTo(other: TripDayGroup): Int = when {
+        this is Today && other !is Today -> -1
+        this !is Today && other is Today -> 1
+        this is Yesterday && other is Date -> -1
+        this is Date && other is Yesterday -> 1
+        this is Date && other is Date -> other.date.compareTo(this.date)
+        else -> 0
     }
 }
 

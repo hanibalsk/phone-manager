@@ -6,9 +6,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
 import org.junit.Before
@@ -282,10 +280,7 @@ class TripManagerTest {
 
     // region Helper Functions
 
-    private fun createTestTrip(
-        id: String = "test-trip",
-        state: TripState = TripState.ACTIVE,
-    ) = Trip(
+    private fun createTestTrip(id: String = "test-trip", state: TripState = TripState.ACTIVE) = Trip(
         id = id,
         state = state,
         startTime = Clock.System.now(),

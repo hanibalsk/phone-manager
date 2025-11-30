@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Speed
@@ -37,10 +36,7 @@ import three.two.bit.phonemanager.ui.tripdetail.TripStatistics as TripStats
  * AC E8.10.6: Trip statistics display
  */
 @Composable
-fun TripStatisticsCard(
-    statistics: TripStats,
-    modifier: Modifier = Modifier,
-) {
+fun TripStatisticsCard(statistics: TripStats, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(

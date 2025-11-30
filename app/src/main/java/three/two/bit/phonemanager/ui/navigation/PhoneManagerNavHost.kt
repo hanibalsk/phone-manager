@@ -10,7 +10,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
-import three.two.bit.phonemanager.ui.home.HomeViewModel
 import three.two.bit.phonemanager.ui.alerts.AlertsScreen
 import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
 import three.two.bit.phonemanager.ui.geofences.CreateGeofenceScreen
@@ -18,16 +17,17 @@ import three.two.bit.phonemanager.ui.geofences.GeofencesScreen
 import three.two.bit.phonemanager.ui.group.GroupMembersScreen
 import three.two.bit.phonemanager.ui.history.HistoryScreen
 import three.two.bit.phonemanager.ui.home.HomeScreen
+import three.two.bit.phonemanager.ui.home.HomeViewModel
 import three.two.bit.phonemanager.ui.map.MapScreen
+import three.two.bit.phonemanager.ui.movementevents.MovementEventsScreen
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.registration.RegistrationScreen
 import three.two.bit.phonemanager.ui.settings.SettingsScreen
+import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
+import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.weather.WeatherScreen
 import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
 import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
-import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
-import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
-import three.two.bit.phonemanager.ui.movementevents.MovementEventsScreen
 
 sealed class Screen(val route: String) {
     object Registration : Screen("registration")

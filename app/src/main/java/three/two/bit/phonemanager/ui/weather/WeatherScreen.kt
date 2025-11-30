@@ -184,63 +184,61 @@ private fun WeatherBackground(weatherCode: WeatherCode) {
 /**
  * Gets gradient colors based on weather condition
  */
-private fun getWeatherGradient(weatherCode: WeatherCode): List<Color> {
-    return when (weatherCode) {
-        WeatherCode.CLEAR_SKY, WeatherCode.MAINLY_CLEAR -> listOf(
-            Color(0xFF4FC3F7),
-            Color(0xFF2196F3),
-            Color(0xFF1976D2),
-        )
-        WeatherCode.PARTLY_CLOUDY -> listOf(
-            Color(0xFF81D4FA),
-            Color(0xFF4FC3F7),
-            Color(0xFF29B6F6),
-        )
-        WeatherCode.OVERCAST -> listOf(
-            Color(0xFF90A4AE),
-            Color(0xFF78909C),
-            Color(0xFF607D8B),
-        )
-        WeatherCode.FOG, WeatherCode.DEPOSITING_RIME_FOG -> listOf(
-            Color(0xFFB0BEC5),
-            Color(0xFF90A4AE),
-            Color(0xFF78909C),
-        )
-        WeatherCode.DRIZZLE_LIGHT, WeatherCode.DRIZZLE_MODERATE, WeatherCode.DRIZZLE_DENSE,
-        WeatherCode.RAIN_SLIGHT, WeatherCode.RAIN_SHOWERS_SLIGHT, WeatherCode.RAIN_SHOWERS_MODERATE,
-        -> listOf(
-            Color(0xFF607D8B),
-            Color(0xFF546E7A),
-            Color(0xFF455A64),
-        )
-        WeatherCode.RAIN_MODERATE, WeatherCode.RAIN_HEAVY, WeatherCode.RAIN_SHOWERS_VIOLENT,
-        WeatherCode.FREEZING_DRIZZLE_LIGHT, WeatherCode.FREEZING_DRIZZLE_DENSE,
-        WeatherCode.FREEZING_RAIN_LIGHT, WeatherCode.FREEZING_RAIN_HEAVY,
-        -> listOf(
-            Color(0xFF455A64),
-            Color(0xFF37474F),
-            Color(0xFF263238),
-        )
-        WeatherCode.SNOW_SLIGHT, WeatherCode.SNOW_MODERATE, WeatherCode.SNOW_HEAVY,
-        WeatherCode.SNOW_GRAINS, WeatherCode.SNOW_SHOWERS_SLIGHT, WeatherCode.SNOW_SHOWERS_HEAVY,
-        -> listOf(
-            Color(0xFFE1F5FE),
-            Color(0xFFB3E5FC),
-            Color(0xFF81D4FA),
-        )
-        WeatherCode.THUNDERSTORM, WeatherCode.THUNDERSTORM_SLIGHT_HAIL,
-        WeatherCode.THUNDERSTORM_HEAVY_HAIL,
-        -> listOf(
-            Color(0xFF37474F),
-            Color(0xFF263238),
-            Color(0xFF1A1A2E),
-        )
-        WeatherCode.UNKNOWN -> listOf(
-            Color(0xFF4FC3F7),
-            Color(0xFF2196F3),
-            Color(0xFF1976D2),
-        )
-    }
+private fun getWeatherGradient(weatherCode: WeatherCode): List<Color> = when (weatherCode) {
+    WeatherCode.CLEAR_SKY, WeatherCode.MAINLY_CLEAR -> listOf(
+        Color(0xFF4FC3F7),
+        Color(0xFF2196F3),
+        Color(0xFF1976D2),
+    )
+    WeatherCode.PARTLY_CLOUDY -> listOf(
+        Color(0xFF81D4FA),
+        Color(0xFF4FC3F7),
+        Color(0xFF29B6F6),
+    )
+    WeatherCode.OVERCAST -> listOf(
+        Color(0xFF90A4AE),
+        Color(0xFF78909C),
+        Color(0xFF607D8B),
+    )
+    WeatherCode.FOG, WeatherCode.DEPOSITING_RIME_FOG -> listOf(
+        Color(0xFFB0BEC5),
+        Color(0xFF90A4AE),
+        Color(0xFF78909C),
+    )
+    WeatherCode.DRIZZLE_LIGHT, WeatherCode.DRIZZLE_MODERATE, WeatherCode.DRIZZLE_DENSE,
+    WeatherCode.RAIN_SLIGHT, WeatherCode.RAIN_SHOWERS_SLIGHT, WeatherCode.RAIN_SHOWERS_MODERATE,
+    -> listOf(
+        Color(0xFF607D8B),
+        Color(0xFF546E7A),
+        Color(0xFF455A64),
+    )
+    WeatherCode.RAIN_MODERATE, WeatherCode.RAIN_HEAVY, WeatherCode.RAIN_SHOWERS_VIOLENT,
+    WeatherCode.FREEZING_DRIZZLE_LIGHT, WeatherCode.FREEZING_DRIZZLE_DENSE,
+    WeatherCode.FREEZING_RAIN_LIGHT, WeatherCode.FREEZING_RAIN_HEAVY,
+    -> listOf(
+        Color(0xFF455A64),
+        Color(0xFF37474F),
+        Color(0xFF263238),
+    )
+    WeatherCode.SNOW_SLIGHT, WeatherCode.SNOW_MODERATE, WeatherCode.SNOW_HEAVY,
+    WeatherCode.SNOW_GRAINS, WeatherCode.SNOW_SHOWERS_SLIGHT, WeatherCode.SNOW_SHOWERS_HEAVY,
+    -> listOf(
+        Color(0xFFE1F5FE),
+        Color(0xFFB3E5FC),
+        Color(0xFF81D4FA),
+    )
+    WeatherCode.THUNDERSTORM, WeatherCode.THUNDERSTORM_SLIGHT_HAIL,
+    WeatherCode.THUNDERSTORM_HEAVY_HAIL,
+    -> listOf(
+        Color(0xFF37474F),
+        Color(0xFF263238),
+        Color(0xFF1A1A2E),
+    )
+    WeatherCode.UNKNOWN -> listOf(
+        Color(0xFF4FC3F7),
+        Color(0xFF2196F3),
+        Color(0xFF1976D2),
+    )
 }
 
 @Composable
@@ -291,11 +289,7 @@ private fun ErrorContent(message: String, onRetry: () -> Unit) {
 }
 
 @Composable
-private fun WeatherContent(
-    weather: Weather,
-    lastUpdatedText: String,
-    isOffline: Boolean,
-) {
+private fun WeatherContent(weather: Weather, lastUpdatedText: String, isOffline: Boolean) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -408,11 +402,7 @@ private fun WeatherDetailsRow(weather: Weather) {
 }
 
 @Composable
-private fun WeatherDetailItem(
-    icon: ImageVector,
-    value: String,
-    label: String,
-) {
+private fun WeatherDetailItem(icon: ImageVector, value: String, label: String) {
     GlassCard(
         modifier = Modifier.width(140.dp),
     ) {
@@ -516,10 +506,7 @@ private fun ForecastDayItem(forecast: DailyForecast) {
  * Glass morphism style card
  */
 @Composable
-private fun GlassCard(
-    modifier: Modifier = Modifier,
-    content: @Composable () -> Unit,
-) {
+private fun GlassCard(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),

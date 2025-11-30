@@ -3,7 +3,6 @@ package three.two.bit.phonemanager.service
 import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

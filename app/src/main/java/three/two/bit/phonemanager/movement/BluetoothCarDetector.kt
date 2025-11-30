@@ -32,9 +32,7 @@ import javax.inject.Singleton
  * - Device class hints indicating car audio/hands-free
  */
 @Singleton
-class BluetoothCarDetector @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
+class BluetoothCarDetector @Inject constructor(@ApplicationContext private val context: Context) {
     private val bluetoothManager: BluetoothManager? =
         context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
 
@@ -123,16 +121,14 @@ class BluetoothCarDetector @Inject constructor(
     /**
      * Check if Bluetooth permission is granted.
      */
-    fun hasPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.BLUETOOTH_CONNECT,
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            // Bluetooth permission not required before Android S
-            true
-        }
+    fun hasPermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.BLUETOOTH_CONNECT,
+        ) == PackageManager.PERMISSION_GRANTED
+    } else {
+        // Bluetooth permission not required before Android S
+        true
     }
 
     /**

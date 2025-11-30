@@ -1,6 +1,5 @@
 package three.two.bit.phonemanager.trip
 
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

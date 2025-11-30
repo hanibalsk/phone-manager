@@ -8,7 +8,6 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.location.Location
-import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import dagger.hilt.android.AndroidEntryPoint
@@ -20,7 +19,6 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -32,17 +30,17 @@ import three.two.bit.phonemanager.data.model.ServiceHealth
 import three.two.bit.phonemanager.data.preferences.PreferencesRepositoryImpl
 import three.two.bit.phonemanager.data.repository.LocationRepositoryImpl
 import three.two.bit.phonemanager.data.repository.TripRepository
+import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.location.LocationManager
-import three.two.bit.phonemanager.queue.QueueManager
-import three.two.bit.phonemanager.queue.WorkManagerScheduler
-import three.two.bit.phonemanager.util.toNotificationText
-import three.two.bit.phonemanager.util.toNotificationTitle
 import three.two.bit.phonemanager.movement.TransportationModeManager
 import three.two.bit.phonemanager.movement.TransportationState
+import three.two.bit.phonemanager.queue.QueueManager
+import three.two.bit.phonemanager.queue.WorkManagerScheduler
 import three.two.bit.phonemanager.trip.TripManager
-import three.two.bit.phonemanager.domain.model.Trip
+import three.two.bit.phonemanager.util.NotificationFormatter
+import three.two.bit.phonemanager.util.toNotificationText
+import three.two.bit.phonemanager.util.toNotificationTitle
 import three.two.bit.phonemanager.watchdog.WatchdogManager
-import kotlinx.datetime.Clock
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -328,12 +326,10 @@ class LocationTrackingService : Service() {
      *
      * @return adjusted interval in minutes
      */
-    private fun calculateEffectiveInterval(): Int {
-        return if (isMovementDetectionEnabled) {
-            currentTransportationState.calculateAdjustedInterval(currentInterval)
-        } else {
-            currentInterval
-        }
+    private fun calculateEffectiveInterval(): Int = if (isMovementDetectionEnabled) {
+        currentTransportationState.calculateAdjustedInterval(currentInterval)
+    } else {
+        currentInterval
     }
 
     /**
@@ -412,8 +408,10 @@ class LocationTrackingService : Service() {
                     // Calculate distance from last location (AC E8.7.3)
                     val distance = lastCapturedLocation?.let { last ->
                         calculateDistance(
-                            last.latitude, last.longitude,
-                            locationEntity.latitude, locationEntity.longitude,
+                            last.latitude,
+                            last.longitude,
+                            locationEntity.latitude,
+                            locationEntity.longitude,
                         )
                     } ?: 0f
 
@@ -437,8 +435,10 @@ class LocationTrackingService : Service() {
                     // Story 0.2.1: Store enriched location to database
                     val id = locationRepository.insertLocation(enrichedLocation)
                     Timber.i(
-                        "Location captured and stored: id=$id, lat=${enrichedLocation.latitude}, lon=${enrichedLocation.longitude}, " +
-                            "accuracy=${enrichedLocation.accuracy}m, mode=${enrichedLocation.transportationMode}, tripId=${enrichedLocation.tripId}",
+                        "Location captured and stored: id=$id, " +
+                            "lat=${enrichedLocation.latitude}, lon=${enrichedLocation.longitude}, " +
+                            "accuracy=${enrichedLocation.accuracy}m, " +
+                            "mode=${enrichedLocation.transportationMode}, tripId=${enrichedLocation.tripId}",
                     )
 
                     // Update last captured location for distance calculation
@@ -676,7 +676,7 @@ class LocationTrackingService : Service() {
             }
 
             // AC E8.14.6: Add "Last update: X min ago" as second line
-            val lastUpdateText = getLastUpdateText()
+            val lastUpdateText = NotificationFormatter.getLastUpdateText(this, lastCapturedLocation?.timestamp)
             val bigText = "$contentText\n$lastUpdateText"
 
             NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
@@ -714,9 +714,9 @@ class LocationTrackingService : Service() {
     private fun buildTripNotificationContent(trip: Trip): String {
         // AC E8.14.2: Use current mode for real-time emoji updates
         val currentMode = currentTransportationState.mode
-        val emoji = getModeEmoji(currentMode)
-        val duration = formatTripDuration(trip.startTime.epochSeconds)
-        val distance = formatTripDistance(trip.totalDistanceMeters)
+        val emoji = NotificationFormatter.getModeEmoji(currentMode)
+        val duration = NotificationFormatter.formatTripDuration(this, trip.startTime.epochSeconds)
+        val distance = NotificationFormatter.formatTripDistance(this, trip.totalDistanceMeters)
         val tripInProgress = getString(R.string.notification_trip_in_progress)
         return "$emoji $tripInProgress • $duration • $distance"
     }
@@ -727,13 +727,19 @@ class LocationTrackingService : Service() {
      */
     private fun buildStandardNotificationContent(): String {
         val transportState = currentTransportationState
-        return if (isMovementDetectionEnabled && transportState.source != three.two.bit.phonemanager.movement.DetectionSource.NONE) {
+        return if (isMovementDetectionEnabled &&
+            transportState.source != three.two.bit.phonemanager.movement.DetectionSource.NONE
+        ) {
             val modeName = when (transportState.mode) {
                 three.two.bit.phonemanager.movement.TransportationMode.WALKING -> getString(R.string.trip_mode_walking)
                 three.two.bit.phonemanager.movement.TransportationMode.RUNNING -> getString(R.string.trip_mode_running)
                 three.two.bit.phonemanager.movement.TransportationMode.CYCLING -> getString(R.string.trip_mode_cycling)
-                three.two.bit.phonemanager.movement.TransportationMode.IN_VEHICLE -> getString(R.string.trip_mode_driving)
-                three.two.bit.phonemanager.movement.TransportationMode.STATIONARY -> getString(R.string.trip_mode_stationary)
+                three.two.bit.phonemanager.movement.TransportationMode.IN_VEHICLE -> getString(
+                    R.string.trip_mode_driving,
+                )
+                three.two.bit.phonemanager.movement.TransportationMode.STATIONARY -> getString(
+                    R.string.trip_mode_stationary,
+                )
                 three.two.bit.phonemanager.movement.TransportationMode.UNKNOWN -> getString(R.string.trip_mode_unknown)
             }
             // Derive confidence from detection source
@@ -750,76 +756,8 @@ class LocationTrackingService : Service() {
         }
     }
 
-    /**
-     * Story E8.14: Get mode emoji for notification (AC E8.14.2)
-     */
-    private fun getModeEmoji(mode: three.two.bit.phonemanager.movement.TransportationMode): String = when (mode) {
-        three.two.bit.phonemanager.movement.TransportationMode.WALKING -> "🚶"
-        three.two.bit.phonemanager.movement.TransportationMode.RUNNING -> "🏃"
-        three.two.bit.phonemanager.movement.TransportationMode.CYCLING -> "🚲"
-        three.two.bit.phonemanager.movement.TransportationMode.IN_VEHICLE -> "🚗"
-        three.two.bit.phonemanager.movement.TransportationMode.STATIONARY -> "📍"
-        three.two.bit.phonemanager.movement.TransportationMode.UNKNOWN -> "❓"
-    }
-
-    /**
-     * Story E8.14: Format trip duration (AC E8.14.3)
-     * Format: "X min" or "X hr Y min"
-     */
-    private fun formatTripDuration(startEpochSeconds: Long): String {
-        val now = Clock.System.now().epochSeconds
-        val durationSeconds = now - startEpochSeconds
-
-        return when {
-            durationSeconds >= 3600 -> {
-                val hours = durationSeconds / 3600
-                val minutes = (durationSeconds % 3600) / 60
-                getString(R.string.notification_duration_hours_minutes, hours, minutes)
-            }
-            durationSeconds >= 60 -> {
-                val minutes = durationSeconds / 60
-                getString(R.string.notification_duration_minutes, minutes)
-            }
-            else -> getString(R.string.notification_duration_less_than_minute)
-        }
-    }
-
-    /**
-     * Story E8.14: Format trip distance (AC E8.14.4)
-     * Format: "X.X km"
-     */
-    private fun formatTripDistance(distanceMeters: Double): String {
-        return if (distanceMeters >= 1000) {
-            getString(R.string.notification_distance_km, distanceMeters / 1000.0)
-        } else {
-            getString(R.string.notification_distance_m, distanceMeters)
-        }
-    }
-
-    private fun getNotificationText(): String = getString(R.string.notification_locations_interval, currentLocationCount, currentInterval)
-
-    /**
-     * Story E8.14: Get "Last update: X min ago" text for notification (AC E8.14.6)
-     */
-    private fun getLastUpdateText(): String {
-        val lastUpdate = lastCapturedLocation?.timestamp
-        return if (lastUpdate != null) {
-            val now = Clock.System.now().toEpochMilliseconds()
-            val diffMs = now - lastUpdate
-            val diffMinutes = diffMs / 60000
-
-            when {
-                diffMinutes < 1 -> getString(R.string.notification_last_update_just_now)
-                diffMinutes < 60 -> getString(R.string.notification_last_update_minutes, diffMinutes.toInt())
-                else -> {
-                    val hours = diffMinutes / 60
-                    getString(R.string.notification_last_update_hours, hours.toInt())
-                }
-            }
-        } else {
-            getString(R.string.notification_last_update_never)
-        }
-    }
+    private fun getNotificationText(): String =
+        getString(R.string.notification_locations_interval, currentLocationCount, currentInterval)
 
     override fun onDestroy() {
         Timber.d("LocationTrackingService destroyed")

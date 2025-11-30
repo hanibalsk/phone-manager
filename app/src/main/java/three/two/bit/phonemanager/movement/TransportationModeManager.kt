@@ -2,6 +2,7 @@ package three.two.bit.phonemanager.movement
 
 import android.content.Context
 import android.location.LocationManager
+import dagger.Lazy
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +29,6 @@ import three.two.bit.phonemanager.trip.TripManager
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
-import dagger.Lazy
 import three.two.bit.phonemanager.domain.model.DetectionSource as DomainDetectionSource
 
 /**
@@ -413,49 +413,43 @@ class TransportationModeManager @Inject constructor(
      * Get the last known location for event recording.
      */
     @Suppress("MissingPermission")
-    private fun getLastKnownLocation(): EventLocation? {
-        return try {
-            val location = locationManager?.getLastKnownLocation(LocationManager.FUSED_PROVIDER)
-                ?: locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                ?: locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
+    private fun getLastKnownLocation(): EventLocation? = try {
+        val location = locationManager?.getLastKnownLocation(LocationManager.FUSED_PROVIDER)
+            ?: locationManager?.getLastKnownLocation(LocationManager.GPS_PROVIDER)
+            ?: locationManager?.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
 
-            location?.let {
-                EventLocation(
-                    latitude = it.latitude,
-                    longitude = it.longitude,
-                    accuracy = it.accuracy,
-                    speed = if (it.hasSpeed()) it.speed else null,
-                )
-            }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to get last known location for movement event")
-            null
+        location?.let {
+            EventLocation(
+                latitude = it.latitude,
+                longitude = it.longitude,
+                accuracy = it.accuracy,
+                speed = if (it.hasSpeed()) it.speed else null,
+            )
         }
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to get last known location for movement event")
+        null
     }
 
     /**
      * Map movement DetectionSource to domain model DetectionSource.
      */
-    private fun mapDetectionSource(source: DetectionSource): DomainDetectionSource {
-        return when (source) {
-            DetectionSource.ACTIVITY_RECOGNITION -> DomainDetectionSource.ACTIVITY_RECOGNITION
-            DetectionSource.BLUETOOTH_CAR -> DomainDetectionSource.SENSOR_FUSION
-            DetectionSource.ANDROID_AUTO -> DomainDetectionSource.SENSOR_FUSION
-            DetectionSource.MULTIPLE -> DomainDetectionSource.SENSOR_FUSION
-            DetectionSource.NONE -> DomainDetectionSource.UNKNOWN
-        }
+    private fun mapDetectionSource(source: DetectionSource): DomainDetectionSource = when (source) {
+        DetectionSource.ACTIVITY_RECOGNITION -> DomainDetectionSource.ACTIVITY_RECOGNITION
+        DetectionSource.BLUETOOTH_CAR -> DomainDetectionSource.SENSOR_FUSION
+        DetectionSource.ANDROID_AUTO -> DomainDetectionSource.SENSOR_FUSION
+        DetectionSource.MULTIPLE -> DomainDetectionSource.SENSOR_FUSION
+        DetectionSource.NONE -> DomainDetectionSource.UNKNOWN
     }
 
     /**
      * Map network type string to domain model NetworkType.
      */
-    private fun mapNetworkType(networkType: String?): NetworkType? {
-        return when (networkType) {
-            "WIFI" -> NetworkType.WIFI
-            "MOBILE" -> NetworkType.CELLULAR
-            "NONE" -> NetworkType.NONE
-            "UNKNOWN" -> NetworkType.UNKNOWN
-            else -> null
-        }
+    private fun mapNetworkType(networkType: String?): NetworkType? = when (networkType) {
+        "WIFI" -> NetworkType.WIFI
+        "MOBILE" -> NetworkType.CELLULAR
+        "NONE" -> NetworkType.NONE
+        "UNKNOWN" -> NetworkType.UNKNOWN
+        else -> null
     }
 }

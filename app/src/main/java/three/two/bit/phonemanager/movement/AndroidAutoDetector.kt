@@ -28,9 +28,7 @@ import javax.inject.Singleton
  * - Manual car mode activation
  */
 @Singleton
-class AndroidAutoDetector @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
+class AndroidAutoDetector @Inject constructor(@ApplicationContext private val context: Context) {
     private val uiModeManager: UiModeManager =
         context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
 
@@ -53,14 +51,12 @@ class AndroidAutoDetector @Inject constructor(
     /**
      * Check if currently in car mode (Android Auto or car dock).
      */
-    fun isCurrentlyInCarMode(): Boolean {
-        return try {
-            val currentMode = uiModeManager.currentModeType
-            currentMode == Configuration.UI_MODE_TYPE_CAR
-        } catch (e: Exception) {
-            Timber.w(e, "Exception checking car mode")
-            false
-        }
+    fun isCurrentlyInCarMode(): Boolean = try {
+        val currentMode = uiModeManager.currentModeType
+        currentMode == Configuration.UI_MODE_TYPE_CAR
+    } catch (e: Exception) {
+        Timber.w(e, "Exception checking car mode")
+        false
     }
 
     /**

@@ -74,10 +74,7 @@ import three.two.bit.phonemanager.movement.TransportationMode
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MovementEventsScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: MovementEventsViewModel = hiltViewModel(),
-) {
+fun MovementEventsScreen(onNavigateBack: () -> Unit, viewModel: MovementEventsViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
 
     Scaffold(
@@ -467,7 +464,8 @@ private fun EventCard(
                                 Icons.Default.Battery4Bar
                             },
                             label = stringResource(R.string.movement_events_battery),
-                            value = "${deviceState.batteryLevel}%${if (deviceState.batteryCharging == true) " (charging)" else ""}",
+                            value = "${deviceState.batteryLevel}%" +
+                                if (deviceState.batteryCharging == true) " (charging)" else "",
                         )
 
                         DetailRow(
@@ -508,10 +506,7 @@ private fun EventCard(
 }
 
 @Composable
-private fun ModeChip(
-    mode: TransportationMode,
-    modifier: Modifier = Modifier,
-) {
+private fun ModeChip(mode: TransportationMode, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .clip(RoundedCornerShape(16.dp))
@@ -570,11 +565,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ErrorState(
-    message: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -625,10 +616,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ClearConfirmationDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun ClearConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.movement_events_clear_title)) },
@@ -650,36 +638,29 @@ private fun ClearConfirmationDialog(
 }
 
 @Composable
-private fun getModeLabel(mode: TransportationMode): String {
-    return when (mode) {
-        TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
-        TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
-        TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
-        TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
-        TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
-        TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
-    }
+private fun getModeLabel(mode: TransportationMode): String = when (mode) {
+    TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
+    TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
+    TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
+    TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
+    TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
+    TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
 }
 
-private fun getModeColor(mode: TransportationMode): Color {
-    return when (mode) {
-        TransportationMode.WALKING -> Color(0xFF4CAF50)
-        TransportationMode.RUNNING -> Color(0xFFF44336)
-        TransportationMode.CYCLING -> Color(0xFF2196F3)
-        TransportationMode.IN_VEHICLE -> Color(0xFF9C27B0)
-        TransportationMode.STATIONARY -> Color(0xFF607D8B)
-        TransportationMode.UNKNOWN -> Color(0xFF9E9E9E)
-    }
+private fun getModeColor(mode: TransportationMode): Color = when (mode) {
+    TransportationMode.WALKING -> Color(0xFF4CAF50)
+    TransportationMode.RUNNING -> Color(0xFFF44336)
+    TransportationMode.CYCLING -> Color(0xFF2196F3)
+    TransportationMode.IN_VEHICLE -> Color(0xFF9C27B0)
+    TransportationMode.STATIONARY -> Color(0xFF607D8B)
+    TransportationMode.UNKNOWN -> Color(0xFF9E9E9E)
 }
 
-private fun getConfidenceColor(confidence: Float): Color {
-    return when {
-        confidence >= 0.9f -> Color(0xFF4CAF50)
-        confidence >= 0.7f -> Color(0xFFFFC107)
-        else -> Color(0xFFF44336)
-    }
+private fun getConfidenceColor(confidence: Float): Color = when {
+    confidence >= 0.9f -> Color(0xFF4CAF50)
+    confidence >= 0.7f -> Color(0xFFFFC107)
+    else -> Color(0xFFF44336)
 }
 
-private fun formatTime(dateTime: kotlinx.datetime.LocalDateTime): String {
-    return String.format("%02d:%02d:%02d", dateTime.hour, dateTime.minute, dateTime.second)
-}
+private fun formatTime(dateTime: kotlinx.datetime.LocalDateTime): String =
+    String.format("%02d:%02d:%02d", dateTime.hour, dateTime.minute, dateTime.second)

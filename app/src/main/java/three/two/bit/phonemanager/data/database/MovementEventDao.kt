@@ -221,7 +221,4 @@ interface MovementEventDao {
 /**
  * Data class for mode transition count results.
  */
-data class ModeTransitionCount(
-    val transition: String,
-    val count: Int,
-)
+data class ModeTransitionCount(val transition: String, val count: Int)

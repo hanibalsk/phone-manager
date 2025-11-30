@@ -19,7 +19,6 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.data.repository.MovementEventRepository
@@ -243,9 +242,11 @@ class MovementEventsViewModel @Inject constructor(
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
 
-                context.startActivity(Intent.createChooser(shareIntent, "Export Events").apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                })
+                context.startActivity(
+                    Intent.createChooser(shareIntent, "Export Events").apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                )
 
                 _uiState.update { it.copy(isExporting = false) }
                 Timber.d("Exported ${events.size} events to JSON")

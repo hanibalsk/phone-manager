@@ -44,10 +44,7 @@ import three.two.bit.phonemanager.ui.tripdetail.ModeBreakdownItem
  * AC E8.10.5: Mode breakdown with percentages
  */
 @Composable
-fun ModeBreakdownChart(
-    items: List<ModeBreakdownItem>,
-    modifier: Modifier = Modifier,
-) {
+fun ModeBreakdownChart(items: List<ModeBreakdownItem>, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -97,10 +94,7 @@ fun ModeBreakdownChart(
 }
 
 @Composable
-private fun ModeBreakdownRow(
-    item: ModeBreakdownItem,
-    modifier: Modifier = Modifier,
-) {
+private fun ModeBreakdownRow(item: ModeBreakdownItem, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -142,35 +136,29 @@ private fun ModeBreakdownRow(
 }
 
 @Composable
-private fun getModeLabel(mode: TransportationMode): String {
-    return when (mode) {
-        TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
-        TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
-        TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
-        TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
-        TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
-        TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
-    }
+private fun getModeLabel(mode: TransportationMode): String = when (mode) {
+    TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
+    TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
+    TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
+    TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
+    TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
+    TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
 }
 
-private fun getModeIcon(mode: TransportationMode): ImageVector {
-    return when (mode) {
-        TransportationMode.WALKING -> Icons.Default.DirectionsWalk
-        TransportationMode.RUNNING -> Icons.Default.DirectionsRun
-        TransportationMode.CYCLING -> Icons.Default.DirectionsBike
-        TransportationMode.IN_VEHICLE -> Icons.Default.DirectionsCar
-        TransportationMode.STATIONARY -> Icons.Default.HourglassEmpty
-        TransportationMode.UNKNOWN -> Icons.Default.Help
-    }
+private fun getModeIcon(mode: TransportationMode): ImageVector = when (mode) {
+    TransportationMode.WALKING -> Icons.Default.DirectionsWalk
+    TransportationMode.RUNNING -> Icons.Default.DirectionsRun
+    TransportationMode.CYCLING -> Icons.Default.DirectionsBike
+    TransportationMode.IN_VEHICLE -> Icons.Default.DirectionsCar
+    TransportationMode.STATIONARY -> Icons.Default.HourglassEmpty
+    TransportationMode.UNKNOWN -> Icons.Default.Help
 }
 
-private fun getModeColor(mode: TransportationMode): Color {
-    return when (mode) {
-        TransportationMode.WALKING -> Color(0xFF4CAF50)
-        TransportationMode.RUNNING -> Color(0xFFF44336)
-        TransportationMode.CYCLING -> Color(0xFF2196F3)
-        TransportationMode.IN_VEHICLE -> Color(0xFF9C27B0)
-        TransportationMode.STATIONARY -> Color(0xFF607D8B)
-        TransportationMode.UNKNOWN -> Color(0xFF9E9E9E)
-    }
+private fun getModeColor(mode: TransportationMode): Color = when (mode) {
+    TransportationMode.WALKING -> Color(0xFF4CAF50)
+    TransportationMode.RUNNING -> Color(0xFFF44336)
+    TransportationMode.CYCLING -> Color(0xFF2196F3)
+    TransportationMode.IN_VEHICLE -> Color(0xFF9C27B0)
+    TransportationMode.STATIONARY -> Color(0xFF607D8B)
+    TransportationMode.UNKNOWN -> Color(0xFF9E9E9E)
 }

@@ -2,7 +2,6 @@ package three.two.bit.phonemanager.ui.triphistory.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,12 +54,7 @@ import three.two.bit.phonemanager.movement.TransportationMode
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TripCard(
-    trip: Trip,
-    onClick: () -> Unit,
-    onSwipeToDelete: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun TripCard(trip: Trip, onClick: () -> Unit, onSwipeToDelete: () -> Unit, modifier: Modifier = Modifier) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             if (value == SwipeToDismissBoxValue.EndToStart) {
@@ -107,11 +101,7 @@ fun TripCard(
 }
 
 @Composable
-private fun TripCardContent(
-    trip: Trip,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun TripCardContent(trip: Trip, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -188,10 +178,7 @@ private fun TripCardContent(
  * Mode icon component (AC E8.9.3)
  */
 @Composable
-fun ModeIcon(
-    mode: TransportationMode,
-    modifier: Modifier = Modifier,
-) {
+fun ModeIcon(mode: TransportationMode, modifier: Modifier = Modifier) {
     val (icon, tint) = getModeIconAndColor(mode)
 
     Box(
@@ -215,15 +202,13 @@ fun ModeIcon(
  * Get icon and color for transportation mode
  */
 @Composable
-fun getModeIconAndColor(mode: TransportationMode): Pair<ImageVector, Color> {
-    return when (mode) {
-        TransportationMode.WALKING -> Icons.Default.DirectionsWalk to MaterialTheme.colorScheme.tertiary
-        TransportationMode.RUNNING -> Icons.Default.DirectionsRun to MaterialTheme.colorScheme.error
-        TransportationMode.CYCLING -> Icons.Default.DirectionsBike to MaterialTheme.colorScheme.secondary
-        TransportationMode.IN_VEHICLE -> Icons.Default.DirectionsCar to MaterialTheme.colorScheme.primary
-        TransportationMode.STATIONARY -> Icons.Default.HourglassEmpty to MaterialTheme.colorScheme.outline
-        TransportationMode.UNKNOWN -> Icons.Default.Help to MaterialTheme.colorScheme.outline
-    }
+fun getModeIconAndColor(mode: TransportationMode): Pair<ImageVector, Color> = when (mode) {
+    TransportationMode.WALKING -> Icons.Default.DirectionsWalk to MaterialTheme.colorScheme.tertiary
+    TransportationMode.RUNNING -> Icons.Default.DirectionsRun to MaterialTheme.colorScheme.error
+    TransportationMode.CYCLING -> Icons.Default.DirectionsBike to MaterialTheme.colorScheme.secondary
+    TransportationMode.IN_VEHICLE -> Icons.Default.DirectionsCar to MaterialTheme.colorScheme.primary
+    TransportationMode.STATIONARY -> Icons.Default.HourglassEmpty to MaterialTheme.colorScheme.outline
+    TransportationMode.UNKNOWN -> Icons.Default.Help to MaterialTheme.colorScheme.outline
 }
 
 /**
@@ -253,7 +238,13 @@ private fun formatTripTimes(trip: Trip): String {
 
     val startFormatted = String.format(
         "%d:%02d %s",
-        if (startTime.hour > 12) startTime.hour - 12 else if (startTime.hour == 0) 12 else startTime.hour,
+        if (startTime.hour > 12) {
+            startTime.hour - 12
+        } else if (startTime.hour == 0) {
+            12
+        } else {
+            startTime.hour
+        },
         startTime.minute,
         if (startTime.hour >= 12) "PM" else "AM",
     )
@@ -262,7 +253,13 @@ private fun formatTripTimes(trip: Trip): String {
         val endTime = endInstant.toLocalDateTime(timeZone)
         val endFormatted = String.format(
             "%d:%02d %s",
-            if (endTime.hour > 12) endTime.hour - 12 else if (endTime.hour == 0) 12 else endTime.hour,
+            if (endTime.hour > 12) {
+                endTime.hour - 12
+            } else if (endTime.hour == 0) {
+                12
+            } else {
+                endTime.hour
+            },
             endTime.minute,
             if (endTime.hour >= 12) "PM" else "AM",
         )
@@ -274,11 +271,7 @@ private fun formatTripTimes(trip: Trip): String {
  * Simple TripCard without swipe (for previews/simple displays)
  */
 @Composable
-fun SimpleTripCard(
-    trip: Trip,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun SimpleTripCard(trip: Trip, onClick: () -> Unit, modifier: Modifier = Modifier) {
     TripCardContent(
         trip = trip,
         onClick = onClick,

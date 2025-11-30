@@ -60,11 +60,7 @@ import three.two.bit.phonemanager.movement.TransportationMode
  * - "End Trip" button
  */
 @Composable
-fun ActiveTripCard(
-    trip: Trip,
-    onEndTrip: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun ActiveTripCard(trip: Trip, onEndTrip: () -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
 
     // Update duration every second
@@ -184,11 +180,7 @@ fun ActiveTripCard(
 }
 
 @Composable
-private fun StatItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+private fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -207,31 +199,27 @@ private fun StatItem(
     }
 }
 
-private fun getModeIcon(mode: TransportationMode): ImageVector {
-    return when (mode) {
-        TransportationMode.WALKING -> Icons.Rounded.DirectionsWalk
-        TransportationMode.RUNNING -> Icons.Rounded.DirectionsRun
-        TransportationMode.CYCLING -> Icons.Rounded.DirectionsBike
-        TransportationMode.IN_VEHICLE -> Icons.Rounded.DirectionsCar
-        TransportationMode.STATIONARY -> Icons.Rounded.LocationOn
-        TransportationMode.UNKNOWN -> Icons.Rounded.QuestionMark
-    }
+private fun getModeIcon(mode: TransportationMode): ImageVector = when (mode) {
+    TransportationMode.WALKING -> Icons.Rounded.DirectionsWalk
+    TransportationMode.RUNNING -> Icons.Rounded.DirectionsRun
+    TransportationMode.CYCLING -> Icons.Rounded.DirectionsBike
+    TransportationMode.IN_VEHICLE -> Icons.Rounded.DirectionsCar
+    TransportationMode.STATIONARY -> Icons.Rounded.LocationOn
+    TransportationMode.UNKNOWN -> Icons.Rounded.QuestionMark
 }
 
-private fun formatDuration(seconds: Long): String {
-    return when {
-        seconds >= 3600 -> {
-            val hours = seconds / 3600
-            val minutes = (seconds % 3600) / 60
-            "${hours}h ${minutes}m"
-        }
-        seconds >= 60 -> {
-            val minutes = seconds / 60
-            val secs = seconds % 60
-            "${minutes}m ${secs}s"
-        }
-        else -> "${seconds}s"
+private fun formatDuration(seconds: Long): String = when {
+    seconds >= 3600 -> {
+        val hours = seconds / 3600
+        val minutes = (seconds % 3600) / 60
+        "${hours}h ${minutes}m"
     }
+    seconds >= 60 -> {
+        val minutes = seconds / 60
+        val secs = seconds % 60
+        "${minutes}m ${secs}s"
+    }
+    else -> "${seconds}s"
 }
 
 // formatStartTime removed - now using Android's DateUtils.getRelativeTimeSpanString()

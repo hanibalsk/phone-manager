@@ -67,10 +67,7 @@ class TripRepositoryTest {
         serverId = null,
     )
 
-    private fun createTestTrip(
-        id: String = "test-trip-1",
-        state: TripState = TripState.ACTIVE,
-    ) = Trip(
+    private fun createTestTrip(id: String = "test-trip-1", state: TripState = TripState.ACTIVE) = Trip(
         id = id,
         state = state,
         startTime = Clock.System.now(),

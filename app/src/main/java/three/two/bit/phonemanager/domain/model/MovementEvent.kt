@@ -92,12 +92,7 @@ enum class DetectionSource {
 /**
  * Location snapshot at the time of the event.
  */
-data class EventLocation(
-    val latitude: Double,
-    val longitude: Double,
-    val accuracy: Float?,
-    val speed: Float?,
-) {
+data class EventLocation(val latitude: Double, val longitude: Double, val accuracy: Float?, val speed: Float?) {
     /**
      * Whether this is a high-accuracy location (< 20m).
      */
@@ -160,10 +155,7 @@ data class SensorTelemetry(
 /**
  * Movement context information.
  */
-data class MovementContext(
-    val distanceFromLastLocation: Float?,
-    val timeSinceLastLocation: Long?,
-) {
+data class MovementContext(val distanceFromLastLocation: Float?, val timeSinceLastLocation: Long?) {
     /**
      * Speed in m/s calculated from distance and time.
      */

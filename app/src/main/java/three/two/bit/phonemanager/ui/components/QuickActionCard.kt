@@ -34,12 +34,7 @@ import three.two.bit.phonemanager.ui.theme.PhoneManagerTheme
  * Used for dashboard navigation in the HomeScreen.
  */
 @Composable
-fun QuickActionCard(
-    icon: ImageVector,
-    title: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun QuickActionCard(icon: ImageVector, title: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()

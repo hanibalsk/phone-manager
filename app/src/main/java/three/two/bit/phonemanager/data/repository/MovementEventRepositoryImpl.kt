@@ -26,9 +26,8 @@ import javax.inject.Singleton
  * AC E8.3.6: Complete MovementEventRepositoryImpl with entity mapping
  */
 @Singleton
-class MovementEventRepositoryImpl @Inject constructor(
-    private val movementEventDao: MovementEventDao,
-) : MovementEventRepository {
+class MovementEventRepositoryImpl @Inject constructor(private val movementEventDao: MovementEventDao) :
+    MovementEventRepository {
 
     override suspend fun recordEvent(
         tripId: String?,
@@ -85,66 +84,54 @@ class MovementEventRepositoryImpl @Inject constructor(
         movementEventDao.insertAll(events.map { it.toEntity() })
     }
 
-    override suspend fun getEventById(eventId: Long): MovementEvent? {
-        return movementEventDao.getEventById(eventId)?.toDomain()
-    }
+    override suspend fun getEventById(eventId: Long): MovementEvent? =
+        movementEventDao.getEventById(eventId)?.toDomain()
 
-    override fun observeRecentEvents(limit: Int): Flow<List<MovementEvent>> {
-        return movementEventDao.observeRecentEvents(limit).map { entities ->
+    override fun observeRecentEvents(limit: Int): Flow<List<MovementEvent>> =
+        movementEventDao.observeRecentEvents(limit).map { entities ->
             entities.map { it.toDomain() }
         }
-    }
 
-    override fun observeEventsByTrip(tripId: String): Flow<List<MovementEvent>> {
-        return movementEventDao.observeEventsByTrip(tripId).map { entities ->
+    override fun observeEventsByTrip(tripId: String): Flow<List<MovementEvent>> =
+        movementEventDao.observeEventsByTrip(tripId).map { entities ->
             entities.map { it.toDomain() }
         }
+
+    override fun observeLatestEvent(): Flow<MovementEvent?> = movementEventDao.observeLatestEvent().map {
+        it?.toDomain()
     }
 
-    override fun observeLatestEvent(): Flow<MovementEvent?> {
-        return movementEventDao.observeLatestEvent().map { it?.toDomain() }
-    }
+    override suspend fun getLatestEvent(): MovementEvent? = movementEventDao.getLatestEvent()?.toDomain()
 
-    override suspend fun getLatestEvent(): MovementEvent? {
-        return movementEventDao.getLatestEvent()?.toDomain()
-    }
-
-    override suspend fun getEventsBetween(start: Instant, end: Instant): List<MovementEvent> {
-        return movementEventDao.getEventsBetween(
+    override suspend fun getEventsBetween(start: Instant, end: Instant): List<MovementEvent> =
+        movementEventDao.getEventsBetween(
             startTime = start.toEpochMilliseconds(),
             endTime = end.toEpochMilliseconds(),
         ).map { it.toDomain() }
-    }
 
-    override suspend fun getEventsByTrip(tripId: String): List<MovementEvent> {
-        return movementEventDao.getEventsByTrip(tripId).map { it.toDomain() }
-    }
+    override suspend fun getEventsByTrip(tripId: String): List<MovementEvent> =
+        movementEventDao.getEventsByTrip(tripId).map {
+            it.toDomain()
+        }
 
-    override fun observeEventCountSince(since: Instant): Flow<Int> {
-        return movementEventDao.observeEventCountSince(since.toEpochMilliseconds())
-    }
+    override fun observeEventCountSince(since: Instant): Flow<Int> =
+        movementEventDao.observeEventCountSince(since.toEpochMilliseconds())
 
-    override suspend fun getEventCountForTrip(tripId: String): Int {
-        return movementEventDao.getEventCountForTrip(tripId)
-    }
+    override suspend fun getEventCountForTrip(tripId: String): Int = movementEventDao.getEventCountForTrip(tripId)
 
-    override fun observeUnsyncedCount(): Flow<Int> {
-        return movementEventDao.observeUnsyncedCount()
-    }
+    override fun observeUnsyncedCount(): Flow<Int> = movementEventDao.observeUnsyncedCount()
 
-    override suspend fun getUnsyncedEvents(limit: Int): List<MovementEvent> {
-        return movementEventDao.getUnsyncedEvents(limit).map { it.toDomain() }
-    }
+    override suspend fun getUnsyncedEvents(limit: Int): List<MovementEvent> =
+        movementEventDao.getUnsyncedEvents(limit).map {
+            it.toDomain()
+        }
 
     override suspend fun markAsSynced(eventIds: List<Long>, syncedAt: Instant) {
         movementEventDao.markAsSynced(eventIds, syncedAt.toEpochMilliseconds())
     }
 
-    override suspend fun deleteOldEvents(before: Instant): Int {
-        return movementEventDao.deleteOldEvents(before.toEpochMilliseconds())
-    }
+    override suspend fun deleteOldEvents(before: Instant): Int =
+        movementEventDao.deleteOldEvents(before.toEpochMilliseconds())
 
-    override suspend fun deleteEventsByTrip(tripId: String): Int {
-        return movementEventDao.deleteEventsByTrip(tripId)
-    }
+    override suspend fun deleteEventsByTrip(tripId: String): Int = movementEventDao.deleteEventsByTrip(tripId)
 }

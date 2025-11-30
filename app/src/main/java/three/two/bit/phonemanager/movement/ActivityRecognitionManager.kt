@@ -30,9 +30,7 @@ import javax.inject.Singleton
  * to enable adaptive location tracking intervals.
  */
 @Singleton
-class ActivityRecognitionManager @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
+class ActivityRecognitionManager @Inject constructor(@ApplicationContext private val context: Context) {
     private val activityClient: ActivityRecognitionClient =
         ActivityRecognition.getClient(context)
 
@@ -58,16 +56,14 @@ class ActivityRecognitionManager @Inject constructor(
     /**
      * Check if activity recognition permission is granted.
      */
-    fun hasPermission(): Boolean {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACTIVITY_RECOGNITION,
-            ) == PackageManager.PERMISSION_GRANTED
-        } else {
-            // Permission not required before Android Q
-            true
-        }
+    fun hasPermission(): Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACTIVITY_RECOGNITION,
+        ) == PackageManager.PERMISSION_GRANTED
+    } else {
+        // Permission not required before Android Q
+        true
     }
 
     /**
@@ -201,22 +197,20 @@ class ActivityRecognitionManager @Inject constructor(
     /**
      * Convert Google's DetectedActivity to our TransportationMode.
      */
-    private fun detectedActivityToTransportationMode(activityType: Int): TransportationMode =
-        when (activityType) {
-            DetectedActivity.STILL -> TransportationMode.STATIONARY
-            DetectedActivity.WALKING -> TransportationMode.WALKING
-            DetectedActivity.RUNNING -> TransportationMode.RUNNING
-            DetectedActivity.ON_BICYCLE -> TransportationMode.CYCLING
-            DetectedActivity.IN_VEHICLE -> TransportationMode.IN_VEHICLE
-            else -> TransportationMode.UNKNOWN
-        }
+    private fun detectedActivityToTransportationMode(activityType: Int): TransportationMode = when (activityType) {
+        DetectedActivity.STILL -> TransportationMode.STATIONARY
+        DetectedActivity.WALKING -> TransportationMode.WALKING
+        DetectedActivity.RUNNING -> TransportationMode.RUNNING
+        DetectedActivity.ON_BICYCLE -> TransportationMode.CYCLING
+        DetectedActivity.IN_VEHICLE -> TransportationMode.IN_VEHICLE
+        else -> TransportationMode.UNKNOWN
+    }
 
     /**
      * Internal broadcast receiver for activity transition events.
      */
-    private inner class ActivityTransitionReceiver(
-        private val onActivityDetected: (TransportationMode) -> Unit,
-    ) : BroadcastReceiver() {
+    private inner class ActivityTransitionReceiver(private val onActivityDetected: (TransportationMode) -> Unit) :
+        BroadcastReceiver() {
 
         override fun onReceive(context: Context, intent: Intent) {
             if (intent.action != ACTION_ACTIVITY_TRANSITION) {

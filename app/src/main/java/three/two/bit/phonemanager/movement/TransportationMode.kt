@@ -39,7 +39,9 @@ enum class TransportationMode {
      * Mode is currently unknown or being detected.
      * Uses default tracking interval.
      */
-    UNKNOWN;
+    UNKNOWN,
+
+    ;
 
     /**
      * Returns the interval multiplier for this transportation mode.

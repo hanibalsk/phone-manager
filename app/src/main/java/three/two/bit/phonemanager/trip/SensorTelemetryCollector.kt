@@ -10,9 +10,6 @@ import android.hardware.SensorManager
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.BatteryManager
-import android.os.Build
-import android.telephony.SignalStrength
-import android.telephony.TelephonyManager
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.withTimeoutOrNull
 import timber.log.Timber
@@ -35,9 +32,7 @@ import kotlin.math.sqrt
  * AC E8.5.1: Injectable singleton with collect() function
  */
 @Singleton
-class SensorTelemetryCollector @Inject constructor(
-    @ApplicationContext private val context: Context,
-) {
+class SensorTelemetryCollector @Inject constructor(@ApplicationContext private val context: Context) {
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
     private val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager
@@ -210,50 +205,44 @@ class SensorTelemetryCollector @Inject constructor(
      *
      * @return TelemetrySnapshot with current sensor readings
      */
-    suspend fun collect(): TelemetrySnapshot {
-        return withTimeoutOrNull(COLLECTION_TIMEOUT_MS) {
-            collectTelemetry()
-        } ?: run {
-            Timber.w("Telemetry collection timed out, returning partial data")
-            collectTelemetryNoTimeout()
-        }
+    suspend fun collect(): TelemetrySnapshot = withTimeoutOrNull(COLLECTION_TIMEOUT_MS) {
+        collectTelemetry()
+    } ?: run {
+        Timber.w("Telemetry collection timed out, returning partial data")
+        collectTelemetryNoTimeout()
     }
 
     /**
      * Collect telemetry without timeout (used as fallback).
      */
-    private fun collectTelemetryNoTimeout(): TelemetrySnapshot {
-        return TelemetrySnapshot(
-            accelerometerMagnitude = accelerometerBuffer.getMagnitude(),
-            accelerometerVariance = accelerometerBuffer.getVariance(),
-            accelerometerPeakFrequency = accelerometerBuffer.getPeakFrequency(),
-            gyroscopeMagnitude = lastGyroscopeMagnitude,
-            stepCount = lastStepCount,
-            significantMotion = getAndResetSignificantMotion(),
-            batteryLevel = getBatteryLevel(),
-            batteryCharging = isCharging(),
-            networkType = getNetworkType(),
-            networkStrength = getNetworkStrength(),
-        )
-    }
+    private fun collectTelemetryNoTimeout(): TelemetrySnapshot = TelemetrySnapshot(
+        accelerometerMagnitude = accelerometerBuffer.getMagnitude(),
+        accelerometerVariance = accelerometerBuffer.getVariance(),
+        accelerometerPeakFrequency = accelerometerBuffer.getPeakFrequency(),
+        gyroscopeMagnitude = lastGyroscopeMagnitude,
+        stepCount = lastStepCount,
+        significantMotion = getAndResetSignificantMotion(),
+        batteryLevel = getBatteryLevel(),
+        batteryCharging = isCharging(),
+        networkType = getNetworkType(),
+        networkStrength = getNetworkStrength(),
+    )
 
     /**
      * Collect telemetry with all available data.
      */
-    private fun collectTelemetry(): TelemetrySnapshot {
-        return TelemetrySnapshot(
-            accelerometerMagnitude = accelerometerBuffer.getMagnitude(),
-            accelerometerVariance = accelerometerBuffer.getVariance(),
-            accelerometerPeakFrequency = accelerometerBuffer.getPeakFrequency(),
-            gyroscopeMagnitude = lastGyroscopeMagnitude,
-            stepCount = lastStepCount,
-            significantMotion = getAndResetSignificantMotion(),
-            batteryLevel = getBatteryLevel(),
-            batteryCharging = isCharging(),
-            networkType = getNetworkType(),
-            networkStrength = getNetworkStrength(),
-        )
-    }
+    private fun collectTelemetry(): TelemetrySnapshot = TelemetrySnapshot(
+        accelerometerMagnitude = accelerometerBuffer.getMagnitude(),
+        accelerometerVariance = accelerometerBuffer.getVariance(),
+        accelerometerPeakFrequency = accelerometerBuffer.getPeakFrequency(),
+        gyroscopeMagnitude = lastGyroscopeMagnitude,
+        stepCount = lastStepCount,
+        significantMotion = getAndResetSignificantMotion(),
+        batteryLevel = getBatteryLevel(),
+        batteryCharging = isCharging(),
+        networkType = getNetworkType(),
+        networkStrength = getNetworkStrength(),
+    )
 
     /**
      * Get and reset significant motion flag.
@@ -267,63 +256,55 @@ class SensorTelemetryCollector @Inject constructor(
     /**
      * AC E8.5.6: Get battery level (0-100).
      */
-    private fun getBatteryLevel(): Int? {
-        return try {
-            batteryManager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to get battery level")
-            null
-        }
+    private fun getBatteryLevel(): Int? = try {
+        batteryManager?.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY)
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to get battery level")
+        null
     }
 
     /**
      * AC E8.5.6: Check if device is charging.
      */
-    private fun isCharging(): Boolean? {
-        return try {
-            val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
-            val status = intent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
-            status == BatteryManager.BATTERY_STATUS_CHARGING ||
-                status == BatteryManager.BATTERY_STATUS_FULL
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to get charging status")
-            null
-        }
+    private fun isCharging(): Boolean? = try {
+        val intent = context.registerReceiver(null, IntentFilter(Intent.ACTION_BATTERY_CHANGED))
+        val status = intent?.getIntExtra(BatteryManager.EXTRA_STATUS, -1) ?: -1
+        status == BatteryManager.BATTERY_STATUS_CHARGING ||
+            status == BatteryManager.BATTERY_STATUS_FULL
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to get charging status")
+        null
     }
 
     /**
      * AC E8.5.6: Get network type (WIFI, MOBILE, NONE).
      */
-    private fun getNetworkType(): String? {
-        return try {
-            val network = connectivityManager?.activeNetwork
-            val capabilities = connectivityManager?.getNetworkCapabilities(network)
+    private fun getNetworkType(): String? = try {
+        val network = connectivityManager?.activeNetwork
+        val capabilities = connectivityManager?.getNetworkCapabilities(network)
 
-            when {
-                capabilities == null -> "NONE"
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WIFI"
-                capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "MOBILE"
-                else -> "UNKNOWN"
-            }
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to get network type")
-            null
+        when {
+            capabilities == null -> "NONE"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) -> "WIFI"
+            capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR) -> "MOBILE"
+            else -> "UNKNOWN"
         }
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to get network type")
+        null
     }
 
     /**
      * AC E8.5.6: Get network signal strength.
      */
-    private fun getNetworkStrength(): Int? {
-        return try {
-            // For simplicity, return null - proper implementation requires
-            // PhoneStateListener or SignalStrengthCallback which is complex
-            // This can be enhanced in a future story
-            null
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to get network strength")
-            null
-        }
+    private fun getNetworkStrength(): Int? = try {
+        // For simplicity, return null - proper implementation requires
+        // PhoneStateListener or SignalStrengthCallback which is complex
+        // This can be enhanced in a future story
+        null
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to get network strength")
+        null
     }
 
     /**
@@ -345,13 +326,8 @@ class SensorTelemetryCollector @Inject constructor(
  * Maintains a 5-second window of accelerometer readings and provides
  * calculations for magnitude, variance, and peak frequency.
  */
-internal class AccelerometerBuffer(
-    private val windowDurationMs: Long = 5000L,
-) {
-    private data class Sample(
-        val magnitude: Float,
-        val timestamp: Long,
-    )
+internal class AccelerometerBuffer(private val windowDurationMs: Long = 5000L) {
+    private data class Sample(val magnitude: Float, val timestamp: Long)
 
     private val samples = ConcurrentLinkedDeque<Sample>()
 

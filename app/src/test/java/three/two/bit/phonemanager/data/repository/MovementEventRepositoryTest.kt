@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.database.MovementEventDao
@@ -80,10 +79,7 @@ class MovementEventRepositoryTest {
         syncedAt = null,
     )
 
-    private fun createTestEvent(
-        id: Long = 1L,
-        tripId: String? = "trip-1",
-    ) = MovementEvent(
+    private fun createTestEvent(id: Long = 1L, tripId: String? = "trip-1") = MovementEvent(
         id = id,
         timestamp = Clock.System.now(),
         tripId = tripId,

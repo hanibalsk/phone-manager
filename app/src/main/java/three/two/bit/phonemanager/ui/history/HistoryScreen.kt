@@ -238,7 +238,9 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
         ) {
             DatePicker(
                 state = datePickerState,
-                title = { Text(stringResource(R.string.history_select_start_date), modifier = Modifier.padding(16.dp)) },
+                title = {
+                    Text(stringResource(R.string.history_select_start_date), modifier = Modifier.padding(16.dp))
+                },
             )
         }
     }

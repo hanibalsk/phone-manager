@@ -48,11 +48,7 @@ import three.two.bit.phonemanager.movement.TransportationMode
  * - "View History" link
  */
 @Composable
-fun DailySummaryCard(
-    stats: TodayTripStats,
-    onViewHistory: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun DailySummaryCard(stats: TodayTripStats, onViewHistory: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -145,11 +141,7 @@ fun DailySummaryCard(
 }
 
 @Composable
-private fun SummaryStatItem(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+private fun SummaryStatItem(label: String, value: String, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -168,13 +160,11 @@ private fun SummaryStatItem(
     }
 }
 
-private fun getDominantModeIcon(mode: TransportationMode): ImageVector {
-    return when (mode) {
-        TransportationMode.WALKING -> Icons.Rounded.DirectionsWalk
-        TransportationMode.RUNNING -> Icons.Rounded.DirectionsRun
-        TransportationMode.CYCLING -> Icons.Rounded.DirectionsBike
-        TransportationMode.IN_VEHICLE -> Icons.Rounded.DirectionsCar
-        TransportationMode.STATIONARY -> Icons.Rounded.LocationOn
-        TransportationMode.UNKNOWN -> Icons.Rounded.QuestionMark
-    }
+private fun getDominantModeIcon(mode: TransportationMode): ImageVector = when (mode) {
+    TransportationMode.WALKING -> Icons.Rounded.DirectionsWalk
+    TransportationMode.RUNNING -> Icons.Rounded.DirectionsRun
+    TransportationMode.CYCLING -> Icons.Rounded.DirectionsBike
+    TransportationMode.IN_VEHICLE -> Icons.Rounded.DirectionsCar
+    TransportationMode.STATIONARY -> Icons.Rounded.LocationOn
+    TransportationMode.UNKNOWN -> Icons.Rounded.QuestionMark
 }

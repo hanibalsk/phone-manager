@@ -66,6 +66,7 @@ interface PreferencesRepository {
     // Vehicle mode multiplier (0.1 to 1.0, lower = more frequent updates)
     val vehicleIntervalMultiplier: Flow<Float>
     suspend fun setVehicleIntervalMultiplier(multiplier: Float)
+
     // Default mode multiplier for walking/cycling/stationary (0.1 to 2.0)
     val defaultIntervalMultiplier: Flow<Float>
     suspend fun setDefaultIntervalMultiplier(multiplier: Float)

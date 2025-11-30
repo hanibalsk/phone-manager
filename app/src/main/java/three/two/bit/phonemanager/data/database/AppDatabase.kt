@@ -253,7 +253,9 @@ abstract class AppDatabase : RoomDatabase() {
 
                 // 6. Create locations indexes for new columns
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_locations_tripId ON locations(tripId)")
-                db.execSQL("CREATE INDEX IF NOT EXISTS index_locations_transportationMode ON locations(transportationMode)")
+                db.execSQL(
+                    "CREATE INDEX IF NOT EXISTS index_locations_transportationMode ON locations(transportationMode)",
+                )
             }
         }
     }

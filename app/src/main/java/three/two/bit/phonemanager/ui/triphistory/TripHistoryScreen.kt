@@ -46,8 +46,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.ui.triphistory.components.TripCard
 import three.two.bit.phonemanager.ui.triphistory.components.TripFilterBar
@@ -261,10 +259,7 @@ private fun TripList(
 }
 
 @Composable
-private fun DayHeader(
-    dayGroup: TripDayGroup,
-    modifier: Modifier = Modifier,
-) {
+private fun DayHeader(dayGroup: TripDayGroup, modifier: Modifier = Modifier) {
     val headerText = when (dayGroup) {
         is TripDayGroup.Today -> stringResource(R.string.trip_day_today)
         is TripDayGroup.Yesterday -> stringResource(R.string.trip_day_yesterday)
@@ -321,11 +316,7 @@ private fun LoadingState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun ErrorState(
-    message: String,
-    onRetry: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ErrorState(message: String, onRetry: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -384,10 +375,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun DeleteConfirmationDialog(
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun DeleteConfirmationDialog(onConfirm: () -> Unit, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.trip_delete_title)) },

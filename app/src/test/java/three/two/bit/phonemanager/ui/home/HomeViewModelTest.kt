@@ -12,11 +12,15 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
+import three.two.bit.phonemanager.data.repository.TripRepository
+import three.two.bit.phonemanager.trip.TripManager
 import kotlin.test.assertFalse
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
     private lateinit var preferencesRepository: PreferencesRepository
+    private lateinit var tripManager: TripManager
+    private lateinit var tripRepository: TripRepository
     private lateinit var viewModel: HomeViewModel
     private lateinit var secretModeFlow: MutableStateFlow<Boolean>
 
@@ -26,6 +30,8 @@ class HomeViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         preferencesRepository = mockk(relaxed = true)
+        tripManager = mockk(relaxed = true)
+        tripRepository = mockk(relaxed = true)
         secretModeFlow = MutableStateFlow(false)
         coEvery { preferencesRepository.isSecretModeEnabled } returns secretModeFlow
     }
@@ -33,7 +39,7 @@ class HomeViewModelTest {
     @Test
     fun `isSecretModeEnabled emits false by default`() = runTest {
         // When
-        viewModel = HomeViewModel(preferencesRepository)
+        viewModel = HomeViewModel(preferencesRepository, tripManager, tripRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -44,7 +50,7 @@ class HomeViewModelTest {
     fun `toggleSecretMode calls setSecretModeEnabled with opposite value when false`() = runTest {
         // Given
         secretModeFlow.value = false
-        viewModel = HomeViewModel(preferencesRepository)
+        viewModel = HomeViewModel(preferencesRepository, tripManager, tripRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -59,7 +65,7 @@ class HomeViewModelTest {
     fun `toggleSecretMode does not throw when called`() = runTest {
         // Given
         secretModeFlow.value = false
-        viewModel = HomeViewModel(preferencesRepository)
+        viewModel = HomeViewModel(preferencesRepository, tripManager, tripRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - should not throw

@@ -190,9 +190,11 @@ class TripDetailViewModel @Inject constructor(
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 }
 
-                context.startActivity(Intent.createChooser(shareIntent, "Export Trip").apply {
-                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                })
+                context.startActivity(
+                    Intent.createChooser(shareIntent, "Export Trip").apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                )
 
                 _uiState.update { it.copy(isExporting = false) }
                 Timber.d("Exported trip to GPX: $fileName")
@@ -247,10 +249,7 @@ class TripDetailViewModel @Inject constructor(
     /**
      * Calculate mode breakdown from movement events
      */
-    private fun calculateModeBreakdown(
-        events: List<MovementEvent>,
-        trip: Trip,
-    ): List<ModeBreakdownItem> {
+    private fun calculateModeBreakdown(events: List<MovementEvent>, trip: Trip): List<ModeBreakdownItem> {
         if (events.isEmpty()) {
             // Return 100% for dominant mode if no events
             return listOf(
@@ -308,7 +307,9 @@ class TripDetailViewModel @Inject constructor(
         val avgSpeed = if (locations.isNotEmpty()) {
             val speeds = locations.mapNotNull { it.speed }
             if (speeds.isNotEmpty()) speeds.average().toFloat() else null
-        } else null
+        } else {
+            null
+        }
 
         return TripStatistics(
             averageSpeedKmh = avgSpeed?.let { it * 3.6f }, // m/s to km/h
@@ -356,15 +357,13 @@ class TripDetailViewModel @Inject constructor(
     /**
      * Get default trip name from mode
      */
-    private fun getTripName(trip: Trip): String {
-        return when (trip.dominantMode) {
-            TransportationMode.WALKING -> "Walk"
-            TransportationMode.RUNNING -> "Run"
-            TransportationMode.CYCLING -> "Bike Ride"
-            TransportationMode.IN_VEHICLE -> "Drive"
-            TransportationMode.STATIONARY -> "Stationary"
-            TransportationMode.UNKNOWN -> "Trip"
-        }
+    private fun getTripName(trip: Trip): String = when (trip.dominantMode) {
+        TransportationMode.WALKING -> "Walk"
+        TransportationMode.RUNNING -> "Run"
+        TransportationMode.CYCLING -> "Bike Ride"
+        TransportationMode.IN_VEHICLE -> "Drive"
+        TransportationMode.STATIONARY -> "Stationary"
+        TransportationMode.UNKNOWN -> "Trip"
     }
 }
 
@@ -391,11 +390,7 @@ data class TripDetailUiState(
 /**
  * Mode breakdown item for chart display
  */
-data class ModeBreakdownItem(
-    val mode: TransportationMode,
-    val percentage: Float,
-    val durationSeconds: Int,
-)
+data class ModeBreakdownItem(val mode: TransportationMode, val percentage: Float, val durationSeconds: Int)
 
 /**
  * Trip statistics
