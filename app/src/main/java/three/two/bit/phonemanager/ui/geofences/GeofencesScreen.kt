@@ -88,15 +88,18 @@ fun GeofencesScreen(
             }
         },
     ) { paddingValues ->
+        // Only show pull-to-refresh indicator when refreshing existing data (not initial load)
+        val isRefreshing = uiState.isSyncing && geofences.isNotEmpty()
+
         PullToRefreshBox(
-            isRefreshing = uiState.isSyncing,
+            isRefreshing = isRefreshing,
             onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
         ) {
             when {
-                // Initial loading
+                // Initial loading (show centered indicator, not pull-to-refresh)
                 uiState.isSyncing && geofences.isEmpty() -> {
                     Box(modifier = Modifier.fillMaxSize()) {
                         CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))

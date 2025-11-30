@@ -69,9 +69,12 @@ fun GroupMembersScreen(viewModel: GroupMembersViewModel = hiltViewModel(), onNav
             )
         },
     ) { paddingValues ->
+        // Only show pull-to-refresh indicator when refreshing existing data (not initial load)
+        val isRefreshing = uiState.isLoading && uiState.members.isNotEmpty()
+
         // Pull-to-refresh wrapper (AC E1.2.6)
         PullToRefreshBox(
-            isRefreshing = uiState.isLoading,
+            isRefreshing = isRefreshing,
             onRefresh = viewModel::refresh,
             modifier = Modifier
                 .fillMaxSize()
