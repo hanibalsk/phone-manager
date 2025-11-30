@@ -67,6 +67,9 @@ data class TripEntity(
     // Timestamps
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
+
+    // Story E8.10: Custom trip name (AC E8.10.7)
+    val name: String? = null,
 )
 
 /**
@@ -119,6 +122,7 @@ fun TripEntity.toDomain(): Trip {
         serverId = serverId,
         createdAt = Instant.fromEpochMilliseconds(createdAt),
         updatedAt = Instant.fromEpochMilliseconds(updatedAt),
+        name = name,
     )
 }
 
@@ -146,4 +150,5 @@ fun Trip.toEntity(): TripEntity = TripEntity(
     serverId = serverId,
     createdAt = createdAt.toEpochMilliseconds(),
     updatedAt = updatedAt.toEpochMilliseconds(),
+    name = name,
 )

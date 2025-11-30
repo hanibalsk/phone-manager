@@ -28,6 +28,8 @@ data class Trip(
     val serverId: String?,
     val createdAt: Instant,
     val updatedAt: Instant,
+    // Story E8.10: Custom trip name (AC E8.10.7)
+    val name: String? = null,
 ) {
     /**
      * Whether the trip is currently active (in progress).

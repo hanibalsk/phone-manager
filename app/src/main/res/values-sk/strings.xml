@@ -269,4 +269,79 @@
     <string name="time_minutes_ago">pred %1$d min</string>
     <string name="time_hours_ago">pred %1$dh</string>
     <string name="time_days_ago">pred %1$dd</string>
+
+    <!-- Movement Detection Settings -->
+    <string name="settings_movement_detection">Detekcia pohybu</string>
+    <string name="settings_movement_detection_enable">Zapnúť detekciu pohybu</string>
+    <string name="settings_movement_detection_summary">Automaticky detekovať režim prepravy</string>
+    <string name="settings_movement_activity_recognition">Rozpoznávanie aktivity Google</string>
+    <string name="settings_movement_activity_recognition_summary">Použiť Google API na detekciu aktivity</string>
+    <string name="settings_movement_bluetooth_car">Detekcia vozidla cez Bluetooth</string>
+    <string name="settings_movement_bluetooth_car_summary">Detekovať režim vozidla pri pripojení k autorádiám</string>
+    <string name="settings_movement_android_auto">Detekcia Android Auto</string>
+    <string name="settings_movement_android_auto_summary">Detekovať režim vozidla pri pripojení k Android Auto</string>
+    <string name="settings_movement_vehicle_multiplier">Násobič intervalu pre vozidlá</string>
+    <string name="settings_movement_vehicle_multiplier_summary">Znížiť frekvenciu aktualizácií polohy v režime vozidla</string>
+    <string name="settings_movement_default_multiplier">Predvolený násobič intervalu</string>
+    <string name="settings_movement_default_multiplier_summary">Násobič pre ostatné režimy pohybu</string>
+
+    <!-- Movement Detection Permission -->
+    <string name="permission_movement_title">Povolenie rozpoznávania aktivity</string>
+    <string name="permission_movement_rationale">Phone Manager potrebuje prístup k rozpoznávaniu aktivity pre automatickú detekciu režimu prepravy.</string>
+
+    <!-- Home Screen Quick Actions -->
+    <string name="home_quick_trips">Cesty</string>
+
+    <!-- Trip History Screen -->
+    <string name="trip_history_title">História ciest</string>
+    <string name="trip_history_empty_title">Zatiaľ žiadne cesty</string>
+    <string name="trip_history_empty_subtitle">Vaše cesty sa zobrazia tu, keď budú zaznamenané</string>
+    <string name="trip_deleted_undo">Cesta zmazaná. Vrátiť späť</string>
+    <string name="trip_delete_title">Zmazať cestu?</string>
+    <string name="trip_delete_message">Táto akcia sa nedá vrátiť späť.</string>
+    <string name="trip_date_range_hint">Zadajte rozsah dátumov</string>
+
+    <!-- Trip Filters -->
+    <string name="trip_filter_today">Dnes</string>
+    <string name="trip_filter_this_week">Tento týždeň</string>
+    <string name="trip_filter_this_month">Tento mesiac</string>
+    <string name="trip_filter_all">Všetky</string>
+    <string name="trip_filter_custom_range">Vlastný rozsah</string>
+    <string name="trip_filter_clear">Zrušiť filter</string>
+
+    <!-- Trip Modes -->
+    <string name="trip_mode_walking">Chôdza</string>
+    <string name="trip_mode_running">Beh</string>
+    <string name="trip_mode_cycling">Cyklistika</string>
+    <string name="trip_mode_driving">Jazda autom</string>
+    <string name="trip_mode_stationary">Státie</string>
+    <string name="trip_mode_unknown">Neznáme</string>
+
+    <!-- Trip Day Groups -->
+    <string name="trip_day_today">Dnes</string>
+    <string name="trip_day_yesterday">Včera</string>
+
+    <!-- Trip Detail Screen -->
+    <string name="trip_detail_title">Detail cesty</string>
+    <string name="trip_detail_start">Začiatok</string>
+    <string name="trip_detail_end">Koniec</string>
+    <string name="trip_detail_duration">Trvanie</string>
+    <string name="trip_detail_distance">Vzdialenosť</string>
+    <string name="trip_detail_avg_speed">Priem. rýchlosť</string>
+    <string name="trip_detail_max_speed">Max. rýchlosť</string>
+    <string name="trip_detail_events">Udalosti</string>
+    <string name="trip_detail_map">Mapa</string>
+    <string name="trip_detail_mode_breakdown">Rozloženie režimov</string>
+    <string name="trip_detail_statistics">Štatistiky</string>
+    <string name="trip_detail_location_points">Body polohy</string>
+    <string name="trip_detail_path_corrected">Trasa opravená</string>
+    <string name="trip_edit_name">Upraviť názov</string>
+    <string name="trip_export_gpx">Exportovať GPX</string>
+    <string name="trip_map_raw">Pôvodná trasa</string>
+    <string name="trip_map_corrected">Opravená trasa</string>
+
+    <!-- Common -->
+    <string name="in_progress">Prebieha</string>
+    <string name="yes">Áno</string>
+    <string name="no">Nie</string>
 </resources>

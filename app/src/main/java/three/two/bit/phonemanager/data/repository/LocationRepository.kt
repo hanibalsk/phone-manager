@@ -66,4 +66,12 @@ interface LocationRepository {
      * Used by ServiceHealthCheckWorker to check for stale data
      */
     fun getLatestLocation(): Flow<LocationEntity?>
+
+    /**
+     * Story E8.10: Get locations within time range for trip detail display
+     * @param startTimeMillis Start timestamp in milliseconds
+     * @param endTimeMillis End timestamp in milliseconds
+     * @return List of locations ordered chronologically
+     */
+    suspend fun getLocationsBetween(startTimeMillis: Long, endTimeMillis: Long): List<LocationEntity>
 }

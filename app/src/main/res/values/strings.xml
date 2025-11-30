@@ -325,8 +325,19 @@
     <string name="trip_detail_end">End</string>
     <string name="trip_detail_duration">Duration</string>
     <string name="trip_detail_distance">Distance</string>
-    <string name="trip_detail_avg_speed">Avg Speed</string>
+    <string name="trip_detail_avg_speed">Average Speed</string>
     <string name="trip_detail_max_speed">Max Speed</string>
     <string name="trip_detail_events">Movement Events</string>
     <string name="trip_detail_map">Trip Route</string>
+    <string name="trip_detail_mode_breakdown">Mode Breakdown</string>
+    <string name="trip_detail_statistics">Statistics</string>
+    <string name="trip_detail_location_points">Location Points</string>
+    <string name="trip_detail_path_corrected">Path Corrected</string>
+    <string name="trip_edit_name">Edit Trip Name</string>
+    <string name="trip_export_gpx">Export GPX</string>
+    <string name="trip_map_raw">Raw Path</string>
+    <string name="trip_map_corrected">Corrected</string>
+    <string name="in_progress">In Progress</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

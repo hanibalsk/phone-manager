@@ -125,4 +125,12 @@ class LocationRepositoryImpl @Inject constructor(
      * Used by ServiceHealthCheckWorker to check for stale data
      */
     override fun getLatestLocation(): Flow<LocationEntity?> = locationDao.observeLastLocation()
+
+    /**
+     * Story E8.10: Get locations within time range for trip detail display
+     */
+    override suspend fun getLocationsBetween(
+        startTimeMillis: Long,
+        endTimeMillis: Long,
+    ): List<LocationEntity> = locationDao.getLocationsBetween(startTimeMillis, endTimeMillis)
 }

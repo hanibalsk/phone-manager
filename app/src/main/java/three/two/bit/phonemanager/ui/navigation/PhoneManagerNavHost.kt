@@ -26,6 +26,7 @@ import three.two.bit.phonemanager.ui.weather.WeatherScreen
 import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
 import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
+import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
 
 sealed class Screen(val route: String) {
     object Registration : Screen("registration")
@@ -227,6 +228,13 @@ fun PhoneManagerNavHost(
                     onTripClick = { tripId ->
                         navController.navigate(Screen.TripDetail.createRoute(tripId))
                     },
+                )
+            }
+        }
+        composable(Screen.TripDetail.route) {
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                TripDetailScreen(
+                    onNavigateBack = { navController.popBackStack() },
                 )
             }
         }
