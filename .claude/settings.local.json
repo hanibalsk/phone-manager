@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "WebSearch"
+      "WebSearch",
+      "mcp__MCP_DOCKER__create_new_file_with_text"
     ],
     "deny": [],
     "ask": []

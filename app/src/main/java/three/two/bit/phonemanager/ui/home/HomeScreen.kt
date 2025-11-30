@@ -2,6 +2,11 @@ package three.two.bit.phonemanager.ui.home
 
 import android.app.Activity
 import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -31,8 +36,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -74,6 +81,16 @@ fun HomeScreen(
     val showBackgroundRationale by permissionViewModel.showBackgroundRationale.collectAsState()
     val showNotificationRationale by permissionViewModel.showNotificationRationale.collectAsState()
 
+    // Secret mode state and haptic feedback
+    val isSecretMode by homeViewModel.isSecretModeEnabled.collectAsState()
+    val hapticFeedback = LocalHapticFeedback.current
+
+    // Toggle secret mode with haptic feedback
+    val toggleWithHaptic = {
+        hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
+        homeViewModel.toggleSecretMode()
+    }
+
     // Story E2.1: Tap counter for version text (AC E2.1.3)
     var tapCount by remember { mutableIntStateOf(0) }
     var lastTapTime by remember { mutableLongStateOf(0L) }
@@ -84,13 +101,13 @@ fun HomeScreen(
                 title = {
                     // Story E2.1: Long-press gesture on title to toggle secret mode (AC E2.1.2)
                     Text(
-                        stringResource(R.string.app_name),
+                        text = stringResource(
+                            if (isSecretMode) R.string.app_name_secret else R.string.app_name,
+                        ),
                         modifier =
                         Modifier.pointerInput(Unit) {
                             detectTapGestures(
-                                onLongPress = {
-                                    homeViewModel.toggleSecretMode()
-                                },
+                                onLongPress = { toggleWithHaptic() },
                             )
                         },
                     )
@@ -113,88 +130,113 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.home_location_tracking),
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
+            // Hide tracking-related UI in secret mode
+            AnimatedVisibility(
+                visible = !isSecretMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text(
+                        text = stringResource(R.string.home_location_tracking),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
 
-            // Permission status card
-            PermissionStatusCard(
-                permissionState = permissionState,
-                onGrantPermissions = {
-                    when (permissionState) {
-                        is PermissionState.LocationDenied -> {
-                            permissionViewModel.requestLocationPermission(context as Activity)
-                        }
+                    // Permission status card
+                    PermissionStatusCard(
+                        permissionState = permissionState,
+                        onGrantPermissions = {
+                            when (permissionState) {
+                                is PermissionState.LocationDenied -> {
+                                    permissionViewModel.requestLocationPermission(context as Activity)
+                                }
 
-                        is PermissionState.BackgroundDenied -> {
-                            onRequestBackgroundPermission()
-                        }
+                                is PermissionState.BackgroundDenied -> {
+                                    onRequestBackgroundPermission()
+                                }
 
-                        is PermissionState.NotificationDenied -> {
-                            permissionViewModel.requestNotificationPermission()
-                        }
+                                is PermissionState.NotificationDenied -> {
+                                    permissionViewModel.requestNotificationPermission()
+                                }
 
-                        else -> {
-                            // For any other state, default to location permission
-                            permissionViewModel.requestLocationPermission(context as Activity)
-                        }
+                                else -> {
+                                    // For any other state, default to location permission
+                                    permissionViewModel.requestLocationPermission(context as Activity)
+                                }
+                            }
+                        },
+                        onOpenSettings = {
+                            permissionViewModel.openAppSettings(context)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    // Location tracking toggle (Story 1.1)
+                    LocationTrackingToggle(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    // Story 1.3: Service status and location statistics
+                    val trackingViewModel: LocationTrackingViewModel = hiltViewModel()
+                    val serviceState by trackingViewModel.serviceState.collectAsState()
+                    val locationStats by trackingViewModel.locationStats.collectAsState()
+
+                    // Service status card (Story 1.3)
+                    ServiceStatusCard(
+                        serviceState = serviceState,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    // Location stats card (Story 1.3)
+                    LocationStatsCard(
+                        locationStats = locationStats,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            }
+
+            // Hide Map/History/GroupMembers navigation in secret mode
+            AnimatedVisibility(
+                visible = !isSecretMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    // Navigate to Group Members screen (Story E1.2)
+                    Button(
+                        onClick = onNavigateToGroupMembers,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.home_view_group_members))
                     }
-                },
-                onOpenSettings = {
-                    permissionViewModel.openAppSettings(context)
-                },
-                modifier = Modifier.fillMaxWidth(),
-            )
 
-            // Location tracking toggle (Story 1.1)
-            LocationTrackingToggle(
-                modifier = Modifier.fillMaxWidth(),
-            )
+                    // Navigate to Map screen (Story E3.1)
+                    Button(
+                        onClick = onNavigateToMap,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.home_view_map))
+                    }
 
-            // Story 1.3: Service status and location statistics
-            val trackingViewModel: LocationTrackingViewModel = hiltViewModel()
-            val serviceState by trackingViewModel.serviceState.collectAsState()
-            val locationStats by trackingViewModel.locationStats.collectAsState()
-
-            // Service status card (Story 1.3)
-            ServiceStatusCard(
-                serviceState = serviceState,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            // Location stats card (Story 1.3)
-            LocationStatsCard(
-                locationStats = locationStats,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            // Navigate to Group Members screen (Story E1.2)
-            Button(
-                onClick = onNavigateToGroupMembers,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.home_view_group_members))
+                    // Navigate to History screen (Story E4.1)
+                    Button(
+                        onClick = onNavigateToHistory,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        Text(stringResource(R.string.home_view_history))
+                    }
+                }
             }
 
-            // Navigate to Map screen (Story E3.1)
-            Button(
-                onClick = onNavigateToMap,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.home_view_map))
-            }
-
-            // Navigate to History screen (Story E4.1)
-            Button(
-                onClick = onNavigateToHistory,
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(stringResource(R.string.home_view_history))
-            }
-
-            // Navigate to Alerts screen (Story E5.1)
+            // Navigate to Alerts screen (Story E5.1) - KEEP VISIBLE in secret mode
             Button(
                 onClick = onNavigateToAlerts,
                 modifier = Modifier.fillMaxWidth(),
@@ -237,7 +279,7 @@ fun HomeScreen(
                             }
                             lastTapTime = now
                             if (tapCount >= 5) {
-                                homeViewModel.toggleSecretMode()
+                                toggleWithHaptic()
                                 tapCount = 0
                             }
                         },

@@ -2,10 +2,15 @@ package three.two.bit.phonemanager.ui.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
+import three.two.bit.phonemanager.ui.home.HomeViewModel
 import three.two.bit.phonemanager.ui.alerts.AlertsScreen
 import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
 import three.two.bit.phonemanager.ui.geofences.CreateGeofenceScreen
@@ -37,6 +42,27 @@ sealed class Screen(val route: String) {
     object Weather : Screen("weather")
 }
 
+/**
+ * Protects a route from being accessed in secret mode.
+ * Redirects to Home screen when secret mode is active.
+ */
+@Composable
+private fun SecretModeProtectedRoute(
+    isSecretMode: Boolean,
+    navController: NavController,
+    content: @Composable () -> Unit,
+) {
+    if (isSecretMode) {
+        LaunchedEffect(Unit) {
+            navController.navigate(Screen.Home.route) {
+                popUpTo(Screen.Home.route) { inclusive = true }
+            }
+        }
+    } else {
+        content()
+    }
+}
+
 @Composable
 fun PhoneManagerNavHost(
     permissionViewModel: PermissionViewModel,
@@ -47,6 +73,10 @@ fun PhoneManagerNavHost(
     initialDestination: String? = null,
 ) {
     val navController = rememberNavController()
+
+    // Secret mode state for navigation protection
+    val homeViewModel: HomeViewModel = hiltViewModel()
+    val isSecretMode by homeViewModel.isSecretModeEnabled.collectAsState()
 
     // Determine start destination based on registration status
     val startDestination = if (isRegistered) Screen.Home.route else Screen.Registration.route
@@ -113,9 +143,11 @@ fun PhoneManagerNavHost(
             )
         }
         composable(Screen.GroupMembers.route) {
-            GroupMembersScreen(
-                onNavigateBack = { navController.popBackStack() },
-            )
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                GroupMembersScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
         }
         composable(Screen.Settings.route) {
             SettingsScreen(
@@ -123,14 +155,18 @@ fun PhoneManagerNavHost(
             )
         }
         composable(Screen.Map.route) {
-            MapScreen(
-                onNavigateBack = { navController.popBackStack() },
-            )
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                MapScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
         }
         composable(Screen.History.route) {
-            HistoryScreen(
-                onNavigateBack = { navController.popBackStack() },
-            )
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                HistoryScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
         }
         composable(Screen.Alerts.route) {
             AlertsScreen(
