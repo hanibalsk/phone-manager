@@ -46,6 +46,25 @@
     <string name="settings_weather_notification">Show weather in notification</string>
     <string name="settings_weather_notification_summary">Display current weather instead of tracking status</string>
 
+    <!-- Movement Detection Settings -->
+    <string name="settings_movement_detection">Movement Detection</string>
+    <string name="settings_movement_detection_enable">Enable movement detection</string>
+    <string name="settings_movement_detection_summary">Adjust tracking frequency based on transportation mode</string>
+    <string name="settings_movement_activity_recognition">Activity recognition</string>
+    <string name="settings_movement_activity_recognition_summary">Use Google Activity Recognition to detect walking, cycling, driving</string>
+    <string name="settings_movement_bluetooth_car">Bluetooth car detection</string>
+    <string name="settings_movement_bluetooth_car_summary">Detect when connected to car Bluetooth</string>
+    <string name="settings_movement_android_auto">Android Auto detection</string>
+    <string name="settings_movement_android_auto_summary">Detect when Android Auto is active</string>
+    <string name="settings_movement_vehicle_multiplier">Vehicle update frequency</string>
+    <string name="settings_movement_vehicle_multiplier_summary">%1$d%% of normal interval when in vehicle</string>
+    <string name="settings_movement_default_multiplier">Default update frequency</string>
+    <string name="settings_movement_default_multiplier_summary">%1$d%% of normal interval when not in vehicle</string>
+
+    <!-- Movement Detection Permission Dialog -->
+    <string name="permission_movement_title">Movement Detection Permissions</string>
+    <string name="permission_movement_rationale">To detect when you\'re in a vehicle, Phone Manager needs access to activity recognition (to detect driving) and Bluetooth (to detect car connections).</string>
+
     <!-- Story E7.3: Weather screen -->
     <string name="weather_title">Weather Forecast</string>
     <string name="weather_loading">Loading weather…</string>

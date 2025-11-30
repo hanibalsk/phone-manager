@@ -7,12 +7,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
+import three.two.bit.phonemanager.permission.PermissionManager
 import javax.inject.Inject
 
 /**
@@ -21,6 +23,7 @@ import javax.inject.Inject
  * Manages device settings (displayName, groupId) and handles re-registration
  * Story E3.3: Also manages map polling interval setting (AC E3.3.5)
  * Story E7.4: Also manages weather notification toggle (AC E7.4.5)
+ * Movement detection: Also manages movement detection settings and permissions
  * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5, E7.4.5
  */
 @HiltViewModel
@@ -29,6 +32,7 @@ class SettingsViewModel
 constructor(
     private val deviceRepository: DeviceRepository,
     private val preferencesRepository: PreferencesRepository,
+    private val permissionManager: PermissionManager,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -44,12 +48,66 @@ constructor(
                 initialValue = true,
             )
 
+    // Movement detection settings
+    val isMovementDetectionEnabled: StateFlow<Boolean> =
+        preferencesRepository.isMovementDetectionEnabled
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = false,
+            )
+
+    val isActivityRecognitionEnabled: StateFlow<Boolean> =
+        preferencesRepository.isActivityRecognitionEnabled
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
+    val isBluetoothCarDetectionEnabled: StateFlow<Boolean> =
+        preferencesRepository.isBluetoothCarDetectionEnabled
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
+    val isAndroidAutoDetectionEnabled: StateFlow<Boolean> =
+        preferencesRepository.isAndroidAutoDetectionEnabled
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = true,
+            )
+
+    val vehicleIntervalMultiplier: StateFlow<Float> =
+        preferencesRepository.vehicleIntervalMultiplier
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 0.55f,
+            )
+
+    val defaultIntervalMultiplier: StateFlow<Float> =
+        preferencesRepository.defaultIntervalMultiplier
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = 1.0f,
+            )
+
+    // Movement detection permission states
+    private val _movementPermissionState = MutableStateFlow(MovementPermissionState())
+    val movementPermissionState: StateFlow<MovementPermissionState> = _movementPermissionState.asStateFlow()
+
     private var originalDisplayName: String = ""
     private var originalGroupId: String = ""
 
     init {
         loadCurrentSettings()
         loadPollingInterval()
+        updateMovementPermissionState()
     }
 
     /**
@@ -101,6 +159,96 @@ constructor(
     fun setShowWeatherInNotification(enabled: Boolean) {
         viewModelScope.launch {
             preferencesRepository.setShowWeatherInNotification(enabled)
+        }
+    }
+
+    // Movement detection methods
+
+    /**
+     * Update movement detection permission state
+     * Call this when permissions may have changed (e.g., returning from permission request)
+     */
+    fun updateMovementPermissionState() {
+        _movementPermissionState.value = MovementPermissionState(
+            hasActivityRecognitionPermission = permissionManager.hasActivityRecognitionPermission(),
+            hasBluetoothConnectPermission = permissionManager.hasBluetoothConnectPermission(),
+        )
+    }
+
+    /**
+     * Toggle movement detection on/off
+     * Returns true if permissions need to be requested before enabling
+     */
+    fun setMovementDetectionEnabled(enabled: Boolean): Boolean {
+        if (enabled) {
+            // Check if we have the necessary permissions
+            val hasActivityPermission = permissionManager.hasActivityRecognitionPermission()
+            val hasBluetoothPermission = permissionManager.hasBluetoothConnectPermission()
+
+            if (!hasActivityPermission || !hasBluetoothPermission) {
+                // Signal that permissions need to be requested
+                return true
+            }
+        }
+
+        viewModelScope.launch {
+            preferencesRepository.setMovementDetectionEnabled(enabled)
+        }
+        return false
+    }
+
+    /**
+     * Enable movement detection after permissions are granted
+     */
+    fun enableMovementDetectionAfterPermission() {
+        viewModelScope.launch {
+            preferencesRepository.setMovementDetectionEnabled(true)
+        }
+        updateMovementPermissionState()
+    }
+
+    /**
+     * Toggle activity recognition detection
+     */
+    fun setActivityRecognitionEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setActivityRecognitionEnabled(enabled)
+        }
+    }
+
+    /**
+     * Toggle Bluetooth car detection
+     */
+    fun setBluetoothCarDetectionEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setBluetoothCarDetectionEnabled(enabled)
+        }
+    }
+
+    /**
+     * Toggle Android Auto detection
+     */
+    fun setAndroidAutoDetectionEnabled(enabled: Boolean) {
+        viewModelScope.launch {
+            preferencesRepository.setAndroidAutoDetectionEnabled(enabled)
+        }
+    }
+
+    /**
+     * Set vehicle interval multiplier (0.1 to 1.0)
+     */
+    fun setVehicleIntervalMultiplier(multiplier: Float) {
+        viewModelScope.launch {
+            preferencesRepository.setVehicleIntervalMultiplier(multiplier.coerceIn(0.1f, 1.0f))
+        }
+    }
+
+    /**
+     * Set default interval multiplier (0.1 to 2.0)
+     */
+    fun setDefaultIntervalMultiplier(multiplier: Float) {
+        viewModelScope.launch {
+            preferencesRepository.setDefaultIntervalMultiplier(multiplier.coerceIn(0.1f, 2.0f))
         }
     }
 
@@ -278,3 +426,14 @@ data class SettingsUiState(
     val showGroupChangeConfirmation: Boolean = false,
     val mapPollingIntervalSeconds: Int = 15,
 )
+
+/**
+ * State for movement detection permissions
+ */
+data class MovementPermissionState(
+    val hasActivityRecognitionPermission: Boolean = true,
+    val hasBluetoothConnectPermission: Boolean = true,
+) {
+    val hasBothPermissions: Boolean
+        get() = hasActivityRecognitionPermission && hasBluetoothConnectPermission
+}

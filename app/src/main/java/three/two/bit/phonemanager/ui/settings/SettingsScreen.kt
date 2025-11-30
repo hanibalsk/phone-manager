@@ -1,13 +1,20 @@
 package three.two.bit.phonemanager.ui.settings
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenuItem
@@ -21,10 +28,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -39,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.R
+import kotlin.math.roundToInt
 
 /**
  * Story E1.3: Settings Screen
@@ -52,6 +62,42 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val showWeatherInNotification by viewModel.showWeatherInNotification.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Movement detection states
+    val isMovementDetectionEnabled by viewModel.isMovementDetectionEnabled.collectAsStateWithLifecycle()
+    val isActivityRecognitionEnabled by viewModel.isActivityRecognitionEnabled.collectAsStateWithLifecycle()
+    val isBluetoothCarDetectionEnabled by viewModel.isBluetoothCarDetectionEnabled.collectAsStateWithLifecycle()
+    val isAndroidAutoDetectionEnabled by viewModel.isAndroidAutoDetectionEnabled.collectAsStateWithLifecycle()
+    val vehicleIntervalMultiplier by viewModel.vehicleIntervalMultiplier.collectAsStateWithLifecycle()
+    val defaultIntervalMultiplier by viewModel.defaultIntervalMultiplier.collectAsStateWithLifecycle()
+    val movementPermissionState by viewModel.movementPermissionState.collectAsStateWithLifecycle()
+
+    // Permission dialog state
+    var showPermissionDialog by remember { mutableStateOf(false) }
+
+    // Build list of permissions to request
+    val permissionsToRequest = remember {
+        buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                add(Manifest.permission.ACTIVITY_RECOGNITION)
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+            }
+        }.toTypedArray()
+    }
+
+    // Permission launcher
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions(),
+    ) { permissions ->
+        viewModel.updateMovementPermissionState()
+        // If all permissions granted, enable movement detection
+        val allGranted = permissions.values.all { it }
+        if (allGranted) {
+            viewModel.enableMovementDetectionAfterPermission()
+        }
+    }
 
     // Show success message with delay before navigation (AC E1.3.2, E1.3.3)
     LaunchedEffect(uiState.saveSuccess) {
@@ -87,7 +133,8 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
             Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -200,6 +247,90 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 modifier = Modifier.fillMaxWidth(),
             )
 
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            // Movement Detection Settings Section
+            Text(
+                text = stringResource(R.string.settings_movement_detection),
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            // Master toggle for movement detection
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.settings_movement_detection_enable),
+                        style = MaterialTheme.typography.bodyLarge,
+                    )
+                    Text(
+                        text = stringResource(R.string.settings_movement_detection_summary),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Switch(
+                    checked = isMovementDetectionEnabled,
+                    onCheckedChange = { enabled ->
+                        val needsPermissions = viewModel.setMovementDetectionEnabled(enabled)
+                        if (needsPermissions) {
+                            showPermissionDialog = true
+                        }
+                    },
+                )
+            }
+
+            // Sub-settings (only visible when movement detection is enabled)
+            if (isMovementDetectionEnabled) {
+                // Activity Recognition toggle
+                SettingsToggleRow(
+                    title = stringResource(R.string.settings_movement_activity_recognition),
+                    summary = stringResource(R.string.settings_movement_activity_recognition_summary),
+                    checked = isActivityRecognitionEnabled,
+                    onCheckedChange = viewModel::setActivityRecognitionEnabled,
+                )
+
+                // Bluetooth car detection toggle
+                SettingsToggleRow(
+                    title = stringResource(R.string.settings_movement_bluetooth_car),
+                    summary = stringResource(R.string.settings_movement_bluetooth_car_summary),
+                    checked = isBluetoothCarDetectionEnabled,
+                    onCheckedChange = viewModel::setBluetoothCarDetectionEnabled,
+                )
+
+                // Android Auto detection toggle
+                SettingsToggleRow(
+                    title = stringResource(R.string.settings_movement_android_auto),
+                    summary = stringResource(R.string.settings_movement_android_auto_summary),
+                    checked = isAndroidAutoDetectionEnabled,
+                    onCheckedChange = viewModel::setAndroidAutoDetectionEnabled,
+                )
+
+                // Vehicle interval multiplier slider
+                IntervalMultiplierSlider(
+                    title = stringResource(R.string.settings_movement_vehicle_multiplier),
+                    summaryFormat = R.string.settings_movement_vehicle_multiplier_summary,
+                    value = vehicleIntervalMultiplier,
+                    onValueChange = viewModel::setVehicleIntervalMultiplier,
+                    valueRange = 0.1f..1.0f,
+                )
+
+                // Default interval multiplier slider
+                IntervalMultiplierSlider(
+                    title = stringResource(R.string.settings_movement_default_multiplier),
+                    summaryFormat = R.string.settings_movement_default_multiplier_summary,
+                    value = defaultIntervalMultiplier,
+                    onValueChange = viewModel::setDefaultIntervalMultiplier,
+                    valueRange = 0.1f..2.0f,
+                )
+            }
+
             // Save Button (AC E1.3.2, E1.3.3)
             Button(
                 onClick = viewModel::onSaveClicked,
@@ -213,7 +344,7 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
 
     // Group Change Confirmation Dialog
     if (uiState.showGroupChangeConfirmation) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = viewModel::onDismissGroupChangeConfirmation,
             title = { Text(stringResource(R.string.dialog_change_group_title)) },
             text = {
@@ -229,8 +360,37 @@ fun SettingsScreen(viewModel: SettingsViewModel = hiltViewModel(), onNavigateBac
                 }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = viewModel::onDismissGroupChangeConfirmation) {
+                TextButton(onClick = viewModel::onDismissGroupChangeConfirmation) {
                     Text(stringResource(R.string.cancel))
+                }
+            },
+        )
+    }
+
+    // Movement Detection Permission Dialog
+    if (showPermissionDialog) {
+        AlertDialog(
+            onDismissRequest = { showPermissionDialog = false },
+            title = { Text(stringResource(R.string.permission_movement_title)) },
+            text = { Text(stringResource(R.string.permission_movement_rationale)) },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showPermissionDialog = false
+                        if (permissionsToRequest.isNotEmpty()) {
+                            permissionLauncher.launch(permissionsToRequest)
+                        } else {
+                            // No permissions needed (old Android version), enable directly
+                            viewModel.enableMovementDetectionAfterPermission()
+                        }
+                    },
+                ) {
+                    Text(stringResource(R.string.permission_continue))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showPermissionDialog = false }) {
+                    Text(stringResource(R.string.permission_not_now))
                 }
             },
         )
@@ -288,5 +448,77 @@ private fun PollingIntervalSelector(
                 )
             }
         }
+    }
+}
+
+/**
+ * Reusable settings toggle row component
+ */
+@Composable
+private fun SettingsToggleRow(
+    title: String,
+    summary: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+        )
+    }
+}
+
+/**
+ * Slider for interval multiplier settings
+ */
+@Composable
+private fun IntervalMultiplierSlider(
+    title: String,
+    summaryFormat: Int,
+    value: Float,
+    onValueChange: (Float) -> Unit,
+    valueRange: ClosedFloatingPointRange<Float>,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp, horizontal = 16.dp),
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        Text(
+            text = stringResource(summaryFormat, (value * 100).roundToInt()),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        Slider(
+            value = value,
+            onValueChange = onValueChange,
+            valueRange = valueRange,
+            steps = ((valueRange.endInclusive - valueRange.start) * 10).roundToInt() - 1,
+            modifier = Modifier.fillMaxWidth(),
+        )
     }
 }
