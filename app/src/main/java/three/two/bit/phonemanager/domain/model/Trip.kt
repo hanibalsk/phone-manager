@@ -183,4 +183,16 @@ data class TodayTripStats(
             }
             else -> "${totalDurationSeconds}s"
         }
+
+    companion object {
+        /**
+         * Story E8.13: Empty stats for initial state (AC E8.13.4)
+         */
+        val EMPTY = TodayTripStats(
+            tripCount = 0,
+            totalDistanceMeters = 0.0,
+            totalDurationSeconds = 0L,
+            dominantMode = null,
+        )
+    }
 }

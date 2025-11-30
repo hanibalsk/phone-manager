@@ -378,4 +378,21 @@
     <string name="load_more">Load More</string>
     <string name="collapse">Collapse</string>
     <string name="expand">Expand</string>
+
+    <!-- Active Trip Card (Story E8.13) -->
+    <string name="active_trip_title">Active Trip</string>
+    <string name="active_trip_started">Started %1$s</string>
+    <string name="active_trip_duration">Duration</string>
+    <string name="active_trip_distance">Distance</string>
+    <string name="active_trip_locations">Points</string>
+    <string name="active_trip_end">End Trip</string>
+    <string name="trip_ended_message">Trip ended</string>
+
+    <!-- Daily Summary Card (Story E8.13) -->
+    <string name="daily_summary_title">Today\'s Activity</string>
+    <string name="daily_summary_trips">Trips</string>
+    <string name="daily_summary_time">Time</string>
+    <string name="daily_summary_distance">Distance</string>
+    <string name="daily_summary_mode">Mode</string>
+    <string name="daily_summary_view_history">View History</string>
 </resources>

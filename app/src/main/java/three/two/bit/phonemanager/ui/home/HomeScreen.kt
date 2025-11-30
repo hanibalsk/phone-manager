@@ -32,15 +32,21 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -52,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.permission.PermissionState
+import three.two.bit.phonemanager.ui.components.ActiveTripCard
+import three.two.bit.phonemanager.ui.components.DailySummaryCard
 import three.two.bit.phonemanager.ui.components.LocationStatsCard
 import three.two.bit.phonemanager.ui.components.LocationTrackingToggle
 import three.two.bit.phonemanager.ui.components.QuickActionCard
@@ -94,6 +102,26 @@ fun HomeScreen(
     val isSecretMode by homeViewModel.isSecretModeEnabled.collectAsState()
     val hapticFeedback = LocalHapticFeedback.current
 
+    // Story E8.13: Active trip and daily stats (AC E8.13.4, E8.13.5)
+    val activeTrip by homeViewModel.activeTrip.collectAsState()
+    val todayStats by homeViewModel.todayStats.collectAsState()
+    val tripEndedEvent by homeViewModel.tripEndedEvent.collectAsState()
+
+    // Snackbar state for trip ended feedback
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
+    val tripEndedMessage = stringResource(R.string.trip_ended_message)
+
+    // Show snackbar when trip ends
+    LaunchedEffect(tripEndedEvent) {
+        if (tripEndedEvent) {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(tripEndedMessage)
+                homeViewModel.clearTripEndedEvent()
+            }
+        }
+    }
+
     // Toggle secret mode with haptic feedback
     val toggleWithHaptic = {
         hapticFeedback.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -128,6 +156,7 @@ fun HomeScreen(
                 },
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier =
@@ -204,6 +233,22 @@ fun HomeScreen(
                     // Location stats card (Story 1.3)
                     LocationStatsCard(
                         locationStats = locationStats,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+
+                    // Story E8.13: Active trip card (AC E8.13.1, E8.13.4, E8.13.5)
+                    activeTrip?.let { trip ->
+                        ActiveTripCard(
+                            trip = trip,
+                            onEndTrip = { homeViewModel.endActiveTrip() },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+
+                    // Story E8.13: Daily summary card (AC E8.13.2)
+                    DailySummaryCard(
+                        stats = todayStats,
+                        onViewHistory = onNavigateToTripHistory,
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }

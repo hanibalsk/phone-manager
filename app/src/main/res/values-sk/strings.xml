@@ -382,4 +382,21 @@
     <string name="load_more">Načítať viac</string>
     <string name="collapse">Zbaliť</string>
     <string name="expand">Rozbaliť</string>
+
+    <!-- Active Trip Card (Story E8.13) -->
+    <string name="active_trip_title">Aktívna cesta</string>
+    <string name="active_trip_started">Začiatok %1$s</string>
+    <string name="active_trip_duration">Trvanie</string>
+    <string name="active_trip_distance">Vzdialenosť</string>
+    <string name="active_trip_locations">Body</string>
+    <string name="active_trip_end">Ukončiť cestu</string>
+    <string name="trip_ended_message">Cesta ukončená</string>
+
+    <!-- Daily Summary Card (Story E8.13) -->
+    <string name="daily_summary_title">Dnešná aktivita</string>
+    <string name="daily_summary_trips">Cesty</string>
+    <string name="daily_summary_time">Čas</string>
+    <string name="daily_summary_distance">Vzdialenosť</string>
+    <string name="daily_summary_mode">Režim</string>
+    <string name="daily_summary_view_history">Zobraziť históriu</string>
 </resources>
