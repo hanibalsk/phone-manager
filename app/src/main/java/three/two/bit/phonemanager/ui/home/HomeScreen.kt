@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Map
 import androidx.compose.material.icons.rounded.NotificationsActive
+import androidx.compose.material.icons.rounded.Route
 import androidx.compose.material.icons.rounded.ShareLocation
 import androidx.compose.material.icons.rounded.Webhook
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -80,6 +81,7 @@ fun HomeScreen(
     onNavigateToGeofences: () -> Unit = {},
     onNavigateToWebhooks: () -> Unit = {},
     onNavigateToWeather: () -> Unit = {},
+    onNavigateToTripHistory: () -> Unit = {},
     homeViewModel: HomeViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -276,6 +278,27 @@ fun HomeScreen(
                     onClick = onNavigateToWebhooks,
                     modifier = Modifier.weight(1f),
                 )
+            }
+
+            // Quick Actions Grid - Row 4: Trips (hidden in secret mode)
+            AnimatedVisibility(
+                visible = !isSecretMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    QuickActionCard(
+                        icon = Icons.Rounded.Route,
+                        title = stringResource(R.string.home_quick_trips),
+                        onClick = onNavigateToTripHistory,
+                        modifier = Modifier.weight(1f),
+                    )
+                    // Placeholder for future feature
+                    Spacer(modifier = Modifier.weight(1f))
+                }
             }
 
             Spacer(modifier = Modifier.height(16.dp))

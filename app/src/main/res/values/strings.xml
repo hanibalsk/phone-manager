@@ -188,6 +188,7 @@
     <string name="home_quick_alerts">Alerts</string>
     <string name="home_quick_geofences">Geofences</string>
     <string name="home_quick_webhooks">Webhooks</string>
+    <string name="home_quick_trips">Trips</string>
 
     <!-- Screen Titles -->
     <string name="webhooks_title">Webhooks</string>
@@ -288,4 +289,44 @@
     <string name="time_minutes_ago">%1$d min ago</string>
     <string name="time_hours_ago">%1$dh ago</string>
     <string name="time_days_ago">%1$dd ago</string>
+
+    <!-- Trip History Screen (Story E8.9) -->
+    <string name="trip_history_title">Trip History</string>
+    <string name="trip_history_empty_title">No trips recorded</string>
+    <string name="trip_history_empty_subtitle">Your trips will appear here once movement is detected</string>
+    <string name="trip_deleted_undo">Trip deleted</string>
+    <string name="trip_delete_title">Delete Trip?</string>
+    <string name="trip_delete_message">This trip will be permanently deleted. This action cannot be undone.</string>
+    <string name="trip_date_range_hint">Select a start and end date to filter trips</string>
+
+    <!-- Trip Filter Options -->
+    <string name="trip_filter_today">Today</string>
+    <string name="trip_filter_this_week">This Week</string>
+    <string name="trip_filter_this_month">This Month</string>
+    <string name="trip_filter_all">All</string>
+    <string name="trip_filter_custom_range">Custom Range</string>
+    <string name="trip_filter_clear">Clear Filters</string>
+
+    <!-- Transportation Modes -->
+    <string name="trip_mode_walking">Walking</string>
+    <string name="trip_mode_running">Running</string>
+    <string name="trip_mode_cycling">Cycling</string>
+    <string name="trip_mode_driving">Driving</string>
+    <string name="trip_mode_stationary">Stationary</string>
+    <string name="trip_mode_unknown">Unknown</string>
+
+    <!-- Trip Day Headers -->
+    <string name="trip_day_today">Today</string>
+    <string name="trip_day_yesterday">Yesterday</string>
+
+    <!-- Trip Detail Screen (Story E8.10) -->
+    <string name="trip_detail_title">Trip Details</string>
+    <string name="trip_detail_start">Start</string>
+    <string name="trip_detail_end">End</string>
+    <string name="trip_detail_duration">Duration</string>
+    <string name="trip_detail_distance">Distance</string>
+    <string name="trip_detail_avg_speed">Avg Speed</string>
+    <string name="trip_detail_max_speed">Max Speed</string>
+    <string name="trip_detail_events">Movement Events</string>
+    <string name="trip_detail_map">Trip Route</string>
 </resources>
