@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.ui.components
 
+import android.text.format.DateUtils
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -35,6 +36,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -63,6 +65,8 @@ fun ActiveTripCard(
     onEndTrip: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
+
     // Update duration every second
     var currentTime by remember { mutableLongStateOf(Clock.System.now().epochSeconds) }
     LaunchedEffect(Unit) {
@@ -74,6 +78,15 @@ fun ActiveTripCard(
 
     val durationSeconds = currentTime - trip.startTime.epochSeconds
     val formattedDuration = formatDuration(durationSeconds)
+
+    // Use Android's DateUtils for localized relative time
+    val startTimeMs = trip.startTime.toEpochMilliseconds()
+    val relativeStartTime = DateUtils.getRelativeTimeSpanString(
+        startTimeMs,
+        System.currentTimeMillis(),
+        DateUtils.MINUTE_IN_MILLIS,
+        DateUtils.FORMAT_ABBREV_RELATIVE,
+    ).toString()
 
     Card(
         modifier = modifier.fillMaxWidth(),
@@ -108,7 +121,7 @@ fun ActiveTripCard(
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                     )
                     Text(
-                        text = stringResource(R.string.active_trip_started, formatStartTime(trip.startTime.epochSeconds)),
+                        text = stringResource(R.string.active_trip_started, relativeStartTime),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                     )
@@ -221,17 +234,5 @@ private fun formatDuration(seconds: Long): String {
     }
 }
 
-private fun formatStartTime(epochSeconds: Long): String {
-    val now = Clock.System.now().epochSeconds
-    val diff = now - epochSeconds
-
-    return when {
-        diff < 60 -> "Just now"
-        diff < 3600 -> "${diff / 60}m ago"
-        else -> {
-            val hours = diff / 3600
-            val minutes = (diff % 3600) / 60
-            "${hours}h ${minutes}m ago"
-        }
-    }
-}
+// formatStartTime removed - now using Android's DateUtils.getRelativeTimeSpanString()
+// which provides automatic localization to device language

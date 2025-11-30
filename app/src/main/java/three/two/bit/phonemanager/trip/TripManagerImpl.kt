@@ -743,10 +743,12 @@ class TripManagerImpl @Inject constructor(
     override fun updateLocation(latitude: Double, longitude: Double) {
         lastKnownLocation = LatLng(latitude, longitude)
 
-        // Update active trip's location count
+        // Update active trip's location count and refresh in-memory state
         _activeTrip.value?.let { trip ->
             managerScope.launch {
                 tripRepository.incrementLocationCount(trip.id, 0.0)
+                // Refresh _activeTrip with updated data from repository
+                refreshActiveTrip(trip.id)
             }
         }
     }
@@ -759,6 +761,21 @@ class TripManagerImpl @Inject constructor(
     override fun addDistance(tripId: String, distanceMeters: Double) {
         managerScope.launch {
             tripRepository.incrementLocationCount(tripId, distanceMeters)
+            // Refresh _activeTrip with updated data from repository
+            refreshActiveTrip(tripId)
+        }
+    }
+
+    /**
+     * Refresh the active trip state from repository.
+     * Ensures UI observes the latest distance/locationCount values.
+     */
+    private suspend fun refreshActiveTrip(tripId: String) {
+        val currentTrip = _activeTrip.value
+        if (currentTrip?.id == tripId) {
+            tripRepository.getTripById(tripId)?.let { updatedTrip ->
+                _activeTrip.value = updatedTrip
+            }
         }
     }
 

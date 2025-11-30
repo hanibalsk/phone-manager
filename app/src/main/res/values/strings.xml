@@ -395,4 +395,18 @@
     <string name="daily_summary_distance">Distance</string>
     <string name="daily_summary_mode">Mode</string>
     <string name="daily_summary_view_history">View History</string>
+
+    <!-- Tracking Notification (Story E8.14) -->
+    <string name="notification_trip_in_progress">Trip in progress</string>
+    <string name="notification_confidence">%1$d%% confidence</string>
+    <string name="notification_last_update_just_now">Last update: Just now</string>
+    <string name="notification_last_update_minutes">Last update: %1$d min ago</string>
+    <string name="notification_last_update_hours">Last update: %1$dh ago</string>
+    <string name="notification_last_update_never">Last update: Never</string>
+    <string name="notification_duration_hours_minutes">%1$dh %2$dm</string>
+    <string name="notification_duration_minutes">%1$d min</string>
+    <string name="notification_duration_less_than_minute">&lt;1 min</string>
+    <string name="notification_distance_km">%1$.1f km</string>
+    <string name="notification_distance_m">%1$.0f m</string>
+    <string name="notification_locations_interval">%1$d locations \u2022 Interval: %2$d min</string>
 </resources>

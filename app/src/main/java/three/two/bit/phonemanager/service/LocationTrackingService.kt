@@ -675,6 +675,10 @@ class LocationTrackingService : Service() {
                 buildStandardNotificationContent()
             }
 
+            // AC E8.14.6: Add "Last update: X min ago" as second line
+            val lastUpdateText = getLastUpdateText()
+            val bigText = "$contentText\n$lastUpdateText"
+
             NotificationCompat.Builder(this, CHANNEL_ID_NORMAL)
                 .setContentTitle("Location Tracking Active")
                 .setContentText(contentText)
@@ -684,6 +688,7 @@ class LocationTrackingService : Service() {
                 .setPriority(NotificationCompat.PRIORITY_LOW)
                 .setCategory(NotificationCompat.CATEGORY_SERVICE)
                 .setContentIntent(contentIntent)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(bigText)) // AC E8.14.6
                 .addAction(
                     android.R.drawable.ic_delete,
                     "Stop Tracking",
@@ -702,12 +707,18 @@ class LocationTrackingService : Service() {
     /**
      * Story E8.14: Build notification content when trip is active (AC E8.14.1, E8.14.6)
      * Format: "🚗 Trip in progress • 23 min • 8.2 km"
+     *
+     * AC E8.14.2: Uses current transportation mode for emoji (not trip.dominantMode)
+     * so the icon updates in real-time when mode changes during trip.
      */
     private fun buildTripNotificationContent(trip: Trip): String {
-        val emoji = getModeEmoji(trip.dominantMode)
+        // AC E8.14.2: Use current mode for real-time emoji updates
+        val currentMode = currentTransportationState.mode
+        val emoji = getModeEmoji(currentMode)
         val duration = formatTripDuration(trip.startTime.epochSeconds)
         val distance = formatTripDistance(trip.totalDistanceMeters)
-        return "$emoji Trip in progress • $duration • $distance"
+        val tripInProgress = getString(R.string.notification_trip_in_progress)
+        return "$emoji $tripInProgress • $duration • $distance"
     }
 
     /**
@@ -718,12 +729,12 @@ class LocationTrackingService : Service() {
         val transportState = currentTransportationState
         return if (isMovementDetectionEnabled && transportState.source != three.two.bit.phonemanager.movement.DetectionSource.NONE) {
             val modeName = when (transportState.mode) {
-                three.two.bit.phonemanager.movement.TransportationMode.WALKING -> "Walking"
-                three.two.bit.phonemanager.movement.TransportationMode.RUNNING -> "Running"
-                three.two.bit.phonemanager.movement.TransportationMode.CYCLING -> "Cycling"
-                three.two.bit.phonemanager.movement.TransportationMode.IN_VEHICLE -> "Driving"
-                three.two.bit.phonemanager.movement.TransportationMode.STATIONARY -> "Stationary"
-                three.two.bit.phonemanager.movement.TransportationMode.UNKNOWN -> "Unknown"
+                three.two.bit.phonemanager.movement.TransportationMode.WALKING -> getString(R.string.trip_mode_walking)
+                three.two.bit.phonemanager.movement.TransportationMode.RUNNING -> getString(R.string.trip_mode_running)
+                three.two.bit.phonemanager.movement.TransportationMode.CYCLING -> getString(R.string.trip_mode_cycling)
+                three.two.bit.phonemanager.movement.TransportationMode.IN_VEHICLE -> getString(R.string.trip_mode_driving)
+                three.two.bit.phonemanager.movement.TransportationMode.STATIONARY -> getString(R.string.trip_mode_stationary)
+                three.two.bit.phonemanager.movement.TransportationMode.UNKNOWN -> getString(R.string.trip_mode_unknown)
             }
             // Derive confidence from detection source
             val confidence = when (transportState.source) {
@@ -733,7 +744,7 @@ class LocationTrackingService : Service() {
                 three.two.bit.phonemanager.movement.DetectionSource.ACTIVITY_RECOGNITION -> 80
                 three.two.bit.phonemanager.movement.DetectionSource.NONE -> 0
             }
-            "$modeName • $confidence% confidence"
+            "$modeName • ${getString(R.string.notification_confidence, confidence)}"
         } else {
             getNotificationText()
         }
@@ -763,13 +774,13 @@ class LocationTrackingService : Service() {
             durationSeconds >= 3600 -> {
                 val hours = durationSeconds / 3600
                 val minutes = (durationSeconds % 3600) / 60
-                "${hours}h ${minutes}m"
+                getString(R.string.notification_duration_hours_minutes, hours, minutes)
             }
             durationSeconds >= 60 -> {
                 val minutes = durationSeconds / 60
-                "${minutes} min"
+                getString(R.string.notification_duration_minutes, minutes)
             }
-            else -> "<1 min"
+            else -> getString(R.string.notification_duration_less_than_minute)
         }
     }
 
@@ -779,13 +790,36 @@ class LocationTrackingService : Service() {
      */
     private fun formatTripDistance(distanceMeters: Double): String {
         return if (distanceMeters >= 1000) {
-            String.format("%.1f km", distanceMeters / 1000.0)
+            getString(R.string.notification_distance_km, distanceMeters / 1000.0)
         } else {
-            String.format("%.0f m", distanceMeters)
+            getString(R.string.notification_distance_m, distanceMeters)
         }
     }
 
-    private fun getNotificationText(): String = "$currentLocationCount locations • Interval: $currentInterval min"
+    private fun getNotificationText(): String = getString(R.string.notification_locations_interval, currentLocationCount, currentInterval)
+
+    /**
+     * Story E8.14: Get "Last update: X min ago" text for notification (AC E8.14.6)
+     */
+    private fun getLastUpdateText(): String {
+        val lastUpdate = lastCapturedLocation?.timestamp
+        return if (lastUpdate != null) {
+            val now = Clock.System.now().toEpochMilliseconds()
+            val diffMs = now - lastUpdate
+            val diffMinutes = diffMs / 60000
+
+            when {
+                diffMinutes < 1 -> getString(R.string.notification_last_update_just_now)
+                diffMinutes < 60 -> getString(R.string.notification_last_update_minutes, diffMinutes.toInt())
+                else -> {
+                    val hours = diffMinutes / 60
+                    getString(R.string.notification_last_update_hours, hours.toInt())
+                }
+            }
+        } else {
+            getString(R.string.notification_last_update_never)
+        }
+    }
 
     override fun onDestroy() {
         Timber.d("LocationTrackingService destroyed")
