@@ -20,8 +20,9 @@ This project consists of 8 epics aligned with the PRD MVP features:
 - **Epic 5**: Proximity Alerts (DONE) - 2 stories ✅
 - **Epic 6**: Geofencing with Webhooks (DONE) - 3 stories ✅
 - **Epic 7**: Weather Forecast (DONE) - 4 stories ✅
+- **Epic 8**: Movement Tracking (DONE) - 14 stories ✅
 
-**Total Stories:** 24 (20 done + 4 remaining)
+**Total Stories:** 38 (34 done + 4 remaining)
 
 ---
 
@@ -479,31 +480,96 @@ As a user, I want to toggle weather display in notifications so that I can choos
 
 ---
 
+## Epic 8: Movement Tracking & Intelligent Path Detection ✅
+
+**Priority:** High
+**Estimated Effort:** High (5-7 days)
+**Status:** ✅ **COMPLETE - Production Ready**
+**PRD Reference:** PRD-movement-tracking.md, ANDROID_APP_SPEC.md
+**Dependencies:** Epic 0 ✅ (Foundation)
+**Completed:** 2025-11-30
+
+### Purpose
+Intelligent movement tracking, automatic trip detection, sensor telemetry logging, and comprehensive trip history features.
+
+### Implementation Summary
+
+**Files Created:** 30+ new files
+**Files Modified:** 15+ existing files
+**Stories Completed:** 14/14
+**Test Coverage:** Data layer fully tested, UI tests pending
+
+### Sub-Epics
+
+| Sub-Epic | Stories | Status | Description |
+|----------|---------|--------|-------------|
+| E8.A | E8.1-E8.8 | ✅ Done | Trip Detection & Data Layer |
+| E8.B | E8.9-E8.14 | ✅ Done | Trip UI & User Experience |
+
+### Stories Completed
+
+#### Data Layer (E8.A)
+- **E8.1**: TripEntity and MovementEventEntity with database migration ✅
+- **E8.2**: TripDao and MovementEventDao with all queries ✅
+- **E8.3**: TripRepository implementation ✅
+- **E8.4**: TripManager state machine ✅
+- **E8.5**: SensorTelemetryCollector with accelerometer data ✅
+- **E8.6**: TransportationModeManager enhancement ✅
+- **E8.7**: LocationTrackingService integration with trip context ✅
+- **E8.8**: Movement event logging ✅
+
+#### User Interface (E8.B)
+- **E8.9**: Trip History Screen with filtering and pagination ✅
+- **E8.10**: Trip Detail Screen with map and GPX export ✅
+- **E8.11**: Movement Events Screen (developer debugging) ✅
+- **E8.12**: Trip Detection Settings Screen ✅
+- **E8.13**: Active Trip Card and Daily Summary on Home Screen ✅
+- **E8.14**: Trip Status in Tracking Notification ✅
+
+### Review Outcomes
+
+**All Stories Approved** with bug fixes applied:
+- Fixed real-time trip metrics updates (BLOCKING)
+- Added "Last update" notification line (HIGH)
+- Fixed mode emoji real-time updates (HIGH)
+- Full localization of notification strings
+
+### Technical Notes
+- **State Machine**: IDLE → ACTIVE → PENDING_END → COMPLETED
+- **Notification**: Two-line format with BigTextStyle
+- **Localization**: 12 new string resources for notifications
+- **Full spec**: See `/docs/product/Epic-E8-Movement-Tracking.md`
+- **Testing Plan**: See `/docs/testing/epic-E8-testing-plan.md`
+
+---
+
 ## Dependencies
 
 ```
 Epic 0 (Foundation) ✅ DONE
     │
-    ├──► Epic 7 (Weather Forecast) 🆕  [Independent - uses existing location]
+    ├──► Epic 7 (Weather Forecast) ✅  [Independent - uses existing location]
+    │
+    ├──► Epic 8 (Movement Tracking) ✅  [Independent - uses existing location]
     │
     ▼
-Epic 1 (Device Registration) ─────┐
-    │                              │
-    ├──► Epic 2 (Secret Mode)     │
-    │                              │
-    ▼                              │
-Epic 3 (Map Display) ◄────────────┘
+Epic 1 (Device Registration) ✅ ─────┐
+    │                                │
+    ├──► Epic 2 (Secret Mode) 🔜     │
+    │                                │
+    ▼                                │
+Epic 3 (Map Display) 🔄 ◄────────────┘
     │
-    ├──► Epic 4 (Location History)
+    ├──► Epic 4 (Location History) ✅
     │
-    └──► Epic 5 (Proximity Alerts)
+    └──► Epic 5 (Proximity Alerts) ✅
               │
               ▼
-         Epic 6 (Geofencing + Webhooks)
+         Epic 6 (Geofencing + Webhooks) ✅
 ```
 
 **Critical Path:** Epic 0 → Epic 1 → Epic 3 → Epic 5/6
-**Independent:** Epic 7 (Weather) can be implemented anytime after Epic 0
+**Independent:** Epic 7 (Weather) ✅, Epic 8 (Movement Tracking) ✅
 
 ---
 
@@ -540,3 +606,5 @@ Epic 3 (Map Display) ◄────────────┘
 | 2025-11-28 | John (PM) | Added Epic 7: Weather Forecast Integration (4 stories) |
 | 2025-11-28 | Dev Agent | Completed Epic 7: All 4 stories implemented, tested, reviewed, and approved |
 | 2025-11-28 | Martin | Epic 7 marked complete - production ready with device testing verified |
+| 2025-11-30 | Dev Agent | Added Epic 8: Movement Tracking (14 stories) - All implemented and reviewed |
+| 2025-11-30 | Dev Agent | Epic 8 marked complete - bug fixes applied, localization complete |
