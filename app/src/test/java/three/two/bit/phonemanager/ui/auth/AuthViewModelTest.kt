@@ -2,6 +2,7 @@ package three.two.bit.phonemanager.ui.auth
 
 import io.mockk.coEvery
 import io.mockk.coVerify
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -15,9 +16,11 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.AuthRepository
-import three.two.bit.phonemanager.network.DeviceApiService
-import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.domain.auth.User
+import three.two.bit.phonemanager.network.DeviceApiService
+import three.two.bit.phonemanager.network.models.LinkedDeviceInfo
+import three.two.bit.phonemanager.network.models.LinkedDeviceResponse
+import three.two.bit.phonemanager.security.SecureStorage
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -48,12 +51,34 @@ class AuthViewModelTest {
         createdAt = Instant.parse("2025-12-01T10:00:00Z")
     )
 
+    private val testLinkedDeviceResponse = LinkedDeviceResponse(
+        device = LinkedDeviceInfo(
+            id = 1L,
+            deviceUuid = "test-device-uuid",
+            displayName = "Test Device",
+            ownerUserId = "user-123",
+            isPrimary = false,
+            linkedAt = "2025-12-01T10:00:00Z",
+        ),
+        linked = true,
+    )
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         authRepository = mockk(relaxed = true)
         deviceApiService = mockk(relaxed = true)
         secureStorage = mockk(relaxed = true)
+
+        // Mock secureStorage to return access token and device ID for auto-link functionality
+        every { secureStorage.getAccessToken() } returns "test-access-token"
+        every { secureStorage.getDeviceId() } returns "test-device-uuid"
+
+        // Mock deviceApiService.linkDevice to return a proper Result (fixes ClassCastException)
+        coEvery {
+            deviceApiService.linkDevice(any(), any(), any(), any(), any())
+        } returns Result.success(testLinkedDeviceResponse)
+
         viewModel = AuthViewModel(authRepository, deviceApiService, secureStorage)
     }
 
