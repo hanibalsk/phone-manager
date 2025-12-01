@@ -61,39 +61,191 @@ data class OAuthRequest(
 // Response Models
 
 /**
- * AC E9.11.3-E9.11.5: Authentication Response
+ * Tokens Response
  *
- * Returned on successful login, registration, or OAuth sign-in.
+ * Token information from auth endpoints.
  *
  * @property accessToken JWT access token for API authentication
  * @property refreshToken JWT refresh token for obtaining new access tokens
+ * @property tokenType Token type (always "Bearer")
  * @property expiresIn Seconds until access token expires
+ */
+@Serializable
+data class TokensResponse(
+    val accessToken: String,
+    val refreshToken: String,
+    val tokenType: String = "Bearer",
+    val expiresIn: Long
+)
+
+/**
+ * User Response
+ *
+ * User information from auth endpoints.
+ *
+ * @property id Unique user identifier
+ * @property email User email address
+ * @property displayName User display name
+ * @property avatarUrl Optional user avatar URL
+ * @property emailVerified Whether email has been verified
+ * @property authProvider Auth provider (email, google, apple)
+ * @property organizationId Optional organization ID
+ * @property createdAt ISO 8601 timestamp of account creation
+ */
+@Serializable
+data class UserResponse(
+    val id: String,
+    val email: String,
+    val displayName: String,
+    val avatarUrl: String? = null,
+    val emailVerified: Boolean = false,
+    val authProvider: String = "email",
+    val organizationId: String? = null,
+    val createdAt: String
+)
+
+/**
+ * AC E9.11.4: Register Response
+ *
+ * Returned on successful registration.
+ *
  * @property user User information
+ * @property tokens Token information
+ * @property deviceLinked Whether device was linked during registration
+ * @property requiresEmailVerification Whether email verification is required
+ */
+@Serializable
+data class RegisterResponse(
+    val user: UserResponse,
+    val tokens: TokensResponse,
+    val deviceLinked: Boolean = false,
+    val requiresEmailVerification: Boolean = true
+)
+
+/**
+ * AC E9.11.3: Login Response
+ *
+ * Returned on successful login.
+ *
+ * @property user User information
+ * @property tokens Token information
+ */
+@Serializable
+data class LoginResponse(
+    val user: UserResponse,
+    val tokens: TokensResponse
+)
+
+/**
+ * AC E9.11.8: Refresh Response
+ *
+ * Returned on successful token refresh.
+ *
+ * @property tokens New token information
+ */
+@Serializable
+data class RefreshResponse(
+    val tokens: TokensResponse
+)
+
+/**
+ * Legacy AuthResponse for mock mode compatibility
+ *
+ * @deprecated Use RegisterResponse, LoginResponse, or RefreshResponse instead
  */
 @Serializable
 data class AuthResponse(
     val accessToken: String,
     val refreshToken: String,
-    val expiresIn: Long, // seconds until access token expires
+    val expiresIn: Long,
     val user: UserInfo
 )
 
 /**
- * User Information
+ * Legacy UserInfo for mock mode compatibility
  *
- * Basic user profile information returned with auth response.
- *
- * @property userId Unique user identifier
- * @property email User email address
- * @property displayName User display name
- * @property createdAt ISO 8601 timestamp of account creation
+ * @deprecated Use UserResponse instead
  */
 @Serializable
 data class UserInfo(
     val userId: String,
     val email: String,
     val displayName: String,
-    val createdAt: String // ISO 8601 format
+    val createdAt: String
+)
+
+/**
+ * Forgot Password Request
+ *
+ * @property email User email address
+ */
+@Serializable
+data class ForgotPasswordRequest(
+    val email: String
+)
+
+/**
+ * Forgot Password Response
+ *
+ * @property message Response message
+ */
+@Serializable
+data class ForgotPasswordResponse(
+    val message: String
+)
+
+/**
+ * Reset Password Request
+ *
+ * @property token Password reset token from email
+ * @property newPassword New password
+ */
+@Serializable
+data class ResetPasswordRequest(
+    val token: String,
+    val newPassword: String
+)
+
+/**
+ * Reset Password Response
+ *
+ * @property message Response message
+ */
+@Serializable
+data class ResetPasswordResponse(
+    val message: String
+)
+
+/**
+ * Verify Email Request
+ *
+ * @property token Email verification token
+ */
+@Serializable
+data class VerifyEmailRequest(
+    val token: String
+)
+
+/**
+ * Verify Email Response
+ *
+ * @property message Response message
+ * @property emailVerified Whether email is now verified
+ */
+@Serializable
+data class VerifyEmailResponse(
+    val message: String,
+    val emailVerified: Boolean
+)
+
+/**
+ * Request Verification Response
+ *
+ * @property message Response message
+ */
+@Serializable
+data class RequestVerificationResponse(
+    val message: String
 )
 
 /**

@@ -121,7 +121,7 @@ fun ForgotPasswordScreen(
     }
 
     Scaffold(
-        topAppBar = {
+        topBar = {
             TopAppBar(
                 title = { Text("Reset Password") },
                 navigationIcon = {

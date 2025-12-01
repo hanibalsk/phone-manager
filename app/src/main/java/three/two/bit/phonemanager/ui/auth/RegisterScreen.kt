@@ -90,12 +90,15 @@ fun RegisterScreen(
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
 
-    // Password strength indicator
-    val passwordStrength by remember {
+    // Password strength level (non-composable, can be used in derivedStateOf)
+    val passwordStrengthLevel by remember {
         derivedStateOf {
-            calculatePasswordStrength(password)
+            calculatePasswordStrengthLevel(password)
         }
     }
+
+    // Password strength with colors (composable)
+    val passwordStrength = passwordStrengthLevel.toPasswordStrength()
 
     // Password match check
     val passwordsMatch by remember {
@@ -382,27 +385,33 @@ data class PasswordStrength(
 )
 
 /**
- * Calculate password strength based on security requirements
+ * Password strength levels (non-composable)
+ */
+enum class PasswordStrengthLevel {
+    WEAK, MEDIUM, STRONG
+}
+
+/**
+ * Calculate password strength level based on security requirements
+ */
+fun calculatePasswordStrengthLevel(password: String): PasswordStrengthLevel {
+    return when {
+        password.length < 8 -> PasswordStrengthLevel.WEAK
+        password.length < 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } -> PasswordStrengthLevel.MEDIUM
+        password.length >= 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } && password.any { !it.isLetterOrDigit() } -> PasswordStrengthLevel.STRONG
+        else -> PasswordStrengthLevel.WEAK
+    }
+}
+
+/**
+ * Convert strength level to display model with colors (composable)
  */
 @Composable
-fun calculatePasswordStrength(password: String): PasswordStrength {
-    return when {
-        password.length < 8 -> PasswordStrength(
-            "Weak",
-            MaterialTheme.colorScheme.error
-        )
-        password.length < 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } -> PasswordStrength(
-            "Medium",
-            MaterialTheme.colorScheme.tertiary
-        )
-        password.length >= 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } && password.any { !it.isLetterOrDigit() } -> PasswordStrength(
-            "Strong",
-            MaterialTheme.colorScheme.primary
-        )
-        else -> PasswordStrength(
-            "Weak",
-            MaterialTheme.colorScheme.error
-        )
+fun PasswordStrengthLevel.toPasswordStrength(): PasswordStrength {
+    return when (this) {
+        PasswordStrengthLevel.WEAK -> PasswordStrength("Weak", MaterialTheme.colorScheme.error)
+        PasswordStrengthLevel.MEDIUM -> PasswordStrength("Medium", MaterialTheme.colorScheme.tertiary)
+        PasswordStrengthLevel.STRONG -> PasswordStrength("Strong", MaterialTheme.colorScheme.primary)
     }
 }
 

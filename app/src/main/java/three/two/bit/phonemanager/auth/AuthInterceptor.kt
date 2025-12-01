@@ -1,13 +1,10 @@
 package three.two.bit.phonemanager.auth
 
-import io.ktor.client.plugins.api.ClientPlugin
 import io.ktor.client.plugins.api.createClientPlugin
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import kotlinx.coroutines.runBlocking
-import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
@@ -28,7 +25,6 @@ import timber.log.Timber
  */
 class AuthInterceptor(
     private val secureStorage: SecureStorage,
-    private val preferencesRepository: PreferencesRepository,
     private val authRepository: AuthRepository
 ) {
 
@@ -45,13 +41,11 @@ class AuthInterceptor(
             request.header("Authorization", "Bearer $accessToken")
             Timber.v("Added Bearer token to request: ${request.url}")
         } else {
-            // Fall back to API key for unauthenticated endpoints
-            runBlocking {
-                val apiKey = preferencesRepository.apiKey.value
-                if (apiKey.isNotBlank()) {
-                    request.header("X-API-Key", apiKey)
-                    Timber.v("Added API key to request: ${request.url}")
-                }
+            // Fall back to API key for unauthenticated endpoints (AC E9.11.8)
+            val apiKey = secureStorage.getApiKey()
+            if (!apiKey.isNullOrBlank()) {
+                request.header("X-API-Key", apiKey)
+                Timber.v("Added API key to request: ${request.url}")
             }
         }
     }

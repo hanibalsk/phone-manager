@@ -65,11 +65,15 @@ class AuthRepository @Inject constructor(
         )
 
         // Store tokens securely (AC E9.11.6)
-        storeTokens(response.accessToken, response.refreshToken, response.expiresIn)
+        storeTokens(
+            response.tokens.accessToken,
+            response.tokens.refreshToken,
+            response.tokens.expiresIn
+        )
 
         // Map to domain model and update current user
         val user = User(
-            userId = response.user.userId,
+            userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName,
             createdAt = Instant.parse(response.user.createdAt)
@@ -101,11 +105,15 @@ class AuthRepository @Inject constructor(
         )
 
         // Store tokens securely (AC E9.11.6)
-        storeTokens(response.accessToken, response.refreshToken, response.expiresIn)
+        storeTokens(
+            response.tokens.accessToken,
+            response.tokens.refreshToken,
+            response.tokens.expiresIn
+        )
 
         // Map to domain model and update current user
         val user = User(
-            userId = response.user.userId,
+            userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName,
             createdAt = Instant.parse(response.user.createdAt)
@@ -137,11 +145,15 @@ class AuthRepository @Inject constructor(
         )
 
         // Store tokens securely (AC E9.11.6)
-        storeTokens(response.accessToken, response.refreshToken, response.expiresIn)
+        storeTokens(
+            response.tokens.accessToken,
+            response.tokens.refreshToken,
+            response.tokens.expiresIn
+        )
 
         // Map to domain model and update current user
         val user = User(
-            userId = response.user.userId,
+            userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName,
             createdAt = Instant.parse(response.user.createdAt)
@@ -157,13 +169,19 @@ class AuthRepository @Inject constructor(
      *
      * Clears tokens and session state.
      * Always succeeds locally even if server logout fails.
+     *
+     * @param allDevices If true, invalidate all sessions for the user
      */
-    suspend fun logout(): Result<Unit> = runCatching {
+    suspend fun logout(allDevices: Boolean = false): Result<Unit> = runCatching {
         Timber.d("Logging out user")
+
+        val refreshToken = secureStorage.getRefreshToken()
 
         try {
             // Attempt to logout on server (AC E9.11.6)
-            authApiService.logout()
+            if (refreshToken != null) {
+                authApiService.logout(refreshToken, allDevices)
+            }
         } catch (e: Exception) {
             // Ignore server errors - always clear local state
             Timber.w(e, "Server logout failed, clearing local state anyway")
@@ -195,11 +213,67 @@ class AuthRepository @Inject constructor(
             )
 
             // Store new tokens (AC E9.11.8)
-            storeTokens(response.accessToken, response.refreshToken, response.expiresIn)
+            storeTokens(
+                response.tokens.accessToken,
+                response.tokens.refreshToken,
+                response.tokens.expiresIn
+            )
 
             Timber.i("Access token refreshed successfully")
-            response.accessToken
+            response.tokens.accessToken
         }
+    }
+
+    /**
+     * Request password reset
+     *
+     * @param email User email address
+     * @return Result with success message
+     */
+    suspend fun forgotPassword(email: String): Result<String> = runCatching {
+        Timber.d("Requesting password reset for: $email")
+        val response = authApiService.forgotPassword(email)
+        Timber.i("Password reset email requested")
+        response.message
+    }
+
+    /**
+     * Reset password with token
+     *
+     * @param token Password reset token from email
+     * @param newPassword New password
+     * @return Result with success message
+     */
+    suspend fun resetPassword(token: String, newPassword: String): Result<String> = runCatching {
+        Timber.d("Resetting password with token")
+        val response = authApiService.resetPassword(token, newPassword)
+        Timber.i("Password reset successfully")
+        response.message
+    }
+
+    /**
+     * Verify email with token
+     *
+     * @param token Email verification token
+     * @return Result with verification status
+     */
+    suspend fun verifyEmail(token: String): Result<Boolean> = runCatching {
+        Timber.d("Verifying email with token")
+        val response = authApiService.verifyEmail(token)
+        Timber.i("Email verified: ${response.emailVerified}")
+        response.emailVerified
+    }
+
+    /**
+     * Request new verification email
+     *
+     * @return Result with success message
+     */
+    suspend fun requestVerification(): Result<String> = runCatching {
+        Timber.d("Requesting verification email")
+        val response = authApiService.requestVerification()
+        Timber.i("Verification email sent")
+        response.message
     }
 
     /**
