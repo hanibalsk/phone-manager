@@ -114,3 +114,109 @@ data class DataExportResponse(
     val expiresAt: String,
     val format: String = "json",
 )
+
+// ============================================================================
+// Story E10.6: Device Binding API Models
+// ============================================================================
+
+/**
+ * Story E10.6 Task 2: Request body for linking a device to a user
+ * POST /api/v1/users/{userId}/devices/{deviceId}/link
+ */
+@Serializable
+data class LinkDeviceRequest(
+    val displayName: String? = null,
+    val isPrimary: Boolean = false,
+)
+
+/**
+ * Story E10.6 Task 2: Response for device link operation
+ */
+@Serializable
+data class LinkedDeviceResponse(
+    val device: LinkedDeviceInfo,
+    val linked: Boolean,
+)
+
+/**
+ * Story E10.6 Task 2: Device info in link response
+ */
+@Serializable
+data class LinkedDeviceInfo(
+    val id: Long,
+    val deviceUuid: String,
+    val displayName: String,
+    val ownerUserId: String,
+    val isPrimary: Boolean,
+    val linkedAt: String,
+)
+
+/**
+ * Story E10.6 Task 2: Response for list user devices
+ * GET /api/v1/users/{userId}/devices
+ */
+@Serializable
+data class ListUserDevicesResponse(
+    val devices: List<UserDeviceDto>,
+    val count: Int,
+)
+
+/**
+ * Story E10.6 Task 2: Device DTO in user's device list
+ */
+@Serializable
+data class UserDeviceDto(
+    val id: Long,
+    val deviceUuid: String,
+    val displayName: String,
+    val platform: String,
+    val isPrimary: Boolean,
+    val active: Boolean,
+    val linkedAt: String?,
+    val lastSeenAt: String?,
+)
+
+/**
+ * Story E10.6 Task 2: Response for unlink device operation
+ * DELETE /api/v1/users/{userId}/devices/{deviceId}/unlink
+ */
+@Serializable
+data class UnlinkDeviceResponse(
+    val deviceUuid: String,
+    val unlinked: Boolean,
+)
+
+/**
+ * Story E10.6 Task 2: Request body for transferring device ownership
+ * POST /api/v1/users/{userId}/devices/{deviceId}/transfer
+ */
+@Serializable
+data class TransferDeviceRequest(
+    val newOwnerId: String,
+)
+
+/**
+ * Story E10.6 Task 2: Response for transfer device operation
+ */
+@Serializable
+data class TransferDeviceResponse(
+    val device: LinkedDeviceInfo,
+    val previousOwnerId: String,
+    val newOwnerId: String,
+    val transferred: Boolean,
+)
+
+/**
+ * Story E10.6 Task 2: Maps UserDeviceDto from API response to UserDevice domain model
+ */
+fun UserDeviceDto.toDomain(): three.two.bit.phonemanager.domain.model.UserDevice =
+    three.two.bit.phonemanager.domain.model.UserDevice(
+        id = id,
+        deviceUuid = deviceUuid,
+        displayName = displayName,
+        platform = platform,
+        isPrimary = isPrimary,
+        active = active,
+        linkedAt = linkedAt?.let { Instant.parse(it) },
+        lastSeenAt = lastSeenAt?.let { Instant.parse(it) },
+    )

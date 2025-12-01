@@ -26,6 +26,8 @@ import three.two.bit.phonemanager.ui.movementevents.MovementEventsScreen
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.registration.RegistrationScreen
 import three.two.bit.phonemanager.ui.settings.SettingsScreen
+import three.two.bit.phonemanager.ui.devices.DeviceDetailScreen
+import three.two.bit.phonemanager.ui.devices.DeviceListScreen
 import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.weather.WeatherScreen
@@ -58,6 +60,10 @@ sealed class Screen(val route: String) {
         fun createRoute(tripId: String) = "trip_detail/$tripId"
     }
     object MovementEvents : Screen("movement_events")
+
+    // Story E10.6: Device Management screens
+    object DeviceList : Screen("device_list")
+    object DeviceDetail : Screen("device_detail")
 }
 
 /**
@@ -226,8 +232,7 @@ fun PhoneManagerNavHost(
                     navController.navigate(Screen.GroupMembers.route)
                 },
                 onNavigateToMyDevices = {
-                    // TODO: Navigate to my devices screen when E10.6 is implemented
-                    navController.navigate(Screen.Home.route)
+                    navController.navigate(Screen.DeviceList.route)
                 }
             )
         }
@@ -312,6 +317,27 @@ fun PhoneManagerNavHost(
                     onNavigateBack = { navController.popBackStack() },
                 )
             }
+        }
+
+        // Story E10.6: Device Management screens (AC E10.6.1, E10.6.3)
+        composable(Screen.DeviceList.route) {
+            DeviceListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToDeviceDetail = {
+                    navController.navigate(Screen.DeviceDetail.route)
+                },
+            )
+        }
+        composable(Screen.DeviceDetail.route) {
+            DeviceDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onDeviceUnlinked = {
+                    // If current device was unlinked, go back to home
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Home.route) { inclusive = true }
+                    }
+                },
+            )
         }
     }
 }

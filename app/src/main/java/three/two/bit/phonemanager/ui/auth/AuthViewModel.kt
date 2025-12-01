@@ -8,6 +8,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.AuthRepository
+import three.two.bit.phonemanager.network.DeviceApiService
+import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -24,7 +26,9 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val deviceApiService: DeviceApiService,
+    private val secureStorage: SecureStorage,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
@@ -39,6 +43,10 @@ class AuthViewModel @Inject constructor(
 
     private val _displayNameError = MutableStateFlow<String?>(null)
     val displayNameError: StateFlow<String?> = _displayNameError.asStateFlow()
+
+    // Story E10.6: Device linking state (AC E10.6.6)
+    private val _deviceLinkState = MutableStateFlow<DeviceLinkState>(DeviceLinkState.Idle)
+    val deviceLinkState: StateFlow<DeviceLinkState> = _deviceLinkState.asStateFlow()
 
     /**
      * AC E9.11.3: Login with email and password
@@ -60,13 +68,17 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             val result = authRepository.login(email, password)
 
-            _uiState.value = if (result.isSuccess) {
+            if (result.isSuccess) {
                 Timber.i("Login successful")
-                AuthUiState.Success(result.getOrThrow())
+                val user = result.getOrThrow()
+                _uiState.value = AuthUiState.Success(user)
+
+                // AC E10.6.6: Auto-link device after successful login
+                autoLinkCurrentDevice(user.userId)
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "Login failed")
-                AuthUiState.Error(
+                _uiState.value = AuthUiState.Error(
                     message = getErrorMessage(exception),
                     errorCode = "login_failed"
                 )
@@ -95,13 +107,17 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             val result = authRepository.register(email, password, displayName)
 
-            _uiState.value = if (result.isSuccess) {
+            if (result.isSuccess) {
                 Timber.i("Registration successful")
-                AuthUiState.Success(result.getOrThrow())
+                val user = result.getOrThrow()
+                _uiState.value = AuthUiState.Success(user)
+
+                // AC E10.6.6: Auto-link device after successful registration
+                autoLinkCurrentDevice(user.userId)
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "Registration failed")
-                AuthUiState.Error(
+                _uiState.value = AuthUiState.Error(
                     message = getErrorMessage(exception),
                     errorCode = "registration_failed"
                 )
@@ -121,13 +137,17 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             val result = authRepository.oauthLogin(provider, idToken)
 
-            _uiState.value = if (result.isSuccess) {
+            if (result.isSuccess) {
                 Timber.i("OAuth sign-in successful: $provider")
-                AuthUiState.Success(result.getOrThrow())
+                val user = result.getOrThrow()
+                _uiState.value = AuthUiState.Success(user)
+
+                // AC E10.6.6: Auto-link device after successful OAuth
+                autoLinkCurrentDevice(user.userId)
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "OAuth sign-in failed: $provider")
-                AuthUiState.Error(
+                _uiState.value = AuthUiState.Error(
                     message = getErrorMessage(exception),
                     errorCode = "oauth_failed"
                 )
@@ -258,4 +278,91 @@ class AuthViewModel @Inject constructor(
             else -> exception?.message ?: "An error occurred. Please try again."
         }
     }
+
+    /**
+     * Story E10.6 Task 8: Auto-link device after successful authentication
+     *
+     * AC E10.6.6: Registration flow integration
+     * - Auto-link current device if not linked
+     * - Show link prompt if auto-link fails
+     * - Allow user to skip linking
+     *
+     * @param userId The authenticated user's ID
+     */
+    private fun autoLinkCurrentDevice(userId: String) {
+        val accessToken = secureStorage.getAccessToken() ?: return
+        val deviceId = secureStorage.getDeviceId()
+
+        _deviceLinkState.value = DeviceLinkState.Linking
+
+        viewModelScope.launch {
+            val result = deviceApiService.linkDevice(
+                userId = userId,
+                deviceId = deviceId,
+                displayName = null, // Will use device's current name
+                isPrimary = false,
+                accessToken = accessToken,
+            )
+
+            _deviceLinkState.value = result.fold(
+                onSuccess = {
+                    Timber.i("Device auto-linked successfully: $deviceId")
+                    DeviceLinkState.Linked
+                },
+                onFailure = { exception ->
+                    val message = exception.message ?: ""
+                    when {
+                        message.contains("409") || message.contains("conflict", ignoreCase = true) -> {
+                            // Device already linked to this or another user
+                            Timber.i("Device already linked: $deviceId")
+                            DeviceLinkState.AlreadyLinked
+                        }
+                        else -> {
+                            Timber.e(exception, "Failed to auto-link device")
+                            DeviceLinkState.Failed(
+                                message = "Could not link device. You can try again from Settings."
+                            )
+                        }
+                    }
+                },
+            )
+        }
+    }
+
+    /**
+     * Dismiss the device link prompt
+     */
+    fun dismissDeviceLinkPrompt() {
+        _deviceLinkState.value = DeviceLinkState.Skipped
+    }
+
+    /**
+     * Clear device link state
+     */
+    fun clearDeviceLinkState() {
+        _deviceLinkState.value = DeviceLinkState.Idle
+    }
+}
+
+/**
+ * Story E10.6: Device linking state for post-authentication flow
+ */
+sealed interface DeviceLinkState {
+    /** No linking operation in progress */
+    data object Idle : DeviceLinkState
+
+    /** Currently attempting to link device */
+    data object Linking : DeviceLinkState
+
+    /** Device successfully linked */
+    data object Linked : DeviceLinkState
+
+    /** Device was already linked (to this user or another) */
+    data object AlreadyLinked : DeviceLinkState
+
+    /** User chose to skip linking */
+    data object Skipped : DeviceLinkState
+
+    /** Failed to link device */
+    data class Failed(val message: String) : DeviceLinkState
 }
