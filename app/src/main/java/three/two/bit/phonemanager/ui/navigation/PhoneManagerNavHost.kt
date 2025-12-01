@@ -48,6 +48,10 @@ import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.weather.WeatherScreen
 import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
 import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
+import three.two.bit.phonemanager.ui.enrollment.EnrollmentQRScannerScreen
+import three.two.bit.phonemanager.ui.enrollment.EnrollmentScreen
+import three.two.bit.phonemanager.ui.enrollment.EnrollmentSuccessScreen
+import three.two.bit.phonemanager.ui.enrollment.SetupScreen
 
 sealed class Screen(val route: String) {
     // Story E9.11: Authentication screens
@@ -120,6 +124,14 @@ sealed class Screen(val route: String) {
     object UnlockRequests : Screen("unlock_requests/{deviceId}") {
         fun createRoute(deviceId: String) = "unlock_requests/$deviceId"
     }
+
+    // Story E13.10: Enterprise Enrollment screens
+    object Setup : Screen("setup")
+    object Enrollment : Screen("enrollment?token={token}") {
+        fun createRoute(token: String? = null) = if (token != null) "enrollment?token=$token" else "enrollment"
+    }
+    object EnrollmentQRScanner : Screen("enrollment_qr_scanner")
+    object EnrollmentSuccess : Screen("enrollment_success")
 }
 
 /**
@@ -154,6 +166,9 @@ fun PhoneManagerNavHost(
     // Story E11.9: Deep link invite code support (AC E11.9.8)
     pendingInviteCode: String? = null,
     onInviteCodeConsumed: () -> Unit = {},
+    // Story E13.10: Deep link enrollment token support (AC E13.10.3)
+    pendingEnrollmentToken: String? = null,
+    onEnrollmentTokenConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
 
@@ -189,6 +204,18 @@ fun PhoneManagerNavHost(
                 launchSingleTop = true
             }
             onInviteCodeConsumed()
+        }
+    }
+
+    // Story E13.10: Handle deep link enrollment token navigation (AC E13.10.3)
+    LaunchedEffect(pendingEnrollmentToken) {
+        if (pendingEnrollmentToken != null) {
+            // Wait for NavHost to be ready
+            delay(100)
+            navController.navigate(Screen.Enrollment.createRoute(pendingEnrollmentToken)) {
+                launchSingleTop = true
+            }
+            onEnrollmentTokenConsumed()
         }
     }
 
@@ -604,6 +631,75 @@ fun PhoneManagerNavHost(
         ) {
             UnlockRequestsScreen(
                 onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        // Story E13.10: Enterprise Enrollment screens (AC E13.10.1-E13.10.9)
+        composable(Screen.Setup.route) {
+            SetupScreen(
+                onPersonalSetup = {
+                    // Navigate to registration or home for personal setup
+                    navController.navigate(Screen.Registration.route) {
+                        popUpTo(Screen.Setup.route) { inclusive = true }
+                    }
+                },
+                onEnterpriseSetup = {
+                    // Navigate to enrollment screen
+                    navController.navigate(Screen.Enrollment.createRoute())
+                },
+                onScanQrCode = {
+                    // Navigate to QR scanner for quick enrollment
+                    navController.navigate(Screen.EnrollmentQRScanner.route)
+                },
+            )
+        }
+
+        composable(
+            route = Screen.Enrollment.route,
+            arguments = listOf(
+                navArgument("token") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            ),
+        ) { backStackEntry ->
+            val token = backStackEntry.arguments?.getString("token")
+            EnrollmentScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onEnrollmentSuccess = {
+                    navController.navigate(Screen.EnrollmentSuccess.route) {
+                        popUpTo(Screen.Enrollment.route) { inclusive = true }
+                    }
+                },
+                onNavigateToQRScanner = {
+                    navController.navigate(Screen.EnrollmentQRScanner.route)
+                },
+                initialToken = token,
+            )
+        }
+
+        composable(Screen.EnrollmentQRScanner.route) {
+            EnrollmentQRScannerScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onCodeScanned = { scannedToken ->
+                    // Pop back to enrollment screen with the scanned token
+                    navController.popBackStack()
+                    navController.navigate(Screen.Enrollment.createRoute(scannedToken)) {
+                        launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        composable(Screen.EnrollmentSuccess.route) {
+            EnrollmentSuccessScreen(
+                onGetStarted = {
+                    // Navigate to home after successful enrollment
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.EnrollmentSuccess.route) { inclusive = true }
+                    }
+                },
             )
         }
     }

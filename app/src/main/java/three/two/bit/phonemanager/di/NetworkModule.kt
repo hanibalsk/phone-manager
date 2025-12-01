@@ -37,6 +37,8 @@ import three.two.bit.phonemanager.network.WebhookApiService
 import three.two.bit.phonemanager.network.WebhookApiServiceImpl
 import three.two.bit.phonemanager.network.GroupApiService
 import three.two.bit.phonemanager.network.GroupApiServiceImpl
+import three.two.bit.phonemanager.network.EnrollmentApiService
+import three.two.bit.phonemanager.network.EnrollmentApiServiceImpl
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import java.util.UUID
@@ -187,4 +189,12 @@ object NetworkModule {
     @Singleton
     fun provideGroupApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): GroupApiService =
         GroupApiServiceImpl(httpClient, apiConfig)
+
+    /**
+     * Story E13.10: Enrollment API Service
+     */
+    @Provides
+    @Singleton
+    fun provideEnrollmentApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): EnrollmentApiService =
+        EnrollmentApiServiceImpl(httpClient, apiConfig)
 }

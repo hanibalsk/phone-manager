@@ -55,6 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.DeviceSettings
+import three.two.bit.phonemanager.domain.model.EnrollmentStatus
 import three.two.bit.phonemanager.domain.model.SettingDefinition
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
 import three.two.bit.phonemanager.ui.unlock.RequestUnlockDialog
@@ -114,6 +115,13 @@ fun SettingsScreen(
     val serverSettings by viewModel.serverSettings.collectAsStateWithLifecycle()
     val managedStatus by viewModel.managedStatus.collectAsStateWithLifecycle()
     val lockDialogState by viewModel.lockDialogState.collectAsStateWithLifecycle()
+
+    // Story E13.10: Enterprise enrollment state (AC E13.10.8)
+    val enrollmentStatus by viewModel.enrollmentStatus.collectAsStateWithLifecycle()
+    val organizationInfo by viewModel.organizationInfo.collectAsStateWithLifecycle()
+    val enrollmentDevicePolicy by viewModel.enrollmentDevicePolicy.collectAsStateWithLifecycle()
+    val isEnrollmentLoading by viewModel.isEnrollmentLoading.collectAsStateWithLifecycle()
+    val showUnenrollDialog by viewModel.showUnenrollDialog.collectAsStateWithLifecycle()
 
     // Story E12.8: Unlock request dialog state (AC E12.8.1, E12.8.2)
     var showUnlockRequestDialog by remember { mutableStateOf(false) }
@@ -203,6 +211,16 @@ fun SettingsScreen(
                     lastSyncTime = managedStatus.lastSyncedAt?.toString()?.take(10),
                     isSyncing = syncStatus == SettingsSyncStatus.SYNCING,
                     onSyncClick = viewModel::syncSettings,
+                )
+            }
+
+            // Story E13.10: Enterprise enrollment status card (AC E13.10.8)
+            if (enrollmentStatus == EnrollmentStatus.ENROLLED && organizationInfo != null) {
+                EnrollmentStatusCard(
+                    organizationInfo = organizationInfo!!,
+                    lockedSettingsCount = enrollmentDevicePolicy?.lockedCount() ?: 0,
+                    isUnenrolling = isEnrollmentLoading,
+                    onUnenrollClick = viewModel::showUnenrollConfirmation,
                 )
             }
 
@@ -701,6 +719,22 @@ fun SettingsScreen(
                 else -> null
             },
             remainingCharacters = 200 - unlockRequestReason.length,
+        )
+    }
+
+    // Story E13.10: Unenroll confirmation dialog (AC E13.10.9)
+    if (showUnenrollDialog && organizationInfo != null) {
+        UnenrollConfirmationDialog(
+            organizationName = organizationInfo!!.name,
+            onConfirm = {
+                viewModel.unenrollDevice(
+                    onSuccess = {
+                        viewModel.dismissUnenrollDialog()
+                    },
+                    onError = { /* Error shown via snackbar */ },
+                )
+            },
+            onDismiss = viewModel::dismissUnenrollDialog,
         )
     }
 }

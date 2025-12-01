@@ -60,6 +60,16 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
         private const val KEY_ACCESS_TOKEN = "access_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
         private const val KEY_TOKEN_EXPIRY_TIME = "token_expiry_time"
+
+        // E13.10: Enrollment Storage Keys
+        private const val KEY_ENROLLMENT_STATUS = "enrollment_status"
+        private const val KEY_ORG_ID = "org_id"
+        private const val KEY_ORG_NAME = "org_name"
+        private const val KEY_ORG_CONTACT_EMAIL = "org_contact_email"
+        private const val KEY_ORG_SUPPORT_PHONE = "org_support_phone"
+        private const val KEY_POLICY_SETTINGS = "policy_settings"
+        private const val KEY_POLICY_LOCKS = "policy_locks"
+        private const val KEY_POLICY_GROUP_ID = "policy_group_id"
     }
 
     /**
@@ -236,5 +246,196 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
     fun clear() {
         encryptedPrefs.edit().clear().apply()
         Timber.d("Secure storage cleared")
+    }
+
+    // ========================================================================
+    // E13.10: Enrollment Management
+    // ========================================================================
+
+    /**
+     * Get enrollment status
+     */
+    fun getEnrollmentStatus(): three.two.bit.phonemanager.domain.model.EnrollmentStatus {
+        val statusName = encryptedPrefs.getString(KEY_ENROLLMENT_STATUS, null)
+        return if (statusName != null) {
+            try {
+                three.two.bit.phonemanager.domain.model.EnrollmentStatus.valueOf(statusName)
+            } catch (_: Exception) {
+                three.two.bit.phonemanager.domain.model.EnrollmentStatus.NOT_ENROLLED
+            }
+        } else {
+            three.two.bit.phonemanager.domain.model.EnrollmentStatus.NOT_ENROLLED
+        }
+    }
+
+    /**
+     * Save enrollment status
+     */
+    fun saveEnrollmentStatus(status: three.two.bit.phonemanager.domain.model.EnrollmentStatus) {
+        encryptedPrefs.edit()
+            .putString(KEY_ENROLLMENT_STATUS, status.name)
+            .apply()
+        Timber.d("Enrollment status saved: ${status.name}")
+    }
+
+    /**
+     * Get organization info
+     */
+    fun getOrganizationInfo(): three.two.bit.phonemanager.domain.model.OrganizationInfo? {
+        val orgId = encryptedPrefs.getString(KEY_ORG_ID, null) ?: return null
+        val orgName = encryptedPrefs.getString(KEY_ORG_NAME, null) ?: return null
+        return three.two.bit.phonemanager.domain.model.OrganizationInfo(
+            id = orgId,
+            name = orgName,
+            contactEmail = encryptedPrefs.getString(KEY_ORG_CONTACT_EMAIL, null),
+            supportPhone = encryptedPrefs.getString(KEY_ORG_SUPPORT_PHONE, null),
+        )
+    }
+
+    /**
+     * Save organization info
+     */
+    fun saveOrganizationInfo(org: three.two.bit.phonemanager.domain.model.OrganizationInfo) {
+        encryptedPrefs.edit()
+            .putString(KEY_ORG_ID, org.id)
+            .putString(KEY_ORG_NAME, org.name)
+            .putString(KEY_ORG_CONTACT_EMAIL, org.contactEmail)
+            .putString(KEY_ORG_SUPPORT_PHONE, org.supportPhone)
+            .apply()
+        saveEnrollmentStatus(three.two.bit.phonemanager.domain.model.EnrollmentStatus.ENROLLED)
+        Timber.d("Organization info saved: ${org.name}")
+    }
+
+    /**
+     * Get device policy
+     */
+    fun getDevicePolicy(): three.two.bit.phonemanager.domain.model.DevicePolicy? {
+        val settingsJson = encryptedPrefs.getString(KEY_POLICY_SETTINGS, null) ?: return null
+        val locksJson = encryptedPrefs.getString(KEY_POLICY_LOCKS, null) ?: "[]"
+        val groupId = encryptedPrefs.getString(KEY_POLICY_GROUP_ID, null)
+
+        return try {
+            val settings = parseSettingsJson(settingsJson)
+            val locks = parseLocksJson(locksJson)
+            three.two.bit.phonemanager.domain.model.DevicePolicy(
+                settings = settings,
+                locks = locks,
+                groupId = groupId,
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to parse device policy")
+            null
+        }
+    }
+
+    /**
+     * Save device policy
+     */
+    fun saveDevicePolicy(policy: three.two.bit.phonemanager.domain.model.DevicePolicy) {
+        val settingsJson = serializeSettingsToJson(policy.settings)
+        val locksJson = serializeLocksToJson(policy.locks)
+
+        encryptedPrefs.edit()
+            .putString(KEY_POLICY_SETTINGS, settingsJson)
+            .putString(KEY_POLICY_LOCKS, locksJson)
+            .putString(KEY_POLICY_GROUP_ID, policy.groupId)
+            .apply()
+        Timber.d("Device policy saved: ${policy.settings.size} settings, ${policy.locks.size} locks")
+    }
+
+    /**
+     * Clear enrollment data
+     */
+    fun clearEnrollmentData() {
+        encryptedPrefs.edit()
+            .remove(KEY_ENROLLMENT_STATUS)
+            .remove(KEY_ORG_ID)
+            .remove(KEY_ORG_NAME)
+            .remove(KEY_ORG_CONTACT_EMAIL)
+            .remove(KEY_ORG_SUPPORT_PHONE)
+            .remove(KEY_POLICY_SETTINGS)
+            .remove(KEY_POLICY_LOCKS)
+            .remove(KEY_POLICY_GROUP_ID)
+            .apply()
+        Timber.d("Enrollment data cleared")
+    }
+
+    /**
+     * Check if device is enrolled
+     */
+    fun isEnrolled(): Boolean {
+        return getEnrollmentStatus() == three.two.bit.phonemanager.domain.model.EnrollmentStatus.ENROLLED
+    }
+
+    /**
+     * Serialize settings map to JSON string
+     */
+    private fun serializeSettingsToJson(settings: Map<String, Any>): String {
+        return buildString {
+            append("{")
+            settings.entries.forEachIndexed { index, (key, value) ->
+                if (index > 0) append(",")
+                append("\"$key\":")
+                when (value) {
+                    is String -> append("\"$value\"")
+                    is Boolean -> append(value)
+                    is Number -> append(value)
+                    else -> append("\"$value\"")
+                }
+            }
+            append("}")
+        }
+    }
+
+    /**
+     * Serialize locks list to JSON string
+     */
+    private fun serializeLocksToJson(locks: List<String>): String {
+        return "[${locks.joinToString(",") { "\"$it\"" }}]"
+    }
+
+    /**
+     * Parse settings JSON string to map
+     */
+    private fun parseSettingsJson(json: String): Map<String, Any> {
+        if (json == "{}") return emptyMap()
+
+        val result = mutableMapOf<String, Any>()
+        val content = json.trim().removePrefix("{").removeSuffix("}")
+        if (content.isBlank()) return result
+
+        // Simple JSON parser for basic types
+        val regex = "\"([^\"]+)\":(?:\"([^\"]*)\"|([^,}]+))".toRegex()
+        regex.findAll(content).forEach { match ->
+            val key = match.groupValues[1]
+            val stringValue = match.groupValues[2]
+            val otherValue = match.groupValues[3].trim()
+
+            val value: Any = when {
+                stringValue.isNotEmpty() -> stringValue
+                otherValue == "true" -> true
+                otherValue == "false" -> false
+                otherValue.toIntOrNull() != null -> otherValue.toInt()
+                otherValue.toLongOrNull() != null -> otherValue.toLong()
+                otherValue.toDoubleOrNull() != null -> otherValue.toDouble()
+                else -> otherValue
+            }
+            result[key] = value
+        }
+        return result
+    }
+
+    /**
+     * Parse locks JSON string to list
+     */
+    private fun parseLocksJson(json: String): List<String> {
+        if (json == "[]") return emptyList()
+
+        val content = json.trim().removePrefix("[").removeSuffix("]")
+        if (content.isBlank()) return emptyList()
+
+        return content.split(",")
+            .map { it.trim().removeSurrounding("\"") }
+            .filter { it.isNotBlank() }
     }
 }

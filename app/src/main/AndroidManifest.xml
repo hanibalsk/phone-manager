@@ -71,6 +71,17 @@
                     android:scheme="phonemanager"
                     android:host="join" />
             </intent-filter>
+
+            <!-- Story E13.10: Deep link handling for enterprise enrollment (AC E13.10.3) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Custom scheme: phonemanager://enroll/{token} -->
+                <data
+                    android:scheme="phonemanager"
+                    android:host="enroll" />
+            </intent-filter>
         </activity>
 
         <!-- LocationTrackingService -->

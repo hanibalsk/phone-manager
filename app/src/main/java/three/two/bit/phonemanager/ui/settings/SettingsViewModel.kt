@@ -14,14 +14,19 @@ import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
+import three.two.bit.phonemanager.data.repository.EnrollmentRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
 import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.domain.model.DeviceSettings
 import three.two.bit.phonemanager.domain.model.ManagedDeviceStatus
+import three.two.bit.phonemanager.domain.model.DevicePolicy
+import three.two.bit.phonemanager.domain.model.EnrollmentStatus
+import three.two.bit.phonemanager.domain.model.OrganizationInfo
 import three.two.bit.phonemanager.domain.model.SettingLock
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
 import three.two.bit.phonemanager.permission.PermissionManager
+import timber.log.Timber
 import javax.inject.Inject
 
 /**
@@ -45,6 +50,7 @@ constructor(
     private val authRepository: AuthRepository,
     private val settingsSyncRepository: SettingsSyncRepository,
     private val unlockRequestRepository: UnlockRequestRepository,
+    private val enrollmentRepository: EnrollmentRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -61,6 +67,16 @@ constructor(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = ManagedDeviceStatus(isManaged = false),
             )
+
+    // Story E13.10: Enterprise enrollment state (AC E13.10.8)
+    val enrollmentStatus: StateFlow<EnrollmentStatus> = enrollmentRepository.enrollmentStatus
+    val organizationInfo: StateFlow<OrganizationInfo?> = enrollmentRepository.organizationInfo
+    val enrollmentDevicePolicy: StateFlow<DevicePolicy?> = enrollmentRepository.devicePolicy
+    val isEnrollmentLoading: StateFlow<Boolean> = enrollmentRepository.isLoading
+    val enrollmentError: StateFlow<String?> = enrollmentRepository.error
+
+    private val _showUnenrollDialog = MutableStateFlow(false)
+    val showUnenrollDialog: StateFlow<Boolean> = _showUnenrollDialog.asStateFlow()
 
     private val _lockDialogState = MutableStateFlow<LockDialogState?>(null)
     val lockDialogState: StateFlow<LockDialogState?> = _lockDialogState.asStateFlow()
@@ -533,6 +549,56 @@ constructor(
         viewModelScope.launch {
             authRepository.logout()
         }
+    }
+
+    // Story E13.10: Enterprise enrollment methods (AC E13.10.8, E13.10.9)
+
+    /**
+     * Check if device is enrolled in enterprise.
+     * AC E13.10.8: Managed device indicator.
+     */
+    fun isEnrolled(): Boolean = enrollmentRepository.isEnrolled()
+
+    /**
+     * Show unenroll confirmation dialog.
+     */
+    fun showUnenrollConfirmation() {
+        _showUnenrollDialog.value = true
+    }
+
+    /**
+     * Dismiss unenroll confirmation dialog.
+     */
+    fun dismissUnenrollDialog() {
+        _showUnenrollDialog.value = false
+    }
+
+    /**
+     * Unenroll device from organization.
+     * AC E13.10.9: Call POST /devices/{id}/unenroll.
+     */
+    fun unenrollDevice(onSuccess: () -> Unit = {}, onError: (String) -> Unit = {}) {
+        viewModelScope.launch {
+            _showUnenrollDialog.value = false
+            val result = enrollmentRepository.unenrollDevice()
+            result.fold(
+                onSuccess = {
+                    Timber.i("Device unenrolled successfully")
+                    onSuccess()
+                },
+                onFailure = { e ->
+                    Timber.e(e, "Failed to unenroll device")
+                    onError(e.message ?: "Unenrollment failed")
+                },
+            )
+        }
+    }
+
+    /**
+     * Clear enrollment error.
+     */
+    fun clearEnrollmentError() {
+        enrollmentRepository.clearError()
     }
 
     // Story E12.6: Settings lock and sync methods (AC E12.6.1-E12.6.8)

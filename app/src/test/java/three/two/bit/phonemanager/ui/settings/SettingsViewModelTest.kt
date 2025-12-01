@@ -17,10 +17,14 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
+import three.two.bit.phonemanager.data.repository.EnrollmentRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
+import three.two.bit.phonemanager.domain.model.DevicePolicy
 import three.two.bit.phonemanager.domain.model.DeviceSettings
+import three.two.bit.phonemanager.domain.model.EnrollmentStatus
 import three.two.bit.phonemanager.domain.model.ManagedDeviceStatus
+import three.two.bit.phonemanager.domain.model.OrganizationInfo
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
 import three.two.bit.phonemanager.permission.PermissionManager
 import kotlin.test.assertEquals
@@ -36,12 +40,18 @@ class SettingsViewModelTest {
     private lateinit var authRepository: AuthRepository
     private lateinit var settingsSyncRepository: SettingsSyncRepository
     private lateinit var unlockRequestRepository: UnlockRequestRepository
+    private lateinit var enrollmentRepository: EnrollmentRepository
     private lateinit var viewModel: SettingsViewModel
 
     private val testDispatcher = StandardTestDispatcher()
     private val syncStatusFlow = MutableStateFlow(SettingsSyncStatus.SYNCED)
     private val serverSettingsFlow = MutableStateFlow<DeviceSettings?>(null)
     private val managedStatusFlow = MutableStateFlow(ManagedDeviceStatus(isManaged = false))
+    private val enrollmentStatusFlow = MutableStateFlow(EnrollmentStatus.NOT_ENROLLED)
+    private val organizationInfoFlow = MutableStateFlow<OrganizationInfo?>(null)
+    private val devicePolicyFlow = MutableStateFlow<DevicePolicy?>(null)
+    private val enrollmentLoadingFlow = MutableStateFlow(false)
+    private val enrollmentErrorFlow = MutableStateFlow<String?>(null)
 
     @Before
     fun setup() {
@@ -52,6 +62,7 @@ class SettingsViewModelTest {
         authRepository = mockk(relaxed = true)
         settingsSyncRepository = mockk(relaxed = true)
         unlockRequestRepository = mockk(relaxed = true)
+        enrollmentRepository = mockk(relaxed = true)
         coEvery { deviceRepository.getDeviceId() } returns "test-device-id"
         every { preferencesRepository.mapPollingIntervalSeconds } returns flowOf(15)
         // Mock AuthRepository.currentUser Flow to prevent ClassCastException
@@ -60,6 +71,12 @@ class SettingsViewModelTest {
         every { settingsSyncRepository.syncStatus } returns syncStatusFlow
         every { settingsSyncRepository.serverSettings } returns serverSettingsFlow
         every { settingsSyncRepository.managedStatus } returns managedStatusFlow
+        // Mock EnrollmentRepository flows
+        every { enrollmentRepository.enrollmentStatus } returns enrollmentStatusFlow
+        every { enrollmentRepository.organizationInfo } returns organizationInfoFlow
+        every { enrollmentRepository.devicePolicy } returns devicePolicyFlow
+        every { enrollmentRepository.isLoading } returns enrollmentLoadingFlow
+        every { enrollmentRepository.error } returns enrollmentErrorFlow
     }
 
     @Test
@@ -69,7 +86,7 @@ class SettingsViewModelTest {
         coEvery { deviceRepository.getGroupId() } returns "test-group"
 
         // When
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -87,7 +104,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Original"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -106,7 +123,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "original-group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -125,7 +142,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onDisplayNameChanged("")
@@ -148,7 +165,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onGroupIdChanged("")
@@ -178,7 +195,7 @@ class SettingsViewModelTest {
             )
         } returns Result.success(Unit)
 
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onDisplayNameChanged("Updated Device")
@@ -214,7 +231,7 @@ class SettingsViewModelTest {
             deviceRepository.registerDevice(any(), any())
         } returns Result.failure(Exception("Network error"))
 
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onDisplayNameChanged("New Name")
@@ -237,7 +254,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - change and revert
@@ -256,7 +273,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -276,7 +293,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -296,7 +313,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -316,7 +333,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -336,7 +353,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -356,7 +373,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -378,7 +395,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "original-group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onGroupIdChanged("new-group")
@@ -404,7 +421,7 @@ class SettingsViewModelTest {
             deviceRepository.registerDevice(any(), any())
         } returns Result.success(Unit)
 
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onGroupIdChanged("new-group")
@@ -435,7 +452,7 @@ class SettingsViewModelTest {
         // Given
         coEvery { deviceRepository.getDisplayName() } returns "Device"
         coEvery { deviceRepository.getGroupId() } returns "original-group"
-        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository)
+        viewModel = SettingsViewModel(deviceRepository, preferencesRepository, permissionManager, authRepository, settingsSyncRepository, unlockRequestRepository, enrollmentRepository)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.onGroupIdChanged("new-group")

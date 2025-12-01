@@ -28,6 +28,7 @@ import javax.inject.Inject
  * MainActivity - Main entry point with Hilt integration and permission handling
  *
  * Story E11.9: Added deep link support for group invites (AC E11.9.8)
+ * Story E13.10: Added deep link support for enterprise enrollment (AC E13.10.3)
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -42,6 +43,9 @@ class MainActivity : ComponentActivity() {
 
     // Story E11.9: State for invite code from deep link (AC E11.9.8)
     private var pendingInviteCode by mutableStateOf<String?>(null)
+
+    // Story E13.10: State for enrollment token from deep link (AC E13.10.3)
+    private var pendingEnrollmentToken by mutableStateOf<String?>(null)
 
     // Permission launchers - must be registered before onCreate
     private val locationPermissionLauncher = registerForActivityResult(
@@ -104,6 +108,9 @@ class MainActivity : ComponentActivity() {
                         // Story E11.9: Pass invite code from deep link (AC E11.9.8)
                         pendingInviteCode = pendingInviteCode,
                         onInviteCodeConsumed = { pendingInviteCode = null },
+                        // Story E13.10: Pass enrollment token from deep link (AC E13.10.3)
+                        pendingEnrollmentToken = pendingEnrollmentToken,
+                        onEnrollmentTokenConsumed = { pendingEnrollmentToken = null },
                     )
                 }
             }
@@ -128,18 +135,39 @@ class MainActivity : ComponentActivity() {
 
     /**
      * Story E11.9: Extract invite code from deep link URI (AC E11.9.8)
+     * Story E13.10: Extract enrollment token from deep link URI (AC E13.10.3)
      *
-     * Handles deep links in the format: phonemanager://join/{code}
+     * Handles deep links in the format:
+     * - phonemanager://join/{code}
+     * - phonemanager://enroll/{token}
      */
     private fun handleDeepLinkIntent(intent: Intent?) {
         val uri = intent?.data
-        if (uri != null && uri.scheme == DEEP_LINK_SCHEME && uri.host == DEEP_LINK_HOST_JOIN) {
-            val code = uri.pathSegments.firstOrNull()
-            if (code != null && code.length == 8 && code.all { it.isLetterOrDigit() }) {
-                Timber.i("Deep link invite code received: $code")
-                pendingInviteCode = code.uppercase()
-            } else {
-                Timber.w("Invalid invite code in deep link: $code")
+        if (uri != null && uri.scheme == DEEP_LINK_SCHEME) {
+            when (uri.host) {
+                DEEP_LINK_HOST_JOIN -> {
+                    // Story E11.9: Handle invite code
+                    val code = uri.pathSegments.firstOrNull()
+                    if (code != null && code.length == 8 && code.all { it.isLetterOrDigit() }) {
+                        Timber.i("Deep link invite code received: $code")
+                        pendingInviteCode = code.uppercase()
+                    } else {
+                        Timber.w("Invalid invite code in deep link: $code")
+                    }
+                }
+                DEEP_LINK_HOST_ENROLL -> {
+                    // Story E13.10: Handle enrollment token
+                    val token = uri.pathSegments.firstOrNull()
+                    if (token != null && token.length >= 6) {
+                        Timber.i("Deep link enrollment token received: $token")
+                        pendingEnrollmentToken = token
+                    } else {
+                        Timber.w("Invalid enrollment token in deep link: $token")
+                    }
+                }
+                else -> {
+                    Timber.w("Unknown deep link host: ${uri.host}")
+                }
             }
         }
     }
@@ -152,6 +180,9 @@ class MainActivity : ComponentActivity() {
         // Story E11.9: Deep link constants for invite codes (AC E11.9.8)
         const val DEEP_LINK_SCHEME = "phonemanager"
         const val DEEP_LINK_HOST_JOIN = "join"
+
+        // Story E13.10: Deep link constants for enterprise enrollment (AC E13.10.3)
+        const val DEEP_LINK_HOST_ENROLL = "enroll"
     }
 
     override fun onResume() {
