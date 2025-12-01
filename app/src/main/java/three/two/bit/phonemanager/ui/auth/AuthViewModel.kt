@@ -1,0 +1,261 @@
+package three.two.bit.phonemanager.ui.auth
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import three.two.bit.phonemanager.data.repository.AuthRepository
+import timber.log.Timber
+import javax.inject.Inject
+
+/**
+ * Story E9.11, Task 7: Authentication ViewModel
+ *
+ * Handles authentication operations for Login and Register screens.
+ *
+ * AC E9.11.3: Email/password login
+ * AC E9.11.4: User registration
+ * AC E9.11.5: OAuth sign-in
+ * AC E9.11.6: User logout
+ * AC E9.11.7: Input validation and error handling
+ */
+@HiltViewModel
+class AuthViewModel @Inject constructor(
+    private val authRepository: AuthRepository
+) : ViewModel() {
+
+    private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
+    val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    // Form validation state
+    private val _emailError = MutableStateFlow<String?>(null)
+    val emailError: StateFlow<String?> = _emailError.asStateFlow()
+
+    private val _passwordError = MutableStateFlow<String?>(null)
+    val passwordError: StateFlow<String?> = _passwordError.asStateFlow()
+
+    private val _displayNameError = MutableStateFlow<String?>(null)
+    val displayNameError: StateFlow<String?> = _displayNameError.asStateFlow()
+
+    /**
+     * AC E9.11.3: Login with email and password
+     *
+     * @param email User email address
+     * @param password User password
+     */
+    fun login(email: String, password: String) {
+        // Clear previous errors
+        clearErrors()
+
+        // Validate input (AC E9.11.7)
+        if (!validateLoginInput(email, password)) {
+            return
+        }
+
+        _uiState.value = AuthUiState.Loading
+
+        viewModelScope.launch {
+            val result = authRepository.login(email, password)
+
+            _uiState.value = if (result.isSuccess) {
+                Timber.i("Login successful")
+                AuthUiState.Success(result.getOrThrow())
+            } else {
+                val exception = result.exceptionOrNull()
+                Timber.e(exception, "Login failed")
+                AuthUiState.Error(
+                    message = getErrorMessage(exception),
+                    errorCode = "login_failed"
+                )
+            }
+        }
+    }
+
+    /**
+     * AC E9.11.4: Register new user account
+     *
+     * @param email User email address
+     * @param password User password
+     * @param displayName User display name
+     */
+    fun register(email: String, password: String, displayName: String) {
+        // Clear previous errors
+        clearErrors()
+
+        // Validate input (AC E9.11.7)
+        if (!validateRegisterInput(email, password, displayName)) {
+            return
+        }
+
+        _uiState.value = AuthUiState.Loading
+
+        viewModelScope.launch {
+            val result = authRepository.register(email, password, displayName)
+
+            _uiState.value = if (result.isSuccess) {
+                Timber.i("Registration successful")
+                AuthUiState.Success(result.getOrThrow())
+            } else {
+                val exception = result.exceptionOrNull()
+                Timber.e(exception, "Registration failed")
+                AuthUiState.Error(
+                    message = getErrorMessage(exception),
+                    errorCode = "registration_failed"
+                )
+            }
+        }
+    }
+
+    /**
+     * AC E9.11.5: OAuth Sign-In
+     *
+     * @param provider OAuth provider (google, apple)
+     * @param idToken ID token from OAuth provider
+     */
+    fun oauthSignIn(provider: String, idToken: String) {
+        _uiState.value = AuthUiState.Loading
+
+        viewModelScope.launch {
+            val result = authRepository.oauthLogin(provider, idToken)
+
+            _uiState.value = if (result.isSuccess) {
+                Timber.i("OAuth sign-in successful: $provider")
+                AuthUiState.Success(result.getOrThrow())
+            } else {
+                val exception = result.exceptionOrNull()
+                Timber.e(exception, "OAuth sign-in failed: $provider")
+                AuthUiState.Error(
+                    message = getErrorMessage(exception),
+                    errorCode = "oauth_failed"
+                )
+            }
+        }
+    }
+
+    /**
+     * AC E9.11.6: Logout current user
+     */
+    fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+            _uiState.value = AuthUiState.Idle
+            Timber.i("User logged out")
+        }
+    }
+
+    /**
+     * Reset UI state to idle
+     */
+    fun resetState() {
+        _uiState.value = AuthUiState.Idle
+        clearErrors()
+    }
+
+    /**
+     * AC E9.11.7: Validate login input
+     *
+     * @return true if input is valid
+     */
+    private fun validateLoginInput(email: String, password: String): Boolean {
+        var isValid = true
+
+        if (!isValidEmail(email)) {
+            _emailError.value = "Please enter a valid email address"
+            isValid = false
+        }
+
+        if (password.isBlank()) {
+            _passwordError.value = "Password is required"
+            isValid = false
+        }
+
+        return isValid
+    }
+
+    /**
+     * AC E9.11.7: Validate registration input
+     *
+     * @return true if input is valid
+     */
+    private fun validateRegisterInput(
+        email: String,
+        password: String,
+        displayName: String
+    ): Boolean {
+        var isValid = true
+
+        if (!isValidEmail(email)) {
+            _emailError.value = "Please enter a valid email address"
+            isValid = false
+        }
+
+        if (displayName.isBlank() || displayName.length < 2) {
+            _displayNameError.value = "Display name must be at least 2 characters"
+            isValid = false
+        }
+
+        if (!isValidPassword(password)) {
+            _passwordError.value = "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character"
+            isValid = false
+        }
+
+        return isValid
+    }
+
+    /**
+     * Validate email format
+     *
+     * @param email Email address to validate
+     * @return true if email format is valid
+     */
+    private fun isValidEmail(email: String): Boolean {
+        return email.matches(Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"))
+    }
+
+    /**
+     * Validate password strength
+     *
+     * Requirements: Minimum 8 characters, 1 uppercase, 1 number, 1 special char
+     *
+     * @param password Password to validate
+     * @return true if password meets requirements
+     */
+    private fun isValidPassword(password: String): Boolean {
+        if (password.length < 8) return false
+        if (!password.any { it.isUpperCase() }) return false
+        if (!password.any { it.isDigit() }) return false
+        if (!password.any { !it.isLetterOrDigit() }) return false
+        return true
+    }
+
+    /**
+     * Clear all validation errors
+     */
+    private fun clearErrors() {
+        _emailError.value = null
+        _passwordError.value = null
+        _displayNameError.value = null
+    }
+
+    /**
+     * Convert exception to user-friendly error message
+     *
+     * @param exception Exception from repository
+     * @return User-friendly error message
+     */
+    private fun getErrorMessage(exception: Throwable?): String {
+        return when (exception?.message) {
+            "email_already_exists" -> "An account with this email already exists"
+            "invalid_credentials" -> "Invalid email or password"
+            "weak_password" -> "Password does not meet security requirements"
+            "account_locked" -> "Your account has been locked. Please contact support."
+            "account_disabled" -> "Your account has been disabled. Please contact support."
+            "network_error" -> "Unable to connect to server. Please check your internet connection."
+            "oauth_failed" -> "Sign-in with this provider failed. Please try again."
+            else -> exception?.message ?: "An error occurred. Please try again."
+        }
+    }
+}
