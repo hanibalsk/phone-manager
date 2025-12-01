@@ -44,6 +44,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import three.two.bit.phonemanager.auth.MockAuthHelper
 
 /**
  * Story E9.11, Task 11: Forgot Password Screen
@@ -87,7 +88,7 @@ fun ForgotPasswordScreen(
 
     /**
      * Send password reset email
-     * Note: Backend integration pending
+     * Uses mock implementation for development
      */
     fun sendResetEmail() {
         if (!validateEmail(email)) {
@@ -96,12 +97,16 @@ fun ForgotPasswordScreen(
 
         isLoading = true
 
-        // Simulate API call (replace with actual API call when backend is ready)
         coroutineScope.launch {
             try {
-                // TODO: Call password reset API endpoint
-                // authApiService.requestPasswordReset(email)
-                delay(1500) // Simulate network delay
+                // Use mock for development (replace with real API when backend is ready)
+                if (MockAuthHelper.USE_MOCK_AUTH) {
+                    MockAuthHelper.mockRequestPasswordReset(email)
+                } else {
+                    // TODO: Call real password reset API endpoint
+                    // authApiService.requestPasswordReset(email)
+                    delay(1500)
+                }
 
                 // Show success state
                 isSuccess = true
@@ -109,7 +114,7 @@ fun ForgotPasswordScreen(
             } catch (e: Exception) {
                 isLoading = false
                 snackbarHostState.showSnackbar(
-                    "Failed to send reset email. Please try again."
+                    e.message ?: "Failed to send reset email. Please try again."
                 )
             }
         }
