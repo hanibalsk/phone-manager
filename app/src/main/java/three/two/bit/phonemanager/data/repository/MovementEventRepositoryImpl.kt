@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import kotlinx.datetime.toJavaInstant
 import three.two.bit.phonemanager.data.database.MovementEventDao
 import three.two.bit.phonemanager.data.model.MovementEventEntity
 import three.two.bit.phonemanager.data.model.toDomain
@@ -15,7 +16,21 @@ import three.two.bit.phonemanager.domain.model.MovementContext
 import three.two.bit.phonemanager.domain.model.MovementEvent
 import three.two.bit.phonemanager.domain.model.SensorTelemetry
 import three.two.bit.phonemanager.movement.TransportationMode
+import three.two.bit.phonemanager.network.MovementEventApiService
+import three.two.bit.phonemanager.network.models.AccelerometerTelemetryDto
+import three.two.bit.phonemanager.network.models.ActivityRecognitionDto
+import three.two.bit.phonemanager.network.models.BatchMovementEventsRequest
+import three.two.bit.phonemanager.network.models.BatchMovementEventsResponse
+import three.two.bit.phonemanager.network.models.CreateMovementEventRequest
+import three.two.bit.phonemanager.network.models.DetectionSourceDetails
+import three.two.bit.phonemanager.network.models.GyroscopeTelemetryDto
+import three.two.bit.phonemanager.network.models.MovementEventDeviceStateDto
+import three.two.bit.phonemanager.network.models.MovementEventLocationDto
+import three.two.bit.phonemanager.network.models.MovementEventTelemetryDto
+import three.two.bit.phonemanager.network.models.MovementEventsListResponse
 import timber.log.Timber
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,8 +41,12 @@ import javax.inject.Singleton
  * AC E8.3.6: Complete MovementEventRepositoryImpl with entity mapping
  */
 @Singleton
-class MovementEventRepositoryImpl @Inject constructor(private val movementEventDao: MovementEventDao) :
-    MovementEventRepository {
+class MovementEventRepositoryImpl @Inject constructor(
+    private val movementEventDao: MovementEventDao,
+    private val movementEventApiService: MovementEventApiService,
+) : MovementEventRepository {
+
+    private val isoFormatter: DateTimeFormatter = DateTimeFormatter.ISO_INSTANT
 
     override suspend fun recordEvent(
         tripId: String?,
@@ -134,4 +153,104 @@ class MovementEventRepositoryImpl @Inject constructor(private val movementEventD
         movementEventDao.deleteOldEvents(before.toEpochMilliseconds())
 
     override suspend fun deleteEventsByTrip(tripId: String): Int = movementEventDao.deleteEventsByTrip(tripId)
+
+    // API Compatibility: Remote sync implementations
+
+    override suspend fun syncEvents(
+        events: List<MovementEvent>,
+        deviceId: String,
+    ): Result<BatchMovementEventsResponse> {
+        Timber.d("Syncing ${events.size} movement events to backend")
+
+        val requests = events.map { event -> event.toApiRequest(deviceId) }
+        val batchRequest = BatchMovementEventsRequest(events = requests)
+
+        return movementEventApiService.uploadEventsBatch(batchRequest).onSuccess { response ->
+            // Mark successfully synced events
+            if (response.processedCount > 0) {
+                val eventIds = events.take(response.processedCount).map { it.id }
+                markAsSynced(eventIds, Clock.System.now())
+                Timber.i("Synced ${response.processedCount} movement events")
+            }
+        }
+    }
+
+    override suspend fun fetchRemoteEvents(
+        deviceId: String,
+        from: String?,
+        to: String?,
+        limit: Int?,
+        offset: Int?,
+    ): Result<MovementEventsListResponse> = movementEventApiService.getDeviceEvents(
+        deviceId = deviceId,
+        from = from,
+        to = to,
+        limit = limit,
+        offset = offset,
+    )
+
+    /**
+     * Convert domain MovementEvent to API request DTO.
+     */
+    private fun MovementEvent.toApiRequest(deviceId: String): CreateMovementEventRequest {
+        return CreateMovementEventRequest(
+            eventId = UUID.randomUUID().toString(),
+            deviceId = deviceId,
+            timestamp = formatTimestamp(timestamp),
+            previousMode = previousMode.name,
+            newMode = newMode.name,
+            detectionSource = DetectionSourceDetails(
+                primary = detectionSource.name,
+                contributing = listOf(detectionSource.name),
+            ),
+            confidence = confidence,
+            detectionLatencyMs = detectionLatencyMs.toInt(),
+            location = location?.let {
+                MovementEventLocationDto(
+                    latitude = it.latitude,
+                    longitude = it.longitude,
+                    accuracy = it.accuracy,
+                    speed = it.speed,
+                )
+            },
+            deviceState = deviceState?.let {
+                MovementEventDeviceStateDto(
+                    batteryLevel = it.batteryLevel,
+                    batteryCharging = it.batteryCharging,
+                    networkType = it.networkType?.name,
+                    networkStrength = it.networkStrength,
+                )
+            },
+            telemetry = sensorTelemetry?.let {
+                MovementEventTelemetryDto(
+                    accelerometer = if (it.accelerometerMagnitude != null) {
+                        AccelerometerTelemetryDto(
+                            magnitude = it.accelerometerMagnitude,
+                            variance = it.accelerometerVariance,
+                            peakFrequency = it.accelerometerPeakFrequency,
+                        )
+                    } else {
+                        null
+                    },
+                    gyroscope = it.gyroscopeMagnitude?.let { mag ->
+                        GyroscopeTelemetryDto(magnitude = mag)
+                    },
+                    stepCount = it.stepCount,
+                    significantMotion = it.significantMotion,
+                    activityRecognition = if (it.activityType != null && it.activityConfidence != null) {
+                        ActivityRecognitionDto(
+                            type = it.activityType,
+                            confidence = it.activityConfidence,
+                        )
+                    } else {
+                        null
+                    },
+                )
+            },
+            tripId = tripId,
+        )
+    }
+
+    private fun formatTimestamp(instant: Instant): String =
+        isoFormatter.format(instant.toJavaInstant())
 }

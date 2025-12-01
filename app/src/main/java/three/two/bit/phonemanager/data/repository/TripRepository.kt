@@ -5,6 +5,9 @@ import kotlinx.datetime.Instant
 import three.two.bit.phonemanager.domain.model.TodayTripStats
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.movement.TransportationMode
+import three.two.bit.phonemanager.network.models.PathCorrectionResponse
+import three.two.bit.phonemanager.network.models.TripPathResponse
+import three.two.bit.phonemanager.network.models.TripsListResponse
 
 /**
  * Story E8.3: TripRepository - Repository interface for trip data
@@ -155,4 +158,50 @@ interface TripRepository {
      * @param tripId Trip ID to delete
      */
     suspend fun deleteTrip(tripId: String)
+
+    // API Compatibility: Remote sync methods
+
+    /**
+     * Sync a trip to the backend.
+     *
+     * @param trip Trip to sync
+     * @return Result containing the server-assigned trip ID
+     */
+    suspend fun syncTrip(trip: Trip): Result<String>
+
+    /**
+     * Fetch remote trips for a device.
+     *
+     * @param deviceId Device identifier
+     * @param status Optional status filter
+     * @param from Optional start timestamp (ISO 8601)
+     * @param to Optional end timestamp (ISO 8601)
+     * @param limit Max results
+     * @return Result containing trips list response
+     */
+    suspend fun fetchRemoteTrips(
+        deviceId: String,
+        status: String? = null,
+        from: String? = null,
+        to: String? = null,
+        limit: Int? = null,
+    ): Result<TripsListResponse>
+
+    /**
+     * Get the corrected path for a trip.
+     *
+     * @param tripId Trip ID (server ID)
+     * @return Result containing trip path response
+     */
+    suspend fun getTripPath(tripId: String): Result<TripPathResponse>
+
+    /**
+     * Trigger path correction for a trip.
+     *
+     * Note: Rate limited to 1 per hour per trip.
+     *
+     * @param tripId Trip ID (server ID)
+     * @return Result containing path correction response
+     */
+    suspend fun triggerPathCorrection(tripId: String): Result<PathCorrectionResponse>
 }

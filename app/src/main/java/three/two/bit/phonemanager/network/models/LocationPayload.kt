@@ -21,6 +21,10 @@ data class LocationPayload(
     val provider: String? = null,
     val batteryLevel: Int? = null,
     val networkType: String? = null,
+    // API Compatibility: New fields for movement tracking
+    val transportationMode: String? = null,
+    val detectionSource: String? = null,
+    val tripId: String? = null,
 )
 
 /**
@@ -37,8 +41,18 @@ data class LocationUploadResponse(val success: Boolean, val message: String? = n
 
 /**
  * Extension function to convert LocationEntity to LocationPayload
+ *
+ * @param deviceId Device identifier
+ * @param transportationMode Current transportation mode (optional)
+ * @param detectionSource How mode was detected (optional)
+ * @param tripId Associated trip ID (optional)
  */
-fun LocationEntity.toPayload(deviceId: String): LocationPayload = LocationPayload(
+fun LocationEntity.toPayload(
+    deviceId: String,
+    transportationMode: String? = null,
+    detectionSource: String? = null,
+    tripId: String? = null,
+): LocationPayload = LocationPayload(
     deviceId = deviceId,
     timestamp = timestamp,
     latitude = latitude,
@@ -50,4 +64,7 @@ fun LocationEntity.toPayload(deviceId: String): LocationPayload = LocationPayloa
     provider = provider,
     batteryLevel = null, // Will be populated by NetworkManager
     networkType = null, // Will be populated by NetworkManager
+    transportationMode = transportationMode,
+    detectionSource = detectionSource,
+    tripId = tripId,
 )

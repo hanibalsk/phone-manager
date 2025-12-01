@@ -48,6 +48,9 @@ data class ProximityAlertDto(
     val metadata: Map<String, String>? = null,
     val createdAt: String,
     val updatedAt: String,
+    // API Compatibility: Trigger state fields
+    val isTriggered: Boolean = false,
+    val lastTriggeredAt: String? = null,
 )
 
 /**

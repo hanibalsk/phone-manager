@@ -29,10 +29,15 @@ import three.two.bit.phonemanager.network.LocationApiService
 import three.two.bit.phonemanager.network.LocationApiServiceImpl
 import three.two.bit.phonemanager.network.ProximityAlertApiService
 import three.two.bit.phonemanager.network.ProximityAlertApiServiceImpl
+import three.two.bit.phonemanager.network.MovementEventApiService
+import three.two.bit.phonemanager.network.MovementEventApiServiceImpl
+import three.two.bit.phonemanager.network.TripApiService
+import three.two.bit.phonemanager.network.TripApiServiceImpl
 import three.two.bit.phonemanager.network.WebhookApiService
 import three.two.bit.phonemanager.network.WebhookApiServiceImpl
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
+import java.util.UUID
 import javax.inject.Singleton
 
 /**
@@ -74,6 +79,8 @@ object NetworkModule {
         // Default request configuration
         defaultRequest {
             contentType(ContentType.Application.Json)
+            // API Compatibility: Add X-Request-ID header for request tracing
+            headers.append("X-Request-ID", UUID.randomUUID().toString())
         }
 
         // Configure engine
@@ -154,4 +161,20 @@ object NetworkModule {
     @Singleton
     fun provideWebhookApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): WebhookApiService =
         WebhookApiServiceImpl(httpClient, apiConfig)
+
+    /**
+     * API Compatibility: Trip API Service
+     */
+    @Provides
+    @Singleton
+    fun provideTripApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): TripApiService =
+        TripApiServiceImpl(httpClient, apiConfig)
+
+    /**
+     * API Compatibility: Movement Event API Service
+     */
+    @Provides
+    @Singleton
+    fun provideMovementEventApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): MovementEventApiService =
+        MovementEventApiServiceImpl(httpClient, apiConfig)
 }

@@ -100,3 +100,17 @@ fun DeviceDto.toDomain(): Device = Device(
     },
     lastSeenAt = lastSeenAt?.let { Instant.parse(it) },
 )
+
+// API Compatibility: GDPR Data Export/Delete
+
+/**
+ * GDPR data export response
+ * GET /api/v1/devices/{deviceId}/data-export
+ */
+@Serializable
+data class DataExportResponse(
+    val deviceId: String,
+    val exportUrl: String,
+    val expiresAt: String,
+    val format: String = "json",
+)

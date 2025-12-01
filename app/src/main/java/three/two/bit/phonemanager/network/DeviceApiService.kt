@@ -2,6 +2,7 @@ package three.two.bit.phonemanager.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -10,6 +11,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import three.two.bit.phonemanager.domain.model.Device
+import three.two.bit.phonemanager.network.models.DataExportResponse
 import three.two.bit.phonemanager.network.models.DeviceRegistrationRequest
 import three.two.bit.phonemanager.network.models.DeviceRegistrationResponse
 import three.two.bit.phonemanager.network.models.DevicesResponse
@@ -44,6 +46,26 @@ interface DeviceApiService {
         order: String? = null,
         tolerance: Float? = null,
     ): Result<LocationHistoryResponse>
+
+    /**
+     * Delete a device
+     * DELETE /api/v1/devices/{deviceId}
+     */
+    suspend fun deleteDevice(deviceId: String): Result<Unit>
+
+    // API Compatibility: GDPR Data Export/Delete
+
+    /**
+     * Export device data for GDPR compliance
+     * GET /api/v1/devices/{deviceId}/data-export
+     */
+    suspend fun exportDeviceData(deviceId: String): Result<DataExportResponse>
+
+    /**
+     * Delete all device data for GDPR compliance
+     * DELETE /api/v1/devices/{deviceId}/data
+     */
+    suspend fun deleteDeviceData(deviceId: String): Result<Unit>
 }
 
 @Singleton
@@ -130,6 +152,64 @@ class DeviceApiServiceImpl @Inject constructor(
         Result.success(response)
     } catch (e: Exception) {
         Timber.e(e, "Failed to fetch location history for deviceId=$deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Delete a device
+     * DELETE /api/v1/devices/{deviceId}
+     */
+    override suspend fun deleteDevice(deviceId: String): Result<Unit> = try {
+        Timber.d("Deleting device: $deviceId")
+
+        httpClient.delete("${apiConfig.baseUrl}/api/v1/devices/$deviceId") {
+            header("X-API-Key", apiConfig.apiKey)
+        }
+
+        Timber.i("Device deleted: $deviceId")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to delete device: $deviceId")
+        Result.failure(e)
+    }
+
+    // API Compatibility: GDPR Data Export/Delete
+
+    /**
+     * Export device data for GDPR compliance
+     * GET /api/v1/devices/{deviceId}/data-export
+     */
+    override suspend fun exportDeviceData(deviceId: String): Result<DataExportResponse> = try {
+        Timber.d("Requesting data export for device: $deviceId")
+
+        val response: DataExportResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/data-export",
+        ) {
+            header("X-API-Key", apiConfig.apiKey)
+        }.body()
+
+        Timber.i("Data export initiated for device: $deviceId, url=${response.exportUrl}")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to request data export for device: $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Delete all device data for GDPR compliance
+     * DELETE /api/v1/devices/{deviceId}/data
+     */
+    override suspend fun deleteDeviceData(deviceId: String): Result<Unit> = try {
+        Timber.d("Deleting all data for device: $deviceId")
+
+        httpClient.delete("${apiConfig.baseUrl}/api/v1/devices/$deviceId/data") {
+            header("X-API-Key", apiConfig.apiKey)
+        }
+
+        Timber.i("All data deleted for device: $deviceId")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to delete data for device: $deviceId")
         Result.failure(e)
     }
 }

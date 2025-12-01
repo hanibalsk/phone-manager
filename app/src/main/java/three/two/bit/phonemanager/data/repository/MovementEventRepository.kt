@@ -9,6 +9,8 @@ import three.two.bit.phonemanager.domain.model.MovementContext
 import three.two.bit.phonemanager.domain.model.MovementEvent
 import three.two.bit.phonemanager.domain.model.SensorTelemetry
 import three.two.bit.phonemanager.movement.TransportationMode
+import three.two.bit.phonemanager.network.models.BatchMovementEventsResponse
+import three.two.bit.phonemanager.network.models.MovementEventsListResponse
 
 /**
  * Story E8.3: MovementEventRepository - Repository interface for movement event data
@@ -171,4 +173,36 @@ interface MovementEventRepository {
      * @return Number of events deleted
      */
     suspend fun deleteEventsByTrip(tripId: String): Int
+
+    // API Compatibility: Remote sync methods
+
+    /**
+     * Sync events to the backend in batch.
+     *
+     * @param events List of events to sync
+     * @param deviceId Device identifier
+     * @return Result containing batch upload response
+     */
+    suspend fun syncEvents(
+        events: List<MovementEvent>,
+        deviceId: String,
+    ): Result<BatchMovementEventsResponse>
+
+    /**
+     * Fetch remote events for a device.
+     *
+     * @param deviceId Device identifier
+     * @param from Optional start timestamp (ISO 8601)
+     * @param to Optional end timestamp (ISO 8601)
+     * @param limit Max results
+     * @param offset Pagination offset
+     * @return Result containing events list response
+     */
+    suspend fun fetchRemoteEvents(
+        deviceId: String,
+        from: String? = null,
+        to: String? = null,
+        limit: Int? = null,
+        offset: Int? = null,
+    ): Result<MovementEventsListResponse>
 }
