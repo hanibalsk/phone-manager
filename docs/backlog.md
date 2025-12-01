@@ -9,6 +9,9 @@
 
 | Date | Story | Epic | Type | Severity | Owner | Status | Notes |
 |------|-------|------|------|----------|-------|--------|-------|
+| 2025-12-01 | E11.9 | 11 | TechDebt | Medium | TBD | Open | Extract extractInviteCode() to shared utility to eliminate duplication. Files: JoinGroupViewModel.kt:207-228, QRScannerScreen.kt:404-425, AC: E11.9.5 |
+| 2025-12-01 | E11.9 | 11 | Enhancement | Low | TBD | Open | Add explicit CAMERA permission to AndroidManifest.xml. File: AndroidManifest.xml, AC: E11.9.5 |
+| 2025-12-01 | E11.9 | 11 | TechDebt | Low | TBD | Open | Extract deep link domain to BuildConfig constant. Files: GroupInvite.kt, extractInviteCode patterns, AC: E11.9.8 |
 | 2025-11-26 | E5.1 | 5 | Enhancement | Medium | TBD | Open | Add radius validation to ProximityAlert domain model - Add init block: require(radiusMeters in 50..10_000). File: ProximityAlert.kt, AC: E5.1.2 |
 | 2025-11-26 | E5.1 | 5 | Enhancement | Medium | TBD | Open | Implement server integration when backend ready - Implement AlertRepository, AlertApiService, and UI components (AlertsScreen, CreateAlertScreen, AlertsViewModel). Files: Multiple, AC: E5.1.4, E5.1.5, E5.1.6 |
 | 2025-11-26 | E5.1 | 5 | Testing | Low | TBD | Open | Add unit tests for domain model and mappers - Test ProximityAlert instantiation, enum values, toDomain/toEntity functions. File: ProximityAlertTest.kt (new) |

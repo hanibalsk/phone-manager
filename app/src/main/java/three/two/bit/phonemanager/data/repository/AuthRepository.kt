@@ -295,6 +295,24 @@ class AuthRepository @Inject constructor(
     }
 
     /**
+     * Story E12.6: Get current access token
+     *
+     * @return Access token if available, null if not authenticated
+     */
+    fun getAccessToken(): String? {
+        return secureStorage.getAccessToken()
+    }
+
+    /**
+     * Story E12.6: Get current user ID
+     *
+     * @return User ID if authenticated, null otherwise
+     */
+    fun getUserId(): String? {
+        return _currentUser.value?.userId
+    }
+
+    /**
      * Store authentication tokens securely
      *
      * AC E9.11.6: Store tokens in SecureStorage on successful auth

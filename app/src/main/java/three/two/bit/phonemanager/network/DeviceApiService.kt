@@ -7,14 +7,17 @@ import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.UserDevice
+import three.two.bit.phonemanager.domain.model.DeviceSettings
 import three.two.bit.phonemanager.network.models.DataExportResponse
 import three.two.bit.phonemanager.network.models.DeviceRegistrationRequest
 import three.two.bit.phonemanager.network.models.DeviceRegistrationResponse
+import three.two.bit.phonemanager.network.models.DeviceSettingsResponse
 import three.two.bit.phonemanager.network.models.DevicesResponse
 import three.two.bit.phonemanager.network.models.LinkDeviceRequest
 import three.two.bit.phonemanager.network.models.LinkedDeviceResponse
@@ -23,6 +26,8 @@ import three.two.bit.phonemanager.network.models.LocationHistoryResponse
 import three.two.bit.phonemanager.network.models.TransferDeviceRequest
 import three.two.bit.phonemanager.network.models.TransferDeviceResponse
 import three.two.bit.phonemanager.network.models.UnlinkDeviceResponse
+import three.two.bit.phonemanager.network.models.UpdateSettingRequest
+import three.two.bit.phonemanager.network.models.UpdateSettingResponse
 import three.two.bit.phonemanager.network.models.toDomain
 import timber.log.Timber
 import javax.inject.Inject
@@ -151,6 +156,44 @@ interface DeviceApiService {
         includeInactive: Boolean = false,
         accessToken: String,
     ): Result<List<UserDevice>>
+
+    // ============================================================================
+    // Story E12.6: Device Settings Sync API (AC E12.6.2, E12.6.4)
+    // ============================================================================
+
+    /**
+     * Story E12.6 Task 2: Get device settings and lock states
+     * GET /api/v1/devices/{deviceId}/settings
+     *
+     * AC E12.6.2: Fetch settings and lock states from server
+     *
+     * @param deviceId The device's UUID
+     * @param accessToken JWT access token for authentication
+     * @return Result with device settings and locks
+     */
+    suspend fun getDeviceSettings(
+        deviceId: String,
+        accessToken: String,
+    ): Result<DeviceSettings>
+
+    /**
+     * Story E12.6 Task 2: Update a device setting
+     * PUT /api/v1/devices/{deviceId}/settings
+     *
+     * AC E12.6.4: Update setting on server (respects locks)
+     *
+     * @param deviceId The device's UUID
+     * @param key The setting key to update
+     * @param value The new value (as string)
+     * @param accessToken JWT access token for authentication
+     * @return Result with update response (may include 403 if locked)
+     */
+    suspend fun updateDeviceSetting(
+        deviceId: String,
+        key: String,
+        value: String,
+        accessToken: String,
+    ): Result<UpdateSettingResponse>
 }
 
 @Singleton
@@ -404,6 +447,65 @@ class DeviceApiServiceImpl @Inject constructor(
         Result.success(devices)
     } catch (e: Exception) {
         Timber.e(e, "Failed to fetch devices for user $userId")
+        Result.failure(e)
+    }
+
+    // ============================================================================
+    // Story E12.6: Device Settings Sync API Implementation
+    // ============================================================================
+
+    /**
+     * Story E12.6 Task 2: Get device settings and lock states
+     * GET /api/v1/devices/{deviceId}/settings
+     */
+    override suspend fun getDeviceSettings(
+        deviceId: String,
+        accessToken: String,
+    ): Result<DeviceSettings> = try {
+        Timber.d("Fetching settings for device $deviceId")
+
+        val response: DeviceSettingsResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        val settings = response.toDomain()
+        Timber.i("Fetched settings for device $deviceId, ${settings.lockedCount()} locked")
+        Result.success(settings)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to fetch settings for device $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.6 Task 2: Update a device setting
+     * PUT /api/v1/devices/{deviceId}/settings
+     */
+    override suspend fun updateDeviceSetting(
+        deviceId: String,
+        key: String,
+        value: String,
+        accessToken: String,
+    ): Result<UpdateSettingResponse> = try {
+        Timber.d("Updating setting $key for device $deviceId")
+
+        val response: UpdateSettingResponse = httpClient.put(
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings",
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(UpdateSettingRequest(key = key, value = value))
+        }.body()
+
+        if (response.success) {
+            Timber.i("Successfully updated setting $key for device $deviceId")
+        } else {
+            Timber.w("Failed to update setting $key: ${response.error}, locked=${response.isLocked}")
+        }
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to update setting $key for device $deviceId")
         Result.failure(e)
     }
 }

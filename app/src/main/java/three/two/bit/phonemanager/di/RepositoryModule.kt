@@ -16,6 +16,8 @@ import three.two.bit.phonemanager.data.repository.MovementEventRepository
 import three.two.bit.phonemanager.data.repository.MovementEventRepositoryImpl
 import three.two.bit.phonemanager.data.repository.TripRepository
 import three.two.bit.phonemanager.data.repository.TripRepositoryImpl
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepositoryImpl
 import three.two.bit.phonemanager.data.repository.WebhookRepository
 import three.two.bit.phonemanager.data.repository.WebhookRepositoryImpl
 import javax.inject.Singleton
@@ -69,4 +71,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindMovementEventRepository(impl: MovementEventRepositoryImpl): MovementEventRepository
+
+    /**
+     * Story E12.6: Settings Sync Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindSettingsSyncRepository(impl: SettingsSyncRepositoryImpl): SettingsSyncRepository
 }

@@ -54,14 +54,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.R
+import three.two.bit.phonemanager.domain.model.DeviceSettings
+import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
 import kotlin.math.roundToInt
 
 /**
  * Story E1.3: Settings Screen
  * Story E8.12: Trip Detection Settings
+ * Story E12.6: Settings Lock & Sync
  *
  * Allows users to update display name, group ID, and trip detection settings
- * ACs: E1.3.1, E1.3.2, E1.3.3, E1.3.4, E8.12.1-E8.12.8
+ * Shows lock indicators for admin-managed settings
+ * ACs: E1.3.1, E1.3.2, E1.3.3, E1.3.4, E8.12.1-E8.12.8, E12.6.1-E12.6.8
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,6 +104,12 @@ fun SettingsScreen(
 
     // Permission dialog state
     var showPermissionDialog by remember { mutableStateOf(false) }
+
+    // Story E12.6: Settings sync and lock state (AC E12.6.1-E12.6.8)
+    val syncStatus by viewModel.syncStatus.collectAsStateWithLifecycle()
+    val serverSettings by viewModel.serverSettings.collectAsStateWithLifecycle()
+    val managedStatus by viewModel.managedStatus.collectAsStateWithLifecycle()
+    val lockDialogState by viewModel.lockDialogState.collectAsStateWithLifecycle()
 
     // Build list of permissions to request
     val permissionsToRequest = remember {
@@ -167,6 +177,22 @@ fun SettingsScreen(
             // Loading state
             if (uiState.isLoading) {
                 CircularProgressIndicator()
+            }
+
+            // Story E12.6: Offline indicator (AC E12.6.8)
+            if (syncStatus == SettingsSyncStatus.OFFLINE) {
+                OfflineBanner()
+            }
+
+            // Story E12.6: Managed device status card (AC E12.6.6)
+            if (managedStatus.isManaged) {
+                ManagedStatusCard(
+                    groupName = managedStatus.groupName,
+                    lockedCount = managedStatus.lockedSettingsCount,
+                    lastSyncTime = managedStatus.lastSyncedAt?.toString()?.take(10),
+                    isSyncing = syncStatus == SettingsSyncStatus.SYNCING,
+                    onSyncClick = viewModel::syncSettings,
+                )
             }
 
             // Story E9.11: Authentication Section (AC E9.11.6, E9.11.8)
@@ -320,35 +346,22 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // Story E7.4: Weather Notification Toggle (AC E7.4.1)
+            // Story E12.6: With lock support (AC E12.6.1)
             Text(
                 text = stringResource(R.string.settings_notification_settings),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier.fillMaxWidth(),
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.settings_weather_notification),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_weather_notification_summary),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Switch(
-                    checked = showWeatherInNotification,
-                    onCheckedChange = { viewModel.setShowWeatherInNotification(it) },
-                )
-            }
+            SettingToggleItem(
+                title = stringResource(R.string.settings_weather_notification),
+                summary = stringResource(R.string.settings_weather_notification_summary),
+                checked = showWeatherInNotification,
+                onCheckedChange = { viewModel.setShowWeatherInNotification(it) },
+                isLocked = viewModel.isSettingLocked(DeviceSettings.KEY_SHOW_WEATHER_IN_NOTIFICATION),
+                lockedBy = viewModel.getLockedBy(DeviceSettings.KEY_SHOW_WEATHER_IN_NOTIFICATION),
+                onLockedClick = { viewModel.showLockedDialog(DeviceSettings.KEY_SHOW_WEATHER_IN_NOTIFICATION) },
+            )
 
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
@@ -453,6 +466,7 @@ fun SettingsScreen(
             HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
             // Story E8.12: Trip Detection Settings Section (AC E8.12.1)
+            // Story E12.6: With lock support (AC E12.6.1)
             Text(
                 text = stringResource(R.string.settings_trip_detection),
                 style = MaterialTheme.typography.titleMedium,
@@ -460,29 +474,15 @@ fun SettingsScreen(
             )
 
             // Enable Trip Detection toggle (AC E8.12.2)
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.settings_trip_detection_enable),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-                    Text(
-                        text = stringResource(R.string.settings_trip_detection_summary),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Switch(
-                    checked = isTripDetectionEnabled,
-                    onCheckedChange = viewModel::setTripDetectionEnabled,
-                )
-            }
+            SettingToggleItem(
+                title = stringResource(R.string.settings_trip_detection_enable),
+                summary = stringResource(R.string.settings_trip_detection_summary),
+                checked = isTripDetectionEnabled,
+                onCheckedChange = viewModel::setTripDetectionEnabled,
+                isLocked = viewModel.isSettingLocked(DeviceSettings.KEY_TRIP_DETECTION_ENABLED),
+                lockedBy = viewModel.getLockedBy(DeviceSettings.KEY_TRIP_DETECTION_ENABLED),
+                onLockedClick = { viewModel.showLockedDialog(DeviceSettings.KEY_TRIP_DETECTION_ENABLED) },
+            )
 
             // Trip detection sub-settings (only visible when enabled)
             if (isTripDetectionEnabled) {
@@ -619,6 +619,16 @@ fun SettingsScreen(
                     Text("Cancel")
                 }
             }
+        )
+    }
+
+    // Story E12.6: Setting Locked Dialog (AC E12.6.3)
+    lockDialogState?.let { state ->
+        SettingLockedDialog(
+            settingKey = state.settingKey,
+            lockedBy = state.lockedBy,
+            onDismiss = viewModel::dismissLockedDialog,
+            onRequestUnlock = { viewModel.requestUnlock(state.settingKey) },
         )
     }
 }

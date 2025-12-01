@@ -14,19 +14,25 @@ import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.domain.auth.User
+import three.two.bit.phonemanager.domain.model.DeviceSettings
+import three.two.bit.phonemanager.domain.model.ManagedDeviceStatus
+import three.two.bit.phonemanager.domain.model.SettingLock
+import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
 import three.two.bit.phonemanager.permission.PermissionManager
 import javax.inject.Inject
 
 /**
- * Story E1.3/E3.3/E7.4/E9.11: SettingsViewModel
+ * Story E1.3/E3.3/E7.4/E9.11/E12.6: SettingsViewModel
  *
  * Manages device settings (displayName, groupId) and handles re-registration
  * Story E3.3: Also manages map polling interval setting (AC E3.3.5)
  * Story E7.4: Also manages weather notification toggle (AC E7.4.5)
  * Story E9.11: Also manages authentication state and logout (AC E9.11.6, E9.11.8)
+ * Story E12.6: Also manages settings lock state and sync (AC E12.6.1-E12.6.8)
  * Movement detection: Also manages movement detection settings and permissions
- * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5, E7.4.5, E9.11.6, E9.11.8
+ * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5, E7.4.5, E9.11.6, E9.11.8, E12.6.1-E12.6.8
  */
 @HiltViewModel
 class SettingsViewModel
@@ -36,11 +42,26 @@ constructor(
     private val preferencesRepository: PreferencesRepository,
     private val permissionManager: PermissionManager,
     private val authRepository: AuthRepository,
+    private val settingsSyncRepository: SettingsSyncRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
     val deviceId: String = deviceRepository.getDeviceId()
+
+    // Story E12.6: Settings sync and lock state (AC E12.6.1-E12.6.8)
+    val syncStatus: StateFlow<SettingsSyncStatus> = settingsSyncRepository.syncStatus
+    val serverSettings: StateFlow<DeviceSettings?> = settingsSyncRepository.serverSettings
+    val managedStatus: StateFlow<ManagedDeviceStatus> =
+        settingsSyncRepository.managedStatus
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = ManagedDeviceStatus(isManaged = false),
+            )
+
+    private val _lockDialogState = MutableStateFlow<LockDialogState?>(null)
+    val lockDialogState: StateFlow<LockDialogState?> = _lockDialogState.asStateFlow()
 
     // Story E7.4: Weather notification toggle state (AC E7.4.5)
     val showWeatherInNotification: StateFlow<Boolean> =
@@ -164,6 +185,7 @@ constructor(
         loadCurrentSettings()
         loadPollingInterval()
         updateMovementPermissionState()
+        syncSettings() // Story E12.6: Sync settings on init
     }
 
     /**
@@ -510,7 +532,110 @@ constructor(
             authRepository.logout()
         }
     }
+
+    // Story E12.6: Settings lock and sync methods (AC E12.6.1-E12.6.8)
+
+    /**
+     * Sync settings from server.
+     * AC E12.6.2: Setting sync on app start
+     */
+    fun syncSettings() {
+        viewModelScope.launch {
+            settingsSyncRepository.syncAllSettings()
+        }
+    }
+
+    /**
+     * Check if a setting is locked.
+     * AC E12.6.1: Lock indicator display
+     * AC E12.6.3: Lock enforcement
+     */
+    fun isSettingLocked(key: String): Boolean {
+        return serverSettings.value?.isLocked(key) ?: false
+    }
+
+    /**
+     * Get who locked a setting.
+     * AC E12.6.1: Show "Managed by [admin name]"
+     */
+    fun getLockedBy(key: String): String? {
+        return serverSettings.value?.getLockedBy(key)
+    }
+
+    /**
+     * Get lock information for a setting.
+     * AC E12.6.1: Lock indicator display
+     */
+    fun getSettingLock(key: String): SettingLock? {
+        return serverSettings.value?.getLock(key)
+    }
+
+    /**
+     * Show locked dialog for a setting.
+     * AC E12.6.3: Show "Setting Locked" dialog
+     */
+    fun showLockedDialog(settingKey: String) {
+        val lockedBy = getLockedBy(settingKey)
+        _lockDialogState.value = LockDialogState(
+            settingKey = settingKey,
+            lockedBy = lockedBy,
+        )
+    }
+
+    /**
+     * Dismiss locked dialog.
+     */
+    fun dismissLockedDialog() {
+        _lockDialogState.value = null
+    }
+
+    /**
+     * Request unlock for a setting.
+     * AC E12.6.3: Offer "Request Unlock" button
+     */
+    fun requestUnlock(settingKey: String) {
+        viewModelScope.launch {
+            // TODO: Implement unlock request API
+            // For now, just dismiss the dialog
+            _lockDialogState.value = null
+        }
+    }
+
+    /**
+     * Try to update a setting, checking lock state first.
+     * AC E12.6.3: Lock enforcement
+     * AC E12.6.4: Unlocked setting interaction
+     *
+     * @return true if update was allowed, false if blocked by lock
+     */
+    suspend fun tryUpdateSetting(key: String, value: Any): Boolean {
+        if (isSettingLocked(key)) {
+            showLockedDialog(key)
+            return false
+        }
+
+        val result = settingsSyncRepository.updateServerSetting(key, value)
+        return result.fold(
+            onSuccess = { updateResult ->
+                if (updateResult.wasLocked) {
+                    showLockedDialog(key)
+                    false
+                } else {
+                    updateResult.success
+                }
+            },
+            onFailure = { false },
+        )
+    }
 }
+
+/**
+ * Story E12.6: State for locked setting dialog
+ */
+data class LockDialogState(
+    val settingKey: String,
+    val lockedBy: String?,
+)
 
 /**
  * UI State for Settings Screen

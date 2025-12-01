@@ -409,4 +409,39 @@
     <string name="notification_distance_km">%1$.1f km</string>
     <string name="notification_distance_m">%1$.0f m</string>
     <string name="notification_locations_interval">%1$d locations \u2022 Interval: %2$d min</string>
+
+    <!-- Story E12.6: Settings Lock & Sync -->
+    <string name="setting_locked">Setting Locked</string>
+    <string name="managed_by">Managed by %1$s</string>
+    <string name="setting_locked_explanation">The \"%1$s\" setting is managed by your group administrator and cannot be changed locally.</string>
+    <string name="dialog_setting_locked_title">Setting Locked</string>
+    <string name="dialog_setting_locked_message">This setting is managed by your group administrator.</string>
+    <string name="locked_by_label">Locked by:</string>
+    <string name="dialog_setting_locked_contact">Contact your group administrator if you need this setting changed.</string>
+    <string name="button_request_unlock">Request Unlock</string>
+    <string name="managed_device_title">Managed Device</string>
+    <string name="managed_by_group">Managed by group: %1$s</string>
+    <string name="locked_settings_count">%1$d settings locked</string>
+    <string name="last_synced">Last synced: %1$s</string>
+    <string name="syncing">Syncing…</string>
+    <string name="sync_now">Sync Now</string>
+    <string name="offline_indicator">Offline - Showing cached settings</string>
+    <string name="settings_updated_by">Settings updated by %1$s</string>
+
+    <!-- Story E12.6: FCM Push Notifications -->
+    <string name="notification_channel_settings_description">Notifications about device settings changes from your group administrator</string>
+    <string name="notification_settings_updated_title">Settings Updated</string>
+    <string name="notification_settings_updated_by_admin">%1$s has updated your device settings</string>
+    <string name="notification_settings_updated_by_admin_group">%1$s has updated your device settings for group %2$s</string>
+    <string name="notification_setting_locked_title">Setting Locked</string>
+    <string name="notification_setting_locked_by_admin">%1$s has been locked by %2$s</string>
+    <string name="notification_setting_unlocked_title">Setting Unlocked</string>
+    <string name="notification_setting_unlocked">%1$s is now available for you to change</string>
+
+    <!-- Story E12.6: Setting Display Names -->
+    <string name="setting_tracking_enabled">Location Tracking</string>
+    <string name="setting_tracking_interval">Update Interval</string>
+    <string name="setting_secret_mode">Secret Mode</string>
+    <string name="setting_weather_notification">Weather Notifications</string>
+    <string name="setting_trip_detection">Trip Detection</string>
 </resources>

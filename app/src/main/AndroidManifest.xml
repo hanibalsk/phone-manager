@@ -96,6 +96,16 @@
             android:name=".geofence.GeofenceBroadcastReceiver"
             android:enabled="true"
             android:exported="false" />
+
+        <!-- Story E12.6: Firebase Cloud Messaging Service for settings updates -->
+        <service
+            android:name=".service.SettingsMessagingService"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
     </application>
 
 </manifest>
