@@ -16,6 +16,8 @@ import three.two.bit.phonemanager.data.repository.MovementEventRepository
 import three.two.bit.phonemanager.data.repository.MovementEventRepositoryImpl
 import three.two.bit.phonemanager.data.repository.TripRepository
 import three.two.bit.phonemanager.data.repository.TripRepositoryImpl
+import three.two.bit.phonemanager.data.repository.AdminSettingsRepository
+import three.two.bit.phonemanager.data.repository.AdminSettingsRepositoryImpl
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepositoryImpl
 import three.two.bit.phonemanager.data.repository.WebhookRepository
@@ -78,4 +80,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSettingsSyncRepository(impl: SettingsSyncRepositoryImpl): SettingsSyncRepository
+
+    /**
+     * Story E12.7: Admin Settings Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindAdminSettingsRepository(impl: AdminSettingsRepositoryImpl): AdminSettingsRepository
 }

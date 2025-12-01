@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.PhoneAndroid
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -79,11 +80,13 @@ import three.two.bit.phonemanager.domain.model.GroupRole
  * - Edit name/description (admins and owners)
  *
  * Story E11.9: Added invite members navigation
+ * Story E12.7: Added member devices settings navigation
  *
  * @param viewModel The GroupDetailViewModel
  * @param onNavigateBack Callback to navigate back
  * @param onNavigateToMembers Callback to navigate to manage members screen
  * @param onNavigateToInvite Callback to navigate to invite members screen
+ * @param onNavigateToMemberDevices Callback to navigate to member devices settings screen (E12.7)
  * @param onGroupDeleted Callback when group is deleted
  * @param onLeftGroup Callback when user leaves group
  */
@@ -94,6 +97,7 @@ fun GroupDetailScreen(
     onNavigateBack: () -> Unit,
     onNavigateToMembers: (String) -> Unit,
     onNavigateToInvite: (String) -> Unit = {},
+    onNavigateToMemberDevices: (String) -> Unit = {},
     onGroupDeleted: () -> Unit = {},
     onLeftGroup: () -> Unit = {},
 ) {
@@ -180,6 +184,7 @@ fun GroupDetailScreen(
                     onEditDescription = { showEditDescriptionDialog = true },
                     onViewMembers = { onNavigateToMembers(state.group.id) },
                     onInviteMembers = { onNavigateToInvite(state.group.id) },
+                    onMemberDevices = { onNavigateToMemberDevices(state.group.id) },
                     onLeaveGroup = { showLeaveDialog = true },
                     onDeleteGroup = { showDeleteDialog = true },
                     modifier = Modifier
@@ -282,6 +287,7 @@ private fun GroupDetailContent(
     onEditDescription: () -> Unit,
     onViewMembers: () -> Unit,
     onInviteMembers: () -> Unit,
+    onMemberDevices: () -> Unit,
     onLeaveGroup: () -> Unit,
     onDeleteGroup: () -> Unit,
     modifier: Modifier = Modifier,
@@ -322,6 +328,16 @@ private fun GroupDetailContent(
                 Icon(Icons.Default.PersonAdd, null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Invite Members")
+            }
+
+            // Story E12.7: Manage member devices button (for admins/owners)
+            OutlinedButton(
+                onClick = onMemberDevices,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Default.PhoneAndroid, null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Manage Member Devices")
             }
         }
 

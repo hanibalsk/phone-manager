@@ -37,6 +37,11 @@ import three.two.bit.phonemanager.ui.groups.JoinGroupScreen
 import three.two.bit.phonemanager.ui.groups.ManageMembersScreen
 import three.two.bit.phonemanager.ui.groups.PendingInvitesScreen
 import three.two.bit.phonemanager.ui.groups.QRScannerScreen
+import three.two.bit.phonemanager.ui.admin.BulkSettingsScreen
+import three.two.bit.phonemanager.ui.admin.DeviceSettingsScreen
+import three.two.bit.phonemanager.ui.admin.MemberDevicesScreen
+import three.two.bit.phonemanager.ui.admin.SettingsHistoryScreen
+import three.two.bit.phonemanager.ui.admin.SettingsTemplateScreen
 import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.weather.WeatherScreen
@@ -94,6 +99,21 @@ sealed class Screen(val route: String) {
         fun createRoute(code: String? = null) = if (code != null) "join_group?code=$code" else "join_group"
     }
     object QRScanner : Screen("qr_scanner")
+
+    // Story E12.7: Admin Settings Management screens
+    object MemberDevices : Screen("member_devices/{groupId}") {
+        fun createRoute(groupId: String) = "member_devices/$groupId"
+    }
+    object AdminDeviceSettings : Screen("admin_device_settings/{deviceId}") {
+        fun createRoute(deviceId: String) = "admin_device_settings/$deviceId"
+    }
+    object AdminSettingsHistory : Screen("admin_settings_history/{deviceId}") {
+        fun createRoute(deviceId: String) = "admin_settings_history/$deviceId"
+    }
+    object BulkSettings : Screen("bulk_settings/{deviceIds}") {
+        fun createRoute(deviceIds: List<String>) = "bulk_settings/${deviceIds.joinToString(",")}"
+    }
+    object SettingsTemplates : Screen("settings_templates")
 }
 
 /**
@@ -407,6 +427,10 @@ fun PhoneManagerNavHost(
                 onNavigateToInvite = { groupId ->
                     navController.navigate(Screen.InviteMembers.createRoute(groupId))
                 },
+                // Story E12.7: Navigate to member devices settings screen
+                onNavigateToMemberDevices = { groupId ->
+                    navController.navigate(Screen.MemberDevices.createRoute(groupId))
+                },
                 onGroupDeleted = {
                     navController.navigate(Screen.GroupList.route) {
                         popUpTo(Screen.GroupList.route) { inclusive = true }
@@ -487,6 +511,76 @@ fun PhoneManagerNavHost(
                     navController.navigate(Screen.JoinGroup.createRoute(scannedCode)) {
                         launchSingleTop = true
                     }
+                },
+            )
+        }
+
+        // Story E12.7: Admin Settings Management screens (AC E12.7.1-E12.7.8)
+        composable(
+            route = Screen.MemberDevices.route,
+            arguments = listOf(
+                navArgument("groupId") { type = NavType.StringType }
+            ),
+        ) {
+            MemberDevicesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onDeviceClick = { deviceId ->
+                    navController.navigate(Screen.AdminDeviceSettings.createRoute(deviceId))
+                },
+                onBulkEditClick = { deviceIds ->
+                    navController.navigate(Screen.BulkSettings.createRoute(deviceIds))
+                },
+            )
+        }
+
+        composable(
+            route = Screen.AdminDeviceSettings.route,
+            arguments = listOf(
+                navArgument("deviceId") { type = NavType.StringType }
+            ),
+        ) {
+            DeviceSettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onViewHistory = { deviceId ->
+                    navController.navigate(Screen.AdminSettingsHistory.createRoute(deviceId))
+                },
+            )
+        }
+
+        composable(
+            route = Screen.AdminSettingsHistory.route,
+            arguments = listOf(
+                navArgument("deviceId") { type = NavType.StringType }
+            ),
+        ) {
+            SettingsHistoryScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = Screen.BulkSettings.route,
+            arguments = listOf(
+                navArgument("deviceIds") { type = NavType.StringType }
+            ),
+        ) { backStackEntry ->
+            val deviceIdsString = backStackEntry.arguments?.getString("deviceIds") ?: ""
+            val deviceIds = deviceIdsString.split(",").filter { it.isNotEmpty() }
+            BulkSettingsScreen(
+                deviceIds = deviceIds,
+                onNavigateBack = { navController.popBackStack() },
+                onComplete = {
+                    navController.popBackStack()
+                },
+            )
+        }
+
+        composable(Screen.SettingsTemplates.route) {
+            SettingsTemplateScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onApplyTemplate = { templateId ->
+                    // Template application is handled within the screen via ViewModel
+                    // This callback could navigate to device selection if needed
                 },
             )
         }

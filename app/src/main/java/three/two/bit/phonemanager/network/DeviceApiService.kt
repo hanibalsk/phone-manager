@@ -26,8 +26,20 @@ import three.two.bit.phonemanager.network.models.LocationHistoryResponse
 import three.two.bit.phonemanager.network.models.TransferDeviceRequest
 import three.two.bit.phonemanager.network.models.TransferDeviceResponse
 import three.two.bit.phonemanager.network.models.UnlinkDeviceResponse
+import three.two.bit.phonemanager.network.models.AdminDeviceSettingsResponse
+import three.two.bit.phonemanager.network.models.BulkUpdateResponse
+import three.two.bit.phonemanager.network.models.BulkUpdateSettingsRequest
+import three.two.bit.phonemanager.network.models.LockSettingsRequest
+import three.two.bit.phonemanager.network.models.LockSettingsResponse
+import three.two.bit.phonemanager.network.models.MemberDevicesResponse
+import three.two.bit.phonemanager.network.models.SaveTemplateRequest
+import three.two.bit.phonemanager.network.models.SaveTemplateResponse
+import three.two.bit.phonemanager.network.models.SettingsHistoryResponse
+import three.two.bit.phonemanager.network.models.TemplatesResponse
+import three.two.bit.phonemanager.network.models.UpdateDeviceSettingsRequest
 import three.two.bit.phonemanager.network.models.UpdateSettingRequest
 import three.two.bit.phonemanager.network.models.UpdateSettingResponse
+import three.two.bit.phonemanager.network.models.UpdateSettingsResponse
 import three.two.bit.phonemanager.network.models.toDomain
 import timber.log.Timber
 import javax.inject.Inject
@@ -194,6 +206,169 @@ interface DeviceApiService {
         value: String,
         accessToken: String,
     ): Result<UpdateSettingResponse>
+
+    // ============================================================================
+    // Story E12.7: Admin Settings Management API (AC E12.7.1-E12.7.8)
+    // ============================================================================
+
+    /**
+     * Story E12.7 Task 2: Get member devices for a group (admin only)
+     * GET /api/v1/groups/{groupId}/devices
+     *
+     * AC E12.7.1: Device Settings List Screen
+     *
+     * @param groupId The group's UUID
+     * @param accessToken JWT access token for authentication
+     * @return Result with list of member devices
+     */
+    suspend fun getGroupMemberDevices(
+        groupId: String,
+        accessToken: String,
+    ): Result<MemberDevicesResponse>
+
+    /**
+     * Story E12.7 Task 2: Get device settings for admin
+     * GET /api/v1/admin/devices/{deviceId}/settings
+     *
+     * AC E12.7.3: View Remote Settings
+     *
+     * @param deviceId The device's UUID
+     * @param accessToken JWT access token for authentication
+     * @return Result with admin-level device settings
+     */
+    suspend fun getAdminDeviceSettings(
+        deviceId: String,
+        accessToken: String,
+    ): Result<AdminDeviceSettingsResponse>
+
+    /**
+     * Story E12.7 Task 2: Update device settings (admin)
+     * PUT /api/v1/admin/devices/{deviceId}/settings
+     *
+     * AC E12.7.4: Modify Remote Settings
+     *
+     * @param deviceId The device's UUID
+     * @param changes Map of setting keys to new values
+     * @param notifyUser Whether to send push notification to user
+     * @param accessToken JWT access token for authentication
+     * @return Result with update response
+     */
+    suspend fun updateAdminDeviceSettings(
+        deviceId: String,
+        changes: Map<String, Any>,
+        notifyUser: Boolean = true,
+        accessToken: String,
+    ): Result<UpdateSettingsResponse>
+
+    /**
+     * Story E12.7 Task 2: Lock/unlock settings (admin)
+     * PUT /api/v1/admin/devices/{deviceId}/settings/locks
+     *
+     * AC E12.7.5: Lock/Unlock Settings
+     *
+     * @param deviceId The device's UUID
+     * @param settingKeys List of setting keys to lock/unlock
+     * @param lock True to lock, false to unlock
+     * @param accessToken JWT access token for authentication
+     * @return Result with lock operation response
+     */
+    suspend fun lockDeviceSettings(
+        deviceId: String,
+        settingKeys: List<String>,
+        lock: Boolean,
+        accessToken: String,
+    ): Result<LockSettingsResponse>
+
+    /**
+     * Story E12.7 Task 2: Get settings history (audit trail)
+     * GET /api/v1/admin/devices/{deviceId}/settings/history
+     *
+     * AC E12.7.8: Audit Trail
+     *
+     * @param deviceId The device's UUID
+     * @param limit Number of entries to return
+     * @param offset Starting offset for pagination
+     * @param accessToken JWT access token for authentication
+     * @return Result with settings change history
+     */
+    suspend fun getSettingsHistory(
+        deviceId: String,
+        limit: Int = 50,
+        offset: Int = 0,
+        accessToken: String,
+    ): Result<SettingsHistoryResponse>
+
+    /**
+     * Story E12.7 Task 2: Bulk update settings across devices
+     * POST /api/v1/admin/devices/bulk-update
+     *
+     * AC E12.7.6: Bulk Settings Application
+     *
+     * @param deviceIds List of device UUIDs to update
+     * @param settings Map of setting keys to new values
+     * @param locks List of setting keys to lock (optional)
+     * @param notifyUsers Whether to send push notifications
+     * @param accessToken JWT access token for authentication
+     * @return Result with bulk update results
+     */
+    suspend fun bulkUpdateSettings(
+        deviceIds: List<String>,
+        settings: Map<String, Any>,
+        locks: List<String>? = null,
+        notifyUsers: Boolean = true,
+        accessToken: String,
+    ): Result<BulkUpdateResponse>
+
+    /**
+     * Story E12.7 Task 2: Get settings templates
+     * GET /api/v1/settings/templates
+     *
+     * AC E12.7.7: Settings Templates
+     *
+     * @param accessToken JWT access token for authentication
+     * @return Result with list of templates
+     */
+    suspend fun getSettingsTemplates(
+        accessToken: String,
+    ): Result<TemplatesResponse>
+
+    /**
+     * Story E12.7 Task 2: Save settings template
+     * POST /api/v1/settings/templates
+     *
+     * AC E12.7.7: Settings Templates
+     *
+     * @param name Template name
+     * @param description Template description
+     * @param settings Map of setting keys to values
+     * @param lockedSettings List of settings to lock when applying
+     * @param isShared Whether other admins can use this template
+     * @param accessToken JWT access token for authentication
+     * @return Result with saved template
+     */
+    suspend fun saveSettingsTemplate(
+        name: String,
+        description: String?,
+        settings: Map<String, Any>,
+        lockedSettings: List<String>,
+        isShared: Boolean = false,
+        accessToken: String,
+    ): Result<SaveTemplateResponse>
+
+    /**
+     * Story E12.7 Task 2: Delete settings template
+     * DELETE /api/v1/settings/templates/{templateId}
+     *
+     * AC E12.7.7: Settings Templates
+     *
+     * @param templateId The template's UUID
+     * @param accessToken JWT access token for authentication
+     * @return Result with success/failure
+     */
+    suspend fun deleteSettingsTemplate(
+        templateId: String,
+        accessToken: String,
+    ): Result<Unit>
 }
 
 @Singleton
@@ -506,6 +681,267 @@ class DeviceApiServiceImpl @Inject constructor(
         Result.success(response)
     } catch (e: Exception) {
         Timber.e(e, "Failed to update setting $key for device $deviceId")
+        Result.failure(e)
+    }
+
+    // ============================================================================
+    // Story E12.7: Admin Settings Management API Implementation
+    // ============================================================================
+
+    /**
+     * Story E12.7 Task 2: Get member devices for a group
+     * GET /api/v1/groups/{groupId}/devices
+     */
+    override suspend fun getGroupMemberDevices(
+        groupId: String,
+        accessToken: String,
+    ): Result<MemberDevicesResponse> = try {
+        Timber.d("Fetching member devices for group $groupId")
+
+        val response: MemberDevicesResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/devices",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        Timber.i("Fetched ${response.totalCount} member devices for group $groupId")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to fetch member devices for group $groupId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Get device settings for admin
+     * GET /api/v1/admin/devices/{deviceId}/settings
+     */
+    override suspend fun getAdminDeviceSettings(
+        deviceId: String,
+        accessToken: String,
+    ): Result<AdminDeviceSettingsResponse> = try {
+        Timber.d("Fetching admin settings for device $deviceId")
+
+        val response: AdminDeviceSettingsResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        Timber.i("Fetched admin settings for device $deviceId")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to fetch admin settings for device $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Update device settings (admin)
+     * PUT /api/v1/admin/devices/{deviceId}/settings
+     */
+    override suspend fun updateAdminDeviceSettings(
+        deviceId: String,
+        changes: Map<String, Any>,
+        notifyUser: Boolean,
+        accessToken: String,
+    ): Result<UpdateSettingsResponse> = try {
+        Timber.d("Updating admin settings for device $deviceId: ${changes.keys}")
+
+        val response: UpdateSettingsResponse = httpClient.put(
+            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings",
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(UpdateDeviceSettingsRequest(changes = changes, notifyUser = notifyUser))
+        }.body()
+
+        if (response.success) {
+            Timber.i("Successfully updated admin settings for device $deviceId")
+        } else {
+            Timber.w("Failed to update admin settings: ${response.error}")
+        }
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to update admin settings for device $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Lock/unlock settings
+     * PUT /api/v1/admin/devices/{deviceId}/settings/locks
+     */
+    override suspend fun lockDeviceSettings(
+        deviceId: String,
+        settingKeys: List<String>,
+        lock: Boolean,
+        accessToken: String,
+    ): Result<LockSettingsResponse> = try {
+        val action = if (lock) "lock" else "unlock"
+        Timber.d("${action}ing settings $settingKeys for device $deviceId")
+
+        val response: LockSettingsResponse = httpClient.put(
+            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings/locks",
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(LockSettingsRequest(settingKeys = settingKeys, lock = lock))
+        }.body()
+
+        if (response.success) {
+            Timber.i("Successfully ${action}ed ${settingKeys.size} settings for device $deviceId")
+        } else {
+            Timber.w("Failed to $action settings: ${response.error}")
+        }
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to lock/unlock settings for device $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Get settings history
+     * GET /api/v1/admin/devices/{deviceId}/settings/history
+     */
+    override suspend fun getSettingsHistory(
+        deviceId: String,
+        limit: Int,
+        offset: Int,
+        accessToken: String,
+    ): Result<SettingsHistoryResponse> = try {
+        Timber.d("Fetching settings history for device $deviceId")
+
+        val response: SettingsHistoryResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings/history",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+            parameter("limit", limit)
+            parameter("offset", offset)
+        }.body()
+
+        Timber.i("Fetched ${response.changes.size} history entries for device $deviceId")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to fetch settings history for device $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Bulk update settings
+     * POST /api/v1/admin/devices/bulk-update
+     */
+    override suspend fun bulkUpdateSettings(
+        deviceIds: List<String>,
+        settings: Map<String, Any>,
+        locks: List<String>?,
+        notifyUsers: Boolean,
+        accessToken: String,
+    ): Result<BulkUpdateResponse> = try {
+        Timber.d("Bulk updating settings for ${deviceIds.size} devices")
+
+        val response: BulkUpdateResponse = httpClient.post(
+            "${apiConfig.baseUrl}/api/v1/admin/devices/bulk-update",
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(
+                BulkUpdateSettingsRequest(
+                    deviceIds = deviceIds,
+                    settings = settings,
+                    locks = locks,
+                    notifyUsers = notifyUsers,
+                ),
+            )
+        }.body()
+
+        Timber.i(
+            "Bulk update complete: ${response.successful.size} successful, ${response.failed.size} failed",
+        )
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to bulk update settings")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Get settings templates
+     * GET /api/v1/settings/templates
+     */
+    override suspend fun getSettingsTemplates(
+        accessToken: String,
+    ): Result<TemplatesResponse> = try {
+        Timber.d("Fetching settings templates")
+
+        val response: TemplatesResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/settings/templates",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        Timber.i("Fetched ${response.templates.size} settings templates")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to fetch settings templates")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Save settings template
+     * POST /api/v1/settings/templates
+     */
+    override suspend fun saveSettingsTemplate(
+        name: String,
+        description: String?,
+        settings: Map<String, Any>,
+        lockedSettings: List<String>,
+        isShared: Boolean,
+        accessToken: String,
+    ): Result<SaveTemplateResponse> = try {
+        Timber.d("Saving settings template: $name")
+
+        val response: SaveTemplateResponse = httpClient.post(
+            "${apiConfig.baseUrl}/api/v1/settings/templates",
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(
+                SaveTemplateRequest(
+                    name = name,
+                    description = description,
+                    settings = settings,
+                    lockedSettings = lockedSettings,
+                    isShared = isShared,
+                ),
+            )
+        }.body()
+
+        if (response.success) {
+            Timber.i("Successfully saved template: $name")
+        } else {
+            Timber.w("Failed to save template: ${response.error}")
+        }
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to save settings template: $name")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.7 Task 2: Delete settings template
+     * DELETE /api/v1/settings/templates/{templateId}
+     */
+    override suspend fun deleteSettingsTemplate(
+        templateId: String,
+        accessToken: String,
+    ): Result<Unit> = try {
+        Timber.d("Deleting settings template: $templateId")
+
+        httpClient.delete("${apiConfig.baseUrl}/api/v1/settings/templates/$templateId") {
+            header("Authorization", "Bearer $accessToken")
+        }
+
+        Timber.i("Successfully deleted template: $templateId")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to delete settings template: $templateId")
         Result.failure(e)
     }
 }
