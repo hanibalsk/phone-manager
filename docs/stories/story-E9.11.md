@@ -4,7 +4,7 @@
 **Epic**: 9 - Authentication Foundation
 **Priority**: Critical
 **Estimate**: 8 story points (3-4 days)
-**Status**: In Progress (7/12 tasks complete - Blocked by backend E9.1-E9.10)
+**Status**: In Progress (8/12 tasks complete - Blocked by backend E9.1-E9.10)
 **Created**: 2025-12-01
 **PRD Reference**: PRD-user-management.md, USER_MANAGEMENT_SPEC.md
 
@@ -192,12 +192,14 @@ so that I can link my device to my user account and access authenticated feature
   - [ ] Handle user cancellation
   - [ ] Test with Apple OAuth backend endpoint
 
-- [ ] Task 10: Update Navigation (AC: E9.11.3, E9.11.4)
-  - [ ] Add Screen.Login to sealed class
-  - [ ] Add Screen.Register to sealed class
-  - [ ] Add composable routes in NavHost
-  - [ ] Add navigation from Settings → Sign In
-  - [ ] Add deep link support for auth screens
+- [x] Task 10: Update Navigation (AC: E9.11.3, E9.11.4)
+  - [x] Add Screen.Login to sealed class
+  - [x] Add Screen.Register to sealed class
+  - [x] Add Screen.ForgotPassword to sealed class
+  - [x] Add composable routes in NavHost
+  - [x] Created ForgotPasswordScreen UI
+  - [ ] Add navigation from Settings → Sign In (pending)
+  - [ ] Add deep link support for auth screens (pending)
 
 - [ ] Task 11: Update SettingsScreen (AC: E9.11.6, E9.11.8)
   - [ ] Show "Sign In" button if not logged in
