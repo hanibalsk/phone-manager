@@ -28,6 +28,9 @@ import three.two.bit.phonemanager.ui.registration.RegistrationScreen
 import three.two.bit.phonemanager.ui.settings.SettingsScreen
 import three.two.bit.phonemanager.ui.devices.DeviceDetailScreen
 import three.two.bit.phonemanager.ui.devices.DeviceListScreen
+import three.two.bit.phonemanager.ui.groups.GroupDetailScreen
+import three.two.bit.phonemanager.ui.groups.GroupListScreen
+import three.two.bit.phonemanager.ui.groups.ManageMembersScreen
 import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.weather.WeatherScreen
@@ -64,6 +67,15 @@ sealed class Screen(val route: String) {
     // Story E10.6: Device Management screens
     object DeviceList : Screen("device_list")
     object DeviceDetail : Screen("device_detail")
+
+    // Story E11.8: Group Management screens
+    object GroupList : Screen("group_list")
+    object GroupDetail : Screen("group_detail/{groupId}") {
+        fun createRoute(groupId: String) = "group_detail/$groupId"
+    }
+    object ManageMembers : Screen("manage_members/{groupId}") {
+        fun createRoute(groupId: String) = "manage_members/$groupId"
+    }
 }
 
 /**
@@ -228,8 +240,7 @@ fun PhoneManagerNavHost(
                     navController.navigate(Screen.Login.route)
                 },
                 onNavigateToGroups = {
-                    // TODO: Navigate to groups screen when E11.8 is implemented
-                    navController.navigate(Screen.GroupMembers.route)
+                    navController.navigate(Screen.GroupList.route)
                 },
                 onNavigateToMyDevices = {
                     navController.navigate(Screen.DeviceList.route)
@@ -336,6 +347,42 @@ fun PhoneManagerNavHost(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Home.route) { inclusive = true }
                     }
+                },
+            )
+        }
+
+        // Story E11.8: Group Management screens (AC E11.8.1, E11.8.3, E11.8.4)
+        composable(Screen.GroupList.route) {
+            GroupListScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToGroupDetail = { group ->
+                    navController.navigate(Screen.GroupDetail.createRoute(group.id))
+                },
+            )
+        }
+        composable(Screen.GroupDetail.route) {
+            GroupDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToMembers = { groupId ->
+                    navController.navigate(Screen.ManageMembers.createRoute(groupId))
+                },
+                onGroupDeleted = {
+                    navController.navigate(Screen.GroupList.route) {
+                        popUpTo(Screen.GroupList.route) { inclusive = true }
+                    }
+                },
+                onLeftGroup = {
+                    navController.navigate(Screen.GroupList.route) {
+                        popUpTo(Screen.GroupList.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+        composable(Screen.ManageMembers.route) {
+            ManageMembersScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onInviteMember = {
+                    // TODO: Navigate to invite screen (Story E11.9)
                 },
             )
         }

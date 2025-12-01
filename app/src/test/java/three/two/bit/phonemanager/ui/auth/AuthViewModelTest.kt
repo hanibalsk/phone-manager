@@ -15,6 +15,8 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.AuthRepository
+import three.two.bit.phonemanager.network.DeviceApiService
+import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.domain.auth.User
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
@@ -34,6 +36,8 @@ import kotlin.test.assertTrue
 class AuthViewModelTest {
 
     private lateinit var authRepository: AuthRepository
+    private lateinit var deviceApiService: DeviceApiService
+    private lateinit var secureStorage: SecureStorage
     private lateinit var viewModel: AuthViewModel
     private val testDispatcher = StandardTestDispatcher()
 
@@ -48,7 +52,9 @@ class AuthViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         authRepository = mockk(relaxed = true)
-        viewModel = AuthViewModel(authRepository)
+        deviceApiService = mockk(relaxed = true)
+        secureStorage = mockk(relaxed = true)
+        viewModel = AuthViewModel(authRepository, deviceApiService, secureStorage)
     }
 
     @After

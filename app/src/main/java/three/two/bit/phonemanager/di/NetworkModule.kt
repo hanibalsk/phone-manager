@@ -35,6 +35,8 @@ import three.two.bit.phonemanager.network.TripApiService
 import three.two.bit.phonemanager.network.TripApiServiceImpl
 import three.two.bit.phonemanager.network.WebhookApiService
 import three.two.bit.phonemanager.network.WebhookApiServiceImpl
+import three.two.bit.phonemanager.network.GroupApiService
+import three.two.bit.phonemanager.network.GroupApiServiceImpl
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import java.util.UUID
@@ -177,4 +179,12 @@ object NetworkModule {
     @Singleton
     fun provideMovementEventApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): MovementEventApiService =
         MovementEventApiServiceImpl(httpClient, apiConfig)
+
+    /**
+     * Story E11.8: Group API Service
+     */
+    @Provides
+    @Singleton
+    fun provideGroupApiService(httpClient: HttpClient, apiConfig: ApiConfiguration): GroupApiService =
+        GroupApiServiceImpl(httpClient, apiConfig)
 }
