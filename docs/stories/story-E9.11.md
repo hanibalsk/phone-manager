@@ -4,7 +4,7 @@
 **Epic**: 9 - Authentication Foundation
 **Priority**: Critical
 **Estimate**: 8 story points (3-4 days)
-**Status**: In Progress (8/12 tasks complete - Blocked by backend E9.1-E9.10)
+**Status**: In Progress (9/12 tasks complete - Mock implementation ready for testing)
 **Created**: 2025-12-01
 **PRD Reference**: PRD-user-management.md, USER_MANAGEMENT_SPEC.md
 
@@ -176,21 +176,21 @@ so that I can link my device to my user account and access authenticated feature
   - [x] Add StateFlow for auth state
   - [x] Add StateFlow for current user
 
-- [ ] Task 8: Integrate Google Sign-In SDK (AC: E9.11.5)
-  - [ ] Add Google Sign-In dependency to build.gradle
-  - [ ] Configure Google OAuth client ID in strings.xml
-  - [ ] Create GoogleSignInHelper class
-  - [ ] Implement ID token retrieval
-  - [ ] Handle user cancellation
-  - [ ] Test with Google OAuth backend endpoint
+- [x] Task 8: Integrate Google Sign-In SDK (AC: E9.11.5)
+  - [x] Created GoogleSignInHelper class with mock implementation
+  - [x] Implemented ID token retrieval (mock)
+  - [x] Handle user cancellation (10% random in mock)
+  - [ ] Add Google Sign-In dependency to build.gradle (pending production)
+  - [ ] Configure Google OAuth client ID (pending production)
+  - [ ] Test with Google OAuth backend endpoint (pending backend)
 
-- [ ] Task 9: Integrate Apple Sign-In (AC: E9.11.5)
-  - [ ] Add Apple Sign-In dependency (if available for Android)
-  - [ ] Configure Apple OAuth client ID
-  - [ ] Create AppleSignInHelper class
-  - [ ] Implement ID token retrieval
-  - [ ] Handle user cancellation
-  - [ ] Test with Apple OAuth backend endpoint
+- [x] Task 9: Integrate Apple Sign-In (AC: E9.11.5)
+  - [x] Created AppleSignInHelper class with mock implementation
+  - [x] Implemented ID token retrieval (mock)
+  - [x] Handle user cancellation (10% random in mock)
+  - [ ] Add Apple Sign-In dependency (pending production)
+  - [ ] Configure Apple OAuth client ID (pending production)
+  - [ ] Test with Apple OAuth backend endpoint (pending backend)
 
 - [x] Task 10: Update Navigation (AC: E9.11.3, E9.11.4)
   - [x] Add Screen.Login to sealed class
@@ -198,15 +198,17 @@ so that I can link my device to my user account and access authenticated feature
   - [x] Add Screen.ForgotPassword to sealed class
   - [x] Add composable routes in NavHost
   - [x] Created ForgotPasswordScreen UI
-  - [ ] Add navigation from Settings → Sign In (pending)
+  - [x] Add navigation from Settings → Sign In
   - [ ] Add deep link support for auth screens (pending)
 
-- [ ] Task 11: Update SettingsScreen (AC: E9.11.6, E9.11.8)
-  - [ ] Show "Sign In" button if not logged in
-  - [ ] Show "Account: {email}" section if logged in
-  - [ ] Show "Sign Out" button if logged in
-  - [ ] Add "My Devices" navigation if logged in
-  - [ ] Add "Groups" navigation if logged in
+- [x] Task 11: Update SettingsScreen (AC: E9.11.6, E9.11.8)
+  - [x] Show "Sign In" button if not logged in
+  - [x] Show "Account: {email}" section if logged in
+  - [x] Show "Sign Out" button if logged in
+  - [x] Add "My Devices" navigation if logged in (placeholder for E10.6)
+  - [x] Add "Groups" navigation if logged in (placeholder for E11.8)
+  - [x] Logout confirmation dialog
+  - [x] Injected AuthRepository into SettingsViewModel
 
 - [ ] Task 12: Testing (All ACs)
   - [ ] Write unit tests for SecureTokenStorage
