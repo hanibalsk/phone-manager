@@ -12,18 +12,21 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
+import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
+import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.permission.PermissionManager
 import javax.inject.Inject
 
 /**
- * Story E1.3/E3.3/E7.4: SettingsViewModel
+ * Story E1.3/E3.3/E7.4/E9.11: SettingsViewModel
  *
  * Manages device settings (displayName, groupId) and handles re-registration
  * Story E3.3: Also manages map polling interval setting (AC E3.3.5)
  * Story E7.4: Also manages weather notification toggle (AC E7.4.5)
+ * Story E9.11: Also manages authentication state and logout (AC E9.11.6, E9.11.8)
  * Movement detection: Also manages movement detection settings and permissions
- * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5, E7.4.5
+ * ACs: E1.3.2, E1.3.3, E1.3.4, E3.3.5, E7.4.5, E9.11.6, E9.11.8
  */
 @HiltViewModel
 class SettingsViewModel
@@ -32,6 +35,7 @@ constructor(
     private val deviceRepository: DeviceRepository,
     private val preferencesRepository: PreferencesRepository,
     private val permissionManager: PermissionManager,
+    private val authRepository: AuthRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -136,6 +140,18 @@ constructor(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = true,
             )
+
+    // Story E9.11: Authentication state (AC E9.11.6, E9.11.8)
+    val currentUser: StateFlow<User?> =
+        authRepository.currentUser
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = null,
+            )
+
+    val isLoggedIn: Boolean
+        get() = authRepository.isLoggedIn()
 
     // Movement detection permission states
     private val _movementPermissionState = MutableStateFlow(MovementPermissionState())
@@ -482,6 +498,17 @@ constructor(
         }
 
         return isValid
+    }
+
+    /**
+     * Story E9.11: Logout user (AC E9.11.6)
+     *
+     * Clears tokens and session state.
+     */
+    fun logout() {
+        viewModelScope.launch {
+            authRepository.logout()
+        }
     }
 }
 

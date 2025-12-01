@@ -218,6 +218,17 @@ fun PhoneManagerNavHost(
                 onNavigateToMovementEvents = {
                     navController.navigate(Screen.MovementEvents.route)
                 },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route)
+                },
+                onNavigateToGroups = {
+                    // TODO: Navigate to groups screen when E11.8 is implemented
+                    navController.navigate(Screen.GroupMembers.route)
+                },
+                onNavigateToMyDevices = {
+                    // TODO: Navigate to my devices screen when E10.6 is implemented
+                    navController.navigate(Screen.Home.route)
+                }
             )
         }
         composable(Screen.Map.route) {

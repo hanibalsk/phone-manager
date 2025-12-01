@@ -70,10 +70,17 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToTripHistory: () -> Unit = {},
     onNavigateToMovementEvents: () -> Unit = {},
+    onNavigateToLogin: () -> Unit = {},
+    onNavigateToGroups: () -> Unit = {},
+    onNavigateToMyDevices: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val showWeatherInNotification by viewModel.showWeatherInNotification.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    // Story E9.11: Authentication state (AC E9.11.6, E9.11.8)
+    val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     // Movement detection states
     val isMovementDetectionEnabled by viewModel.isMovementDetectionEnabled.collectAsStateWithLifecycle()
@@ -160,6 +167,99 @@ fun SettingsScreen(
             // Loading state
             if (uiState.isLoading) {
                 CircularProgressIndicator()
+            }
+
+            // Story E9.11: Authentication Section (AC E9.11.6, E9.11.8)
+            currentUser?.let { user ->
+                // Logged In State
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = "Account",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    OutlinedTextField(
+                        value = user.email,
+                        onValueChange = {},
+                        label = { Text("Email") },
+                        enabled = false,
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        supportingText = { Text("Signed in as ${user.displayName}") }
+                    )
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        OutlinedTextField(
+                            value = "My Devices",
+                            onValueChange = {},
+                            enabled = true,
+                            readOnly = true,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { onNavigateToMyDevices() },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = "Navigate to devices"
+                                )
+                            }
+                        )
+
+                        OutlinedTextField(
+                            value = "Groups",
+                            onValueChange = {},
+                            enabled = true,
+                            readOnly = true,
+                            modifier = Modifier
+                                .weight(1f)
+                                .clickable { onNavigateToGroups() },
+                            trailingIcon = {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                                    contentDescription = "Navigate to groups"
+                                )
+                            }
+                        )
+                    }
+
+                    Button(
+                        onClick = { showLogoutDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Sign Out")
+                    }
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
+            } ?: run {
+                // Not Logged In State
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Sign in to access advanced features",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    Button(
+                        onClick = onNavigateToLogin,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text("Sign In")
+                    }
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(vertical = 16.dp))
             }
 
             // Device ID Display (read-only for transparency)
@@ -495,6 +595,30 @@ fun SettingsScreen(
                     Text(stringResource(R.string.permission_not_now))
                 }
             },
+        )
+    }
+
+    // Story E9.11: Logout Confirmation Dialog (AC E9.11.6)
+    if (showLogoutDialog) {
+        AlertDialog(
+            onDismissRequest = { showLogoutDialog = false },
+            title = { Text("Sign Out") },
+            text = { Text("Are you sure you want to sign out?") },
+            confirmButton = {
+                Button(
+                    onClick = {
+                        showLogoutDialog = false
+                        viewModel.logout()
+                    }
+                ) {
+                    Text("Sign Out")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showLogoutDialog = false }) {
+                    Text("Cancel")
+                }
+            }
         )
     }
 }
