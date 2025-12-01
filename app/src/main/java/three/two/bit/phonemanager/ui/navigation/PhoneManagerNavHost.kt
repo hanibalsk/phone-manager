@@ -12,6 +12,9 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import three.two.bit.phonemanager.ui.alerts.AlertsScreen
 import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
+import three.two.bit.phonemanager.ui.auth.ForgotPasswordScreen
+import three.two.bit.phonemanager.ui.auth.LoginScreen
+import three.two.bit.phonemanager.ui.auth.RegisterScreen
 import three.two.bit.phonemanager.ui.geofences.CreateGeofenceScreen
 import three.two.bit.phonemanager.ui.geofences.GeofencesScreen
 import three.two.bit.phonemanager.ui.group.GroupMembersScreen
@@ -30,7 +33,14 @@ import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
 import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
 
 sealed class Screen(val route: String) {
+    // Story E9.11: Authentication screens
+    object Login : Screen("login")
+    object Register : Screen("register")
+    object ForgotPassword : Screen("forgot_password")
+
+    // Legacy registration (to be replaced by Login/Register flow)
     object Registration : Screen("registration")
+
     object Home : Screen("home")
     object GroupMembers : Screen("group_members")
     object Settings : Screen("settings")
@@ -109,6 +119,45 @@ fun PhoneManagerNavHost(
         navController = navController,
         startDestination = startDestination,
     ) {
+        // Story E9.11: Authentication screens
+        composable(Screen.Login.route) {
+            LoginScreen(
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route)
+                },
+                onNavigateToForgotPassword = {
+                    navController.navigate(Screen.ForgotPassword.route)
+                },
+                onLoginSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.Register.route) {
+            RegisterScreen(
+                onNavigateToLogin = {
+                    navController.popBackStack()
+                },
+                onRegisterSuccess = {
+                    navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+
+        composable(Screen.ForgotPassword.route) {
+            ForgotPasswordScreen(
+                onNavigateBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        // Legacy registration screen (will be removed when auth is integrated)
         composable(Screen.Registration.route) {
             RegistrationScreen(
                 onRegistrationComplete = {
