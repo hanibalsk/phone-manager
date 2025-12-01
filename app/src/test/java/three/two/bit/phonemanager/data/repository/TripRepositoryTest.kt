@@ -31,12 +31,14 @@ import kotlin.test.assertTrue
 class TripRepositoryTest {
 
     private lateinit var tripDao: TripDao
+    private lateinit var tripApiService: three.two.bit.phonemanager.network.TripApiService
     private lateinit var repository: TripRepositoryImpl
 
     @Before
     fun setup() {
         tripDao = mockk(relaxed = true)
-        repository = TripRepositoryImpl(tripDao)
+        tripApiService = mockk(relaxed = true)
+        repository = TripRepositoryImpl(tripDao, tripApiService)
     }
 
     // region Test Data

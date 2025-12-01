@@ -33,12 +33,14 @@ import kotlin.test.assertTrue
 class MovementEventRepositoryTest {
 
     private lateinit var movementEventDao: MovementEventDao
+    private lateinit var movementEventApiService: three.two.bit.phonemanager.network.MovementEventApiService
     private lateinit var repository: MovementEventRepositoryImpl
 
     @Before
     fun setup() {
         movementEventDao = mockk(relaxed = true)
-        repository = MovementEventRepositoryImpl(movementEventDao)
+        movementEventApiService = mockk(relaxed = true)
+        repository = MovementEventRepositoryImpl(movementEventDao, movementEventApiService)
     }
 
     // region Test Data
