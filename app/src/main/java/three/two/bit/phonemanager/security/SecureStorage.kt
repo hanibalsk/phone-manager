@@ -55,6 +55,11 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
         private const val KEY_DEVICE_ID = "device_id"
         private const val KEY_DISPLAY_NAME = "display_name"
         private const val KEY_GROUP_ID = "group_id"
+
+        // E9.11: JWT Token Storage Keys
+        private const val KEY_ACCESS_TOKEN = "access_token"
+        private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_TOKEN_EXPIRY_TIME = "token_expiry_time"
     }
 
     /**
@@ -140,6 +145,90 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
      * Check if device is registered (has displayName and groupId)
      */
     fun isRegistered(): Boolean = getDisplayName() != null && getGroupId() != null
+
+    // ========================================================================
+    // E9.11: JWT Token Management
+    // ========================================================================
+
+    /**
+     * Save access token securely
+     */
+    fun saveAccessToken(token: String) {
+        encryptedPrefs.edit()
+            .putString(KEY_ACCESS_TOKEN, token)
+            .apply()
+        Timber.d("Access token stored securely")
+    }
+
+    /**
+     * Save refresh token securely
+     */
+    fun saveRefreshToken(token: String) {
+        encryptedPrefs.edit()
+            .putString(KEY_REFRESH_TOKEN, token)
+            .apply()
+        Timber.d("Refresh token stored securely")
+    }
+
+    /**
+     * Get access token
+     */
+    fun getAccessToken(): String? = encryptedPrefs.getString(KEY_ACCESS_TOKEN, null)
+
+    /**
+     * Get refresh token
+     */
+    fun getRefreshToken(): String? = encryptedPrefs.getString(KEY_REFRESH_TOKEN, null)
+
+    /**
+     * Save token expiry time (Unix timestamp in milliseconds)
+     */
+    fun saveTokenExpiryTime(expiryTimeMs: Long) {
+        encryptedPrefs.edit()
+            .putLong(KEY_TOKEN_EXPIRY_TIME, expiryTimeMs)
+            .apply()
+        Timber.d("Token expiry time stored: $expiryTimeMs")
+    }
+
+    /**
+     * Get token expiry time (Unix timestamp in milliseconds)
+     */
+    fun getTokenExpiryTime(): Long? {
+        val expiryTime = encryptedPrefs.getLong(KEY_TOKEN_EXPIRY_TIME, -1L)
+        return if (expiryTime == -1L) null else expiryTime
+    }
+
+    /**
+     * Check if access token is expired
+     * Returns true if token is expired or expiry time is not set
+     */
+    fun isTokenExpired(): Boolean {
+        val expiryTime = getTokenExpiryTime() ?: return true
+        val currentTime = System.currentTimeMillis()
+        // Add 5-minute buffer before actual expiry to refresh proactively
+        val bufferMs = 5 * 60 * 1000L
+        return currentTime >= (expiryTime - bufferMs)
+    }
+
+    /**
+     * Clear all JWT tokens
+     */
+    fun clearTokens() {
+        encryptedPrefs.edit()
+            .remove(KEY_ACCESS_TOKEN)
+            .remove(KEY_REFRESH_TOKEN)
+            .remove(KEY_TOKEN_EXPIRY_TIME)
+            .apply()
+        Timber.d("JWT tokens cleared")
+    }
+
+    /**
+     * Check if user is authenticated (has valid tokens)
+     */
+    fun isAuthenticated(): Boolean {
+        val hasTokens = getAccessToken() != null && getRefreshToken() != null
+        return hasTokens && !isTokenExpired()
+    }
 
     /**
      * Clear all secure storage (for logout/reset)
