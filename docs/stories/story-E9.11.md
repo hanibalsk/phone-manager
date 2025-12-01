@@ -4,7 +4,7 @@
 **Epic**: 9 - Authentication Foundation
 **Priority**: Critical
 **Estimate**: 8 story points (3-4 days)
-**Status**: In Progress (Blocked - awaiting backend)
+**Status**: In Progress (7/12 tasks complete - Blocked by backend E9.1-E9.10)
 **Created**: 2025-12-01
 **PRD Reference**: PRD-user-management.md, USER_MANAGEMENT_SPEC.md
 
@@ -109,72 +109,72 @@ so that I can link my device to my user account and access authenticated feature
   - [x] Add `isTokenExpired(): Boolean` helper
   - [x] Add `isAuthenticated(): Boolean` helper
 
-- [ ] Task 2: Implement AuthInterceptor (AC: E9.11.2, E9.11.8)
-  - [ ] Create AuthInterceptor class implementing Interceptor
-  - [ ] Inject SecureStorage and PreferencesRepository
-  - [ ] Add Bearer token to Authorization header if available
-  - [ ] Fall back to X-API-Key if no token exists
-  - [ ] Handle 401 Unauthorized by refreshing token
-  - [ ] Logout user if refresh token fails
-  - [ ] Add to Ktor client in NetworkModule
+- [x] Task 2: Implement AuthInterceptor (AC: E9.11.2, E9.11.8)
+  - [x] Create AuthInterceptor class implementing Interceptor
+  - [x] Inject SecureStorage and PreferencesRepository
+  - [x] Add Bearer token to Authorization header if available
+  - [x] Fall back to X-API-Key if no token exists
+  - [x] Handle 401 Unauthorized by refreshing token
+  - [x] Logout user if refresh token fails
+  - [ ] Add to Ktor client in NetworkModule (pending backend integration)
 
-- [ ] Task 3: Create AuthApiService (AC: E9.11.2, E9.11.5)
-  - [ ] Create data class `RegisterRequest(email, password, displayName)`
-  - [ ] Create data class `LoginRequest(email, password)`
-  - [ ] Create data class `AuthResponse(accessToken, refreshToken, user)`
-  - [ ] Create data class `RefreshRequest(refreshToken)`
-  - [ ] Create data class `OAuthRequest(provider, idToken)`
-  - [ ] Add `POST /auth/register` endpoint
-  - [ ] Add `POST /auth/login` endpoint
-  - [ ] Add `POST /auth/logout` endpoint
-  - [ ] Add `POST /auth/refresh` endpoint
-  - [ ] Add `POST /auth/oauth` endpoint
+- [x] Task 3: Create AuthApiService (AC: E9.11.2, E9.11.5)
+  - [x] Create data class `RegisterRequest(email, password, displayName)`
+  - [x] Create data class `LoginRequest(email, password)`
+  - [x] Create data class `AuthResponse(accessToken, refreshToken, user)`
+  - [x] Create data class `RefreshRequest(refreshToken)`
+  - [x] Create data class `OAuthRequest(provider, idToken)`
+  - [x] Add `POST /auth/register` endpoint
+  - [x] Add `POST /auth/login` endpoint
+  - [x] Add `POST /auth/logout` endpoint
+  - [x] Add `POST /auth/refresh` endpoint
+  - [x] Add `POST /auth/oauth` endpoint
 
-- [ ] Task 4: Create AuthRepository (AC: E9.11.6)
-  - [ ] Create AuthRepository interface
-  - [ ] Implement register() function
-  - [ ] Implement login() function
-  - [ ] Implement logout() function
-  - [ ] Implement refreshToken() function
-  - [ ] Implement oauthLogin() function
-  - [ ] Implement isLoggedIn() function
-  - [ ] Implement getCurrentUser() function
-  - [ ] Store tokens in SecureStorage on success
+- [x] Task 4: Create AuthRepository (AC: E9.11.6)
+  - [x] Create AuthRepository interface
+  - [x] Implement register() function
+  - [x] Implement login() function
+  - [x] Implement logout() function
+  - [x] Implement refreshToken() function
+  - [x] Implement oauthLogin() function
+  - [x] Implement isLoggedIn() function
+  - [x] Implement getCurrentUser() function
+  - [x] Store tokens in SecureStorage on success
 
-- [ ] Task 5: Create LoginScreen UI (AC: E9.11.3, E9.11.5, E9.11.7)
-  - [ ] Create LoginScreen composable
-  - [ ] Add email TextField with validation
-  - [ ] Add password TextField (visualTransformation)
-  - [ ] Add "Sign In" Button
-  - [ ] Add "Create Account" TextButton
-  - [ ] Add "Forgot Password?" TextButton
-  - [ ] Add Google Sign-In button (use painterResource)
-  - [ ] Add Apple Sign-In button
-  - [ ] Add CircularProgressIndicator for loading state
-  - [ ] Display error messages via Snackbar
+- [x] Task 5: Create LoginScreen UI (AC: E9.11.3, E9.11.5, E9.11.7)
+  - [x] Create LoginScreen composable
+  - [x] Add email TextField with validation
+  - [x] Add password TextField (visualTransformation)
+  - [x] Add "Sign In" Button
+  - [x] Add "Create Account" TextButton
+  - [x] Add "Forgot Password?" TextButton
+  - [x] Add Google Sign-In button (use painterResource)
+  - [x] Add Apple Sign-In button
+  - [x] Add CircularProgressIndicator for loading state
+  - [x] Display error messages via Snackbar
 
-- [ ] Task 6: Create RegisterScreen UI (AC: E9.11.4, E9.11.7)
-  - [ ] Create RegisterScreen composable
-  - [ ] Add display name TextField
-  - [ ] Add email TextField with validation
-  - [ ] Add password TextField with strength indicator
-  - [ ] Add confirm password TextField
-  - [ ] Add terms of service Checkbox
-  - [ ] Add "Create Account" Button
-  - [ ] Add "Sign In" TextButton
-  - [ ] Display error messages via Snackbar
+- [x] Task 6: Create RegisterScreen UI (AC: E9.11.4, E9.11.7)
+  - [x] Create RegisterScreen composable
+  - [x] Add display name TextField
+  - [x] Add email TextField with validation
+  - [x] Add password TextField with strength indicator
+  - [x] Add confirm password TextField
+  - [x] Add terms of service Checkbox
+  - [x] Add "Create Account" Button
+  - [x] Add "Sign In" TextButton
+  - [x] Display error messages via Snackbar
 
-- [ ] Task 7: Create AuthViewModel (AC: E9.11.6, E9.11.7)
-  - [ ] Create AuthViewModel with Hilt
-  - [ ] Create AuthUiState sealed class (Idle, Loading, Success, Error)
-  - [ ] Inject AuthRepository
-  - [ ] Add register() function
-  - [ ] Add login() function
-  - [ ] Add logout() function
-  - [ ] Add googleSignIn() function
-  - [ ] Add appleSignIn() function
-  - [ ] Add StateFlow for auth state
-  - [ ] Add StateFlow for current user
+- [x] Task 7: Create AuthViewModel (AC: E9.11.6, E9.11.7)
+  - [x] Create AuthViewModel with Hilt
+  - [x] Create AuthUiState sealed class (Idle, Loading, Success, Error)
+  - [x] Inject AuthRepository
+  - [x] Add register() function
+  - [x] Add login() function
+  - [x] Add logout() function
+  - [x] Add googleSignIn() function (oauthSignIn)
+  - [x] Add appleSignIn() function (oauthSignIn)
+  - [x] Add StateFlow for auth state
+  - [x] Add StateFlow for current user
 
 - [ ] Task 8: Integrate Google Sign-In SDK (AC: E9.11.5)
   - [ ] Add Google Sign-In dependency to build.gradle
