@@ -40,6 +40,10 @@ import three.two.bit.phonemanager.network.models.UpdateDeviceSettingsRequest
 import three.two.bit.phonemanager.network.models.UpdateSettingRequest
 import three.two.bit.phonemanager.network.models.UpdateSettingResponse
 import three.two.bit.phonemanager.network.models.UpdateSettingsResponse
+import three.two.bit.phonemanager.network.models.CreateUnlockRequestBody
+import three.two.bit.phonemanager.network.models.CreateUnlockRequestResponse
+import three.two.bit.phonemanager.network.models.UnlockRequestListResponse
+import three.two.bit.phonemanager.network.models.WithdrawUnlockRequestResponse
 import three.two.bit.phonemanager.network.models.toDomain
 import timber.log.Timber
 import javax.inject.Inject
@@ -369,6 +373,61 @@ interface DeviceApiService {
         templateId: String,
         accessToken: String,
     ): Result<Unit>
+
+    // ============================================================================
+    // Story E12.8: Unlock Request API (AC E12.8.1-E12.8.8)
+    // ============================================================================
+
+    /**
+     * Story E12.8 Task 2: Create unlock request
+     * POST /api/v1/devices/{deviceId}/settings/unlock-requests
+     *
+     * AC E12.8.2: Submit Unlock Request
+     *
+     * @param deviceId The device's UUID
+     * @param settingKey The setting key to request unlock for
+     * @param reason User-provided reason for the unlock request
+     * @param accessToken JWT access token for authentication
+     * @return Result with created unlock request
+     */
+    suspend fun createUnlockRequest(
+        deviceId: String,
+        settingKey: String,
+        reason: String,
+        accessToken: String,
+    ): Result<CreateUnlockRequestResponse>
+
+    /**
+     * Story E12.8 Task 2: Get user's unlock requests
+     * GET /api/v1/devices/{deviceId}/settings/unlock-requests
+     *
+     * AC E12.8.3: View My Unlock Requests
+     *
+     * @param deviceId The device's UUID
+     * @param status Optional filter by status (pending, approved, denied, withdrawn)
+     * @param accessToken JWT access token for authentication
+     * @return Result with list of unlock requests
+     */
+    suspend fun getUnlockRequests(
+        deviceId: String,
+        status: String? = null,
+        accessToken: String,
+    ): Result<UnlockRequestListResponse>
+
+    /**
+     * Story E12.8 Task 2: Withdraw unlock request
+     * DELETE /api/v1/unlock-requests/{requestId}
+     *
+     * AC E12.8.4: Withdraw Unlock Request
+     *
+     * @param requestId The unlock request's UUID
+     * @param accessToken JWT access token for authentication
+     * @return Result with withdrawal confirmation
+     */
+    suspend fun withdrawUnlockRequest(
+        requestId: String,
+        accessToken: String,
+    ): Result<WithdrawUnlockRequestResponse>
 }
 
 @Singleton
@@ -942,6 +1001,89 @@ class DeviceApiServiceImpl @Inject constructor(
         Result.success(Unit)
     } catch (e: Exception) {
         Timber.e(e, "Failed to delete settings template: $templateId")
+        Result.failure(e)
+    }
+
+    // ============================================================================
+    // Story E12.8: Unlock Request API Implementation
+    // ============================================================================
+
+    /**
+     * Story E12.8 Task 2: Create unlock request
+     * POST /api/v1/devices/{deviceId}/settings/unlock-requests
+     */
+    override suspend fun createUnlockRequest(
+        deviceId: String,
+        settingKey: String,
+        reason: String,
+        accessToken: String,
+    ): Result<CreateUnlockRequestResponse> = try {
+        Timber.d("Creating unlock request for device $deviceId, setting $settingKey")
+
+        val response: CreateUnlockRequestResponse = httpClient.post(
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings/unlock-requests",
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(CreateUnlockRequestBody(settingKey = settingKey, reason = reason))
+        }.body()
+
+        Timber.i("Successfully created unlock request: ${response.id}")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to create unlock request for device $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.8 Task 2: Get user's unlock requests
+     * GET /api/v1/devices/{deviceId}/settings/unlock-requests
+     */
+    override suspend fun getUnlockRequests(
+        deviceId: String,
+        status: String?,
+        accessToken: String,
+    ): Result<UnlockRequestListResponse> = try {
+        Timber.d("Fetching unlock requests for device $deviceId, status=$status")
+
+        val response: UnlockRequestListResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings/unlock-requests",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+            status?.let { parameter("status", it) }
+        }.body()
+
+        Timber.i("Fetched ${response.requests.size} unlock requests for device $deviceId")
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to fetch unlock requests for device $deviceId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E12.8 Task 2: Withdraw unlock request
+     * DELETE /api/v1/unlock-requests/{requestId}
+     */
+    override suspend fun withdrawUnlockRequest(
+        requestId: String,
+        accessToken: String,
+    ): Result<WithdrawUnlockRequestResponse> = try {
+        Timber.d("Withdrawing unlock request: $requestId")
+
+        val response: WithdrawUnlockRequestResponse = httpClient.delete(
+            "${apiConfig.baseUrl}/api/v1/unlock-requests/$requestId",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        if (response.success) {
+            Timber.i("Successfully withdrew unlock request: $requestId")
+        } else {
+            Timber.w("Failed to withdraw unlock request: ${response.error}")
+        }
+        Result.success(response)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to withdraw unlock request: $requestId")
         Result.failure(e)
     }
 }

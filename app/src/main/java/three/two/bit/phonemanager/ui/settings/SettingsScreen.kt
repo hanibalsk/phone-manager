@@ -55,7 +55,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.DeviceSettings
+import three.two.bit.phonemanager.domain.model.SettingDefinition
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
+import three.two.bit.phonemanager.ui.unlock.RequestUnlockDialog
 import kotlin.math.roundToInt
 
 /**
@@ -77,6 +79,8 @@ fun SettingsScreen(
     onNavigateToLogin: () -> Unit = {},
     onNavigateToGroups: () -> Unit = {},
     onNavigateToMyDevices: () -> Unit = {},
+    // Story E12.8: Navigate to unlock requests screen
+    onNavigateToUnlockRequests: (deviceId: String) -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val showWeatherInNotification by viewModel.showWeatherInNotification.collectAsStateWithLifecycle()
@@ -110,6 +114,13 @@ fun SettingsScreen(
     val serverSettings by viewModel.serverSettings.collectAsStateWithLifecycle()
     val managedStatus by viewModel.managedStatus.collectAsStateWithLifecycle()
     val lockDialogState by viewModel.lockDialogState.collectAsStateWithLifecycle()
+
+    // Story E12.8: Unlock request dialog state (AC E12.8.1, E12.8.2)
+    var showUnlockRequestDialog by remember { mutableStateOf(false) }
+    var unlockRequestSettingKey by remember { mutableStateOf<String?>(null) }
+    var unlockRequestSettingName by remember { mutableStateOf<String?>(null) }
+    var unlockRequestReason by remember { mutableStateOf("") }
+    var isSubmittingUnlockRequest by remember { mutableStateOf(false) }
 
     // Build list of permissions to request
     val permissionsToRequest = remember {
@@ -533,6 +544,14 @@ fun SettingsScreen(
                 onClick = onNavigateToMovementEvents,
             )
 
+            // Story E12.8: Navigation to unlock requests (AC E12.8.3)
+            if (managedStatus.isManaged) {
+                SettingsNavigationRow(
+                    title = stringResource(R.string.settings_view_unlock_requests),
+                    onClick = { onNavigateToUnlockRequests(viewModel.deviceId) },
+                )
+            }
+
             // Save Button (AC E1.3.2, E1.3.3)
             Button(
                 onClick = viewModel::onSaveClicked,
@@ -628,7 +647,60 @@ fun SettingsScreen(
             settingKey = state.settingKey,
             lockedBy = state.lockedBy,
             onDismiss = viewModel::dismissLockedDialog,
-            onRequestUnlock = { viewModel.requestUnlock(state.settingKey) },
+            onRequestUnlock = {
+                // Story E12.8: Show unlock request dialog (AC E12.8.1)
+                unlockRequestSettingKey = state.settingKey
+                unlockRequestSettingName = SettingDefinition.forKey(state.settingKey)?.displayName
+                    ?: state.settingKey.replace("_", " ").replaceFirstChar { it.uppercase() }
+                unlockRequestReason = ""
+                showUnlockRequestDialog = true
+                viewModel.dismissLockedDialog()
+            },
+        )
+    }
+
+    // Story E12.8: Request Unlock Dialog (AC E12.8.1, E12.8.2)
+    if (showUnlockRequestDialog && unlockRequestSettingKey != null) {
+        RequestUnlockDialog(
+            settingName = unlockRequestSettingName ?: "",
+            reason = unlockRequestReason,
+            onReasonChange = { newReason ->
+                unlockRequestReason = newReason.take(200)
+            },
+            onSubmit = {
+                isSubmittingUnlockRequest = true
+                viewModel.submitUnlockRequest(
+                    settingKey = unlockRequestSettingKey!!,
+                    reason = unlockRequestReason,
+                    onSuccess = {
+                        isSubmittingUnlockRequest = false
+                        showUnlockRequestDialog = false
+                        unlockRequestSettingKey = null
+                        unlockRequestSettingName = null
+                        unlockRequestReason = ""
+                    },
+                    onError = {
+                        isSubmittingUnlockRequest = false
+                    },
+                )
+            },
+            onDismiss = {
+                if (!isSubmittingUnlockRequest) {
+                    showUnlockRequestDialog = false
+                    unlockRequestSettingKey = null
+                    unlockRequestSettingName = null
+                    unlockRequestReason = ""
+                }
+            },
+            isSubmitting = isSubmittingUnlockRequest,
+            isValid = unlockRequestReason.length in 5..200,
+            errorMessage = when {
+                unlockRequestReason.isEmpty() -> null
+                unlockRequestReason.length < 5 -> "Reason must be at least 5 characters"
+                unlockRequestReason.length > 200 -> "Reason cannot exceed 200 characters"
+                else -> null
+            },
+            remainingCharacters = 200 - unlockRequestReason.length,
         )
     }
 }

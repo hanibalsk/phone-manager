@@ -444,4 +444,14 @@
     <string name="setting_secret_mode">Secret Mode</string>
     <string name="setting_weather_notification">Weather Notifications</string>
     <string name="setting_trip_detection">Trip Detection</string>
+
+    <!-- Story E12.8: Unlock Request Notifications -->
+    <string name="notification_unlock_request_approved_title">Request Approved</string>
+    <string name="notification_unlock_request_approved">Your request to unlock \"%1$s\" was approved by %2$s</string>
+    <string name="notification_unlock_request_denied_title">Request Denied</string>
+    <string name="notification_unlock_request_denied">Your request to unlock \"%1$s\" was denied by %2$s</string>
+    <string name="notification_unlock_request_denied_with_reason">Your request to unlock \"%1$s\" was denied by %2$s: %3$s</string>
+
+    <!-- Story E12.8: Settings Navigation -->
+    <string name="settings_view_unlock_requests">My Unlock Requests</string>
 </resources>

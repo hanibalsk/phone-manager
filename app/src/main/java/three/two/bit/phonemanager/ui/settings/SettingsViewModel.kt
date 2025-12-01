@@ -15,6 +15,7 @@ import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
+import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
 import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.domain.model.DeviceSettings
 import three.two.bit.phonemanager.domain.model.ManagedDeviceStatus
@@ -43,6 +44,7 @@ constructor(
     private val permissionManager: PermissionManager,
     private val authRepository: AuthRepository,
     private val settingsSyncRepository: SettingsSyncRepository,
+    private val unlockRequestRepository: UnlockRequestRepository,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -590,14 +592,40 @@ constructor(
     }
 
     /**
-     * Request unlock for a setting.
+     * Request unlock for a setting (legacy - kept for compatibility).
      * AC E12.6.3: Offer "Request Unlock" button
      */
     fun requestUnlock(settingKey: String) {
         viewModelScope.launch {
-            // TODO: Implement unlock request API
-            // For now, just dismiss the dialog
             _lockDialogState.value = null
+        }
+    }
+
+    /**
+     * Story E12.8: Submit unlock request for a setting.
+     * AC E12.8.2: Submit Unlock Request
+     */
+    fun submitUnlockRequest(
+        settingKey: String,
+        reason: String,
+        onSuccess: () -> Unit,
+        onError: (String) -> Unit,
+    ) {
+        viewModelScope.launch {
+            val result = unlockRequestRepository.createUnlockRequest(
+                deviceId = deviceId,
+                settingKey = settingKey,
+                reason = reason,
+            )
+
+            result.fold(
+                onSuccess = {
+                    onSuccess()
+                },
+                onFailure = { error ->
+                    onError(error.message ?: "Failed to submit unlock request")
+                },
+            )
         }
     }
 

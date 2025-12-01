@@ -20,6 +20,8 @@ import three.two.bit.phonemanager.data.repository.AdminSettingsRepository
 import three.two.bit.phonemanager.data.repository.AdminSettingsRepositoryImpl
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepositoryImpl
+import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
+import three.two.bit.phonemanager.data.repository.UnlockRequestRepositoryImpl
 import three.two.bit.phonemanager.data.repository.WebhookRepository
 import three.two.bit.phonemanager.data.repository.WebhookRepositoryImpl
 import javax.inject.Singleton
@@ -87,4 +89,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAdminSettingsRepository(impl: AdminSettingsRepositoryImpl): AdminSettingsRepository
+
+    /**
+     * Story E12.8: Unlock Request Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindUnlockRequestRepository(impl: UnlockRequestRepositoryImpl): UnlockRequestRepository
 }

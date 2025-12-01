@@ -17,6 +17,9 @@ import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.MainActivity
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
+import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
+import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
+import kotlinx.datetime.Instant
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -36,6 +39,9 @@ class SettingsMessagingService : FirebaseMessagingService() {
     @Inject
     lateinit var settingsSyncRepository: SettingsSyncRepository
 
+    @Inject
+    lateinit var unlockRequestRepository: UnlockRequestRepository
+
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     companion object {
@@ -47,6 +53,8 @@ class SettingsMessagingService : FirebaseMessagingService() {
         const val TYPE_SETTINGS_UPDATE = "settings_update"
         const val TYPE_SETTING_LOCKED = "setting_locked"
         const val TYPE_SETTING_UNLOCKED = "setting_unlocked"
+        const val TYPE_UNLOCK_REQUEST_APPROVED = "unlock_request_approved"
+        const val TYPE_UNLOCK_REQUEST_DENIED = "unlock_request_denied"
 
         // Payload keys
         const val KEY_TYPE = "type"
@@ -56,6 +64,9 @@ class SettingsMessagingService : FirebaseMessagingService() {
         const val KEY_SETTING_KEY = "setting_key"
         const val KEY_SETTING_VALUE = "setting_value"
         const val KEY_GROUP_NAME = "group_name"
+        const val KEY_REQUEST_ID = "request_id"
+        const val KEY_RESPONSE_MESSAGE = "response_message"
+        const val KEY_RESPONDED_AT = "responded_at"
     }
 
     override fun onCreate() {
@@ -87,6 +98,8 @@ class SettingsMessagingService : FirebaseMessagingService() {
             TYPE_SETTINGS_UPDATE -> handleSettingsUpdate(data)
             TYPE_SETTING_LOCKED -> handleSettingLocked(data)
             TYPE_SETTING_UNLOCKED -> handleSettingUnlocked(data)
+            TYPE_UNLOCK_REQUEST_APPROVED -> handleUnlockRequestResponse(data, approved = true)
+            TYPE_UNLOCK_REQUEST_DENIED -> handleUnlockRequestResponse(data, approved = false)
             else -> Timber.w("Unknown FCM message type: $messageType")
         }
     }
@@ -172,6 +185,62 @@ class SettingsMessagingService : FirebaseMessagingService() {
     }
 
     /**
+     * Story E12.8: Handle unlock request response push notification.
+     * AC E12.8.5: Request Status Notifications
+     * AC E12.8.8: Setting Auto-Unlock on Approval
+     */
+    private fun handleUnlockRequestResponse(data: Map<String, String>, approved: Boolean) {
+        Timber.i("Handling unlock request response push: approved=$approved")
+
+        val requestId = data[KEY_REQUEST_ID] ?: return
+        val settingKey = data[KEY_SETTING_KEY]
+        val adminName = data[KEY_ADMIN_NAME] ?: data[KEY_ADMIN_EMAIL]
+        val responseMessage = data[KEY_RESPONSE_MESSAGE]
+        val respondedAtString = data[KEY_RESPONDED_AT]
+
+        serviceScope.launch {
+            try {
+                // Parse responded_at timestamp
+                val respondedAt = respondedAtString?.let {
+                    try {
+                        Instant.parse(it)
+                    } catch (e: Exception) {
+                        Timber.w(e, "Failed to parse responded_at: $it")
+                        null
+                    }
+                }
+
+                // Update local request state
+                val status = if (approved) {
+                    UnlockRequestStatus.APPROVED
+                } else {
+                    UnlockRequestStatus.DENIED
+                }
+
+                unlockRequestRepository.updateRequestStatus(
+                    requestId = requestId,
+                    status = status,
+                    adminName = adminName,
+                    responseMessage = responseMessage,
+                    respondedAt = respondedAt,
+                )
+
+                // AC E12.8.8: If approved, unlock the setting
+                if (approved && settingKey != null) {
+                    settingsSyncRepository.handleSettingLockPush(settingKey, isLocked = false, adminName ?: "Admin")
+                }
+
+                // Show notification
+                showUnlockRequestResponseNotification(settingKey, approved, adminName, responseMessage)
+
+                Timber.i("Unlock request $requestId ${if (approved) "approved" else "denied"} by $adminName")
+            } catch (e: Exception) {
+                Timber.e(e, "Failed to process unlock request response push")
+            }
+        }
+    }
+
+    /**
      * Parse settings JSON from push payload.
      */
     private fun parseSettingsJson(settingsJson: String?): Map<String, Any> {
@@ -241,6 +310,38 @@ class SettingsMessagingService : FirebaseMessagingService() {
         val title = getString(R.string.notification_setting_unlocked_title)
         val settingName = getSettingDisplayName(settingKey)
         val message = getString(R.string.notification_setting_unlocked, settingName)
+
+        showNotification(title, message)
+    }
+
+    /**
+     * Story E12.8: Show notification for unlock request response.
+     * AC E12.8.5: Request Status Notifications
+     */
+    private fun showUnlockRequestResponseNotification(
+        settingKey: String?,
+        approved: Boolean,
+        adminName: String?,
+        responseMessage: String?,
+    ) {
+        val settingName = settingKey?.let { getSettingDisplayName(it) } ?: "Setting"
+        val admin = adminName ?: "Admin"
+
+        val title = if (approved) {
+            getString(R.string.notification_unlock_request_approved_title)
+        } else {
+            getString(R.string.notification_unlock_request_denied_title)
+        }
+
+        val message = if (approved) {
+            getString(R.string.notification_unlock_request_approved, settingName, admin)
+        } else {
+            if (!responseMessage.isNullOrBlank()) {
+                getString(R.string.notification_unlock_request_denied_with_reason, settingName, admin, responseMessage)
+            } else {
+                getString(R.string.notification_unlock_request_denied, settingName, admin)
+            }
+        }
 
         showNotification(title, message)
     }

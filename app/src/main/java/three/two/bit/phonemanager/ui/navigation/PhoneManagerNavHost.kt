@@ -43,6 +43,7 @@ import three.two.bit.phonemanager.ui.admin.MemberDevicesScreen
 import three.two.bit.phonemanager.ui.admin.SettingsHistoryScreen
 import three.two.bit.phonemanager.ui.admin.SettingsTemplateScreen
 import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
+import three.two.bit.phonemanager.ui.unlock.UnlockRequestsScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.weather.WeatherScreen
 import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
@@ -114,6 +115,11 @@ sealed class Screen(val route: String) {
         fun createRoute(deviceIds: List<String>) = "bulk_settings/${deviceIds.joinToString(",")}"
     }
     object SettingsTemplates : Screen("settings_templates")
+
+    // Story E12.8: Unlock Request UI screens
+    object UnlockRequests : Screen("unlock_requests/{deviceId}") {
+        fun createRoute(deviceId: String) = "unlock_requests/$deviceId"
+    }
 }
 
 /**
@@ -297,7 +303,11 @@ fun PhoneManagerNavHost(
                 },
                 onNavigateToMyDevices = {
                     navController.navigate(Screen.DeviceList.route)
-                }
+                },
+                // Story E12.8: Navigate to unlock requests screen
+                onNavigateToUnlockRequests = { deviceId ->
+                    navController.navigate(Screen.UnlockRequests.createRoute(deviceId))
+                },
             )
         }
         composable(Screen.Map.route) {
@@ -582,6 +592,18 @@ fun PhoneManagerNavHost(
                     // Template application is handled within the screen via ViewModel
                     // This callback could navigate to device selection if needed
                 },
+            )
+        }
+
+        // Story E12.8: Unlock Request UI screens (AC E12.8.1-E12.8.10)
+        composable(
+            route = Screen.UnlockRequests.route,
+            arguments = listOf(
+                navArgument("deviceId") { type = NavType.StringType }
+            ),
+        ) {
+            UnlockRequestsScreen(
+                onNavigateBack = { navController.popBackStack() },
             )
         }
     }
