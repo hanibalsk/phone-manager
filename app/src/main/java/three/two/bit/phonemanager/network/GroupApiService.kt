@@ -11,16 +11,24 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.domain.model.GroupInvite
 import three.two.bit.phonemanager.domain.model.GroupMembership
+import three.two.bit.phonemanager.domain.model.InviteValidationResult
+import three.two.bit.phonemanager.domain.model.JoinGroupResult
 import three.two.bit.phonemanager.network.models.CreateGroupRequest
 import three.two.bit.phonemanager.network.models.CreateGroupResponse
+import three.two.bit.phonemanager.network.models.CreateInviteRequest
+import three.two.bit.phonemanager.network.models.CreateInviteResponse
 import three.two.bit.phonemanager.network.models.GroupDetailResponse
 import three.two.bit.phonemanager.network.models.GroupOperationResponse
+import three.two.bit.phonemanager.network.models.JoinGroupResponse
 import three.two.bit.phonemanager.network.models.ListGroupsResponse
+import three.two.bit.phonemanager.network.models.ListInvitesResponse
 import three.two.bit.phonemanager.network.models.ListMembersResponse
 import three.two.bit.phonemanager.network.models.TransferOwnershipRequest
 import three.two.bit.phonemanager.network.models.UpdateGroupRequest
 import three.two.bit.phonemanager.network.models.UpdateMemberRoleRequest
+import three.two.bit.phonemanager.network.models.ValidateInviteResponse
 import three.two.bit.phonemanager.network.models.toDomain
 import timber.log.Timber
 import javax.inject.Inject
@@ -172,6 +180,77 @@ interface GroupApiService {
         newOwnerId: String,
         accessToken: String,
     ): Result<Unit>
+
+    // ==========================================================================
+    // Story E11.9: Group Invite Endpoints
+    // ==========================================================================
+
+    /**
+     * AC E11.9.1: Create a new invite for a group
+     * POST /groups/{groupId}/invites
+     *
+     * @param groupId The group's ID
+     * @param expiryDays Number of days until the invite expires (default: 7)
+     * @param maxUses Maximum number of uses (-1 for unlimited)
+     * @param accessToken JWT access token
+     * @return Result with created invite on success
+     */
+    suspend fun createInvite(
+        groupId: String,
+        expiryDays: Int,
+        maxUses: Int,
+        accessToken: String,
+    ): Result<GroupInvite>
+
+    /**
+     * AC E11.9.6: Get all invites for a group
+     * GET /groups/{groupId}/invites
+     *
+     * @param groupId The group's ID
+     * @param accessToken JWT access token
+     * @return Result with list of invites on success
+     */
+    suspend fun getGroupInvites(
+        groupId: String,
+        accessToken: String,
+    ): Result<List<GroupInvite>>
+
+    /**
+     * AC E11.9.7: Revoke an invite
+     * DELETE /groups/{groupId}/invites/{inviteId}
+     *
+     * @param groupId The group's ID
+     * @param inviteId The invite's ID
+     * @param accessToken JWT access token
+     * @return Result with success status
+     */
+    suspend fun revokeInvite(
+        groupId: String,
+        inviteId: String,
+        accessToken: String,
+    ): Result<Unit>
+
+    /**
+     * AC E11.9.4: Validate an invite code
+     * POST /invites/{code}/validate
+     *
+     * @param code The 8-character invite code
+     * @return Result with validation result including group preview
+     */
+    suspend fun validateInviteCode(code: String): Result<InviteValidationResult>
+
+    /**
+     * AC E11.9.4: Join a group using an invite code
+     * POST /invites/{code}/join
+     *
+     * @param code The 8-character invite code
+     * @param accessToken JWT access token
+     * @return Result with join result including role assigned
+     */
+    suspend fun joinWithInvite(
+        code: String,
+        accessToken: String,
+    ): Result<JoinGroupResult>
 }
 
 @Singleton
@@ -417,6 +496,127 @@ class GroupApiServiceImpl @Inject constructor(
         }
     } catch (e: Exception) {
         Timber.e(e, "Failed to transfer ownership: groupId=$groupId")
+        Result.failure(e)
+    }
+
+    // ==========================================================================
+    // Story E11.9: Group Invite Endpoints Implementation
+    // ==========================================================================
+
+    /**
+     * Story E11.9 Task 2: Create a new invite for a group
+     * POST /groups/{groupId}/invites
+     */
+    override suspend fun createInvite(
+        groupId: String,
+        expiryDays: Int,
+        maxUses: Int,
+        accessToken: String,
+    ): Result<GroupInvite> = try {
+        Timber.d("Creating invite: groupId=$groupId, expiryDays=$expiryDays, maxUses=$maxUses")
+
+        val response: CreateInviteResponse = httpClient.post(
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/invites"
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(CreateInviteRequest(expiryDays = expiryDays, maxUses = maxUses))
+        }.body()
+
+        Timber.i("Invite created: code=${response.code} for group=$groupId")
+        Result.success(response.toDomain())
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to create invite: groupId=$groupId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E11.9 Task 2: Get all invites for a group
+     * GET /groups/{groupId}/invites
+     */
+    override suspend fun getGroupInvites(
+        groupId: String,
+        accessToken: String,
+    ): Result<List<GroupInvite>> = try {
+        Timber.d("Fetching invites: groupId=$groupId")
+
+        val response: ListInvitesResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/invites"
+        ) {
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        val invites = response.invites.map { it.toDomain() }
+        Timber.i("Fetched ${invites.size} invites for group=$groupId")
+        Result.success(invites)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to fetch invites: groupId=$groupId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E11.9 Task 2: Revoke an invite
+     * DELETE /groups/{groupId}/invites/{inviteId}
+     */
+    override suspend fun revokeInvite(
+        groupId: String,
+        inviteId: String,
+        accessToken: String,
+    ): Result<Unit> = try {
+        Timber.d("Revoking invite: inviteId=$inviteId in group=$groupId")
+
+        httpClient.delete("${apiConfig.baseUrl}/api/v1/groups/$groupId/invites/$inviteId") {
+            header("Authorization", "Bearer $accessToken")
+        }
+
+        Timber.i("Invite revoked: $inviteId")
+        Result.success(Unit)
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to revoke invite: inviteId=$inviteId")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E11.9 Task 2: Validate an invite code
+     * POST /invites/{code}/validate
+     */
+    override suspend fun validateInviteCode(code: String): Result<InviteValidationResult> = try {
+        Timber.d("Validating invite code: $code")
+
+        val response: ValidateInviteResponse = httpClient.post(
+            "${apiConfig.baseUrl}/api/v1/invites/$code/validate"
+        ) {
+            contentType(ContentType.Application.Json)
+        }.body()
+
+        Timber.i("Invite code validated: valid=${response.valid}")
+        Result.success(response.toDomain())
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to validate invite code: $code")
+        Result.failure(e)
+    }
+
+    /**
+     * Story E11.9 Task 2: Join a group using an invite code
+     * POST /invites/{code}/join
+     */
+    override suspend fun joinWithInvite(
+        code: String,
+        accessToken: String,
+    ): Result<JoinGroupResult> = try {
+        Timber.d("Joining group with invite code: $code")
+
+        val response: JoinGroupResponse = httpClient.post(
+            "${apiConfig.baseUrl}/api/v1/invites/$code/join"
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        Timber.i("Joined group: ${response.groupId} with role=${response.role}")
+        Result.success(response.toDomain())
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to join group with invite code: $code")
         Result.failure(e)
     }
 }

@@ -50,6 +50,7 @@
             android:value="${MAPS_API_KEY}" />
 
         <!-- Story E7.2: MainActivity with singleTop for deep link navigation (AC E7.2.4) -->
+        <!-- Story E11.9: Added deep link intent filter for invite codes (AC E11.9.8) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -58,6 +59,17 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- Story E11.9: Deep link handling for group invites (AC E11.9.8) -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Custom scheme: phonemanager://join/{code} -->
+                <data
+                    android:scheme="phonemanager"
+                    android:host="join" />
             </intent-filter>
         </activity>
 

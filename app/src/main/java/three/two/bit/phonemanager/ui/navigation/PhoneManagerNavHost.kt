@@ -6,9 +6,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import kotlinx.coroutines.delay
 import three.two.bit.phonemanager.ui.alerts.AlertsScreen
 import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
@@ -30,7 +32,11 @@ import three.two.bit.phonemanager.ui.devices.DeviceDetailScreen
 import three.two.bit.phonemanager.ui.devices.DeviceListScreen
 import three.two.bit.phonemanager.ui.groups.GroupDetailScreen
 import three.two.bit.phonemanager.ui.groups.GroupListScreen
+import three.two.bit.phonemanager.ui.groups.InviteMembersScreen
+import three.two.bit.phonemanager.ui.groups.JoinGroupScreen
 import three.two.bit.phonemanager.ui.groups.ManageMembersScreen
+import three.two.bit.phonemanager.ui.groups.PendingInvitesScreen
+import three.two.bit.phonemanager.ui.groups.QRScannerScreen
 import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
 import three.two.bit.phonemanager.ui.weather.WeatherScreen
@@ -76,6 +82,18 @@ sealed class Screen(val route: String) {
     object ManageMembers : Screen("manage_members/{groupId}") {
         fun createRoute(groupId: String) = "manage_members/$groupId"
     }
+
+    // Story E11.9: Invite screens
+    object InviteMembers : Screen("invite_members/{groupId}") {
+        fun createRoute(groupId: String) = "invite_members/$groupId"
+    }
+    object PendingInvites : Screen("pending_invites/{groupId}") {
+        fun createRoute(groupId: String) = "pending_invites/$groupId"
+    }
+    object JoinGroup : Screen("join_group?code={code}") {
+        fun createRoute(code: String? = null) = if (code != null) "join_group?code=$code" else "join_group"
+    }
+    object QRScanner : Screen("qr_scanner")
 }
 
 /**
@@ -107,6 +125,9 @@ fun PhoneManagerNavHost(
     onRequestNotificationPermission: () -> Unit,
     isRegistered: Boolean,
     initialDestination: String? = null,
+    // Story E11.9: Deep link invite code support (AC E11.9.8)
+    pendingInviteCode: String? = null,
+    onInviteCodeConsumed: () -> Unit = {},
 ) {
     val navController = rememberNavController()
 
@@ -130,6 +151,18 @@ fun PhoneManagerNavHost(
                 }
                 launchSingleTop = true
             }
+        }
+    }
+
+    // Story E11.9: Handle deep link invite code navigation (AC E11.9.8)
+    LaunchedEffect(pendingInviteCode) {
+        if (pendingInviteCode != null) {
+            // Wait for NavHost to be ready
+            delay(100)
+            navController.navigate(Screen.JoinGroup.createRoute(pendingInviteCode)) {
+                launchSingleTop = true
+            }
+            onInviteCodeConsumed()
         }
     }
 
@@ -358,6 +391,10 @@ fun PhoneManagerNavHost(
                 onNavigateToGroupDetail = { group ->
                     navController.navigate(Screen.GroupDetail.createRoute(group.id))
                 },
+                // Story E11.9: Navigate to join group screen
+                onNavigateToJoinGroup = {
+                    navController.navigate(Screen.JoinGroup.createRoute())
+                },
             )
         }
         composable(Screen.GroupDetail.route) {
@@ -365,6 +402,10 @@ fun PhoneManagerNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onNavigateToMembers = { groupId ->
                     navController.navigate(Screen.ManageMembers.createRoute(groupId))
+                },
+                // Story E11.9: Navigate to invite members screen
+                onNavigateToInvite = { groupId ->
+                    navController.navigate(Screen.InviteMembers.createRoute(groupId))
                 },
                 onGroupDeleted = {
                     navController.navigate(Screen.GroupList.route) {
@@ -378,11 +419,74 @@ fun PhoneManagerNavHost(
                 },
             )
         }
-        composable(Screen.ManageMembers.route) {
+        composable(Screen.ManageMembers.route) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
             ManageMembersScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onInviteMember = {
-                    // TODO: Navigate to invite screen (Story E11.9)
+                    navController.navigate(Screen.InviteMembers.createRoute(groupId))
+                },
+            )
+        }
+
+        // Story E11.9: Invite screens (AC E11.9.1-E11.9.8)
+        composable(Screen.InviteMembers.route) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            InviteMembersScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToPendingInvites = {
+                    navController.navigate(Screen.PendingInvites.createRoute(groupId))
+                },
+            )
+        }
+
+        composable(Screen.PendingInvites.route) {
+            PendingInvitesScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onInviteClick = { invite ->
+                    // Could navigate to invite detail if needed
+                },
+            )
+        }
+
+        composable(
+            route = Screen.JoinGroup.route,
+            arguments = listOf(
+                navArgument("code") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            ),
+        ) { backStackEntry ->
+            val code = backStackEntry.arguments?.getString("code")
+            JoinGroupScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToQrScanner = {
+                    navController.navigate(Screen.QRScanner.route)
+                },
+                onNavigateToLogin = {
+                    navController.navigate(Screen.Login.route)
+                },
+                onJoinSuccess = { groupId ->
+                    // Navigate to the group detail after joining
+                    navController.navigate(Screen.GroupDetail.createRoute(groupId)) {
+                        popUpTo(Screen.JoinGroup.route) { inclusive = true }
+                    }
+                },
+            )
+        }
+
+        composable(Screen.QRScanner.route) {
+            QRScannerScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onCodeScanned = { scannedCode ->
+                    // Pop back to JoinGroup screen with the scanned code
+                    navController.popBackStack()
+                    // Navigate to JoinGroup with the code
+                    navController.navigate(Screen.JoinGroup.createRoute(scannedCode)) {
+                        launchSingleTop = true
+                    }
                 },
             )
         }

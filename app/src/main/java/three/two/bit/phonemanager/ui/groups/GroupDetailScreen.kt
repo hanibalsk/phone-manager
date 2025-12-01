@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -77,9 +78,12 @@ import three.two.bit.phonemanager.domain.model.GroupRole
  * AC E11.8.8: Group Settings
  * - Edit name/description (admins and owners)
  *
+ * Story E11.9: Added invite members navigation
+ *
  * @param viewModel The GroupDetailViewModel
  * @param onNavigateBack Callback to navigate back
  * @param onNavigateToMembers Callback to navigate to manage members screen
+ * @param onNavigateToInvite Callback to navigate to invite members screen
  * @param onGroupDeleted Callback when group is deleted
  * @param onLeftGroup Callback when user leaves group
  */
@@ -89,6 +93,7 @@ fun GroupDetailScreen(
     viewModel: GroupDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToMembers: (String) -> Unit,
+    onNavigateToInvite: (String) -> Unit = {},
     onGroupDeleted: () -> Unit = {},
     onLeftGroup: () -> Unit = {},
 ) {
@@ -174,6 +179,7 @@ fun GroupDetailScreen(
                     onEditName = { showEditNameDialog = true },
                     onEditDescription = { showEditDescriptionDialog = true },
                     onViewMembers = { onNavigateToMembers(state.group.id) },
+                    onInviteMembers = { onNavigateToInvite(state.group.id) },
                     onLeaveGroup = { showLeaveDialog = true },
                     onDeleteGroup = { showDeleteDialog = true },
                     modifier = Modifier
@@ -275,6 +281,7 @@ private fun GroupDetailContent(
     onEditName: () -> Unit,
     onEditDescription: () -> Unit,
     onViewMembers: () -> Unit,
+    onInviteMembers: () -> Unit,
     onLeaveGroup: () -> Unit,
     onDeleteGroup: () -> Unit,
     modifier: Modifier = Modifier,
@@ -305,6 +312,18 @@ private fun GroupDetailContent(
             totalCount = group.memberCount,
             onViewAll = onViewMembers,
         )
+
+        // Story E11.9: Invite members button (for admins/owners)
+        if (canManageMembers) {
+            Button(
+                onClick = onInviteMembers,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Icon(Icons.Default.PersonAdd, null, modifier = Modifier.size(18.dp))
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Invite Members")
+            }
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 

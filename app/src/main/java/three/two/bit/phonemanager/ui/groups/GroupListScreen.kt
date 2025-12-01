@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Group
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -62,9 +63,12 @@ import three.two.bit.phonemanager.domain.model.GroupRole
  * - Loading indicator
  * - Navigation to group detail
  *
+ * Story E11.9: Added "Join Group" action in top bar
+ *
  * @param viewModel The GroupListViewModel
  * @param onNavigateBack Callback to navigate back
  * @param onNavigateToGroupDetail Callback to navigate to group detail
+ * @param onNavigateToJoinGroup Callback to navigate to join group screen
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -72,6 +76,7 @@ fun GroupListScreen(
     viewModel: GroupListViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onNavigateToGroupDetail: (Group) -> Unit,
+    onNavigateToJoinGroup: () -> Unit = {},
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val createGroupResult by viewModel.createGroupResult.collectAsStateWithLifecycle()
@@ -108,6 +113,12 @@ fun GroupListScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                    }
+                },
+                // Story E11.9: Add "Join Group" action
+                actions = {
+                    IconButton(onClick = onNavigateToJoinGroup) {
+                        Icon(Icons.Default.PersonAdd, "Join Group")
                     }
                 },
             )

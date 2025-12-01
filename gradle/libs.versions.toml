@@ -50,6 +50,15 @@ timber = "5.0.1"
 # Lottie Animations
 lottie = "6.6.2"
 
+# CameraX (Story E11.9: QR Code Scanning)
+cameraX = "1.4.1"
+
+# ML Kit Barcode (Story E11.9: QR Code Scanning)
+mlkitBarcode = "17.3.0"
+
+# ZXing (Story E11.9: QR Code Generation)
+zxing = "3.5.3"
+
 # Testing
 junit = "4.13.2"
 mockk = "1.14.6"
@@ -132,6 +141,18 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 
 # Lottie
 lottie-compose = { group = "com.airbnb.android", name = "lottie-compose", version.ref = "lottie" }
+
+# CameraX (Story E11.9: QR Code Scanning)
+androidx-camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "cameraX" }
+androidx-camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "cameraX" }
+androidx-camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "cameraX" }
+androidx-camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "cameraX" }
+
+# ML Kit Barcode (Story E11.9: QR Code Scanning)
+mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkitBarcode" }
+
+# ZXing (Story E11.9: QR Code Generation)
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

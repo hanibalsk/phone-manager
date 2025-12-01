@@ -3,8 +3,13 @@ package three.two.bit.phonemanager.network.models
 import kotlinx.datetime.Instant
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.domain.model.GroupInvite
 import three.two.bit.phonemanager.domain.model.GroupMembership
+import three.two.bit.phonemanager.domain.model.GroupPreview
 import three.two.bit.phonemanager.domain.model.GroupRole
+import three.two.bit.phonemanager.domain.model.InviteStatus
+import three.two.bit.phonemanager.domain.model.InviteValidationResult
+import three.two.bit.phonemanager.domain.model.JoinGroupResult
 
 // ============================================================================
 // Story E11.8: Group Management API Models
@@ -171,4 +176,165 @@ fun CreateGroupResponse.toDomain(): Group = Group(
     memberCount = memberCount,
     userRole = GroupRole.OWNER, // Creator is always owner
     createdAt = Instant.parse(createdAt),
+)
+
+// ============================================================================
+// Story E11.9: Group Invite API Models
+// ============================================================================
+
+/**
+ * Story E11.9 Task 2: Request body for creating a new invite
+ * POST /groups/{groupId}/invites
+ */
+@Serializable
+data class CreateInviteRequest(
+    val expiryDays: Int = 7,
+    val maxUses: Int = 1, // -1 for unlimited
+)
+
+/**
+ * Story E11.9 Task 2: Response for create invite operation
+ */
+@Serializable
+data class CreateInviteResponse(
+    val id: String,
+    val code: String,
+    val groupId: String,
+    val groupName: String? = null,
+    val createdBy: String,
+    val createdAt: String,
+    val expiresAt: String,
+    val maxUses: Int,
+    val usesRemaining: Int,
+    val status: String,
+)
+
+/**
+ * Story E11.9 Task 2: Response for list group invites
+ * GET /groups/{groupId}/invites
+ */
+@Serializable
+data class ListInvitesResponse(
+    val invites: List<InviteDto>,
+    val count: Int,
+)
+
+/**
+ * Story E11.9 Task 2: Invite DTO in API responses
+ */
+@Serializable
+data class InviteDto(
+    val id: String,
+    val code: String,
+    val groupId: String,
+    val groupName: String? = null,
+    val createdBy: String,
+    val createdAt: String,
+    val expiresAt: String,
+    val maxUses: Int,
+    val usesRemaining: Int,
+    val status: String, // "active", "expired", "revoked", "used"
+)
+
+/**
+ * Story E11.9 Task 2: Request body for validating invite code
+ * POST /invites/{code}/validate
+ */
+@Serializable
+data class ValidateInviteRequest(
+    val code: String,
+)
+
+/**
+ * Story E11.9 Task 2: Response for validate invite code
+ */
+@Serializable
+data class ValidateInviteResponse(
+    val valid: Boolean,
+    val group: GroupPreviewDto? = null,
+    val error: String? = null,
+)
+
+/**
+ * Story E11.9 Task 2: Group preview DTO for invite validation
+ */
+@Serializable
+data class GroupPreviewDto(
+    val id: String,
+    val name: String,
+    val memberCount: Int,
+)
+
+/**
+ * Story E11.9 Task 2: Response for joining a group with invite code
+ * POST /invites/{code}/join
+ */
+@Serializable
+data class JoinGroupResponse(
+    val groupId: String,
+    val role: String, // "member", "admin", "owner"
+    val joinedAt: String,
+)
+
+// ============================================================================
+// Story E11.9: Invite Mapping Functions
+// ============================================================================
+
+/**
+ * Maps InviteDto from API response to GroupInvite domain model
+ */
+fun InviteDto.toDomain(): GroupInvite = GroupInvite(
+    id = id,
+    groupId = groupId,
+    groupName = groupName,
+    code = code,
+    createdBy = createdBy,
+    createdAt = Instant.parse(createdAt),
+    expiresAt = Instant.parse(expiresAt),
+    maxUses = maxUses,
+    usesRemaining = usesRemaining,
+    status = InviteStatus.fromString(status),
+)
+
+/**
+ * Maps CreateInviteResponse to GroupInvite domain model
+ */
+fun CreateInviteResponse.toDomain(): GroupInvite = GroupInvite(
+    id = id,
+    groupId = groupId,
+    groupName = groupName,
+    code = code,
+    createdBy = createdBy,
+    createdAt = Instant.parse(createdAt),
+    expiresAt = Instant.parse(expiresAt),
+    maxUses = maxUses,
+    usesRemaining = usesRemaining,
+    status = InviteStatus.fromString(status),
+)
+
+/**
+ * Maps GroupPreviewDto to GroupPreview domain model
+ */
+fun GroupPreviewDto.toDomain(): GroupPreview = GroupPreview(
+    id = id,
+    name = name,
+    memberCount = memberCount,
+)
+
+/**
+ * Maps ValidateInviteResponse to InviteValidationResult domain model
+ */
+fun ValidateInviteResponse.toDomain(): InviteValidationResult = InviteValidationResult(
+    valid = valid,
+    group = group?.toDomain(),
+    error = error,
+)
+
+/**
+ * Maps JoinGroupResponse to JoinGroupResult domain model
+ */
+fun JoinGroupResponse.toDomain(): JoinGroupResult = JoinGroupResult(
+    groupId = groupId,
+    role = GroupRole.fromString(role),
+    joinedAt = Instant.parse(joinedAt),
 )

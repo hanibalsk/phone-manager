@@ -4,7 +4,10 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.domain.model.GroupInvite
 import three.two.bit.phonemanager.domain.model.GroupMembership
+import three.two.bit.phonemanager.domain.model.InviteValidationResult
+import three.two.bit.phonemanager.domain.model.JoinGroupResult
 import three.two.bit.phonemanager.network.GroupApiService
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
@@ -300,6 +303,164 @@ class GroupRepository @Inject constructor(
      */
     fun clearCache() {
         _cachedGroups.value = emptyList()
-        Timber.d("Group cache cleared")
+        _cachedInvites.value = emptyList()
+        Timber.d("Group and invite cache cleared")
+    }
+
+    // ==========================================================================
+    // Story E11.9: Group Invite Functions
+    // ==========================================================================
+
+    // Cached invites for quick display
+    private val _cachedInvites = MutableStateFlow<List<GroupInvite>>(emptyList())
+    val cachedInvites: Flow<List<GroupInvite>> = _cachedInvites.asStateFlow()
+
+    /**
+     * AC E11.9.1: Create a new invite for a group
+     *
+     * @param groupId The group's ID
+     * @param expiryDays Number of days until the invite expires (default: 7)
+     * @param maxUses Maximum number of uses (-1 for unlimited, default: 1)
+     * @return Result with created GroupInvite on success
+     */
+    suspend fun createInvite(
+        groupId: String,
+        expiryDays: Int = 7,
+        maxUses: Int = 1,
+    ): Result<GroupInvite> {
+        val accessToken = secureStorage.getAccessToken()
+            ?: return Result.failure(IllegalStateException("Authentication required"))
+
+        return groupApiService.createInvite(
+            groupId = groupId,
+            expiryDays = expiryDays,
+            maxUses = maxUses,
+            accessToken = accessToken
+        ).also { result ->
+            result.onSuccess { invite ->
+                Timber.i("Invite created: ${invite.code} for group $groupId")
+                // Add to cache
+                _cachedInvites.value = _cachedInvites.value + invite
+            }
+        }
+    }
+
+    /**
+     * AC E11.9.6: Get all invites for a group
+     *
+     * @param groupId The group's ID
+     * @return Result with list of invites on success
+     */
+    suspend fun getGroupInvites(groupId: String): Result<List<GroupInvite>> {
+        val accessToken = secureStorage.getAccessToken()
+            ?: return Result.failure(IllegalStateException("Authentication required"))
+
+        return groupApiService.getGroupInvites(
+            groupId = groupId,
+            accessToken = accessToken
+        ).also { result ->
+            result.onSuccess { invites ->
+                Timber.i("Loaded ${invites.size} invites for group $groupId")
+                // Update cache for this group
+                _cachedInvites.value = _cachedInvites.value
+                    .filter { it.groupId != groupId } + invites
+            }
+        }
+    }
+
+    /**
+     * AC E11.9.7: Revoke an invite
+     *
+     * @param groupId The group's ID
+     * @param inviteId The invite's ID
+     * @return Result with success status
+     */
+    suspend fun revokeInvite(groupId: String, inviteId: String): Result<Unit> {
+        val accessToken = secureStorage.getAccessToken()
+            ?: return Result.failure(IllegalStateException("Authentication required"))
+
+        return groupApiService.revokeInvite(
+            groupId = groupId,
+            inviteId = inviteId,
+            accessToken = accessToken
+        ).also { result ->
+            result.onSuccess {
+                Timber.i("Invite revoked: $inviteId")
+                // Remove from cache
+                _cachedInvites.value = _cachedInvites.value.filter { it.id != inviteId }
+            }
+        }
+    }
+
+    /**
+     * AC E11.9.4: Validate an invite code
+     *
+     * No authentication required for validation (allows preview before sign-in)
+     *
+     * @param code The 8-character invite code
+     * @return Result with validation result including group preview
+     */
+    suspend fun validateInviteCode(code: String): Result<InviteValidationResult> {
+        return groupApiService.validateInviteCode(code).also { result ->
+            result.onSuccess { validation ->
+                if (validation.valid) {
+                    Timber.i("Invite code valid: group=${validation.group?.name}")
+                } else {
+                    Timber.w("Invite code invalid: ${validation.error}")
+                }
+            }
+        }
+    }
+
+    /**
+     * AC E11.9.4: Join a group using an invite code
+     *
+     * @param code The 8-character invite code
+     * @return Result with join result including role assigned
+     */
+    suspend fun joinWithInvite(code: String): Result<JoinGroupResult> {
+        val accessToken = secureStorage.getAccessToken()
+            ?: return Result.failure(IllegalStateException("Authentication required"))
+
+        return groupApiService.joinWithInvite(
+            code = code,
+            accessToken = accessToken
+        ).also { result ->
+            result.onSuccess { joinResult ->
+                Timber.i("Joined group: ${joinResult.groupId} with role=${joinResult.role}")
+                // Refresh groups to include new group
+                getUserGroups()
+            }
+        }
+    }
+
+    /**
+     * Get cached invites for a specific group
+     *
+     * @param groupId The group's ID
+     * @return List of cached invites for the group
+     */
+    fun getCachedInvitesForGroup(groupId: String): List<GroupInvite> {
+        return _cachedInvites.value.filter { it.groupId == groupId }
+    }
+
+    /**
+     * Get cached invite by code
+     *
+     * @param code The 8-character invite code
+     * @return Invite from cache or null if not found
+     */
+    fun getCachedInviteByCode(code: String): GroupInvite? {
+        return _cachedInvites.value.find { it.code == code }
+    }
+
+    /**
+     * Clear invites cache for a specific group
+     *
+     * @param groupId The group's ID
+     */
+    fun clearInvitesCache(groupId: String) {
+        _cachedInvites.value = _cachedInvites.value.filter { it.groupId != groupId }
+        Timber.d("Invites cache cleared for group $groupId")
     }
 }

@@ -26,6 +26,8 @@ import javax.inject.Inject
 
 /**
  * MainActivity - Main entry point with Hilt integration and permission handling
+ *
+ * Story E11.9: Added deep link support for group invites (AC E11.9.8)
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -37,6 +39,9 @@ class MainActivity : ComponentActivity() {
 
     // Story E7.2: State for deep link navigation (AC E7.2.4)
     private var navigationDestination by mutableStateOf<String?>(null)
+
+    // Story E11.9: State for invite code from deep link (AC E11.9.8)
+    private var pendingInviteCode by mutableStateOf<String?>(null)
 
     // Permission launchers - must be registered before onCreate
     private val locationPermissionLauncher = registerForActivityResult(
@@ -80,6 +85,9 @@ class MainActivity : ComponentActivity() {
         // Story E7.2: Extract navigation destination from intent (AC E7.2.4)
         navigationDestination = intent?.getStringExtra(EXTRA_NAVIGATE_TO)
 
+        // Story E11.9: Extract invite code from deep link (AC E11.9.8)
+        handleDeepLinkIntent(intent)
+
         setContent {
             PhoneManagerTheme {
                 Surface(
@@ -93,6 +101,9 @@ class MainActivity : ComponentActivity() {
                         onRequestNotificationPermission = ::requestNotificationPermission,
                         isRegistered = secureStorage.isRegistered(),
                         initialDestination = navigationDestination,
+                        // Story E11.9: Pass invite code from deep link (AC E11.9.8)
+                        pendingInviteCode = pendingInviteCode,
+                        onInviteCodeConsumed = { pendingInviteCode = null },
                     )
                 }
             }
@@ -110,12 +121,37 @@ class MainActivity : ComponentActivity() {
             // Update the intent so it's available in onCreate after process recreation
             setIntent(intent)
         }
+
+        // Story E11.9: Handle invite deep link when app is already running (AC E11.9.8)
+        handleDeepLinkIntent(intent)
+    }
+
+    /**
+     * Story E11.9: Extract invite code from deep link URI (AC E11.9.8)
+     *
+     * Handles deep links in the format: phonemanager://join/{code}
+     */
+    private fun handleDeepLinkIntent(intent: Intent?) {
+        val uri = intent?.data
+        if (uri != null && uri.scheme == DEEP_LINK_SCHEME && uri.host == DEEP_LINK_HOST_JOIN) {
+            val code = uri.pathSegments.firstOrNull()
+            if (code != null && code.length == 8 && code.all { it.isLetterOrDigit() }) {
+                Timber.i("Deep link invite code received: $code")
+                pendingInviteCode = code.uppercase()
+            } else {
+                Timber.w("Invalid invite code in deep link: $code")
+            }
+        }
     }
 
     companion object {
         // Story E7.2: Intent extra for deep link navigation
         const val EXTRA_NAVIGATE_TO = "navigate_to"
         const val DESTINATION_WEATHER = "weather"
+
+        // Story E11.9: Deep link constants for invite codes (AC E11.9.8)
+        const val DEEP_LINK_SCHEME = "phonemanager"
+        const val DEEP_LINK_HOST_JOIN = "join"
     }
 
     override fun onResume() {
