@@ -1,7 +1,7 @@
 # Project Backlog
 
 **Project**: Phone Manager
-**Last Updated**: 2025-11-25
+**Last Updated**: 2025-12-02
 
 ---
 
@@ -59,6 +59,8 @@
 | 2025-12-02 | E14.* | 14 | Testing | Medium | TBD | Open | Add integration tests with MSW for API mocking - Current tests are unit-only. File: admin-portal/__tests__/integration/ |
 | 2025-12-02 | E14.* | 14 | Testing | Low | TBD | Open | Add error boundary tests - Verify error recovery paths. File: admin-portal/app/__tests__/ |
 | 2025-12-02 | E14.* | 14 | Security | Medium | TBD | Open | Add API response validation with Zod - Prevent type confusion from backend mismatches. File: admin-portal/lib/api-client.ts |
+| 2025-12-02 | E14.8 | 14 | Security | Low | TBD | Open | Migrate token storage from localStorage to httpOnly cookies - Enhanced XSS protection for production. Files: admin-portal/contexts/auth-context.tsx, admin-portal/middleware.ts |
+| 2025-12-02 | E14.8 | 14 | Enhancement | Low | TBD | Open | Add request queuing during token refresh - Prevent race conditions with concurrent requests. File: admin-portal/contexts/auth-context.tsx |
 
 ---
 
