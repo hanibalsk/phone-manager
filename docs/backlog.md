@@ -51,6 +51,14 @@
 | 2025-11-25 | 1.4 | 1 | Testing | Medium | TBD | Open | Add Integration Tests for State Persistence - Implement ServiceStatePersistenceTest.kt for process death/reboot scenarios. File: app/src/androidTest/java/com/phonemanager/service/ServiceStatePersistenceTest.kt |
 | 2025-11-25 | 1.4 | 1 | Performance | Low | TBD | Open | Add Performance Test for DataStore Writes - Verify <100ms write time for setServiceRunningState(). File: app/src/androidTest/java/com/phonemanager/data/preferences/PreferencesRepositoryPerformanceTest.kt |
 | 2025-11-25 | 1.4 | 1 | Documentation | Low | TBD | Open | Document Repository Scope Lifecycle - Add KDoc explaining application-scoped repositoryScope design. File: LocationRepositoryImpl.kt:34 |
+| 2025-12-02 | E14.2 | 14 | Enhancement | Low | TBD | Open | Complete device details modal implementation - Currently placeholder. File: admin-portal/components/devices/device-details.tsx, AC: E14.2.2 |
+| 2025-12-02 | E14.2 | 14 | Enhancement | Low | TBD | Open | Add pagination for large device lists. File: admin-portal/app/devices/page.tsx |
+| 2025-12-02 | E14.2 | 14 | Testing | Low | TBD | Open | Add DeviceList component tests. File: admin-portal/components/devices/__tests__/ |
+| 2025-12-02 | E14.4 | 14 | Enhancement | Low | TBD | Open | Complete usage analytics if needed for MVP - Currently placeholder. Files: admin-portal/components/usage/, AC: E14.4.1-3 |
+| 2025-12-02 | E14.* | 14 | Security | Medium | TBD | Open | Implement authentication/authorization before production deployment - All admin routes unprotected. Recommend NextAuth.js. Files: All page routes, AC: E14.8 (future story) |
+| 2025-12-02 | E14.* | 14 | Testing | Medium | TBD | Open | Add integration tests with MSW for API mocking - Current tests are unit-only. File: admin-portal/__tests__/integration/ |
+| 2025-12-02 | E14.* | 14 | Testing | Low | TBD | Open | Add error boundary tests - Verify error recovery paths. File: admin-portal/app/__tests__/ |
+| 2025-12-02 | E14.* | 14 | Security | Medium | TBD | Open | Add API response validation with Zod - Prevent type confusion from backend mismatches. File: admin-portal/lib/api-client.ts |
 
 ---
 
