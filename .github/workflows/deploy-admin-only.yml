@@ -105,18 +105,18 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 32 -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p 332 -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to staging
         run: |
           echo "Deploying to staging..."
 
           # Upload tar
-          cat ./out.tar | ssh -p 32 ${{ secrets.STAGING_HOST }} \
+          cat ./out.tar | ssh -p 332 ${{ secrets.STAGING_HOST }} \
             "cat > /volume1/docker/phone-manager/web/out.tar"
 
           # Clear old files and extract
-          ssh -p 32 ${{ secrets.STAGING_HOST }} "
+          ssh -p 332 ${{ secrets.STAGING_HOST }} "
             rm -rf /volume1/docker/phone-manager/web/staging/*
             tar xf /volume1/docker/phone-manager/web/out.tar -C /volume1/docker/phone-manager/web/staging
             rm /volume1/docker/phone-manager/web/out.tar
@@ -154,18 +154,18 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 32 -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p 332 -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
 
       - name: Deploy to production
         run: |
           echo "Deploying to production..."
 
           # Upload tar
-          cat ./out.tar | ssh -p 32 ${{ secrets.PRODUCTION_HOST }} \
+          cat ./out.tar | ssh -p 332 ${{ secrets.PRODUCTION_HOST }} \
             "cat > /volume1/docker/phone-manager/web/out.tar"
 
           # Clear old files and extract
-          ssh -p 32 ${{ secrets.PRODUCTION_HOST }} "
+          ssh -p 332 ${{ secrets.PRODUCTION_HOST }} "
             rm -rf /volume1/docker/phone-manager/web/production/*
             tar xf /volume1/docker/phone-manager/web/out.tar -C /volume1/docker/phone-manager/web/production
             rm /volume1/docker/phone-manager/web/out.tar
