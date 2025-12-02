@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import type { UnlockRequest } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X, CheckCircle, XCircle } from "lucide-react";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 interface RequestActionDialogProps {
   request: UnlockRequest;
@@ -30,6 +31,9 @@ export function RequestActionDialog({
 }: RequestActionDialogProps) {
   const [response, setResponse] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const dialogRef = useFocusTrap<HTMLDivElement>({ onEscape: onCancel });
+  const titleId = useId();
+  const descriptionId = useId();
 
   const isApprove = action === "approve";
 
@@ -43,31 +47,38 @@ export function RequestActionDialog({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Card className="w-full max-w-md mx-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+    >
+      <Card ref={dialogRef} className="w-full max-w-md mx-4">
         <CardHeader className="relative">
           <Button
             variant="ghost"
             size="icon"
             className="absolute right-4 top-4"
             onClick={onCancel}
+            aria-label="Close dialog"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle id={titleId} className="flex items-center gap-2">
             {isApprove ? (
               <>
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-green-600" aria-hidden="true" />
                 Approve Request
               </>
             ) : (
               <>
-                <XCircle className="h-5 w-5 text-red-600" />
+                <XCircle className="h-5 w-5 text-red-600" aria-hidden="true" />
                 Deny Request
               </>
             )}
           </CardTitle>
-          <CardDescription>
+          <CardDescription id={descriptionId}>
             {isApprove
               ? `Grant ${request.requestedDuration} minutes of unlock time`
               : "Deny this unlock request"}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useId } from "react";
 import type { DailyLimit } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,6 +14,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { X } from "lucide-react";
+import { dailyLimitSchema, getFieldErrors } from "@/lib/schemas";
+import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 interface LimitEditDialogProps {
   limit: DailyLimit | null;
@@ -33,37 +35,60 @@ export function LimitEditDialog({
   );
   const [enabled, setEnabled] = useState(limit?.enabled ?? true);
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const dialogRef = useFocusTrap<HTMLDivElement>({ onEscape: onCancel });
+  const titleId = useId();
+  const descriptionId = useId();
 
   const isEditing = limit !== null;
 
+  const clearFieldError = (field: string) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
+  };
+
   const handleSubmit = async () => {
+    const formData = { packageName, appName, dailyLimitMinutes, enabled };
+    const validationErrors = getFieldErrors(dailyLimitSchema, formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await onSave({
-        packageName,
-        appName,
-        dailyLimitMinutes,
-        enabled,
-      });
+      await onSave(formData);
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <Card className="w-full max-w-md mx-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby={titleId}
+      aria-describedby={descriptionId}
+    >
+      <Card ref={dialogRef} className="w-full max-w-md mx-4">
         <CardHeader className="relative">
           <Button
             variant="ghost"
             size="icon"
             className="absolute right-4 top-4"
             onClick={onCancel}
+            aria-label="Close dialog"
           >
-            <X className="h-4 w-4" />
+            <X className="h-4 w-4" aria-hidden="true" />
           </Button>
-          <CardTitle>{isEditing ? "Edit Limit" : "Add Limit"}</CardTitle>
-          <CardDescription>
+          <CardTitle id={titleId}>{isEditing ? "Edit Limit" : "Add Limit"}</CardTitle>
+          <CardDescription id={descriptionId}>
             {isEditing
               ? "Modify the daily time limit for this app"
               : "Set a daily time limit for an app"}
@@ -76,9 +101,19 @@ export function LimitEditDialog({
               id="packageName"
               placeholder="com.example.app"
               value={packageName}
-              onChange={(e) => setPackageName(e.target.value)}
+              onChange={(e) => {
+                setPackageName(e.target.value);
+                clearFieldError("packageName");
+              }}
               disabled={isEditing}
+              aria-invalid={!!errors.packageName}
+              aria-describedby={errors.packageName ? "packageName-error" : undefined}
             />
+            {errors.packageName && (
+              <p id="packageName-error" className="text-xs text-destructive">
+                {errors.packageName}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="appName">App Name</Label>
@@ -86,8 +121,18 @@ export function LimitEditDialog({
               id="appName"
               placeholder="Example App"
               value={appName}
-              onChange={(e) => setAppName(e.target.value)}
+              onChange={(e) => {
+                setAppName(e.target.value);
+                clearFieldError("appName");
+              }}
+              aria-invalid={!!errors.appName}
+              aria-describedby={errors.appName ? "appName-error" : undefined}
             />
+            {errors.appName && (
+              <p id="appName-error" className="text-xs text-destructive">
+                {errors.appName}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="dailyLimit">Daily Limit (minutes)</Label>
@@ -97,8 +142,18 @@ export function LimitEditDialog({
               min={1}
               max={1440}
               value={dailyLimitMinutes}
-              onChange={(e) => setDailyLimitMinutes(parseInt(e.target.value))}
+              onChange={(e) => {
+                setDailyLimitMinutes(parseInt(e.target.value));
+                clearFieldError("dailyLimitMinutes");
+              }}
+              aria-invalid={!!errors.dailyLimitMinutes}
+              aria-describedby={errors.dailyLimitMinutes ? "dailyLimit-error" : undefined}
             />
+            {errors.dailyLimitMinutes && (
+              <p id="dailyLimit-error" className="text-xs text-destructive">
+                {errors.dailyLimitMinutes}
+              </p>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <input
@@ -117,7 +172,7 @@ export function LimitEditDialog({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={submitting || !packageName || !appName}
+            disabled={submitting}
           >
             {submitting ? "Saving..." : isEditing ? "Save Changes" : "Add Limit"}
           </Button>

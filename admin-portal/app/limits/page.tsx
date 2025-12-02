@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { toast } from "sonner";
 import { Header } from "@/components/layout";
 import { LimitList } from "@/components/limits";
 import { limitsApi, deviceApi } from "@/lib/api-client";
@@ -33,18 +34,51 @@ export default function LimitsPage() {
   }, [refreshLimits]);
 
   const handleCreate = async (data: Omit<DailyLimit, "id">) => {
-    await limitsApi.set(selectedDeviceId, data);
-    refreshLimits();
+    try {
+      const result = await limitsApi.set(selectedDeviceId, data);
+      if (result.error) {
+        toast.error("Failed to create limit", { description: result.error });
+        return;
+      }
+      toast.success("Limit created successfully");
+      refreshLimits();
+    } catch (error) {
+      toast.error("Failed to create limit", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
+    }
   };
 
   const handleUpdate = async (id: string, data: Partial<DailyLimit>) => {
-    await limitsApi.update(selectedDeviceId, id, data);
-    refreshLimits();
+    try {
+      const result = await limitsApi.update(selectedDeviceId, id, data);
+      if (result.error) {
+        toast.error("Failed to update limit", { description: result.error });
+        return;
+      }
+      toast.success("Limit updated successfully");
+      refreshLimits();
+    } catch (error) {
+      toast.error("Failed to update limit", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
+    }
   };
 
   const handleDelete = async (id: string) => {
-    await limitsApi.delete(selectedDeviceId, id);
-    refreshLimits();
+    try {
+      const result = await limitsApi.delete(selectedDeviceId, id);
+      if (result.error) {
+        toast.error("Failed to delete limit", { description: result.error });
+        return;
+      }
+      toast.success("Limit deleted successfully");
+      refreshLimits();
+    } catch (error) {
+      toast.error("Failed to delete limit", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
+    }
   };
 
   return (

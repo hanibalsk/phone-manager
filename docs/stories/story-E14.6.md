@@ -4,8 +4,25 @@
 **Epic**: 14 - Admin Web Portal
 **Priority**: Medium
 **Estimate**: 2 story points
-**Status**: Complete
+**Status**: Changes Requested
 **Created**: 2025-12-02
+**Reviewed**: 2025-12-02
+
+## Review Report
+**Date**: 2025-12-02
+**Reviewer**: Code Quality Reviewer (Agent)
+**Outcome**: Changes Requested
+**Report**: [epic-14-code-review.md](/docs/reviews/epic-14-code-review.md)
+
+### Critical Security Issues
+- **SECURITY CRITICAL**: PIN stored as plaintext - MUST hash server-side
+- Missing authentication - Critical
+
+### Required Actions
+1. Hash PINs with bcrypt/argon2 server-side
+2. Never transmit actual PIN in API responses
+3. Add authentication protection
+4. Implement PIN change workflow with current PIN verification
 **Dependencies**: E14.1
 
 ---

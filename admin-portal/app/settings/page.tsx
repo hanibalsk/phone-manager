@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
+import { toast } from "sonner";
 import { Header } from "@/components/layout";
 import { SettingsForm } from "@/components/settings";
 import { settingsApi } from "@/lib/api-client";
@@ -19,8 +20,21 @@ export default function SettingsPage() {
   }, [fetchSettings]);
 
   const handleSave = async (data: Partial<AdminSettings>) => {
-    await settingsApi.update(data);
-    fetchSettings();
+    try {
+      const result = await settingsApi.update(data);
+      if (result.error) {
+        toast.error("Failed to save settings", {
+          description: result.error,
+        });
+        return;
+      }
+      toast.success("Settings saved successfully");
+      fetchSettings();
+    } catch (error) {
+      toast.error("Failed to save settings", {
+        description: error instanceof Error ? error.message : "An unexpected error occurred",
+      });
+    }
   };
 
   return (

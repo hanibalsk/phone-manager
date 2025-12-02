@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, Save } from "lucide-react";
+import { adminSettingsUpdateSchema, getFieldErrors } from "@/lib/schemas";
 
 interface SettingsFormProps {
   settings: AdminSettings | null;
@@ -31,6 +32,7 @@ export function SettingsForm({
   const [formData, setFormData] = useState<Partial<AdminSettings>>({});
   const [saving, setSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (settings) {
@@ -44,15 +46,32 @@ export function SettingsForm({
   }, [settings]);
 
   const handleChange = (field: keyof AdminSettings, value: string | number | boolean) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    const newData = { ...formData, [field]: value };
+    setFormData(newData);
     setHasChanges(true);
+    // Clear field error on change
+    if (errors[field]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[field];
+        return next;
+      });
+    }
   };
 
   const handleSubmit = async () => {
+    // Validate before submitting
+    const validationErrors = getFieldErrors(adminSettingsUpdateSchema, formData);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
     setSaving(true);
     try {
       await onSave(formData);
       setHasChanges(false);
+      setErrors({});
     } finally {
       setSaving(false);
     }
@@ -96,10 +115,18 @@ export function SettingsForm({
                 placeholder="Enter PIN"
                 value={formData.unlockPin || ""}
                 onChange={(e) => handleChange("unlockPin", e.target.value)}
+                aria-invalid={!!errors.unlockPin}
+                aria-describedby={errors.unlockPin ? "unlockPin-error" : undefined}
               />
-              <p className="text-xs text-muted-foreground">
-                PIN required to access admin features on the device
-              </p>
+              {errors.unlockPin ? (
+                <p id="unlockPin-error" className="text-xs text-destructive">
+                  {errors.unlockPin}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  PIN required to access admin features on the device
+                </p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -113,10 +140,18 @@ export function SettingsForm({
                 onChange={(e) =>
                   handleChange("defaultDailyLimitMinutes", parseInt(e.target.value))
                 }
+                aria-invalid={!!errors.defaultDailyLimitMinutes}
+                aria-describedby={errors.defaultDailyLimitMinutes ? "defaultLimit-error" : undefined}
               />
-              <p className="text-xs text-muted-foreground">
-                Default time limit applied to new apps
-              </p>
+              {errors.defaultDailyLimitMinutes ? (
+                <p id="defaultLimit-error" className="text-xs text-destructive">
+                  {errors.defaultDailyLimitMinutes}
+                </p>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Default time limit applied to new apps
+                </p>
+              )}
             </div>
 
             <div className="flex items-center justify-between border rounded-lg p-4">

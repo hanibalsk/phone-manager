@@ -6,8 +6,9 @@ import type {
   DailyLimit,
   AdminSettings,
 } from "@/types";
+import { env } from "./env";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
+const API_BASE_URL = env.NEXT_PUBLIC_API_URL;
 
 async function request<T>(
   endpoint: string,
