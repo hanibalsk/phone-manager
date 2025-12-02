@@ -1,3 +1,6 @@
+"use client";
+
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,6 +14,16 @@ import { FileQuestion, Home, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default function NotFound() {
+  const router = useRouter();
+
+  const handleGoBack = () => {
+    if (window.history.length > 1) {
+      router.back();
+    } else {
+      router.push("/");
+    }
+  };
+
   return (
     <div className="flex min-h-screen items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -29,11 +42,9 @@ export default function NotFound() {
           </p>
         </CardContent>
         <CardFooter className="flex gap-2">
-          <Button variant="outline" asChild className="flex-1">
-            <Link href="javascript:history.back()">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Go Back
-            </Link>
+          <Button variant="outline" className="flex-1" onClick={handleGoBack}>
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Go Back
           </Button>
           <Button asChild className="flex-1">
             <Link href="/">

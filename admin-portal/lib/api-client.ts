@@ -12,6 +12,7 @@ import type {
   LoginCredentials,
   ForgotPasswordRequest,
   ResetPasswordRequest,
+  User,
 } from "@/types/auth";
 import { env } from "./env";
 import { getAccessToken } from "@/contexts/auth-context";
@@ -75,6 +76,11 @@ export const authApi = {
       method: "POST",
       body: JSON.stringify({ refresh_token: refreshToken }),
     }, false),
+
+  getCurrentUser: () =>
+    request<User>("/api/v1/auth/me", {
+      method: "GET",
+    }, true),
 
   logout: () =>
     request<void>("/api/v1/auth/logout", {

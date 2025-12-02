@@ -84,7 +84,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const newTokens = response.data.tokens;
       setTokens(newTokens);
       setStoredTokens(newTokens);
-      return true;
+
+      // Fetch user data after successful token refresh
+      const userResponse = await authApi.getCurrentUser();
+      if (userResponse.data) {
+        setUser(userResponse.data);
+        return true;
+      }
     }
     return false;
   };
