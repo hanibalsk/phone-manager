@@ -95,34 +95,34 @@ jobs:
           name: admin-portal-${{ github.sha }}
           path: ./out
 
+      - name: Create tar archive
+        run: |
+          tar -cvf out.tar -C ./out .
+          echo "Created out.tar with $(tar -tf out.tar | wc -l) files"
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 32 -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+
       - name: Deploy to staging
         run: |
           echo "Deploying to staging..."
+
           # Upload tar
-          ssh -p 32 ${{ secrets.STAGING_HOST }} \
-            "cat > /volume1/docker/phone-manager/web/out.tar" < ./out.tar
+          cat ./out.tar | ssh -p 32 ${{ secrets.STAGING_HOST }} \
+            "cat > /volume1/docker/phone-manager/web/out.tar"
 
+          # Clear old files and extract
           ssh -p 32 ${{ secrets.STAGING_HOST }} "
-            "rm -rf /volume1/docker/phone-manager/web/staging/*"
+            rm -rf /volume1/docker/phone-manager/web/staging/*
+            tar xf /volume1/docker/phone-manager/web/out.tar -C /volume1/docker/phone-manager/web/staging
+            rm /volume1/docker/phone-manager/web/out.tar
+          "
 
-          # Extract tar
-          ssh -p 32 ${{ secrets.STAGING_HOST }} \
-            "tar xf /volume1/docker/phone-manager/web/out.tar -C /volume1/docker/phone-manager/web/staging"
-
-          # Customize this section for your deployment method:
-          #
-          # Option 1: rsync to server
-          # rsync -avz --delete ./out/ ${{ secrets.STAGING_HOST }}:/app/static/admin/
-          #
-          # Option 2: Update Docker volume via SSH
-          # ssh ${{ secrets.STAGING_HOST }} "docker cp - phone-manager-backend:/app/static/admin/" < ./out.tar
-          #
-          # Option 3: Upload to S3/GCS for CDN serving
-          # aws s3 sync ./out/ s3://${{ secrets.STAGING_BUCKET }}/admin/ --delete
-          #
-          # Option 4: kubectl cp for Kubernetes
-          # kubectl cp ./out/. ${{ secrets.K8S_NAMESPACE }}/pod-name:/app/static/admin/
-          echo "Staging deployment placeholder - configure for your infrastructure"
+          echo "Deployment complete!"
 
       - name: Verify deployment
         run: |
@@ -144,20 +144,36 @@ jobs:
           name: admin-portal-${{ github.sha }}
           path: ./out
 
+      - name: Create tar archive
+        run: |
+          tar -cvf out.tar -C ./out .
+          echo "Created out.tar with $(tar -tf out.tar | wc -l) files"
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -p 32 -H ${{ secrets.PRODUCTION_HOST }} >> ~/.ssh/known_hosts
+
       - name: Deploy to production
         run: |
           echo "Deploying to production..."
-          # Same options as staging - customize for your infrastructure
-          echo "Production deployment placeholder - configure for your infrastructure"
 
-      - name: Verify deployment
-        run: |
-          echo "Verifying production deployment..."
-          # curl -f https://your-domain.com/ || exit 1
-          echo "Verification placeholder - add your health check URL"
+          # Upload tar
+          cat ./out.tar | ssh -p 32 ${{ secrets.PRODUCTION_HOST }} \
+            "cat > /volume1/docker/phone-manager/web/out.tar"
+
+          # Clear old files and extract
+          ssh -p 32 ${{ secrets.PRODUCTION_HOST }} "
+            rm -rf /volume1/docker/phone-manager/web/production/*
+            tar xf /volume1/docker/phone-manager/web/out.tar -C /volume1/docker/phone-manager/web/production
+            rm /volume1/docker/phone-manager/web/out.tar
+          "
+
+          echo "Production deployment complete!"
 
       - name: Notify on success
         if: success()
         run: |
           echo "Production deployment successful!"
-          # Add Slack/Discord/email notification here
