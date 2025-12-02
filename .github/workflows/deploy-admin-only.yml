@@ -98,6 +98,17 @@ jobs:
       - name: Deploy to staging
         run: |
           echo "Deploying to staging..."
+          # Upload tar
+          ssh -p 32 ${{ secrets.STAGING_HOST }} \
+            "cat > /volume1/docker/phone-manager/web/out.tar" < ./out.tar
+
+          ssh -p 32 ${{ secrets.STAGING_HOST }} "
+            "rm -rf /volume1/docker/phone-manager/web/staging/*"
+
+          # Extract tar
+          ssh -p 32 ${{ secrets.STAGING_HOST }} \
+            "tar xf /volume1/docker/phone-manager/web/out.tar -C /volume1/docker/phone-manager/web/staging"
+
           # Customize this section for your deployment method:
           #
           # Option 1: rsync to server
