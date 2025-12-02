@@ -2,7 +2,6 @@
 
 import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Header } from "@/components/layout";
 import { RequestList } from "@/components/unlock-requests";
 import { unlockApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
@@ -52,17 +51,14 @@ export default function UnlockRequestsPage() {
   };
 
   return (
-    <div className="flex flex-col">
-      <Header title="Unlock Requests" />
-      <div className="p-6">
-        <RequestList
-          requests={requests || []}
-          loading={loading}
-          onRefresh={fetchRequests}
-          onApprove={handleApprove}
-          onDeny={handleDeny}
-        />
-      </div>
+    <div className="p-6">
+      <RequestList
+        requests={requests || []}
+        loading={loading}
+        onRefresh={fetchRequests}
+        onApprove={handleApprove}
+        onDeny={handleDeny}
+      />
     </div>
   );
 }

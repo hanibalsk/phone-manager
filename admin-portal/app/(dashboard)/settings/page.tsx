@@ -2,7 +2,6 @@
 
 import { useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { Header } from "@/components/layout";
 import { SettingsForm } from "@/components/settings";
 import { settingsApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
@@ -38,16 +37,13 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="flex flex-col">
-      <Header title="Settings" />
-      <div className="p-6">
-        <SettingsForm
-          settings={settings}
-          loading={loading}
-          onRefresh={fetchSettings}
-          onSave={handleSave}
-        />
-      </div>
+    <div className="p-6">
+      <SettingsForm
+        settings={settings}
+        loading={loading}
+        onRefresh={fetchSettings}
+        onSave={handleSave}
+      />
     </div>
   );
 }

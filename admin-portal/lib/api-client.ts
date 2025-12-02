@@ -6,23 +6,42 @@ import type {
   DailyLimit,
   AdminSettings,
 } from "@/types";
+import type {
+  LoginResponse,
+  RefreshResponse,
+  LoginCredentials,
+  ForgotPasswordRequest,
+  ResetPasswordRequest,
+} from "@/types/auth";
 import { env } from "./env";
+import { getAccessToken } from "@/contexts/auth-context";
 
 const API_BASE_URL = env.NEXT_PUBLIC_API_URL;
 
 async function request<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  includeAuth = true
 ): Promise<ApiResponse<T>> {
   const url = `${API_BASE_URL}${endpoint}`;
+
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string>),
+  };
+
+  // Add auth header if we have a token and auth is requested
+  if (includeAuth) {
+    const token = getAccessToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
 
   try {
     const response = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options.headers,
-      },
+      headers,
     });
 
     if (!response.ok) {
@@ -42,6 +61,38 @@ async function request<T>(
     };
   }
 }
+
+// Auth API (no auth header required for most endpoints)
+export const authApi = {
+  login: (credentials: LoginCredentials) =>
+    request<LoginResponse>("/api/v1/auth/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    }, false),
+
+  refresh: (refreshToken: string) =>
+    request<RefreshResponse>("/api/v1/auth/refresh", {
+      method: "POST",
+      body: JSON.stringify({ refresh_token: refreshToken }),
+    }, false),
+
+  logout: () =>
+    request<void>("/api/v1/auth/logout", {
+      method: "POST",
+    }, true),
+
+  forgotPassword: (data: ForgotPasswordRequest) =>
+    request<void>("/api/v1/auth/forgot-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }, false),
+
+  resetPassword: (data: ResetPasswordRequest) =>
+    request<void>("/api/v1/auth/reset-password", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }, false),
+};
 
 // Device Management
 export const deviceApi = {

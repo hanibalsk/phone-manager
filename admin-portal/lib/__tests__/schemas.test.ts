@@ -1,4 +1,7 @@
 import {
+  loginSchema,
+  forgotPasswordSchema,
+  resetPasswordSchema,
   adminSettingsSchema,
   adminSettingsUpdateSchema,
   dailyLimitSchema,
@@ -8,6 +11,103 @@ import {
   validate,
   getFieldErrors,
 } from "../schemas";
+
+describe("loginSchema", () => {
+  it("should validate correct login credentials", () => {
+    const validLogin = {
+      email: "user@example.com",
+      password: "password123",
+    };
+    expect(() => loginSchema.parse(validLogin)).not.toThrow();
+  });
+
+  it("should reject invalid email format", () => {
+    const result = loginSchema.safeParse({
+      email: "invalid-email",
+      password: "password123",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject empty password", () => {
+    const result = loginSchema.safeParse({
+      email: "user@example.com",
+      password: "",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject missing email", () => {
+    const result = loginSchema.safeParse({
+      password: "password123",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("forgotPasswordSchema", () => {
+  it("should validate correct email", () => {
+    const validData = { email: "user@example.com" };
+    expect(() => forgotPasswordSchema.parse(validData)).not.toThrow();
+  });
+
+  it("should reject invalid email format", () => {
+    const result = forgotPasswordSchema.safeParse({
+      email: "not-an-email",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("resetPasswordSchema", () => {
+  it("should validate correct reset password data", () => {
+    const validData = {
+      token: "some-reset-token",
+      new_password: "Password123",
+    };
+    expect(() => resetPasswordSchema.parse(validData)).not.toThrow();
+  });
+
+  it("should reject password without uppercase", () => {
+    const result = resetPasswordSchema.safeParse({
+      token: "some-token",
+      new_password: "password123",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject password without lowercase", () => {
+    const result = resetPasswordSchema.safeParse({
+      token: "some-token",
+      new_password: "PASSWORD123",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject password without number", () => {
+    const result = resetPasswordSchema.safeParse({
+      token: "some-token",
+      new_password: "PasswordOnly",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject password shorter than 8 characters", () => {
+    const result = resetPasswordSchema.safeParse({
+      token: "some-token",
+      new_password: "Pass1",
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it("should reject empty token", () => {
+    const result = resetPasswordSchema.safeParse({
+      token: "",
+      new_password: "Password123",
+    });
+    expect(result.success).toBe(false);
+  });
+});
 
 describe("adminSettingsSchema", () => {
   it("should validate correct settings", () => {
