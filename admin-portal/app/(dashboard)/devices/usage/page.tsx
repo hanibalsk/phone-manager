@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useCallback, useState } from "react";
-import { useParams } from "next/navigation";
+import { Suspense, useEffect, useCallback, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { UsageChart, UsageSummary } from "@/components/usage";
 import { deviceApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
@@ -11,26 +11,41 @@ import { RefreshCw, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import type { AppUsage } from "@/types";
 
-export default function DeviceUsagePage() {
-  const params = useParams();
-  const deviceId = params.id as string;
+function DeviceUsageContent() {
+  const searchParams = useSearchParams();
+  const deviceId = searchParams.get("id");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   const { data: usage, loading, execute } = useApi<AppUsage[]>();
 
   const fetchUsage = useCallback(() => {
-    execute(() => deviceApi.getUsage(deviceId, date));
+    if (deviceId) {
+      execute(() => deviceApi.getUsage(deviceId, date));
+    }
   }, [execute, deviceId, date]);
 
   useEffect(() => {
     fetchUsage();
   }, [fetchUsage]);
 
+  if (!deviceId) {
+    return (
+      <div className="p-6">
+        <div className="text-center py-16">
+          <p className="text-muted-foreground">No device ID provided</p>
+          <Button variant="outline" asChild className="mt-4">
+            <Link href="/devices/">Back to Devices</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <Button variant="outline" asChild>
-          <Link href="/devices">
+          <Link href="/devices/">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Devices
           </Link>
@@ -67,5 +82,23 @@ export default function DeviceUsagePage() {
         </>
       )}
     </div>
+  );
+}
+
+function DeviceUsageFallback() {
+  return (
+    <div className="p-6">
+      <div className="flex items-center justify-center py-16">
+        <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
+      </div>
+    </div>
+  );
+}
+
+export default function DeviceUsagePage() {
+  return (
+    <Suspense fallback={<DeviceUsageFallback />}>
+      <DeviceUsageContent />
+    </Suspense>
   );
 }

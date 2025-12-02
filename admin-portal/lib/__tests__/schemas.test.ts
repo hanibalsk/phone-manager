@@ -224,16 +224,30 @@ describe("unlockRequestResponseSchema", () => {
 });
 
 describe("envSchema", () => {
-  it("should provide default API URL", () => {
+  it("should provide empty string as default API URL (same-origin)", () => {
     const result = envSchema.parse({});
-    expect(result.NEXT_PUBLIC_API_URL).toBe("http://localhost:3000/api");
+    expect(result.NEXT_PUBLIC_API_URL).toBe("");
   });
 
-  it("should accept valid URL", () => {
+  it("should accept valid absolute URL", () => {
     const result = envSchema.parse({
       NEXT_PUBLIC_API_URL: "https://api.example.com",
     });
     expect(result.NEXT_PUBLIC_API_URL).toBe("https://api.example.com");
+  });
+
+  it("should accept localhost URL for development", () => {
+    const result = envSchema.parse({
+      NEXT_PUBLIC_API_URL: "http://localhost:8080",
+    });
+    expect(result.NEXT_PUBLIC_API_URL).toBe("http://localhost:8080");
+  });
+
+  it("should accept empty string for same-origin deployment", () => {
+    const result = envSchema.parse({
+      NEXT_PUBLIC_API_URL: "",
+    });
+    expect(result.NEXT_PUBLIC_API_URL).toBe("");
   });
 });
 

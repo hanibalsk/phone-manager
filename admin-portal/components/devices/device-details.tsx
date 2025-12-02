@@ -84,22 +84,18 @@ export function DeviceDetails({ device, onClose }: DeviceDetailsProps) {
         </CardContent>
         <CardFooter className="flex justify-between gap-2">
           <Button variant="outline" asChild>
-            <Link href={`/devices/${device.id}/usage`}>
+            <Link href={`/devices/usage/?id=${device.id}`}>
               <BarChart3 className="h-4 w-4 mr-2" />
               View Usage
             </Link>
           </Button>
-          <Button variant="outline" asChild>
-            <Link href={`/devices/${device.id}/limits`}>
-              <Clock className="h-4 w-4 mr-2" />
-              Set Limits
-            </Link>
+          <Button variant="outline" disabled>
+            <Clock className="h-4 w-4 mr-2" />
+            Set Limits
           </Button>
-          <Button variant="outline" asChild>
-            <Link href={`/devices/${device.id}/settings`}>
-              <Settings className="h-4 w-4 mr-2" />
-              Settings
-            </Link>
+          <Button variant="outline" disabled>
+            <Settings className="h-4 w-4 mr-2" />
+            Settings
           </Button>
         </CardFooter>
       </Card>

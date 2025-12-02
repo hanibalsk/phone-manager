@@ -95,12 +95,12 @@ export const deviceSchema = z.object({
 export type DeviceInput = z.infer<typeof deviceSchema>;
 
 // Environment Variables Schema
+// Supports both absolute URLs (http://...) and relative paths (/api/v1)
 export const envSchema = z.object({
   NEXT_PUBLIC_API_URL: z
     .string()
-    .url("Invalid API URL")
     .optional()
-    .default("http://localhost:3000/api"),
+    .default(""),  // Empty string means same-origin (production default)
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

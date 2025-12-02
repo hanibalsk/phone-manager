@@ -1,0 +1,152 @@
+# Deploy Admin Portal Only
+# Triggered when only admin-portal files change
+# Does NOT restart the Rust backend - just updates static files
+
+name: Deploy Admin Portal
+
+on:
+  push:
+    paths:
+      - 'admin-portal/**'
+      - '!admin-portal/README.md'
+      - '!admin-portal/DEPLOYMENT.md'
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'staging'
+        type: choice
+        options:
+          - staging
+          - production
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  build:
+    name: Build Admin Portal
+    runs-on: ubuntu-latest
+    outputs:
+      artifact-name: admin-portal-${{ github.sha }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: admin-portal/package-lock.json
+
+      - name: Install dependencies
+        working-directory: admin-portal
+        run: npm ci
+
+      - name: Run type check
+        working-directory: admin-portal
+        run: npm run type-check
+
+      - name: Run linter
+        working-directory: admin-portal
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: admin-portal
+        run: npm test
+
+      - name: Build static export
+        working-directory: admin-portal
+        run: npm run build
+
+      - name: Verify build output
+        run: |
+          if [ ! -d "admin-portal/out" ]; then
+            echo "ERROR: Build output not found"
+            exit 1
+          fi
+          FILE_COUNT=$(find admin-portal/out -type f | wc -l)
+          echo "Build successful: $FILE_COUNT files generated"
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: admin-portal-${{ github.sha }}
+          path: admin-portal/out/
+          retention-days: 7
+
+  # Example deployment job - customize for your infrastructure
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'staging')
+    environment: staging
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: admin-portal-${{ github.sha }}
+          path: ./out
+
+      - name: Deploy to staging
+        run: |
+          echo "Deploying to staging..."
+          # Customize this section for your deployment method:
+          #
+          # Option 1: rsync to server
+          # rsync -avz --delete ./out/ ${{ secrets.STAGING_HOST }}:/app/static/admin/
+          #
+          # Option 2: Update Docker volume via SSH
+          # ssh ${{ secrets.STAGING_HOST }} "docker cp - phone-manager-backend:/app/static/admin/" < ./out.tar
+          #
+          # Option 3: Upload to S3/GCS for CDN serving
+          # aws s3 sync ./out/ s3://${{ secrets.STAGING_BUCKET }}/admin/ --delete
+          #
+          # Option 4: kubectl cp for Kubernetes
+          # kubectl cp ./out/. ${{ secrets.K8S_NAMESPACE }}/pod-name:/app/static/admin/
+          echo "Staging deployment placeholder - configure for your infrastructure"
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying deployment..."
+          # curl -f https://staging.example.com/ || exit 1
+          echo "Verification placeholder - add your health check URL"
+
+  deploy-production:
+    name: Deploy to Production
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'production'
+    environment: production
+
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: admin-portal-${{ github.sha }}
+          path: ./out
+
+      - name: Deploy to production
+        run: |
+          echo "Deploying to production..."
+          # Same options as staging - customize for your infrastructure
+          echo "Production deployment placeholder - configure for your infrastructure"
+
+      - name: Verify deployment
+        run: |
+          echo "Verifying production deployment..."
+          # curl -f https://your-domain.com/ || exit 1
+          echo "Verification placeholder - add your health check URL"
+
+      - name: Notify on success
+        if: success()
+        run: |
+          echo "Production deployment successful!"
+          # Add Slack/Discord/email notification here
