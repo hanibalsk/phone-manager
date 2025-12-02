@@ -105,7 +105,8 @@ jobs:
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -p 332 -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+          #ssh-keyscan -p 332 -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -p 332 -H github@rlt.sk >> ~/.ssh/known_hosts
 
       - name: Deploy to staging
         run: |
