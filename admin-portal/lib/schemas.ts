@@ -30,17 +30,17 @@ export type ResetPasswordInput = z.infer<typeof resetPasswordSchema>;
 
 // Admin Settings Schema
 export const adminSettingsSchema = z.object({
-  unlockPin: z
+  unlock_pin: z
     .string()
     .min(4, "PIN must be at least 4 characters")
     .max(8, "PIN must be at most 8 characters")
     .regex(/^\d+$/, "PIN must contain only digits"),
-  defaultDailyLimitMinutes: z
+  default_daily_limit_minutes: z
     .number()
     .min(1, "Daily limit must be at least 1 minute")
     .max(1440, "Daily limit cannot exceed 24 hours (1440 minutes)"),
-  notificationsEnabled: z.boolean(),
-  autoApproveUnlockRequests: z.boolean(),
+  notifications_enabled: z.boolean(),
+  auto_approve_unlock_requests: z.boolean(),
 });
 
 export type AdminSettingsInput = z.infer<typeof adminSettingsSchema>;
@@ -52,18 +52,18 @@ export type AdminSettingsUpdateInput = z.infer<typeof adminSettingsUpdateSchema>
 
 // Daily Limit Schema
 export const dailyLimitSchema = z.object({
-  packageName: z
+  package_name: z
     .string()
     .min(1, "Package name is required")
     .regex(
       /^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/i,
       "Invalid package name format (e.g., com.example.app)"
     ),
-  appName: z
+  app_name: z
     .string()
     .min(1, "App name is required")
     .max(100, "App name is too long"),
-  dailyLimitMinutes: z
+  daily_limit_minutes: z
     .number()
     .min(1, "Daily limit must be at least 1 minute")
     .max(1440, "Daily limit cannot exceed 24 hours (1440 minutes)"),
@@ -86,9 +86,9 @@ export type UnlockRequestResponseInput = z.infer<typeof unlockRequestResponseSch
 export const deviceSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1),
-  androidId: z.string().min(1),
-  enrolledAt: z.string().datetime(),
-  lastSeen: z.string().datetime(),
+  android_id: z.string().min(1),
+  enrolled_at: z.string().datetime(),
+  last_seen: z.string().datetime(),
   status: z.enum(["active", "inactive", "pending"]),
 });
 

@@ -80,13 +80,13 @@ export function RequestActionDialog({
           </CardTitle>
           <CardDescription id={descriptionId}>
             {isApprove
-              ? `Grant ${request.requestedDuration} minutes of unlock time`
+              ? `Grant ${request.requested_duration} minutes of unlock time`
               : "Deny this unlock request"}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="p-3 bg-muted rounded-lg">
-            <p className="text-sm font-medium">{request.deviceName}</p>
+            <p className="text-sm font-medium">{request.device_name}</p>
             <p className="text-sm text-muted-foreground">{request.reason}</p>
           </div>
           <div className="space-y-2">

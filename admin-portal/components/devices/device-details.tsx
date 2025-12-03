@@ -44,7 +44,7 @@ export function DeviceDetails({ device, onClose }: DeviceDetailsProps) {
           </Button>
           <CardTitle className="flex items-center gap-2">
             {device.name}
-            <DeviceStatusBadge lastSeen={device.lastSeen} />
+            <DeviceStatusBadge lastSeen={device.last_seen} />
           </CardTitle>
           <CardDescription>Device Details</CardDescription>
         </CardHeader>
@@ -56,7 +56,7 @@ export function DeviceDetails({ device, onClose }: DeviceDetailsProps) {
                   Android ID
                 </p>
                 <code className="text-sm bg-muted px-2 py-1 rounded block mt-1">
-                  {device.androidId}
+                  {device.android_id}
                 </code>
               </div>
               <div>
@@ -71,13 +71,13 @@ export function DeviceDetails({ device, onClose }: DeviceDetailsProps) {
                 <p className="text-sm font-medium text-muted-foreground">
                   Enrolled
                 </p>
-                <p className="text-sm mt-1">{formatDate(device.enrolledAt)}</p>
+                <p className="text-sm mt-1">{formatDate(device.enrolled_at)}</p>
               </div>
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Last Seen
                 </p>
-                <p className="text-sm mt-1">{formatDate(device.lastSeen)}</p>
+                <p className="text-sm mt-1">{formatDate(device.last_seen)}</p>
               </div>
             </div>
           </div>

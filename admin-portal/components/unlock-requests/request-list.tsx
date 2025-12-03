@@ -143,7 +143,7 @@ export function RequestList({
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium">{request.deviceName}</span>
+                      <span className="font-medium">{request.device_name}</span>
                       <Badge variant={statusConfig[request.status].variant}>
                         {statusConfig[request.status].label}
                       </Badge>
@@ -154,13 +154,13 @@ export function RequestList({
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
                       <span className="flex items-center gap-1">
                         <Clock className="h-3 w-3" />
-                        {formatDuration(request.requestedDuration)}
+                        {formatDuration(request.requested_duration)}
                       </span>
-                      <span>{formatDate(request.requestedAt)}</span>
+                      <span>{formatDate(request.requested_at)}</span>
                     </div>
-                    {request.adminResponse && (
+                    {request.admin_response && (
                       <p className="text-sm mt-2 italic text-muted-foreground">
-                        Response: {request.adminResponse}
+                        Response: {request.admin_response}
                       </p>
                     )}
                   </div>

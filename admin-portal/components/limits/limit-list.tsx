@@ -108,17 +108,17 @@ export function LimitList({
                 >
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-1">
-                      <span className="font-medium">{limit.appName}</span>
+                      <span className="font-medium">{limit.app_name}</span>
                       <Badge variant={limit.enabled ? "success" : "secondary"}>
                         {limit.enabled ? "Active" : "Disabled"}
                       </Badge>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Clock className="h-4 w-4" />
-                      <span>{formatTime(limit.dailyLimitMinutes)} daily</span>
+                      <span>{formatTime(limit.daily_limit_minutes)} daily</span>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {limit.packageName}
+                      {limit.package_name}
                     </p>
                   </div>
                   <div className="flex gap-2">

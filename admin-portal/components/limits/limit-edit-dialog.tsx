@@ -28,10 +28,10 @@ export function LimitEditDialog({
   onSave,
   onCancel,
 }: LimitEditDialogProps) {
-  const [packageName, setPackageName] = useState(limit?.packageName || "");
-  const [appName, setAppName] = useState(limit?.appName || "");
+  const [packageName, setPackageName] = useState(limit?.package_name || "");
+  const [appName, setAppName] = useState(limit?.app_name || "");
   const [dailyLimitMinutes, setDailyLimitMinutes] = useState(
-    limit?.dailyLimitMinutes || 60
+    limit?.daily_limit_minutes || 60
   );
   const [enabled, setEnabled] = useState(limit?.enabled ?? true);
   const [submitting, setSubmitting] = useState(false);
@@ -53,7 +53,12 @@ export function LimitEditDialog({
   };
 
   const handleSubmit = async () => {
-    const formData = { packageName, appName, dailyLimitMinutes, enabled };
+    const formData = {
+      package_name: packageName,
+      app_name: appName,
+      daily_limit_minutes: dailyLimitMinutes,
+      enabled,
+    };
     const validationErrors = getFieldErrors(dailyLimitSchema, formData);
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
@@ -103,15 +108,15 @@ export function LimitEditDialog({
               value={packageName}
               onChange={(e) => {
                 setPackageName(e.target.value);
-                clearFieldError("packageName");
+                clearFieldError("package_name");
               }}
               disabled={isEditing}
-              aria-invalid={!!errors.packageName}
-              aria-describedby={errors.packageName ? "packageName-error" : undefined}
+              aria-invalid={!!errors.package_name}
+              aria-describedby={errors.package_name ? "package_name-error" : undefined}
             />
-            {errors.packageName && (
-              <p id="packageName-error" className="text-xs text-destructive">
-                {errors.packageName}
+            {errors.package_name && (
+              <p id="package_name-error" className="text-xs text-destructive">
+                {errors.package_name}
               </p>
             )}
           </div>
@@ -123,14 +128,14 @@ export function LimitEditDialog({
               value={appName}
               onChange={(e) => {
                 setAppName(e.target.value);
-                clearFieldError("appName");
+                clearFieldError("app_name");
               }}
-              aria-invalid={!!errors.appName}
-              aria-describedby={errors.appName ? "appName-error" : undefined}
+              aria-invalid={!!errors.app_name}
+              aria-describedby={errors.app_name ? "app_name-error" : undefined}
             />
-            {errors.appName && (
-              <p id="appName-error" className="text-xs text-destructive">
-                {errors.appName}
+            {errors.app_name && (
+              <p id="app_name-error" className="text-xs text-destructive">
+                {errors.app_name}
               </p>
             )}
           </div>
@@ -144,14 +149,14 @@ export function LimitEditDialog({
               value={dailyLimitMinutes}
               onChange={(e) => {
                 setDailyLimitMinutes(parseInt(e.target.value));
-                clearFieldError("dailyLimitMinutes");
+                clearFieldError("daily_limit_minutes");
               }}
-              aria-invalid={!!errors.dailyLimitMinutes}
-              aria-describedby={errors.dailyLimitMinutes ? "dailyLimit-error" : undefined}
+              aria-invalid={!!errors.daily_limit_minutes}
+              aria-describedby={errors.daily_limit_minutes ? "dailyLimit-error" : undefined}
             />
-            {errors.dailyLimitMinutes && (
+            {errors.daily_limit_minutes && (
               <p id="dailyLimit-error" className="text-xs text-destructive">
-                {errors.dailyLimitMinutes}
+                {errors.daily_limit_minutes}
               </p>
             )}
           </div>

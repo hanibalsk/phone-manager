@@ -16,9 +16,9 @@ interface UsageChartProps {
 
 export function UsageChart({ usage, title = "App Usage" }: UsageChartProps) {
   const sortedUsage = [...usage].sort(
-    (a, b) => b.usageTimeMinutes - a.usageTimeMinutes
+    (a, b) => b.usage_time_minutes - a.usage_time_minutes
   );
-  const maxUsage = sortedUsage[0]?.usageTimeMinutes || 1;
+  const maxUsage = sortedUsage[0]?.usage_time_minutes || 1;
 
   const formatTime = (minutes: number) => {
     if (minutes < 60) return `${minutes}m`;
@@ -43,20 +43,20 @@ export function UsageChart({ usage, title = "App Usage" }: UsageChartProps) {
         ) : (
           <div className="space-y-3">
             {sortedUsage.slice(0, 10).map((app) => (
-              <div key={app.packageName} className="space-y-1">
+              <div key={app.package_name} className="space-y-1">
                 <div className="flex justify-between text-sm">
                   <span className="font-medium truncate max-w-[200px]">
-                    {app.appName}
+                    {app.app_name}
                   </span>
                   <span className="text-muted-foreground">
-                    {formatTime(app.usageTimeMinutes)}
+                    {formatTime(app.usage_time_minutes)}
                   </span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full transition-all"
                     style={{
-                      width: `${(app.usageTimeMinutes / maxUsage) * 100}%`,
+                      width: `${(app.usage_time_minutes / maxUsage) * 100}%`,
                     }}
                   />
                 </div>

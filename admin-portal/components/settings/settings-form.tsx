@@ -37,10 +37,10 @@ export function SettingsForm({
   useEffect(() => {
     if (settings) {
       setFormData({
-        unlockPin: settings.unlockPin,
-        defaultDailyLimitMinutes: settings.defaultDailyLimitMinutes,
-        notificationsEnabled: settings.notificationsEnabled,
-        autoApproveUnlockRequests: settings.autoApproveUnlockRequests,
+        unlock_pin: settings.unlock_pin,
+        default_daily_limit_minutes: settings.default_daily_limit_minutes,
+        notifications_enabled: settings.notifications_enabled,
+        auto_approve_unlock_requests: settings.auto_approve_unlock_requests,
       });
     }
   }, [settings]);
@@ -108,19 +108,19 @@ export function SettingsForm({
         ) : (
           <div className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="unlockPin">Unlock PIN</Label>
+              <Label htmlFor="unlock_pin">Unlock PIN</Label>
               <Input
-                id="unlockPin"
+                id="unlock_pin"
                 type="password"
                 placeholder="Enter PIN"
-                value={formData.unlockPin || ""}
-                onChange={(e) => handleChange("unlockPin", e.target.value)}
-                aria-invalid={!!errors.unlockPin}
-                aria-describedby={errors.unlockPin ? "unlockPin-error" : undefined}
+                value={formData.unlock_pin || ""}
+                onChange={(e) => handleChange("unlock_pin", e.target.value)}
+                aria-invalid={!!errors.unlock_pin}
+                aria-describedby={errors.unlock_pin ? "unlock_pin-error" : undefined}
               />
-              {errors.unlockPin ? (
-                <p id="unlockPin-error" className="text-xs text-destructive">
-                  {errors.unlockPin}
+              {errors.unlock_pin ? (
+                <p id="unlock_pin-error" className="text-xs text-destructive">
+                  {errors.unlock_pin}
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
@@ -130,22 +130,22 @@ export function SettingsForm({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="defaultLimit">Default Daily Limit (minutes)</Label>
+              <Label htmlFor="default_daily_limit_minutes">Default Daily Limit (minutes)</Label>
               <Input
-                id="defaultLimit"
+                id="default_daily_limit_minutes"
                 type="number"
                 min={1}
                 max={1440}
-                value={formData.defaultDailyLimitMinutes || 60}
+                value={formData.default_daily_limit_minutes || 60}
                 onChange={(e) =>
-                  handleChange("defaultDailyLimitMinutes", parseInt(e.target.value))
+                  handleChange("default_daily_limit_minutes", parseInt(e.target.value))
                 }
-                aria-invalid={!!errors.defaultDailyLimitMinutes}
-                aria-describedby={errors.defaultDailyLimitMinutes ? "defaultLimit-error" : undefined}
+                aria-invalid={!!errors.default_daily_limit_minutes}
+                aria-describedby={errors.default_daily_limit_minutes ? "default_daily_limit_minutes-error" : undefined}
               />
-              {errors.defaultDailyLimitMinutes ? (
-                <p id="defaultLimit-error" className="text-xs text-destructive">
-                  {errors.defaultDailyLimitMinutes}
+              {errors.default_daily_limit_minutes ? (
+                <p id="default_daily_limit_minutes-error" className="text-xs text-destructive">
+                  {errors.default_daily_limit_minutes}
                 </p>
               ) : (
                 <p className="text-xs text-muted-foreground">
@@ -156,36 +156,36 @@ export function SettingsForm({
 
             <div className="flex items-center justify-between border rounded-lg p-4">
               <div>
-                <Label htmlFor="notifications">Push Notifications</Label>
+                <Label htmlFor="notifications_enabled">Push Notifications</Label>
                 <p className="text-sm text-muted-foreground">
                   Receive notifications for unlock requests
                 </p>
               </div>
               <input
-                id="notifications"
+                id="notifications_enabled"
                 type="checkbox"
                 className="h-4 w-4"
-                checked={formData.notificationsEnabled || false}
+                checked={formData.notifications_enabled || false}
                 onChange={(e) =>
-                  handleChange("notificationsEnabled", e.target.checked)
+                  handleChange("notifications_enabled", e.target.checked)
                 }
               />
             </div>
 
             <div className="flex items-center justify-between border rounded-lg p-4">
               <div>
-                <Label htmlFor="autoApprove">Auto-Approve Requests</Label>
+                <Label htmlFor="auto_approve_unlock_requests">Auto-Approve Requests</Label>
                 <p className="text-sm text-muted-foreground">
                   Automatically approve all unlock requests
                 </p>
               </div>
               <input
-                id="autoApprove"
+                id="auto_approve_unlock_requests"
                 type="checkbox"
                 className="h-4 w-4"
-                checked={formData.autoApproveUnlockRequests || false}
+                checked={formData.auto_approve_unlock_requests || false}
                 onChange={(e) =>
-                  handleChange("autoApproveUnlockRequests", e.target.checked)
+                  handleChange("auto_approve_unlock_requests", e.target.checked)
                 }
               />
             </div>

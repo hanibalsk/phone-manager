@@ -142,17 +142,17 @@ export function DeviceList({ devices, loading, onRefresh }: DeviceListProps) {
                       </td>
                       <td className="py-3 px-4">
                         <code className="text-xs bg-muted px-2 py-1 rounded">
-                          {device.androidId.slice(0, 8)}...
+                          {device.android_id.slice(0, 8)}...
                         </code>
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {formatDate(device.enrolledAt)}
+                        {formatDate(device.enrolled_at)}
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
-                        {formatDate(device.lastSeen)}
+                        {formatDate(device.last_seen)}
                       </td>
                       <td className="py-3 px-4">
-                        <DeviceStatusBadge lastSeen={device.lastSeen} />
+                        <DeviceStatusBadge lastSeen={device.last_seen} />
                       </td>
                       <td className="py-3 px-4 text-right">
                         <Button

@@ -14,7 +14,7 @@ interface UsageSummaryProps {
 }
 
 export function UsageSummary({ usage }: UsageSummaryProps) {
-  const totalMinutes = usage.reduce((sum, app) => sum + app.usageTimeMinutes, 0);
+  const totalMinutes = usage.reduce((sum, app) => sum + app.usage_time_minutes, 0);
   const appCount = usage.length;
   const avgPerApp = appCount > 0 ? Math.round(totalMinutes / appCount) : 0;
 
