@@ -1,0 +1,59 @@
+# Create Group Flow
+# Tests creating a new group
+
+appId: three.two.bit.phonemanager.dev
+name: Create Group Flow
+
+---
+# Login first
+- runFlow: "../shared/login_steps.yaml"
+
+# Navigate to groups
+- tapOn:
+    id: "groups_card"
+
+# Wait for groups screen
+- assertVisible:
+    id: "groups_screen"
+    timeout: 5000
+
+# Tap create group button
+- tapOn:
+    id: "create_group_button"
+
+# Wait for create group form
+- assertVisible:
+    id: "group_name_input"
+    timeout: 5000
+
+# Enter group name
+- tapOn:
+    id: "group_name_input"
+
+- inputText: ${TEST_GROUP_NAME}
+
+# Enter optional description
+- tapOn:
+    id: "group_description_input"
+
+- inputText: "E2E test group for family tracking"
+
+# Create the group
+- tapOn:
+    id: "create_button"
+
+# Wait for group detail screen
+- assertVisible:
+    id: "group_detail_screen"
+    timeout: 10000
+
+# Verify invite code is displayed
+- assertVisible:
+    id: "invite_code_display"
+
+# Verify QR code is displayed
+- assertVisible:
+    id: "qr_code_display"
+
+# Take screenshot of created group
+- takeScreenshot: "group_created"

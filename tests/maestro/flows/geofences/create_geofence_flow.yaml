@@ -1,0 +1,68 @@
+# Create Geofence Flow
+# Tests creating a new geofence from the map
+
+appId: three.two.bit.phonemanager.dev
+name: Create Geofence Flow
+
+---
+# Login first
+- runFlow: "../shared/login_steps.yaml"
+
+# Navigate to map
+- tapOn:
+    id: "map_button"
+
+# Wait for map screen
+- assertVisible:
+    id: "map_screen"
+    timeout: 10000
+
+# Wait for map to load
+- assertVisible:
+    id: "map_view"
+    timeout: 10000
+
+# Tap create geofence button
+- tapOn:
+    id: "create_geofence_button"
+
+# Wait for geofence creation mode
+- assertVisible:
+    text: "Tap on map to set geofence center"
+    timeout: 5000
+
+# Long press on map to place geofence
+# Note: In real implementation, this would tap at specific coordinates
+- longPressOn:
+    id: "map_view"
+
+# Wait for geofence form
+- assertVisible:
+    id: "geofence_name_input"
+    timeout: 5000
+
+# Enter geofence name
+- tapOn:
+    id: "geofence_name_input"
+
+- inputText: "Home Zone"
+
+# Set radius (if adjustable)
+- tapOn:
+    id: "geofence_radius_input"
+
+- clearText
+
+- inputText: "100"
+
+# Save geofence
+- tapOn:
+    id: "save_geofence_button"
+
+# Verify geofence was created
+- assertVisible:
+    text: "Home Zone"
+    timeout: 5000
+
+# Take screenshot
+- takeScreenshot: "geofence_created"

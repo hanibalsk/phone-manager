@@ -1,0 +1,47 @@
+# Maestro Global Configuration for Phone Manager E2E Tests
+# https://maestro.mobile.dev/
+
+# App Configuration
+appId: three.two.bit.phonemanager.dev
+
+# Default timeout for assertions (milliseconds)
+timeout: 10000
+
+# Environment Variables (can be overridden via CLI)
+env:
+  # Test User Credentials
+  TEST_USER_EMAIL: "test@example.com"
+  TEST_USER_PASSWORD: "Test123!"
+  TEST_USER_NAME: "Test User"
+
+  # Second Test User (for multi-device scenarios)
+  TEST_USER2_EMAIL: "test2@example.com"
+  TEST_USER2_PASSWORD: "Test123!"
+  TEST_USER2_NAME: "Test User 2"
+
+  # API Configuration
+  API_BASE_URL: "http://localhost:8080"
+
+  # Test Locations (San Francisco Bay Area)
+  TEST_LOC_HOME_LAT: "37.7749"
+  TEST_LOC_HOME_LON: "-122.4194"
+  TEST_LOC_WORK_LAT: "37.8044"
+  TEST_LOC_WORK_LON: "-122.2712"
+
+  # Group Test Data
+  TEST_GROUP_NAME: "E2E Test Family"
+  TEST_INVITE_CODE: "ABC123"
+
+# Screenshots configuration
+screenshots:
+  enabled: true
+  onFailure: true
+  directory: "./reports/screenshots"
+
+# Video recording
+video:
+  enabled: false
+  onFailure: true
+
+# Retry configuration
+retries: 2

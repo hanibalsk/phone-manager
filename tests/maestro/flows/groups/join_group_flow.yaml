@@ -1,0 +1,49 @@
+# Join Group Flow
+# Tests joining an existing group with invite code
+
+appId: three.two.bit.phonemanager.dev
+name: Join Group Flow
+
+---
+# Login first
+- runFlow: "../shared/login_steps.yaml"
+
+# Navigate to groups
+- tapOn:
+    id: "groups_card"
+
+# Wait for groups screen
+- assertVisible:
+    id: "groups_screen"
+    timeout: 5000
+
+# Tap join group button
+- tapOn:
+    id: "join_group_button"
+
+# Wait for join group screen
+- assertVisible:
+    id: "invite_code_input"
+    timeout: 5000
+
+# Enter invite code
+- tapOn:
+    id: "invite_code_input"
+
+- inputText: ${TEST_INVITE_CODE}
+
+# Submit join request
+- tapOn:
+    id: "join_button"
+
+# Wait for group detail screen (successful join)
+- assertVisible:
+    id: "group_detail_screen"
+    timeout: 10000
+
+# Verify we're a member
+- assertVisible:
+    id: "members_list"
+
+# Take screenshot of joined group
+- takeScreenshot: "group_joined"

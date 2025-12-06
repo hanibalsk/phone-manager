@@ -1,0 +1,75 @@
+# Registration Flow Test
+# Tests new user registration
+
+appId: three.two.bit.phonemanager.dev
+name: User Registration Flow
+
+---
+# Clear app state
+- clearState
+
+# Launch the app
+- launchApp
+
+# Wait for login screen
+- assertVisible:
+    id: "email_input"
+    timeout: 10000
+
+# Navigate to registration
+- tapOn:
+    id: "create_account_link"
+
+# Wait for registration screen
+- assertVisible:
+    id: "name_input"
+    timeout: 5000
+
+# Verify registration form elements
+- assertVisible:
+    id: "email_input"
+
+- assertVisible:
+    id: "password_input"
+
+- assertVisible:
+    id: "confirm_password_input"
+
+- assertVisible:
+    id: "register_button"
+
+# Enter name
+- tapOn:
+    id: "name_input"
+
+- inputText: "New Test User"
+
+# Enter email (using timestamp to ensure uniqueness)
+- tapOn:
+    id: "email_input"
+
+- inputText: "newuser_${timestamp}@example.com"
+
+# Enter password
+- tapOn:
+    id: "password_input"
+
+- inputText: "NewUser123!"
+
+# Confirm password
+- tapOn:
+    id: "confirm_password_input"
+
+- inputText: "NewUser123!"
+
+# Submit registration
+- tapOn:
+    id: "register_button"
+
+# Wait for home screen (successful registration auto-logs in)
+- assertVisible:
+    id: "home_screen"
+    timeout: 15000
+
+# Take screenshot of successful registration
+- takeScreenshot: "registration_success"

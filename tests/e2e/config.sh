@@ -175,6 +175,56 @@ export CLEANUP_AFTER_TEST="${CLEANUP_AFTER_TEST:-true}"
 export PRESERVE_FAILED_DATA="${PRESERVE_FAILED_DATA:-true}"
 
 # =============================================================================
+# Multi-Device Configuration
+# =============================================================================
+# Number of emulators to launch for multi-device tests
+export MULTI_DEVICE_COUNT="${MULTI_DEVICE_COUNT:-2}"
+
+# Emulator ports (even numbers, ADB uses port and port+1)
+export EMULATOR_PORT_PARENT="${EMULATOR_PORT_PARENT:-5554}"
+export EMULATOR_PORT_CHILD1="${EMULATOR_PORT_CHILD1:-5556}"
+export EMULATOR_PORT_CHILD2="${EMULATOR_PORT_CHILD2:-5558}"
+
+# AVD names for test emulators
+export AVD_PARENT="${AVD_PARENT:-phone_manager_e2e_1}"
+export AVD_CHILD1="${AVD_CHILD1:-phone_manager_e2e_2}"
+export AVD_CHILD2="${AVD_CHILD2:-phone_manager_e2e_3}"
+
+# Emulator configuration
+export EMULATOR_RAM_MB="${EMULATOR_RAM_MB:-2048}"
+export EMULATOR_HEADLESS="${EMULATOR_HEADLESS:-true}"
+export EMULATOR_BOOT_TIMEOUT="${EMULATOR_BOOT_TIMEOUT:-180}"
+
+# Multi-device test user credentials
+export MD_PARENT_EMAIL="${MD_PARENT_EMAIL:-$TEST_USER_PARENT_EMAIL}"
+export MD_PARENT_PASSWORD="${MD_PARENT_PASSWORD:-$TEST_USER_PARENT_PASSWORD}"
+export MD_PARENT_NAME="${MD_PARENT_NAME:-$TEST_USER_PARENT_NAME}"
+
+export MD_CHILD1_EMAIL="${MD_CHILD1_EMAIL:-$TEST_USER_CHILD1_EMAIL}"
+export MD_CHILD1_PASSWORD="${MD_CHILD1_PASSWORD:-$TEST_USER_CHILD1_PASSWORD}"
+export MD_CHILD1_NAME="${MD_CHILD1_NAME:-$TEST_USER_CHILD1_NAME}"
+
+export MD_CHILD2_EMAIL="${MD_CHILD2_EMAIL:-$TEST_USER_CHILD2_EMAIL}"
+export MD_CHILD2_PASSWORD="${MD_CHILD2_PASSWORD:-$TEST_USER_CHILD2_PASSWORD}"
+export MD_CHILD2_NAME="${MD_CHILD2_NAME:-$TEST_USER_CHILD2_NAME}"
+
+# Multi-device test group
+export MD_GROUP_NAME="${MD_GROUP_NAME:-E2E Family Group ${TEST_SESSION_ID}}"
+
+# =============================================================================
+# Proximity Alert Configuration
+# =============================================================================
+export PROXIMITY_DEFAULT_RADIUS="${PROXIMITY_DEFAULT_RADIUS:-500}"
+export PROXIMITY_MIN_RADIUS="${PROXIMITY_MIN_RADIUS:-50}"
+export PROXIMITY_MAX_RADIUS="${PROXIMITY_MAX_RADIUS:-100000}"
+
+# =============================================================================
+# Network Simulation Configuration
+# =============================================================================
+export NETWORK_OFFLINE_DURATION="${NETWORK_OFFLINE_DURATION:-10}"
+export NETWORK_RECONNECT_WAIT="${NETWORK_RECONNECT_WAIT:-5}"
+
+# =============================================================================
 # Initialization
 # =============================================================================
 # Create directories if they don't exist

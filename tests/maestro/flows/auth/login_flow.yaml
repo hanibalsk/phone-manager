@@ -1,0 +1,52 @@
+# Login Flow Test
+# Tests user login with valid credentials
+
+appId: three.two.bit.phonemanager.dev
+name: User Login Flow
+
+---
+# Clear app state for clean test
+- clearState
+
+# Launch the app
+- launchApp
+
+# Wait for login screen to appear
+- assertVisible:
+    id: "email_input"
+    timeout: 10000
+
+# Verify login screen elements
+- assertVisible:
+    id: "password_input"
+
+- assertVisible:
+    id: "sign_in_button"
+
+# Enter email
+- tapOn:
+    id: "email_input"
+
+- inputText: ${TEST_USER_EMAIL}
+
+# Enter password
+- tapOn:
+    id: "password_input"
+
+- inputText: ${TEST_USER_PASSWORD}
+
+# Submit login
+- tapOn:
+    id: "sign_in_button"
+
+# Wait for home screen
+- assertVisible:
+    id: "home_screen"
+    timeout: 15000
+
+# Verify user is logged in (home screen elements visible)
+- assertVisible:
+    id: "tracking_toggle"
+
+# Take screenshot of successful login
+- takeScreenshot: "login_success"
