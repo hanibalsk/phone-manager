@@ -7,7 +7,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.BatteryManager
 import dagger.hilt.android.qualifiers.ApplicationContext
-import three.two.bit.phonemanager.BuildConfig
 import three.two.bit.phonemanager.data.model.LocationEntity
 import three.two.bit.phonemanager.network.models.LocationBatchPayload
 import three.two.bit.phonemanager.network.models.LocationUploadResponse
@@ -39,25 +38,13 @@ class NetworkManager @Inject constructor(
 
     /**
      * Check if device has active network connection
-     *
-     * In debug builds, we skip the NET_CAPABILITY_VALIDATED check because:
-     * - Emulators with ADB reverse port forwarding may not pass Android's captive portal detection
-     * - This allows testing with local backend servers via localhost forwarding
-     * - Production builds still require full network validation for security
      */
     fun isNetworkAvailable(): Boolean {
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
-        val hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-
-        // In debug builds, skip the VALIDATED check to support emulator testing with ADB reverse
-        return if (BuildConfig.DEBUG) {
-            Timber.d("Debug mode: checking only NET_CAPABILITY_INTERNET (skip VALIDATED)")
-            hasInternet
-        } else {
-            hasInternet && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
-        }
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 
     /**
