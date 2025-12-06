@@ -111,3 +111,12 @@ mapping.txt
 seeds.txt
 usage.txt
 resources.txt
+
+# E2E Test generated artifacts
+tests/e2e/screenshots/
+tests/e2e/reports/
+
+# Admin Portal environment files
+admin-portal/.env.local
+admin-portal/.env.local.backup
+admin-portal/.env.docker
