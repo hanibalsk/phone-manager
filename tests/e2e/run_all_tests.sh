@@ -2,7 +2,7 @@
 # Phone Manager E2E Test Suite - Master Runner
 # Runs all E2E tests and generates reports
 
-set -e
+# Don't use set -e as we need to continue even if some tests fail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # =============================================================================
@@ -137,7 +137,16 @@ run_test() {
     echo ">>> Running: $test_name"
     echo "-------------------------------------------"
 
-    if bash "$test_file" 2>&1 | tee -a "$TEST_LOG"; then
+    # Capture output and exit code separately to avoid tee issues with set -e
+    local output
+    local exit_code=0
+    output=$(/bin/bash "$test_file" 2>&1) || exit_code=$?
+
+    # Display and log output
+    echo "$output"
+    [[ -n "$TEST_LOG" ]] && echo "$output" >> "$TEST_LOG"
+
+    if [[ $exit_code -eq 0 ]]; then
         ((PASSED_TESTS++))
     else
         ((FAILED_TESTS++))

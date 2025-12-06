@@ -866,3 +866,16 @@ adb_exit_doze() {
 }
 
 echo "ADB helpers loaded"
+
+# =============================================================================
+# Aliases for backward compatibility
+# =============================================================================
+adb_check_device() {
+    adb_check_connection
+}
+
+adb_get_device_id() {
+    # Get device ID from the app settings or generate one
+    adb shell cat /data/data/three.two.bit.phonemanager/shared_prefs/*.xml 2>/dev/null | grep -oP "(?<=device_id\">)[^<]+" || generate_uuid
+}
+

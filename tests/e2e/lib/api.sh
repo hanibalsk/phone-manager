@@ -577,9 +577,8 @@ EOF
 
 # Create a new group
 api_create_group() {
-    local access_token="$1"
-    local name="$2"
-    local description="${3:-}"
+    local name="${1:-}"
+    local description="${2:-}"
 
     local payload=$(cat <<EOF
 {
@@ -588,42 +587,37 @@ api_create_group() {
 }
 EOF
 )
-    api_request "POST" "/api/v1/groups" "$payload" "Authorization: Bearer $access_token"
+    api_request "POST" "/api/v1/groups" "$payload"
 }
 
 # Get user's groups
 api_get_user_groups() {
-    local access_token="$1"
-    api_request "GET" "/api/v1/groups" "" "Authorization: Bearer $access_token"
+    api_request "GET" "/api/v1/groups"
 }
 
 # Get group details
 api_get_group() {
     local group_id="$1"
-    local access_token="$2"
-    api_request "GET" "/api/v1/groups/$group_id" "" "Authorization: Bearer $access_token"
+    api_request "GET" "/api/v1/groups/$group_id"
 }
 
 # Update group
 api_update_group() {
     local group_id="$1"
-    local access_token="$2"
-    local updates_json="$3"
-    api_request "PATCH" "/api/v1/groups/$group_id" "$updates_json" "Authorization: Bearer $access_token"
+    local updates_json="$2"
+    api_request "PATCH" "/api/v1/groups/$group_id" "$updates_json"
 }
 
 # Delete group
 api_delete_group() {
     local group_id="$1"
-    local access_token="$2"
-    api_request "DELETE" "/api/v1/groups/$group_id" "" "Authorization: Bearer $access_token"
+    api_request "DELETE" "/api/v1/groups/$group_id"
 }
 
 # Get group members
 api_get_group_members() {
     local group_id="$1"
-    local access_token="$2"
-    api_request "GET" "/api/v1/groups/$group_id/members" "" "Authorization: Bearer $access_token"
+    api_request "GET" "/api/v1/groups/$group_id/members"
 }
 
 # Update member role
@@ -631,7 +625,6 @@ api_update_member_role() {
     local group_id="$1"
     local member_id="$2"
     local role="$3"  # OWNER, ADMIN, MEMBER, VIEWER
-    local access_token="$4"
 
     local payload=$(cat <<EOF
 {
@@ -639,29 +632,26 @@ api_update_member_role() {
 }
 EOF
 )
-    api_request "PATCH" "/api/v1/groups/$group_id/members/$member_id" "$payload" "Authorization: Bearer $access_token"
+    api_request "PATCH" "/api/v1/groups/$group_id/members/$member_id" "$payload"
 }
 
 # Remove member from group
 api_remove_group_member() {
     local group_id="$1"
     local member_id="$2"
-    local access_token="$3"
-    api_request "DELETE" "/api/v1/groups/$group_id/members/$member_id" "" "Authorization: Bearer $access_token"
+    api_request "DELETE" "/api/v1/groups/$group_id/members/$member_id"
 }
 
 # Leave group
 api_leave_group() {
     local group_id="$1"
-    local access_token="$2"
-    api_request "POST" "/api/v1/groups/$group_id/leave" "" "Authorization: Bearer $access_token"
+    api_request "POST" "/api/v1/groups/$group_id/leave"
 }
 
 # Transfer ownership
 api_transfer_ownership() {
     local group_id="$1"
     local new_owner_id="$2"
-    local access_token="$3"
 
     local payload=$(cat <<EOF
 {
@@ -669,7 +659,7 @@ api_transfer_ownership() {
 }
 EOF
 )
-    api_request "POST" "/api/v1/groups/$group_id/transfer" "$payload" "Authorization: Bearer $access_token"
+    api_request "POST" "/api/v1/groups/$group_id/transfer" "$payload"
 }
 
 # =============================================================================
@@ -679,9 +669,8 @@ EOF
 # Create invite code
 api_create_group_invite() {
     local group_id="$1"
-    local access_token="$2"
-    local max_uses="${3:-1}"
-    local expires_hours="${4:-24}"
+    local max_uses="${2:-1}"
+    local expires_hours="${3:-24}"
 
     local payload=$(cat <<EOF
 {
@@ -690,21 +679,19 @@ api_create_group_invite() {
 }
 EOF
 )
-    api_request "POST" "/api/v1/groups/$group_id/invites" "$payload" "Authorization: Bearer $access_token"
+    api_request "POST" "/api/v1/groups/$group_id/invites" "$payload"
 }
 
 # Get group invites
 api_get_group_invites() {
     local group_id="$1"
-    local access_token="$2"
-    api_request "GET" "/api/v1/groups/$group_id/invites" "" "Authorization: Bearer $access_token"
+    api_request "GET" "/api/v1/groups/$group_id/invites"
 }
 
 # Revoke invite
 api_revoke_invite() {
     local invite_id="$1"
-    local access_token="$2"
-    api_request "DELETE" "/api/v1/invites/$invite_id" "" "Authorization: Bearer $access_token"
+    api_request "DELETE" "/api/v1/invites/$invite_id"
 }
 
 # Validate invite code
@@ -716,15 +703,16 @@ api_validate_invite() {
 # Join group with invite code
 api_join_group() {
     local code="$1"
-    local access_token="$2"
+    local device_id="${2:-}"
 
     local payload=$(cat <<EOF
 {
-    "code": "$code"
+    "code": "$code",
+    "device_id": "$device_id"
 }
 EOF
 )
-    api_request "POST" "/api/v1/invites/join" "$payload" "Authorization: Bearer $access_token"
+    api_request "POST" "/api/v1/invites/join" "$payload"
 }
 
 # =============================================================================
@@ -734,16 +722,14 @@ EOF
 # Get device settings
 api_get_device_settings() {
     local device_id="$1"
-    local access_token="$2"
-    api_request "GET" "/api/v1/devices/$device_id/settings" "" "Authorization: Bearer $access_token"
+    api_request "GET" "/api/v1/devices/$device_id/settings"
 }
 
 # Update device settings
 api_update_device_settings() {
     local device_id="$1"
-    local access_token="$2"
-    local settings_json="$3"
-    api_request "PATCH" "/api/v1/devices/$device_id/settings" "$settings_json" "Authorization: Bearer $access_token"
+    local settings_json="$2"
+    api_request "PATCH" "/api/v1/devices/$device_id/settings" "$settings_json"
 }
 
 # Lock device setting (admin only)
