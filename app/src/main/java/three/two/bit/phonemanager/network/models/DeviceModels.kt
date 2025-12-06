@@ -132,11 +132,15 @@ data class LinkDeviceRequest(
 
 /**
  * Story E10.6 Task 2: Response for device link operation
+ * Note: Fields are nullable to handle cases where API returns partial response
  */
 @Serializable
 data class LinkedDeviceResponse(
-    val device: LinkedDeviceInfo,
-    val linked: Boolean,
+    val device: LinkedDeviceInfo? = null,
+    val linked: Boolean = false,
+    // Alternative response fields the API might return
+    val success: Boolean? = null,
+    val message: String? = null,
 )
 
 /**

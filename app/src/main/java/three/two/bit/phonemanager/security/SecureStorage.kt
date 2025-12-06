@@ -61,6 +61,12 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
         private const val KEY_REFRESH_TOKEN = "refresh_token"
         private const val KEY_TOKEN_EXPIRY_TIME = "token_expiry_time"
 
+        // E9.11: User Info Storage Keys
+        private const val KEY_USER_ID = "user_id"
+        private const val KEY_USER_EMAIL = "user_email"
+        private const val KEY_USER_DISPLAY_NAME = "user_display_name"
+        private const val KEY_USER_CREATED_AT = "user_created_at"
+
         // E13.10: Enrollment Storage Keys
         private const val KEY_ENROLLMENT_STATUS = "enrollment_status"
         private const val KEY_ORG_ID = "org_id"
@@ -238,6 +244,61 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
     fun isAuthenticated(): Boolean {
         val hasTokens = getAccessToken() != null && getRefreshToken() != null
         return hasTokens && !isTokenExpired()
+    }
+
+    // ========================================================================
+    // E9.11: User Info Storage
+    // ========================================================================
+
+    /**
+     * Save user info securely
+     */
+    fun saveUserInfo(userId: String, email: String, displayName: String, createdAt: String) {
+        encryptedPrefs.edit()
+            .putString(KEY_USER_ID, userId)
+            .putString(KEY_USER_EMAIL, email)
+            .putString(KEY_USER_DISPLAY_NAME, displayName)
+            .putString(KEY_USER_CREATED_AT, createdAt)
+            .apply()
+        Timber.d("User info stored securely")
+    }
+
+    /**
+     * Get stored user ID
+     */
+    fun getUserId(): String? = encryptedPrefs.getString(KEY_USER_ID, null)
+
+    /**
+     * Get stored user email
+     */
+    fun getUserEmail(): String? = encryptedPrefs.getString(KEY_USER_EMAIL, null)
+
+    /**
+     * Get stored user display name
+     */
+    fun getUserDisplayName(): String? = encryptedPrefs.getString(KEY_USER_DISPLAY_NAME, null)
+
+    /**
+     * Get stored user created at timestamp
+     */
+    fun getUserCreatedAt(): String? = encryptedPrefs.getString(KEY_USER_CREATED_AT, null)
+
+    /**
+     * Check if user info is stored
+     */
+    fun hasUserInfo(): Boolean = getUserId() != null && getUserEmail() != null
+
+    /**
+     * Clear user info
+     */
+    fun clearUserInfo() {
+        encryptedPrefs.edit()
+            .remove(KEY_USER_ID)
+            .remove(KEY_USER_EMAIL)
+            .remove(KEY_USER_DISPLAY_NAME)
+            .remove(KEY_USER_CREATED_AT)
+            .apply()
+        Timber.d("User info cleared")
     }
 
     /**

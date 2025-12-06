@@ -41,6 +41,37 @@ class AuthRepository @Inject constructor(
     // Mutex to prevent concurrent token refresh requests
     private val refreshMutex = Mutex()
 
+    init {
+        // Restore user state from secure storage on initialization
+        restoreUserState()
+    }
+
+    /**
+     * Restore user state from SecureStorage
+     *
+     * Called on initialization to restore the user session
+     * if tokens and user info are available.
+     */
+    private fun restoreUserState() {
+        if (secureStorage.isAuthenticated() && secureStorage.hasUserInfo()) {
+            val userId = secureStorage.getUserId()
+            val email = secureStorage.getUserEmail()
+            val displayName = secureStorage.getUserDisplayName()
+            val createdAt = secureStorage.getUserCreatedAt()
+
+            if (userId != null && email != null) {
+                val user = User(
+                    userId = userId,
+                    email = email,
+                    displayName = displayName ?: email.substringBefore('@'),
+                    createdAt = createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
+                )
+                _currentUser.value = user
+                Timber.d("User state restored from storage: ${user.userId}")
+            }
+        }
+    }
+
     /**
      * AC E9.11.4: Register a new user account
      *
@@ -79,6 +110,14 @@ class AuthRepository @Inject constructor(
             createdAt = Instant.parse(response.user.createdAt)
         )
         _currentUser.value = user
+
+        // Store user info for session restoration
+        secureStorage.saveUserInfo(
+            userId = response.user.id,
+            email = response.user.email,
+            displayName = response.user.displayName,
+            createdAt = response.user.createdAt
+        )
 
         Timber.i("User registered successfully: ${user.userId}")
         user
@@ -120,6 +159,14 @@ class AuthRepository @Inject constructor(
         )
         _currentUser.value = user
 
+        // Store user info for session restoration
+        secureStorage.saveUserInfo(
+            userId = response.user.id,
+            email = response.user.email,
+            displayName = response.user.displayName,
+            createdAt = response.user.createdAt
+        )
+
         Timber.i("User logged in successfully: ${user.userId}")
         user
     }
@@ -160,6 +207,14 @@ class AuthRepository @Inject constructor(
         )
         _currentUser.value = user
 
+        // Store user info for session restoration
+        secureStorage.saveUserInfo(
+            userId = response.user.id,
+            email = response.user.email,
+            displayName = response.user.displayName,
+            createdAt = response.user.createdAt
+        )
+
         Timber.i("OAuth sign-in successful: ${user.userId}")
         user
     }
@@ -187,8 +242,9 @@ class AuthRepository @Inject constructor(
             Timber.w(e, "Server logout failed, clearing local state anyway")
         }
 
-        // Always clear tokens and session (AC E9.11.6)
+        // Always clear tokens, user info, and session (AC E9.11.6)
         secureStorage.clearTokens()
+        secureStorage.clearUserInfo()
         _currentUser.value = null
 
         Timber.i("User logged out successfully")

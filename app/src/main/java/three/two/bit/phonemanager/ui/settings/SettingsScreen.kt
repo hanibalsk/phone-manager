@@ -253,37 +253,51 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        OutlinedTextField(
-                            value = stringResource(R.string.settings_my_devices),
-                            onValueChange = {},
-                            enabled = true,
-                            readOnly = true,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { onNavigateToMyDevices() },
-                            trailingIcon = {
+                        // My Devices navigation button
+                        androidx.compose.material3.OutlinedCard(
+                            onClick = onNavigateToMyDevices,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.settings_my_devices),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                     contentDescription = stringResource(R.string.settings_navigate_to_devices)
                                 )
                             }
-                        )
+                        }
 
-                        OutlinedTextField(
-                            value = stringResource(R.string.settings_groups),
-                            onValueChange = {},
-                            enabled = true,
-                            readOnly = true,
-                            modifier = Modifier
-                                .weight(1f)
-                                .clickable { onNavigateToGroups() },
-                            trailingIcon = {
+                        // Groups navigation button
+                        androidx.compose.material3.OutlinedCard(
+                            onClick = onNavigateToGroups,
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.settings_groups),
+                                    style = MaterialTheme.typography.bodyLarge
+                                )
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                                     contentDescription = stringResource(R.string.settings_navigate_to_groups)
                                 )
                             }
-                        )
+                        }
                     }
 
                     Button(
