@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.robots
 
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.junit4.ComposeTestRule
 
 /**
  * Robot for interacting with authentication screens (Login, Register, Forgot Password).
@@ -15,8 +15,8 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
  * ```
  */
 class AuthScreenRobot(
-    semanticsProvider: SemanticsNodeInteractionsProvider
-) : BaseRobot(semanticsProvider) {
+    composeTestRule: ComposeTestRule
+) : BaseRobot(composeTestRule) {
 
     // Test tags - should match those defined in the Compose UI
     companion object {

@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.robots
 
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.junit4.ComposeTestRule
 
 /**
  * Robot for interacting with Groups screens (list, detail, create, join).
@@ -15,8 +15,8 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
  * ```
  */
 class GroupsScreenRobot(
-    semanticsProvider: SemanticsNodeInteractionsProvider
-) : BaseRobot(semanticsProvider) {
+    composeTestRule: ComposeTestRule
+) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_GROUPS_SCREEN = "groups_screen"
@@ -77,7 +77,7 @@ class GroupsScreenRobot(
      */
     fun navigateBack(): HomeScreenRobot {
         clickOnTag(TAG_BACK_BUTTON)
-        return HomeScreenRobot(semanticsProvider)
+        return HomeScreenRobot(composeTestRule)
     }
 
     // =============================================================================

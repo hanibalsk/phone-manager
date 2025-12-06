@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- Remove BootReceiver during instrumented tests to avoid Hilt initialization issues -->
+    <application>
+        <receiver
+            android:name="three.two.bit.phonemanager.receiver.BootReceiver"
+            tools:node="remove" />
+    </application>
+
+</manifest>

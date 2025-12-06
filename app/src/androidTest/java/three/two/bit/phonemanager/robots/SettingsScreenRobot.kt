@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.robots
 
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.junit4.ComposeTestRule
 
 /**
  * Robot for interacting with Settings screens.
@@ -14,8 +14,8 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
  * ```
  */
 class SettingsScreenRobot(
-    semanticsProvider: SemanticsNodeInteractionsProvider
-) : BaseRobot(semanticsProvider) {
+    composeTestRule: ComposeTestRule
+) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_SETTINGS_SCREEN = "settings_screen"
@@ -75,7 +75,7 @@ class SettingsScreenRobot(
      */
     fun navigateBack(): HomeScreenRobot {
         clickOnTag(TAG_BACK_BUTTON)
-        return HomeScreenRobot(semanticsProvider)
+        return HomeScreenRobot(composeTestRule)
     }
 
     /**
@@ -272,7 +272,7 @@ class SettingsScreenRobot(
      */
     fun confirmLogout(): AuthScreenRobot {
         clickOnTag(TAG_CONFIRM_BUTTON)
-        return AuthScreenRobot(semanticsProvider)
+        return AuthScreenRobot(composeTestRule)
     }
 
     /**

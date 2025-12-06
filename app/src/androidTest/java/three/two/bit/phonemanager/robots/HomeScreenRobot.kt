@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.robots
 
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.junit4.ComposeTestRule
 
 /**
  * Robot for interacting with the Home screen.
@@ -14,8 +14,8 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
  * ```
  */
 class HomeScreenRobot(
-    semanticsProvider: SemanticsNodeInteractionsProvider
-) : BaseRobot(semanticsProvider) {
+    composeTestRule: ComposeTestRule
+) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_HOME_SCREEN = "home_screen"
@@ -42,7 +42,7 @@ class HomeScreenRobot(
      */
     fun navigateToSettings(): SettingsScreenRobot {
         clickOnTag(TAG_SETTINGS_BUTTON)
-        return SettingsScreenRobot(semanticsProvider)
+        return SettingsScreenRobot(composeTestRule)
     }
 
     /**
@@ -50,7 +50,7 @@ class HomeScreenRobot(
      */
     fun navigateToMap(): MapScreenRobot {
         clickOnTag(TAG_MAP_BUTTON)
-        return MapScreenRobot(semanticsProvider)
+        return MapScreenRobot(composeTestRule)
     }
 
     /**
@@ -58,7 +58,7 @@ class HomeScreenRobot(
      */
     fun navigateToGroups(): GroupsScreenRobot {
         clickOnTag(TAG_GROUPS_CARD)
-        return GroupsScreenRobot(semanticsProvider)
+        return GroupsScreenRobot(composeTestRule)
     }
 
     // =============================================================================

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -37,8 +38,9 @@ import androidx.compose.ui.test.performTextInput
  * ```
  */
 abstract class BaseRobot(
-    protected val semanticsProvider: SemanticsNodeInteractionsProvider
+    protected val composeTestRule: ComposeTestRule
 ) {
+    protected val semanticsProvider: SemanticsNodeInteractionsProvider = composeTestRule
     // =============================================================================
     // Common Assertions
     // =============================================================================
@@ -152,9 +154,9 @@ abstract class BaseRobot(
      * Wait for a node with text to exist.
      */
     protected fun waitForText(text: String, timeoutMs: Long = 5000) {
-        semanticsProvider.waitUntil(timeoutMs) {
+        composeTestRule.waitUntil(timeoutMs) {
             try {
-                semanticsProvider.onNode(hasText(text)).fetchSemanticsNode()
+                composeTestRule.onNode(hasText(text)).fetchSemanticsNode()
                 true
             } catch (e: AssertionError) {
                 false
@@ -166,9 +168,9 @@ abstract class BaseRobot(
      * Wait for a node with test tag to exist.
      */
     protected fun waitForTag(tag: String, timeoutMs: Long = 5000) {
-        semanticsProvider.waitUntil(timeoutMs) {
+        composeTestRule.waitUntil(timeoutMs) {
             try {
-                semanticsProvider.onNode(hasTestTag(tag)).fetchSemanticsNode()
+                composeTestRule.onNode(hasTestTag(tag)).fetchSemanticsNode()
                 true
             } catch (e: AssertionError) {
                 false
@@ -180,9 +182,9 @@ abstract class BaseRobot(
      * Wait for a node with content description to exist.
      */
     protected fun waitForContentDescription(description: String, timeoutMs: Long = 5000) {
-        semanticsProvider.waitUntil(timeoutMs) {
+        composeTestRule.waitUntil(timeoutMs) {
             try {
-                semanticsProvider.onNode(hasContentDescription(description)).fetchSemanticsNode()
+                composeTestRule.onNode(hasContentDescription(description)).fetchSemanticsNode()
                 true
             } catch (e: AssertionError) {
                 false

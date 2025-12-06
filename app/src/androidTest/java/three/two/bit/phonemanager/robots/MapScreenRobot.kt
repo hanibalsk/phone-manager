@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.robots
 
-import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
+import androidx.compose.ui.test.junit4.ComposeTestRule
 
 /**
  * Robot for interacting with the Map screen.
@@ -14,8 +14,8 @@ import androidx.compose.ui.test.SemanticsNodeInteractionsProvider
  * ```
  */
 class MapScreenRobot(
-    semanticsProvider: SemanticsNodeInteractionsProvider
-) : BaseRobot(semanticsProvider) {
+    composeTestRule: ComposeTestRule
+) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_MAP_SCREEN = "map_screen"
@@ -83,7 +83,7 @@ class MapScreenRobot(
      */
     fun navigateBack(): HomeScreenRobot {
         clickOnTag(TAG_BACK_BUTTON)
-        return HomeScreenRobot(semanticsProvider)
+        return HomeScreenRobot(composeTestRule)
     }
 
     // =============================================================================

@@ -1,8 +1,8 @@
-# Login Flow Test
-# Tests user login with valid credentials
+# Device Registration Flow Test
+# Tests device registration with display name and group ID
 
 appId: three.two.bit.phonemanager.dev
-name: User Login Flow
+name: Device Registration Flow
 
 ---
 # Clear app state for clean test
@@ -11,42 +11,64 @@ name: User Login Flow
 # Launch the app
 - launchApp
 
-# Wait for login screen to appear
-- assertVisible:
-    id: "email_input"
+# Wait for registration screen to appear
+- extendedWaitUntil:
+    visible:
+      text: "Device Registration"
     timeout: 10000
 
-# Verify login screen elements
+# Hide keyboard if visible
+- hideKeyboard
+
+# Verify registration screen elements
 - assertVisible:
-    id: "password_input"
+    text: "Display Name"
 
 - assertVisible:
-    id: "sign_in_button"
+    text: "Group ID"
 
-# Enter email
+# Scroll down to see Register button
+- scrollUntilVisible:
+    element:
+      text: "Register"
+    direction: DOWN
+
+# Take screenshot of registration screen
+- takeScreenshot: "registration_screen"
+
+# Enter display name - tap on the input field area
 - tapOn:
-    id: "email_input"
+    text: "Display Name"
 
-- inputText: ${TEST_USER_EMAIL}
+- inputText: "TestDevice"
 
-# Enter password
+# Hide keyboard
+- hideKeyboard
+
+# Enter group ID
 - tapOn:
-    id: "password_input"
+    text: "Group ID"
 
-- inputText: ${TEST_USER_PASSWORD}
+- inputText: "test-group-123"
 
-# Submit login
+# Hide keyboard before tapping Register
+- hideKeyboard
+
+# Scroll to Register button
+- scrollUntilVisible:
+    element:
+      text: "Register"
+    direction: DOWN
+
+# Submit registration
 - tapOn:
-    id: "sign_in_button"
+    text: "Register"
 
-# Wait for home screen
-- assertVisible:
-    id: "home_screen"
+# Wait for next screen (could be permission dialog or home)
+- extendedWaitUntil:
+    notVisible:
+      text: "Device Registration"
     timeout: 15000
 
-# Verify user is logged in (home screen elements visible)
-- assertVisible:
-    id: "tracking_toggle"
-
-# Take screenshot of successful login
-- takeScreenshot: "login_success"
+# Take screenshot of result
+- takeScreenshot: "registration_result"
