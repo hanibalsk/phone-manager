@@ -24,6 +24,18 @@ fun getLocalProperty(
     defaultValue: String = "",
 ): String = localProperties.getProperty(key) ?: project.findProperty(key)?.toString() ?: defaultValue
 
+// Read version from VERSION file (single source of truth)
+val versionFile = rootProject.file("VERSION")
+val appVersion = if (versionFile.exists()) {
+    versionFile.readText().trim()
+} else {
+    "0.9.0" // Fallback version
+}
+val versionParts = appVersion.split(".")
+val calculatedVersionCode = versionParts[0].toInt() * 10000 +
+                           versionParts[1].toInt() * 100 +
+                           versionParts[2].toInt()
+
 android {
     namespace = "three.two.bit.phonemanager"
     compileSdk = 36
@@ -32,8 +44,8 @@ android {
         applicationId = "three.two.bit.phonemanager"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = calculatedVersionCode
+        versionName = appVersion
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

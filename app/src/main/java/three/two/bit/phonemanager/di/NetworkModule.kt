@@ -85,6 +85,8 @@ object NetworkModule {
             contentType(ContentType.Application.Json)
             // API Compatibility: Add X-Request-ID header for request tracing
             headers.append("X-Request-ID", UUID.randomUUID().toString())
+            // Version compatibility: Send client version for backend compatibility checks
+            headers.append("X-Client-Version", BuildConfig.VERSION_NAME)
         }
 
         // Configure engine

@@ -8,7 +8,8 @@
       "Bash(adb shell:*)",
       "Bash(cat:*)",
       "Bash(find:*)",
-      "Bash(xargs cat:*)"
+      "Bash(xargs cat:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []
