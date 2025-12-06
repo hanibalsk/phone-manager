@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import three.two.bit.phonemanager.BuildConfig
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -55,7 +56,9 @@ class ConnectivityMonitor @Inject constructor(@ApplicationContext private val co
                     NetworkCapabilities.NET_CAPABILITY_VALIDATED,
                 )
 
-                if (hasInternet && isValidated) {
+                // In debug builds, skip VALIDATED check for emulator testing
+                val isConnected = if (BuildConfig.DEBUG) hasInternet else hasInternet && isValidated
+                if (isConnected) {
                     availableNetworks.add(network)
                 } else {
                     availableNetworks.remove(network)
@@ -84,12 +87,17 @@ class ConnectivityMonitor @Inject constructor(@ApplicationContext private val co
 
     /**
      * Check current network availability (one-time check)
+     * In debug builds, skip VALIDATED check for emulator testing
      */
     fun isNetworkAvailable(): Boolean {
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
 
-        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
-            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        val hasInternet = capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+        return if (BuildConfig.DEBUG) {
+            hasInternet
+        } else {
+            hasInternet && capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
+        }
     }
 }

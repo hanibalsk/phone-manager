@@ -439,4 +439,430 @@ adb_get_device_model() {
     adb shell getprop ro.product.model 2>/dev/null
 }
 
+# =============================================================================
+# Trip Simulation Helpers
+# =============================================================================
+
+# Simulate a walking trip with realistic movement
+adb_simulate_walking_trip() {
+    local start_lat="$1"
+    local start_lon="$2"
+    local end_lat="$3"
+    local end_lon="$4"
+    local duration_seconds="${5:-300}"  # 5 minutes default
+
+    if ! adb_is_emulator; then
+        log_warning "Trip simulation only works on emulator"
+        return 1
+    fi
+
+    log_info "Simulating walking trip: ($start_lat,$start_lon) -> ($end_lat,$end_lon)"
+
+    local num_points=$((duration_seconds / 5))  # Update every 5 seconds
+    local path=$(adb_generate_path "$start_lat" "$start_lon" "$end_lat" "$end_lon" "$num_points")
+
+    adb_simulate_movement 5 $path
+}
+
+# Simulate a driving trip with realistic speed
+adb_simulate_driving_trip() {
+    local start_lat="$1"
+    local start_lon="$2"
+    local end_lat="$3"
+    local end_lon="$4"
+    local duration_seconds="${5:-180}"  # 3 minutes default
+
+    if ! adb_is_emulator; then
+        log_warning "Trip simulation only works on emulator"
+        return 1
+    fi
+
+    log_info "Simulating driving trip: ($start_lat,$start_lon) -> ($end_lat,$end_lon)"
+
+    local num_points=$((duration_seconds / 2))  # Update every 2 seconds
+    local path=$(adb_generate_path "$start_lat" "$start_lon" "$end_lat" "$end_lon" "$num_points")
+
+    adb_simulate_movement 2 $path
+}
+
+# Simulate stationary period (for trip end detection)
+adb_simulate_stationary() {
+    local lat="$1"
+    local lon="$2"
+    local duration_seconds="${3:-60}"
+
+    log_info "Simulating stationary at ($lat,$lon) for ${duration_seconds}s"
+
+    adb_set_location "$lat" "$lon"
+    sleep "$duration_seconds"
+}
+
+# Simulate multi-modal trip (walk -> drive -> walk)
+adb_simulate_multimodal_trip() {
+    local home_lat="$1"
+    local home_lon="$2"
+    local pickup_lat="$3"
+    local pickup_lon="$4"
+    local dest_lat="$5"
+    local dest_lon="$6"
+    local final_lat="$7"
+    local final_lon="$8"
+
+    log_info "Simulating multi-modal trip"
+
+    # Walking to pickup
+    log_step "Walking to pickup..."
+    adb_simulate_walking_trip "$home_lat" "$home_lon" "$pickup_lat" "$pickup_lon" 120
+
+    # Brief stop at pickup
+    adb_simulate_stationary "$pickup_lat" "$pickup_lon" 30
+
+    # Driving
+    log_step "Driving to destination..."
+    adb_simulate_driving_trip "$pickup_lat" "$pickup_lon" "$dest_lat" "$dest_lon" 180
+
+    # Brief stop
+    adb_simulate_stationary "$dest_lat" "$dest_lon" 30
+
+    # Walking to final
+    log_step "Walking to final destination..."
+    adb_simulate_walking_trip "$dest_lat" "$dest_lon" "$final_lat" "$final_lon" 120
+}
+
+# =============================================================================
+# FCM Mocking (Settings Sync)
+# =============================================================================
+
+# Simulate FCM settings update message
+mock_fcm_settings_update() {
+    local device_id="$1"
+    local setting_key="$2"
+    local setting_value="$3"
+
+    log_info "Mocking FCM settings update: $setting_key=$setting_value"
+
+    adb shell am broadcast \
+        -a com.google.android.c2dm.intent.RECEIVE \
+        -n "${APP_PACKAGE}/.services.SettingsMessagingService" \
+        --es "type" "settings_update" \
+        --es "device_id" "$device_id" \
+        --es "setting_key" "$setting_key" \
+        --es "setting_value" "$setting_value" \
+        2>/dev/null
+}
+
+# Simulate FCM settings lock notification
+mock_fcm_settings_lock() {
+    local device_id="$1"
+    local setting_key="$2"
+    local locked_by="$3"
+    local reason="${4:-Admin locked}"
+
+    log_info "Mocking FCM settings lock: $setting_key by $locked_by"
+
+    adb shell am broadcast \
+        -a com.google.android.c2dm.intent.RECEIVE \
+        -n "${APP_PACKAGE}/.services.SettingsMessagingService" \
+        --es "type" "settings_lock" \
+        --es "device_id" "$device_id" \
+        --es "setting_key" "$setting_key" \
+        --es "locked_by" "$locked_by" \
+        --es "reason" "$reason" \
+        2>/dev/null
+}
+
+# Simulate FCM enrollment complete notification
+mock_fcm_enrollment_complete() {
+    local enrollment_id="$1"
+    local organization_name="$2"
+
+    log_info "Mocking FCM enrollment complete: $enrollment_id"
+
+    adb shell am broadcast \
+        -a com.google.android.c2dm.intent.RECEIVE \
+        -n "${APP_PACKAGE}/.services.SettingsMessagingService" \
+        --es "type" "enrollment_complete" \
+        --es "enrollment_id" "$enrollment_id" \
+        --es "organization_name" "$organization_name" \
+        2>/dev/null
+}
+
+# Simulate FCM group invite notification
+mock_fcm_group_invite() {
+    local group_id="$1"
+    local group_name="$2"
+    local invited_by="$3"
+
+    log_info "Mocking FCM group invite: $group_name"
+
+    adb shell am broadcast \
+        -a com.google.android.c2dm.intent.RECEIVE \
+        -n "${APP_PACKAGE}/.services.SettingsMessagingService" \
+        --es "type" "group_invite" \
+        --es "group_id" "$group_id" \
+        --es "group_name" "$group_name" \
+        --es "invited_by" "$invited_by" \
+        2>/dev/null
+}
+
+# =============================================================================
+# Service Management
+# =============================================================================
+
+# Check if location tracking service is running
+adb_is_location_service_running() {
+    local package="${1:-$APP_PACKAGE}"
+    adb shell dumpsys activity services "$package" 2>/dev/null | grep -q "LocationTrackingService"
+}
+
+# Wait for location service to start
+adb_wait_for_location_service() {
+    local timeout="${1:-30}"
+    local counter=0
+
+    while ! adb_is_location_service_running && [[ $counter -lt $timeout ]]; do
+        sleep 1
+        ((counter++))
+    done
+
+    adb_is_location_service_running
+}
+
+# Get foreground service notification
+adb_get_foreground_notification() {
+    local package="${1:-$APP_PACKAGE}"
+    adb shell dumpsys notification --noredact 2>/dev/null | grep -A20 "pkg=$package" | head -25
+}
+
+# Force stop and restart app (to test service recovery)
+adb_restart_app() {
+    local package="${1:-$APP_PACKAGE}"
+    adb_stop_app "$package"
+    sleep 2
+    adb_launch_app "$package"
+}
+
+# Simulate app kill (swipe from recents)
+adb_kill_from_recents() {
+    local package="${1:-$APP_PACKAGE}"
+
+    # Open recent apps
+    adb_recent_apps
+    sleep 1
+
+    # Get screen size for swipe calculation
+    local size=$(adb_get_screen_size)
+    local width=$(echo "$size" | cut -d'x' -f1)
+    local height=$(echo "$size" | cut -d'x' -f2)
+
+    # Swipe to dismiss (swipe up in recents)
+    local center_x=$((width / 2))
+    local start_y=$((height / 2))
+    local end_y=$((height / 4))
+
+    adb_swipe "$center_x" "$start_y" "$center_x" "$end_y" 200
+    sleep 1
+
+    # Go home
+    adb_home
+}
+
+# =============================================================================
+# Extended Permissions
+# =============================================================================
+
+# Grant Bluetooth permissions
+adb_grant_bluetooth_permissions() {
+    local package="${1:-$APP_PACKAGE}"
+    adb_grant_permission "$package" "android.permission.BLUETOOTH"
+    adb_grant_permission "$package" "android.permission.BLUETOOTH_CONNECT"
+    adb_grant_permission "$package" "android.permission.BLUETOOTH_SCAN"
+}
+
+# Revoke permission (for testing permission denied scenarios)
+adb_revoke_permission() {
+    local package="${1:-$APP_PACKAGE}"
+    local permission="$2"
+    adb shell pm revoke "$package" "$permission" 2>/dev/null
+}
+
+# Revoke all location permissions
+adb_revoke_location_permissions() {
+    local package="${1:-$APP_PACKAGE}"
+    adb_revoke_permission "$package" "android.permission.ACCESS_FINE_LOCATION"
+    adb_revoke_permission "$package" "android.permission.ACCESS_COARSE_LOCATION"
+    adb_revoke_permission "$package" "android.permission.ACCESS_BACKGROUND_LOCATION"
+}
+
+# Check if permission is granted
+adb_has_permission() {
+    local package="${1:-$APP_PACKAGE}"
+    local permission="$2"
+    adb shell dumpsys package "$package" 2>/dev/null | grep -q "$permission: granted=true"
+}
+
+# =============================================================================
+# Deep Link Testing
+# =============================================================================
+
+# Launch group invite deep link
+adb_open_group_invite() {
+    local invite_code="$1"
+    adb_launch_deep_link "phonemanager://join/$invite_code"
+}
+
+# Launch enrollment deep link
+adb_open_enrollment() {
+    local token="$1"
+    adb_launch_deep_link "phonemanager://enroll/$token"
+}
+
+# Launch weather screen deep link
+adb_open_weather_screen() {
+    adb_launch_deep_link "phonemanager://weather"
+}
+
+# Launch trip history deep link
+adb_open_trip_history() {
+    adb_launch_deep_link "phonemanager://trips"
+}
+
+# Launch settings screen
+adb_open_settings() {
+    adb_launch_deep_link "phonemanager://settings"
+}
+
+# =============================================================================
+# Extended UI Helpers
+# =============================================================================
+
+# Wait for element to appear (by content description)
+adb_wait_for_element_by_desc() {
+    local desc="$1"
+    local timeout="${2:-10}"
+    local counter=0
+
+    while ! adb_element_exists_by_desc "$desc" && [[ $counter -lt $timeout ]]; do
+        sleep 1
+        ((counter++))
+    done
+
+    adb_element_exists_by_desc "$desc"
+}
+
+# Wait for element to appear (by resource ID)
+adb_wait_for_element_by_id() {
+    local id="$1"
+    local timeout="${2:-10}"
+    local counter=0
+
+    while ! adb_element_exists_by_id "$id" && [[ $counter -lt $timeout ]]; do
+        sleep 1
+        ((counter++))
+    done
+
+    adb_element_exists_by_id "$id"
+}
+
+# Tap element by content description
+adb_tap_by_desc() {
+    local desc="$1"
+    local ui_dump=$(adb_get_ui_dump)
+    local bounds=$(echo "$ui_dump" | grep "content-desc=\"$desc\"" | sed -n 's/.*bounds="\(\[[0-9]*,[0-9]*\]\[[0-9]*,[0-9]*\]\)".*/\1/p' | head -1)
+
+    if [[ -n "$bounds" ]]; then
+        local center=$(_bounds_to_center "$bounds")
+        local x=$(echo "$center" | cut -d' ' -f1)
+        local y=$(echo "$center" | cut -d' ' -f2)
+        adb_tap "$x" "$y"
+        log_debug "Tapped element with desc: $desc"
+        return 0
+    else
+        log_error "Element not found by desc: $desc"
+        return 1
+    fi
+}
+
+# Get text from element
+adb_get_element_text() {
+    local search_text="$1"
+    local ui_dump=$(adb_get_ui_dump)
+    # Get the text attribute from element containing the search text
+    echo "$ui_dump" | grep -o 'text="[^"]*"' | sed 's/text="//;s/"$//' | grep "$search_text" | head -1
+}
+
+# Check if loading indicator is present
+adb_is_loading() {
+    local ui_dump=$(adb_get_ui_dump)
+    echo "$ui_dump" | grep -qE "Loading|ProgressIndicator|CircularProgress"
+}
+
+# Wait for loading to complete
+adb_wait_for_loading_complete() {
+    local timeout="${1:-30}"
+    local counter=0
+
+    while adb_is_loading && [[ $counter -lt $timeout ]]; do
+        sleep 1
+        ((counter++))
+    done
+
+    ! adb_is_loading
+}
+
+# =============================================================================
+# Secret Mode Testing
+# =============================================================================
+
+# Perform secret mode activation gesture (long press on logo)
+adb_activate_secret_mode_long_press() {
+    local x="${1:-540}"  # Center of screen by default
+    local y="${2:-300}"  # Approximate logo position
+
+    log_info "Activating secret mode with long press at ($x,$y)"
+    adb_long_press "$x" "$y" 3500  # 3.5 second long press
+}
+
+# Perform secret mode activation gesture (5x tap on version)
+adb_activate_secret_mode_taps() {
+    local x="${1:-540}"
+    local y="${2:-1800}"  # Approximate version text position
+
+    log_info "Activating secret mode with 5x tap at ($x,$y)"
+    for i in {1..5}; do
+        adb_tap "$x" "$y"
+        sleep 0.3
+    done
+}
+
+# =============================================================================
+# Battery and Power Management
+# =============================================================================
+
+# Disable battery optimization for app
+adb_disable_battery_optimization() {
+    local package="${1:-$APP_PACKAGE}"
+    adb shell dumpsys deviceidle whitelist +$package 2>/dev/null
+    log_debug "Disabled battery optimization for $package"
+}
+
+# Enable battery optimization for app
+adb_enable_battery_optimization() {
+    local package="${1:-$APP_PACKAGE}"
+    adb shell dumpsys deviceidle whitelist -$package 2>/dev/null
+    log_debug "Enabled battery optimization for $package"
+}
+
+# Simulate device entering Doze mode
+adb_simulate_doze() {
+    log_info "Simulating Doze mode"
+    adb shell dumpsys deviceidle force-idle 2>/dev/null
+}
+
+# Exit Doze mode
+adb_exit_doze() {
+    log_info "Exiting Doze mode"
+    adb shell dumpsys deviceidle unforce 2>/dev/null
+}
+
 echo "ADB helpers loaded"

@@ -41,9 +41,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.auth.MockAuthHelper
 
 /**
@@ -123,7 +125,7 @@ fun ForgotPasswordScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reset Password") },
+                title = { Text(stringResource(R.string.auth_reset_password)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
@@ -194,7 +196,7 @@ fun ForgotPasswordScreen(
                     onClick = onNavigateBack,
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("Back to Login")
+                    Text(stringResource(R.string.auth_back_to_login))
                 }
             } else {
                 // Input State
@@ -222,7 +224,7 @@ fun ForgotPasswordScreen(
                         email = it
                         emailError = null
                     },
-                    label = { Text("Email") },
+                    label = { Text(stringResource(R.string.auth_email)) },
                     modifier = Modifier.fillMaxWidth(),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
@@ -256,7 +258,7 @@ fun ForgotPasswordScreen(
                             color = MaterialTheme.colorScheme.onPrimary
                         )
                     } else {
-                        Text("Send Reset Link")
+                        Text(stringResource(R.string.auth_send_reset_link))
                     }
                 }
 
@@ -272,7 +274,7 @@ fun ForgotPasswordScreen(
                     onClick = onNavigateBack,
                     enabled = !isLoading
                 ) {
-                    Text("Back to Login")
+                    Text(stringResource(R.string.auth_back_to_login))
                 }
             }
         }

@@ -24,6 +24,9 @@ export APP_APK_PATH="${APP_APK_PATH:-$(dirname "$0")/../../app/build/outputs/apk
 # =============================================================================
 # Test Configuration
 # =============================================================================
+# Generate test session ID early (used by other variables)
+export TEST_SESSION_ID="${TEST_SESSION_ID:-$(date +%Y%m%d_%H%M%S)_$$}"
+
 export TEST_GROUP_ID="${TEST_GROUP_ID:-e2e-test-$(date +%s)}"
 export TEST_DEVICE_NAME="${TEST_DEVICE_NAME:-E2E Test Device}"
 export TEST_TIMEOUT="${TEST_TIMEOUT:-30}"
@@ -81,6 +84,95 @@ export GEOFENCE_MIN_RADIUS="20"
 export GEOFENCE_MAX_RADIUS="50000"
 export PROXIMITY_MIN_RADIUS="50"
 export PROXIMITY_MAX_RADIUS="100000"
+
+# =============================================================================
+# Test Users Configuration (Hybrid approach)
+# =============================================================================
+# Pre-configured test users for stable tests
+export TEST_USER_PARENT_EMAIL="test_parent@e2e.phonemanager.local"
+export TEST_USER_PARENT_PASSWORD="Parent123!"
+export TEST_USER_PARENT_NAME="E2E Parent User"
+
+export TEST_USER_CHILD1_EMAIL="test_child1@e2e.phonemanager.local"
+export TEST_USER_CHILD1_PASSWORD="Child123!"
+export TEST_USER_CHILD1_NAME="E2E Child One"
+
+export TEST_USER_CHILD2_EMAIL="test_child2@e2e.phonemanager.local"
+export TEST_USER_CHILD2_PASSWORD="Child123!"
+export TEST_USER_CHILD2_NAME="E2E Child Two"
+
+export TEST_USER_ADMIN_EMAIL="test_admin@e2e.phonemanager.local"
+export TEST_USER_ADMIN_PASSWORD="Admin123!"
+export TEST_USER_ADMIN_NAME="E2E Admin User"
+
+# Dynamic test user prefix (for isolation)
+export TEST_USER_PREFIX="e2e_${TEST_SESSION_ID}_"
+
+# =============================================================================
+# Test Locations (Named locations for scenarios)
+# =============================================================================
+export TEST_LOC_HOME_LAT="37.7749"
+export TEST_LOC_HOME_LON="-122.4194"
+export TEST_LOC_HOME_NAME="Home (SF Downtown)"
+
+export TEST_LOC_WORK_LAT="37.8044"
+export TEST_LOC_WORK_LON="-122.2712"
+export TEST_LOC_WORK_NAME="Work (Oakland)"
+
+export TEST_LOC_SCHOOL_LAT="37.8715"
+export TEST_LOC_SCHOOL_LON="-122.2730"
+export TEST_LOC_SCHOOL_NAME="School (Berkeley)"
+
+export TEST_LOC_PARK_LAT="37.7600"
+export TEST_LOC_PARK_LON="-122.4100"
+export TEST_LOC_PARK_NAME="Park (SF Mission)"
+
+export TEST_LOC_MALL_LAT="37.7855"
+export TEST_LOC_MALL_LON="-122.4061"
+export TEST_LOC_MALL_NAME="Mall (SF Union Square)"
+
+# =============================================================================
+# Test Routes (Pre-defined routes for trip simulation)
+# =============================================================================
+# Route format: "name:start_lat,start_lon,end_lat,end_lon,duration_min,mode"
+export TEST_ROUTE_COMMUTE="commute:${TEST_LOC_HOME_LAT},${TEST_LOC_HOME_LON},${TEST_LOC_WORK_LAT},${TEST_LOC_WORK_LON},30,driving"
+export TEST_ROUTE_SCHOOL_RUN="school_run:${TEST_LOC_HOME_LAT},${TEST_LOC_HOME_LON},${TEST_LOC_SCHOOL_LAT},${TEST_LOC_SCHOOL_LON},15,driving"
+export TEST_ROUTE_MORNING_JOG="morning_jog:${TEST_LOC_HOME_LAT},${TEST_LOC_HOME_LON},${TEST_LOC_PARK_LAT},${TEST_LOC_PARK_LON},20,walking"
+export TEST_ROUTE_SHOPPING="shopping:${TEST_LOC_HOME_LAT},${TEST_LOC_HOME_LON},${TEST_LOC_MALL_LAT},${TEST_LOC_MALL_LON},10,driving"
+
+# =============================================================================
+# Test Geofence Presets
+# =============================================================================
+export TEST_GEOFENCE_HOME_RADIUS="100"
+export TEST_GEOFENCE_WORK_RADIUS="200"
+export TEST_GEOFENCE_SCHOOL_RADIUS="150"
+
+# =============================================================================
+# Trip Detection Settings
+# =============================================================================
+export TRIP_STATIONARY_THRESHOLD_SECONDS="300"   # 5 minutes
+export TRIP_GRACE_PERIOD_SECONDS="120"           # 2 minutes
+export TRIP_MIN_DISTANCE_METERS="50"             # Minimum distance for trip
+
+# =============================================================================
+# Test Timeouts
+# =============================================================================
+export TEST_TIMEOUT_SHORT="10"     # Quick operations
+export TEST_TIMEOUT_MEDIUM="30"    # Standard operations
+export TEST_TIMEOUT_LONG="60"      # Long operations (trip detection, etc.)
+export TEST_TIMEOUT_EXTENDED="120" # Extended operations (full scenarios)
+
+# =============================================================================
+# Test Group Names
+# =============================================================================
+export TEST_GROUP_FAMILY="E2E Test Family ${TEST_SESSION_ID}"
+export TEST_GROUP_WORK="E2E Test Work ${TEST_SESSION_ID}"
+
+# =============================================================================
+# Cleanup Configuration
+# =============================================================================
+export CLEANUP_AFTER_TEST="${CLEANUP_AFTER_TEST:-true}"
+export PRESERVE_FAILED_DATA="${PRESERVE_FAILED_DATA:-true}"
 
 # =============================================================================
 # Initialization

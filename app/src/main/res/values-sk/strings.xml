@@ -63,6 +63,37 @@
     <string name="weather_humidity_label">Vlhkosť</string>
     <string name="weather_wind_label">Vietor</string>
 
+    <!-- Weather Conditions / Počasie -->
+    <string name="weather_condition_clear_sky">Jasno</string>
+    <string name="weather_condition_mainly_clear">Prevažne jasno</string>
+    <string name="weather_condition_partly_cloudy">Čiastočne zamračené</string>
+    <string name="weather_condition_overcast">Zamračené</string>
+    <string name="weather_condition_fog">Hmla</string>
+    <string name="weather_condition_depositing_rime_fog">Námrazová hmla</string>
+    <string name="weather_condition_drizzle_light">Slabé mrholenie</string>
+    <string name="weather_condition_drizzle_moderate">Mierne mrholenie</string>
+    <string name="weather_condition_drizzle_dense">Husté mrholenie</string>
+    <string name="weather_condition_freezing_drizzle_light">Slabé mrznúce mrholenie</string>
+    <string name="weather_condition_freezing_drizzle_dense">Husté mrznúce mrholenie</string>
+    <string name="weather_condition_rain_slight">Slabý dážď</string>
+    <string name="weather_condition_rain_moderate">Mierny dážď</string>
+    <string name="weather_condition_rain_heavy">Silný dážď</string>
+    <string name="weather_condition_freezing_rain_light">Slabý mrznúci dážď</string>
+    <string name="weather_condition_freezing_rain_heavy">Silný mrznúci dážď</string>
+    <string name="weather_condition_snow_slight">Slabé sneženie</string>
+    <string name="weather_condition_snow_moderate">Mierne sneženie</string>
+    <string name="weather_condition_snow_heavy">Silné sneženie</string>
+    <string name="weather_condition_snow_grains">Snehové zrná</string>
+    <string name="weather_condition_rain_showers_slight">Slabé prehánky</string>
+    <string name="weather_condition_rain_showers_moderate">Mierne prehánky</string>
+    <string name="weather_condition_rain_showers_violent">Prudké prehánky</string>
+    <string name="weather_condition_snow_showers_slight">Slabé snehové prehánky</string>
+    <string name="weather_condition_snow_showers_heavy">Silné snehové prehánky</string>
+    <string name="weather_condition_thunderstorm">Búrka</string>
+    <string name="weather_condition_thunderstorm_slight_hail">Búrka so slabým krupobitím</string>
+    <string name="weather_condition_thunderstorm_heavy_hail">Búrka so silným krupobitím</string>
+    <string name="weather_condition_unknown">Neznáme</string>
+
     <!-- Alerts Screen -->
     <string name="alerts_create">Vytvoriť upozornenie</string>
     <string name="alerts_empty_title">Žiadne upozornenia na blízkosť</string>
@@ -399,4 +430,134 @@
     <string name="daily_summary_distance">Vzdialenosť</string>
     <string name="daily_summary_mode">Režim</string>
     <string name="daily_summary_view_history">Zobraziť históriu</string>
+
+    <!-- Auth Screens -->
+    <string name="auth_email">E-mail</string>
+    <string name="auth_password">Heslo</string>
+    <string name="auth_forgot_password">Zabudli ste heslo?</string>
+    <string name="auth_sign_in">Prihlásiť sa</string>
+    <string name="auth_sign_out">Odhlásiť sa</string>
+    <string name="auth_create_account">Vytvoriť účet</string>
+    <string name="auth_continue_google">Pokračovať s Google</string>
+    <string name="auth_continue_apple">Pokračovať s Apple</string>
+    <string name="auth_display_name">Zobrazované meno</string>
+    <string name="auth_confirm_password">Potvrdiť heslo</string>
+    <string name="auth_passwords_mismatch">Heslá sa nezhodujú</string>
+    <string name="auth_reset_password">Obnoviť heslo</string>
+    <string name="auth_back_to_login">Späť na prihlásenie</string>
+    <string name="auth_send_reset_link">Odoslať odkaz na obnovenie</string>
+    <string name="auth_signed_in_as">Prihlásený ako %1$s</string>
+    <string name="auth_sign_out_confirm_title">Odhlásiť sa</string>
+    <string name="auth_sign_out_confirm_message">Naozaj sa chcete odhlásiť?</string>
+
+    <!-- Admin Screens -->
+    <string name="admin_selected_count">%1$d vybraných</string>
+    <string name="admin_member_devices">Zariadenia členov</string>
+    <string name="admin_select_all">Vybrať všetky</string>
+    <string name="admin_search_placeholder">Hľadať zariadenia alebo vlastníkov…</string>
+    <string name="admin_filter_all">Všetky (%1$d)</string>
+    <string name="admin_filter_online">Online (%1$d)</string>
+    <string name="admin_filter_offline">Offline (%1$d)</string>
+    <string name="admin_lock_setting">Zamknúť nastavenie</string>
+    <string name="admin_unlock_setting">Odomknúť nastavenie</string>
+    <string name="admin_lock">Zamknúť</string>
+    <string name="admin_unlock">Odomknúť</string>
+    <string name="admin_settings_history">História nastavení</string>
+    <string name="admin_settings_templates">Šablóny nastavení</string>
+    <string name="admin_template_name">Názov šablóny</string>
+    <string name="admin_template_description">Popis (voliteľné)</string>
+    <string name="admin_share_admins">Zdieľať s ostatnými adminmi</string>
+    <string name="admin_delete_template">Zmazať šablónu</string>
+    <string name="admin_delete_template_confirm">Naozaj chcete zmazať \"%1$s\"? Táto akcia sa nedá vrátiť späť.</string>
+    <string name="admin_bulk_settings">Hromadná aktualizácia nastavení</string>
+    <string name="admin_applying_settings">Aplikujem nastavenia na %1$d zariadení…</string>
+    <string name="admin_apply_settings">Aplikovať nastavenia</string>
+    <string name="admin_done">Hotovo</string>
+
+    <!-- Group Dialogs -->
+    <string name="group_dialog_delete_title">Zmazať skupinu?</string>
+    <string name="group_dialog_delete_message">Skupina bude natrvalo zmazaná a všetci členovia budú odstránení.</string>
+    <string name="group_dialog_leave_title">Opustiť skupinu?</string>
+    <string name="group_dialog_leave_message">Stratíte prístup k údajom o polohe tejto skupiny.</string>
+    <string name="group_dialog_leave">Opustiť</string>
+    <string name="group_dialog_edit_name_title">Upraviť názov skupiny</string>
+    <string name="group_dialog_group_name">Názov skupiny</string>
+    <string name="group_dialog_edit_description_title">Upraviť popis</string>
+    <string name="group_dialog_description_hint">Na čo slúži táto skupina?</string>
+    <string name="group_dialog_change_role_title">Zmeniť rolu</string>
+    <string name="group_dialog_change_role">Zmeniť rolu</string>
+    <string name="group_dialog_remove_member_title">Odstrániť člena?</string>
+    <string name="group_dialog_remove_member_message">Naozaj chcete odstrániť tohto člena zo skupiny?</string>
+    <string name="group_dialog_remove">Odstrániť</string>
+    <string name="group_dialog_transfer_title">Previesť vlastníctvo?</string>
+    <string name="group_dialog_transfer_message">Stanete sa bežným členom tejto skupiny.</string>
+    <string name="group_dialog_transfer">Previesť</string>
+
+    <!-- Group Screens -->
+    <string name="group_go_back">Späť</string>
+    <string name="group_manage_members">Spravovať členov</string>
+    <string name="group_invite_members">Pozvať členov</string>
+    <string name="group_pending_invites">Čakajúce pozvánky</string>
+    <string name="group_view_all">Zobraziť všetky (%1$d)</string>
+    <string name="group_share_invite">Zdieľať pozvánku</string>
+    <string name="group_copy_code">Kopírovať kód</string>
+    <string name="group_generate_code">Vygenerovať nový kód</string>
+    <string name="group_retry">Skúsiť znova</string>
+    <string name="group_revoke_invite_title">Zrušiť pozvánku?</string>
+    <string name="group_revoke_invite_message">Naozaj chcete zrušiť túto pozvánku?</string>
+    <string name="group_revoke">Zrušiť</string>
+    <string name="group_transfer_ownership">Previesť vlastníctvo</string>
+
+    <!-- Enrollment Screens -->
+    <string name="enrollment_company_title">Firemná registrácia</string>
+    <string name="enrollment_code_hint">Zadajte 16–20 znakový kód</string>
+    <string name="enrollment_code_label">Registračný kód</string>
+    <string name="enrollment_scan_qr">Naskenovať QR kód</string>
+    <string name="enrollment_enroll">Zaregistrovať zariadenie</string>
+    <string name="enrollment_try_again">Skúsiť znova</string>
+    <string name="enrollment_get_started">Začať</string>
+    <string name="enrollment_welcome">Vitajte</string>
+    <string name="enrollment_grant_permission">Udeliť povolenie</string>
+    <string name="enrollment_enter_manually">Zadať kód manuálne</string>
+    <string name="enrollment_scan_title">Naskenovať registračný QR</string>
+
+    <!-- Device Management -->
+    <string name="device_details">Detaily zariadenia</string>
+    <string name="device_unlink_this">Odpojiť toto zariadenie</string>
+    <string name="device_unlink">Odpojiť zariadenie</string>
+    <string name="device_unlink_title">Odpojiť zariadenie?</string>
+    <string name="device_unlink_message">Naozaj chcete odpojiť \"%1$s\"?</string>
+    <string name="device_unlink_warning">Upozornenie: Budete odhlásení z tohto zariadenia.</string>
+    <string name="device_transfer_title">Previesť vlastníctvo</string>
+    <string name="device_new_owner_label">ID nového vlastníka</string>
+    <string name="device_new_owner_hint">Zadajte UUID používateľa</string>
+    <string name="device_invalid_user_id">Zadajte platné ID používateľa</string>
+
+    <!-- QR Scanner -->
+    <string name="qr_scan_title">Naskenovať QR kód</string>
+    <string name="qr_grant_permission">Udeliť povolenie</string>
+    <string name="qr_enter_manually">Zadať kód manuálne</string>
+
+    <!-- Unlock Requests -->
+    <string name="unlock_requests_title">Žiadosti o odomknutie</string>
+    <string name="unlock_reason_label">Dôvod</string>
+    <string name="unlock_reason_hint">Prečo potrebujete zmeniť toto nastavenie?</string>
+    <string name="unlock_submitting">Odosielam…</string>
+    <string name="unlock_submit">Odoslať žiadosť</string>
+    <string name="unlock_withdraw">Stiahnuť</string>
+    <string name="unlock_close">Zavrieť</string>
+
+    <!-- History Screen -->
+    <string name="history_date_range">%1$s - %2$s</string>
+
+    <!-- Location Tracking Toggle Preview -->
+    <string name="location_tracking_preview">Náhľad prepínača sledovania polohy</string>
+
+    <!-- Settings Screen - Account Section -->
+    <string name="settings_account">Účet</string>
+    <string name="settings_my_devices">Moje zariadenia</string>
+    <string name="settings_groups">Skupiny</string>
+    <string name="settings_navigate_to_devices">Prejsť na zariadenia</string>
+    <string name="settings_navigate_to_groups">Prejsť na skupiny</string>
+    <string name="settings_sign_in_prompt">Prihláste sa pre prístup k pokročilým funkciám</string>
 </resources>

@@ -642,7 +642,7 @@ class LocationTrackingService : Service() {
             val channelId = if (isSecretMode) CHANNEL_ID_SECRET else CHANNEL_ID_NORMAL
             NotificationCompat.Builder(this, channelId)
                 .setContentTitle(weather.toNotificationTitle()) // AC E7.2.1: "{icon} {temp}°C"
-                .setContentText(weather.toNotificationText()) // AC E7.2.2: Weather condition
+                .setContentText(weather.toNotificationText(this)) // AC E7.2.2: Weather condition
                 .setSmallIcon(R.drawable.ic_foreground_service) // Custom foreground service icon
                 .setColor(getColor(R.color.notification_icon_color)) // Help system display icon
                 .setOngoing(true)

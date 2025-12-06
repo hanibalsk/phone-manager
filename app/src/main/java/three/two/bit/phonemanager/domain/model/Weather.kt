@@ -1,8 +1,10 @@
 package three.two.bit.phonemanager.domain.model
 
+import androidx.annotation.StringRes
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
+import three.two.bit.phonemanager.R
 
 /**
  * Story E7.1: Weather domain models
@@ -72,36 +74,36 @@ data class LocationCoordinates(val latitude: Double, val longitude: Double)
  *
  * Maps standardized weather condition codes to descriptive conditions
  */
-enum class WeatherCode(val code: Int, val description: String, val emoji: String) {
-    CLEAR_SKY(0, "Clear sky", "☀️"),
-    MAINLY_CLEAR(1, "Mainly clear", "🌤️"),
-    PARTLY_CLOUDY(2, "Partly cloudy", "⛅"),
-    OVERCAST(3, "Overcast", "☁️"),
-    FOG(45, "Fog", "🌫️"),
-    DEPOSITING_RIME_FOG(48, "Depositing rime fog", "🌫️"),
-    DRIZZLE_LIGHT(51, "Light drizzle", "🌦️"),
-    DRIZZLE_MODERATE(53, "Moderate drizzle", "🌦️"),
-    DRIZZLE_DENSE(55, "Dense drizzle", "🌧️"),
-    FREEZING_DRIZZLE_LIGHT(56, "Light freezing drizzle", "🌧️"),
-    FREEZING_DRIZZLE_DENSE(57, "Dense freezing drizzle", "🌧️"),
-    RAIN_SLIGHT(61, "Slight rain", "🌧️"),
-    RAIN_MODERATE(63, "Moderate rain", "🌧️"),
-    RAIN_HEAVY(65, "Heavy rain", "🌧️"),
-    FREEZING_RAIN_LIGHT(66, "Light freezing rain", "🌧️"),
-    FREEZING_RAIN_HEAVY(68, "Heavy freezing rain", "🌧️"),
-    SNOW_SLIGHT(71, "Slight snow", "🌨️"),
-    SNOW_MODERATE(73, "Moderate snow", "🌨️"),
-    SNOW_HEAVY(75, "Heavy snow", "🌨️"),
-    SNOW_GRAINS(77, "Snow grains", "🌨️"),
-    RAIN_SHOWERS_SLIGHT(80, "Slight rain showers", "🌦️"),
-    RAIN_SHOWERS_MODERATE(81, "Moderate rain showers", "🌦️"),
-    RAIN_SHOWERS_VIOLENT(82, "Violent rain showers", "🌧️"),
-    SNOW_SHOWERS_SLIGHT(85, "Slight snow showers", "🌨️"),
-    SNOW_SHOWERS_HEAVY(86, "Heavy snow showers", "🌨️"),
-    THUNDERSTORM(95, "Thunderstorm", "⛈️"),
-    THUNDERSTORM_SLIGHT_HAIL(96, "Thunderstorm with slight hail", "⛈️"),
-    THUNDERSTORM_HEAVY_HAIL(99, "Thunderstorm with heavy hail", "⛈️"),
-    UNKNOWN(-1, "Unknown", "❓"),
+enum class WeatherCode(val code: Int, @StringRes val descriptionResId: Int, val emoji: String) {
+    CLEAR_SKY(0, R.string.weather_condition_clear_sky, "☀️"),
+    MAINLY_CLEAR(1, R.string.weather_condition_mainly_clear, "🌤️"),
+    PARTLY_CLOUDY(2, R.string.weather_condition_partly_cloudy, "⛅"),
+    OVERCAST(3, R.string.weather_condition_overcast, "☁️"),
+    FOG(45, R.string.weather_condition_fog, "🌫️"),
+    DEPOSITING_RIME_FOG(48, R.string.weather_condition_depositing_rime_fog, "🌫️"),
+    DRIZZLE_LIGHT(51, R.string.weather_condition_drizzle_light, "🌦️"),
+    DRIZZLE_MODERATE(53, R.string.weather_condition_drizzle_moderate, "🌦️"),
+    DRIZZLE_DENSE(55, R.string.weather_condition_drizzle_dense, "🌧️"),
+    FREEZING_DRIZZLE_LIGHT(56, R.string.weather_condition_freezing_drizzle_light, "🌧️"),
+    FREEZING_DRIZZLE_DENSE(57, R.string.weather_condition_freezing_drizzle_dense, "🌧️"),
+    RAIN_SLIGHT(61, R.string.weather_condition_rain_slight, "🌧️"),
+    RAIN_MODERATE(63, R.string.weather_condition_rain_moderate, "🌧️"),
+    RAIN_HEAVY(65, R.string.weather_condition_rain_heavy, "🌧️"),
+    FREEZING_RAIN_LIGHT(66, R.string.weather_condition_freezing_rain_light, "🌧️"),
+    FREEZING_RAIN_HEAVY(68, R.string.weather_condition_freezing_rain_heavy, "🌧️"),
+    SNOW_SLIGHT(71, R.string.weather_condition_snow_slight, "🌨️"),
+    SNOW_MODERATE(73, R.string.weather_condition_snow_moderate, "🌨️"),
+    SNOW_HEAVY(75, R.string.weather_condition_snow_heavy, "🌨️"),
+    SNOW_GRAINS(77, R.string.weather_condition_snow_grains, "🌨️"),
+    RAIN_SHOWERS_SLIGHT(80, R.string.weather_condition_rain_showers_slight, "🌦️"),
+    RAIN_SHOWERS_MODERATE(81, R.string.weather_condition_rain_showers_moderate, "🌦️"),
+    RAIN_SHOWERS_VIOLENT(82, R.string.weather_condition_rain_showers_violent, "🌧️"),
+    SNOW_SHOWERS_SLIGHT(85, R.string.weather_condition_snow_showers_slight, "🌨️"),
+    SNOW_SHOWERS_HEAVY(86, R.string.weather_condition_snow_showers_heavy, "🌨️"),
+    THUNDERSTORM(95, R.string.weather_condition_thunderstorm, "⛈️"),
+    THUNDERSTORM_SLIGHT_HAIL(96, R.string.weather_condition_thunderstorm_slight_hail, "⛈️"),
+    THUNDERSTORM_HEAVY_HAIL(99, R.string.weather_condition_thunderstorm_heavy_hail, "⛈️"),
+    UNKNOWN(-1, R.string.weather_condition_unknown, "❓"),
     ;
 
     companion object {

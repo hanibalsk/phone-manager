@@ -32,14 +32,29 @@ while [[ $# -gt 0 ]]; do
             GENERATE_REPORT=false
             shift
             ;;
+        --quick)
+            # Quick mode: only run essential tests
+            QUICK_MODE=true
+            shift
+            ;;
         -h|--help)
             echo "Usage: $0 [options]"
             echo ""
             echo "Options:"
             echo "  -v, --verbose     Enable verbose output"
-            echo "  -c, --category    Run specific category (api, adb, screens)"
+            echo "  -c, --category    Run specific category:"
+            echo "                    api       - API-only tests (no device needed)"
+            echo "                    adb       - Device/emulator tests"
+            echo "                    auth      - Authentication tests"
+            echo "                    location  - Location & trip tests"
+            echo "                    groups    - Group management tests"
+            echo "                    geofence  - Geofence tests"
+            echo "                    settings  - Settings sync tests"
+            echo "                    weather   - Weather integration tests"
+            echo "                    scenarios - Full scenario tests"
             echo "  --skip-adb        Skip ADB-dependent tests"
             echo "  --no-report       Skip HTML report generation"
+            echo "  --quick           Run only essential tests (faster)"
             echo "  -h, --help        Show this help"
             exit 0
             ;;
@@ -49,6 +64,8 @@ while [[ $# -gt 0 ]]; do
             ;;
     esac
 done
+
+QUICK_MODE="${QUICK_MODE:-false}"
 
 # =============================================================================
 # Load Configuration
@@ -128,9 +145,11 @@ run_test() {
     ((TOTAL_TESTS++))
 }
 
-# API Tests (always run)
-log_info "=== API TESTS ==="
+# =============================================================================
+# Core API Tests (always run first)
+# =============================================================================
 if [[ -z "$CATEGORY" || "$CATEGORY" == "api" ]]; then
+    log_info "=== CORE API TESTS ==="
     for test_file in "$SCRIPT_DIR/tests/01_health_check.sh" \
                      "$SCRIPT_DIR/tests/02_device_registration.sh" \
                      "$SCRIPT_DIR/tests/03_location_tracking.sh" \
@@ -141,40 +160,113 @@ if [[ -z "$CATEGORY" || "$CATEGORY" == "api" ]]; then
     done
 fi
 
-# ADB Tests (require device connection)
-if [[ "$ADB_AVAILABLE" == "true" ]] && [[ -z "$CATEGORY" || "$CATEGORY" == "adb" || "$CATEGORY" == "screens" ]]; then
-    log_info "=== ADB TESTS ==="
+# =============================================================================
+# Authentication Tests
+# =============================================================================
+if [[ -z "$CATEGORY" || "$CATEGORY" == "auth" || "$CATEGORY" == "api" ]]; then
+    log_info "=== AUTHENTICATION TESTS ==="
+    if [[ -f "$SCRIPT_DIR/tests/09_authentication.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/09_authentication.sh"
+    fi
+fi
+
+# =============================================================================
+# Location Service Tests (require ADB)
+# =============================================================================
+if [[ "$ADB_AVAILABLE" == "true" ]] && [[ -z "$CATEGORY" || "$CATEGORY" == "location" || "$CATEGORY" == "adb" ]]; then
+    log_info "=== LOCATION SERVICE TESTS ==="
 
     # Movement simulation
     if [[ -f "$SCRIPT_DIR/tests/05_movement_simulation.sh" ]]; then
         run_test "$SCRIPT_DIR/tests/05_movement_simulation.sh"
     fi
 
-    # Screen navigation
-    if [[ -f "$SCRIPT_DIR/tests/06_screen_navigation.sh" ]]; then
-        run_test "$SCRIPT_DIR/tests/06_screen_navigation.sh"
+    # Location service lifecycle
+    if [[ -f "$SCRIPT_DIR/tests/10_location_service.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/10_location_service.sh"
     fi
 
-    # Geofence tests
-    if [[ -f "$SCRIPT_DIR/tests/07_geofence_tests.sh" ]]; then
-        run_test "$SCRIPT_DIR/tests/07_geofence_tests.sh"
+    # Trip detection
+    if [[ -f "$SCRIPT_DIR/tests/11_trip_detection.sh" ]] && [[ "$QUICK_MODE" != "true" ]]; then
+        run_test "$SCRIPT_DIR/tests/11_trip_detection.sh"
     fi
 fi
 
-# Scenario Tests
-if [[ -z "$CATEGORY" || "$CATEGORY" == "scenarios" ]]; then
+# =============================================================================
+# Group Management Tests
+# =============================================================================
+if [[ -z "$CATEGORY" || "$CATEGORY" == "groups" || "$CATEGORY" == "api" ]]; then
+    log_info "=== GROUP MANAGEMENT TESTS ==="
+    if [[ -f "$SCRIPT_DIR/tests/12_group_management.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/12_group_management.sh"
+    fi
+fi
+
+# =============================================================================
+# Geofence Tests
+# =============================================================================
+if [[ -z "$CATEGORY" || "$CATEGORY" == "geofence" ]]; then
+    log_info "=== GEOFENCE TESTS ==="
+
+    # API-based geofence tests
+    if [[ -f "$SCRIPT_DIR/tests/07_geofence_tests.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/07_geofence_tests.sh"
+    fi
+
+    # UI-based geofence tests (require ADB)
+    if [[ "$ADB_AVAILABLE" == "true" ]] && [[ -f "$SCRIPT_DIR/tests/13_geofence_ui.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/13_geofence_ui.sh"
+    fi
+fi
+
+# =============================================================================
+# Settings Sync Tests
+# =============================================================================
+if [[ -z "$CATEGORY" || "$CATEGORY" == "settings" ]]; then
+    log_info "=== SETTINGS SYNC TESTS ==="
+    if [[ -f "$SCRIPT_DIR/tests/14_settings_sync.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/14_settings_sync.sh"
+    fi
+fi
+
+# =============================================================================
+# Weather Integration Tests
+# =============================================================================
+if [[ -z "$CATEGORY" || "$CATEGORY" == "weather" ]]; then
+    log_info "=== WEATHER INTEGRATION TESTS ==="
+    if [[ -f "$SCRIPT_DIR/tests/15_weather.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/15_weather.sh"
+    fi
+fi
+
+# =============================================================================
+# Screen Navigation Tests (require ADB)
+# =============================================================================
+if [[ "$ADB_AVAILABLE" == "true" ]] && [[ -z "$CATEGORY" || "$CATEGORY" == "adb" || "$CATEGORY" == "screens" ]]; then
+    log_info "=== SCREEN NAVIGATION TESTS ==="
+    if [[ -f "$SCRIPT_DIR/tests/06_screen_navigation.sh" ]]; then
+        run_test "$SCRIPT_DIR/tests/06_screen_navigation.sh"
+    fi
+fi
+
+# =============================================================================
+# Full Integration Test
+# =============================================================================
+if [[ -f "$SCRIPT_DIR/tests/08_full_integration.sh" ]] && [[ -z "$CATEGORY" ]] && [[ "$QUICK_MODE" != "true" ]]; then
+    log_info "=== INTEGRATION TEST ==="
+    run_test "$SCRIPT_DIR/tests/08_full_integration.sh"
+fi
+
+# =============================================================================
+# Scenario Tests (comprehensive end-to-end, require ADB)
+# =============================================================================
+if [[ "$ADB_AVAILABLE" == "true" ]] && [[ -z "$CATEGORY" || "$CATEGORY" == "scenarios" ]] && [[ "$QUICK_MODE" != "true" ]]; then
     log_info "=== SCENARIO TESTS ==="
     for scenario_file in "$SCRIPT_DIR/scenarios/"*.sh; do
         if [[ -f "$scenario_file" ]]; then
             run_test "$scenario_file"
         fi
     done
-fi
-
-# Full Integration Test
-if [[ -f "$SCRIPT_DIR/tests/08_full_integration.sh" ]] && [[ -z "$CATEGORY" ]]; then
-    log_info "=== INTEGRATION TEST ==="
-    run_test "$SCRIPT_DIR/tests/08_full_integration.sh"
 fi
 
 # =============================================================================

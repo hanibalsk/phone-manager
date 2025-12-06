@@ -353,4 +353,402 @@ get_school_route_coordinates() {
     echo "37.7820,-122.4080"   # School
 }
 
+# =============================================================================
+# User Generation
+# =============================================================================
+
+# Generate dynamic test user email
+generate_test_email() {
+    local prefix="${1:-user}"
+    echo "${TEST_USER_PREFIX}${prefix}_$(date +%s)@e2e.phonemanager.local"
+}
+
+# Generate test user data JSON
+generate_user_data() {
+    local email="${1:-$(generate_test_email)}"
+    local password="${2:-TestPass123!}"
+    local display_name="${3:-E2E Test User $(generate_short_id)}"
+
+    cat <<EOF
+{
+    "email": "$email",
+    "password": "$password",
+    "display_name": "$display_name"
+}
+EOF
+}
+
+# Generate user with random data
+generate_random_user() {
+    local prefix="${1:-user}"
+    local email=$(generate_test_email "$prefix")
+    local password="Test$(random_int 100 999)Pass!"
+    local name="E2E $prefix $(generate_short_id)"
+    echo "$email|$password|$name"
+}
+
+# =============================================================================
+# Group Generation
+# =============================================================================
+
+# Generate group data JSON
+generate_group_data() {
+    local name="${1:-E2E Test Group $(generate_short_id)}"
+    local description="${2:-Automated test group}"
+
+    cat <<EOF
+{
+    "name": "$name",
+    "description": "$description"
+}
+EOF
+}
+
+# Generate invite code (for validation tests)
+generate_fake_invite_code() {
+    local chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+    local code=""
+    for i in {1..8}; do
+        local idx=$((RANDOM % ${#chars}))
+        code+="${chars:$idx:1}"
+    done
+    echo "$code"
+}
+
+# =============================================================================
+# Settings Generation
+# =============================================================================
+
+# Generate device settings JSON
+generate_device_settings() {
+    local tracking_enabled="${1:-true}"
+    local update_interval="${2:-60000}"
+    local battery_optimization="${3:-false}"
+    local weather_enabled="${4:-true}"
+    local secret_mode="${5:-false}"
+
+    cat <<EOF
+{
+    "tracking_enabled": $tracking_enabled,
+    "location_update_interval_ms": $update_interval,
+    "battery_optimization_enabled": $battery_optimization,
+    "weather_notifications_enabled": $weather_enabled,
+    "secret_mode_enabled": $secret_mode
+}
+EOF
+}
+
+# Generate settings lock data
+generate_settings_lock() {
+    local setting_key="$1"
+    local reason="${2:-Locked by admin for testing}"
+
+    cat <<EOF
+{
+    "setting_key": "$setting_key",
+    "reason": "$reason"
+}
+EOF
+}
+
+# Generate unlock request data
+generate_unlock_request() {
+    local setting_key="$1"
+    local reason="${2:-Need to adjust this setting for personal use}"
+
+    cat <<EOF
+{
+    "setting_key": "$setting_key",
+    "reason": "$reason"
+}
+EOF
+}
+
+# =============================================================================
+# Trip Generation
+# =============================================================================
+
+# Generate trip data JSON for API upload
+generate_trip_data() {
+    local device_id="$1"
+    local local_trip_id="${2:-$(generate_uuid)}"
+    local start_lat="${3:-$SF_DOWNTOWN_LAT}"
+    local start_lon="${4:-$SF_DOWNTOWN_LON}"
+    local transport_mode="${5:-IN_VEHICLE}"
+    local timestamp="${6:-$(date +%s000)}"
+
+    cat <<EOF
+{
+    "device_id": "$device_id",
+    "local_trip_id": "$local_trip_id",
+    "start_timestamp": $timestamp,
+    "start_latitude": $start_lat,
+    "start_longitude": $start_lon,
+    "transportation_mode": "$transport_mode",
+    "detection_source": "ACTIVITY_RECOGNITION"
+}
+EOF
+}
+
+# Generate trip completion data
+generate_trip_completion() {
+    local end_lat="${1:-$OAKLAND_LAT}"
+    local end_lon="${2:-$OAKLAND_LON}"
+    local timestamp="${3:-$(date +%s000)}"
+
+    cat <<EOF
+{
+    "state": "COMPLETED",
+    "end_timestamp": $timestamp,
+    "end_latitude": $end_lat,
+    "end_longitude": $end_lon
+}
+EOF
+}
+
+# Generate a complete simulated trip with locations and events
+generate_simulated_trip() {
+    local device_id="$1"
+    local start_lat="${2:-$SF_DOWNTOWN_LAT}"
+    local start_lon="${3:-$SF_DOWNTOWN_LON}"
+    local end_lat="${4:-$OAKLAND_LAT}"
+    local end_lon="${5:-$OAKLAND_LON}"
+    local duration_minutes="${6:-30}"
+    local mode="${7:-IN_VEHICLE}"
+
+    local trip_id=$(generate_uuid)
+    local num_points=$((duration_minutes * 2))  # 2 points per minute
+    local interval_ms=30000  # 30 seconds
+
+    echo "{"
+    echo "  \"trip_id\": \"$trip_id\","
+    echo "  \"device_id\": \"$device_id\","
+    echo "  \"transportation_mode\": \"$mode\","
+    echo "  \"locations\": $(generate_location_path "$start_lat" "$start_lon" "$end_lat" "$end_lon" "$num_points" "" "$interval_ms"),"
+    echo "  \"events\": $(generate_movement_events_for_path "$trip_id" "$start_lat" "$start_lon" "$end_lat" "$end_lon" "$num_points" "$mode" "" "$interval_ms")"
+    echo "}"
+}
+
+# =============================================================================
+# Weather Generation (for mocking)
+# =============================================================================
+
+# Generate weather data JSON (for mock responses)
+generate_weather_data() {
+    local temperature="${1:-18.5}"
+    local condition="${2:-PARTLY_CLOUDY}"
+    local humidity="${3:-65}"
+    local wind_speed="${4:-12.5}"
+
+    cat <<EOF
+{
+    "temperature": $temperature,
+    "condition": "$condition",
+    "humidity": $humidity,
+    "wind_speed": $wind_speed,
+    "feels_like": $(echo "scale=1; $temperature - 2" | bc),
+    "timestamp": $(date +%s000)
+}
+EOF
+}
+
+# Generate 5-day forecast
+generate_weather_forecast() {
+    local base_temp="${1:-18}"
+
+    echo "["
+    for i in {0..4}; do
+        local temp=$(echo "scale=1; $base_temp + $(random_float -5 5 1)" | bc)
+        local conditions=("SUNNY" "PARTLY_CLOUDY" "CLOUDY" "RAINY" "CLEAR")
+        local condition="${conditions[$((RANDOM % ${#conditions[@]}))]}"
+
+        [[ $i -gt 0 ]] && echo ","
+        cat <<EOF
+    {
+        "date": "$(date -v+${i}d +%Y-%m-%d 2>/dev/null || date -d "+${i} days" +%Y-%m-%d)",
+        "high_temperature": $(echo "scale=1; $temp + 5" | bc),
+        "low_temperature": $(echo "scale=1; $temp - 5" | bc),
+        "condition": "$condition"
+    }
+EOF
+    done
+    echo "]"
+}
+
+# =============================================================================
+# Geofence Generation (Extended)
+# =============================================================================
+
+# Generate geofence at predefined location
+generate_home_geofence() {
+    local device_id="$1"
+    generate_geofence_data "Home" "$TEST_LOC_HOME_LAT" "$TEST_LOC_HOME_LON" "$TEST_GEOFENCE_HOME_RADIUS"
+}
+
+generate_work_geofence() {
+    local device_id="$1"
+    generate_geofence_data "Work" "$TEST_LOC_WORK_LAT" "$TEST_LOC_WORK_LON" "$TEST_GEOFENCE_WORK_RADIUS"
+}
+
+generate_school_geofence() {
+    local device_id="$1"
+    generate_geofence_data "School" "$TEST_LOC_SCHOOL_LAT" "$TEST_LOC_SCHOOL_LON" "$TEST_GEOFENCE_SCHOOL_RADIUS"
+}
+
+# =============================================================================
+# Proximity Alert Generation
+# =============================================================================
+
+# Generate proximity alert data
+generate_proximity_alert_data() {
+    local source_device_id="$1"
+    local target_device_id="$2"
+    local name="${3:-Proximity Alert $(generate_short_id)}"
+    local radius="${4:-5000}"
+
+    cat <<EOF
+{
+    "source_device_id": "$source_device_id",
+    "target_device_id": "$target_device_id",
+    "name": "$name",
+    "radius_meters": $radius,
+    "is_active": true
+}
+EOF
+}
+
+# =============================================================================
+# Webhook Generation
+# =============================================================================
+
+# Generate webhook data
+generate_webhook_data() {
+    local device_id="$1"
+    local url="${2:-https://webhook.test/e2e-$(generate_short_id)}"
+    local events="${3:-[\"geofence_enter\", \"geofence_exit\"]}"
+    local secret="${4:-test_secret_$(generate_short_id)}"
+
+    cat <<EOF
+{
+    "device_id": "$device_id",
+    "url": "$url",
+    "events": $events,
+    "secret": "$secret",
+    "active": true
+}
+EOF
+}
+
+# =============================================================================
+# Enrollment Generation
+# =============================================================================
+
+# Generate enrollment token (fake, for testing)
+generate_fake_enrollment_token() {
+    openssl rand -hex 16 2>/dev/null || generate_uuid | tr -d '-'
+}
+
+# Generate device info for enrollment
+generate_enrollment_device_info() {
+    local device_name="${1:-E2E Test Device}"
+    local manufacturer="${2:-Google}"
+    local model="${3:-Pixel 8a}"
+    local os_version="${4:-14}"
+
+    cat <<EOF
+{
+    "device_name": "$device_name",
+    "manufacturer": "$manufacturer",
+    "model": "$model",
+    "os_version": "$os_version",
+    "platform": "android"
+}
+EOF
+}
+
+# =============================================================================
+# Test Scenario Helpers
+# =============================================================================
+
+# Generate family scenario data (3 users, 1 group)
+generate_family_scenario() {
+    local session_id="${1:-$(generate_short_id)}"
+
+    cat <<EOF
+{
+    "session_id": "$session_id",
+    "parent": {
+        "email": "parent_${session_id}@e2e.phonemanager.local",
+        "password": "Parent123!",
+        "name": "Parent User"
+    },
+    "child1": {
+        "email": "child1_${session_id}@e2e.phonemanager.local",
+        "password": "Child123!",
+        "name": "Child One"
+    },
+    "child2": {
+        "email": "child2_${session_id}@e2e.phonemanager.local",
+        "password": "Child123!",
+        "name": "Child Two"
+    },
+    "group_name": "Family ${session_id}",
+    "geofences": {
+        "home": {
+            "lat": $TEST_LOC_HOME_LAT,
+            "lon": $TEST_LOC_HOME_LON,
+            "radius": $TEST_GEOFENCE_HOME_RADIUS
+        },
+        "school": {
+            "lat": $TEST_LOC_SCHOOL_LAT,
+            "lon": $TEST_LOC_SCHOOL_LON,
+            "radius": $TEST_GEOFENCE_SCHOOL_RADIUS
+        }
+    }
+}
+EOF
+}
+
+# Generate commute scenario data
+generate_commute_scenario() {
+    local device_id="$1"
+    local session_id="${2:-$(generate_short_id)}"
+
+    cat <<EOF
+{
+    "session_id": "$session_id",
+    "device_id": "$device_id",
+    "segments": [
+        {
+            "name": "walk_to_car",
+            "start_lat": $TEST_LOC_HOME_LAT,
+            "start_lon": $TEST_LOC_HOME_LON,
+            "end_lat": $(echo "scale=6; $TEST_LOC_HOME_LAT + 0.002" | bc),
+            "end_lon": $(echo "scale=6; $TEST_LOC_HOME_LON + 0.002" | bc),
+            "mode": "WALKING",
+            "duration_min": 5
+        },
+        {
+            "name": "drive_to_work",
+            "start_lat": $(echo "scale=6; $TEST_LOC_HOME_LAT + 0.002" | bc),
+            "start_lon": $(echo "scale=6; $TEST_LOC_HOME_LON + 0.002" | bc),
+            "end_lat": $TEST_LOC_WORK_LAT,
+            "end_lon": $TEST_LOC_WORK_LON,
+            "mode": "IN_VEHICLE",
+            "duration_min": 25
+        },
+        {
+            "name": "walk_to_office",
+            "start_lat": $TEST_LOC_WORK_LAT,
+            "start_lon": $TEST_LOC_WORK_LON,
+            "end_lat": $(echo "scale=6; $TEST_LOC_WORK_LAT + 0.001" | bc),
+            "end_lon": $(echo "scale=6; $TEST_LOC_WORK_LON + 0.001" | bc),
+            "mode": "WALKING",
+            "duration_min": 3
+        }
+    ]
+}
+EOF
+}
+
 echo "Generators loaded"

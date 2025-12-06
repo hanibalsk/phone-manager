@@ -82,6 +82,37 @@
     <string name="weather_humidity_label">Humidity</string>
     <string name="weather_wind_label">Wind</string>
 
+    <!-- Weather Conditions -->
+    <string name="weather_condition_clear_sky">Clear sky</string>
+    <string name="weather_condition_mainly_clear">Mainly clear</string>
+    <string name="weather_condition_partly_cloudy">Partly cloudy</string>
+    <string name="weather_condition_overcast">Overcast</string>
+    <string name="weather_condition_fog">Fog</string>
+    <string name="weather_condition_depositing_rime_fog">Depositing rime fog</string>
+    <string name="weather_condition_drizzle_light">Light drizzle</string>
+    <string name="weather_condition_drizzle_moderate">Moderate drizzle</string>
+    <string name="weather_condition_drizzle_dense">Dense drizzle</string>
+    <string name="weather_condition_freezing_drizzle_light">Light freezing drizzle</string>
+    <string name="weather_condition_freezing_drizzle_dense">Dense freezing drizzle</string>
+    <string name="weather_condition_rain_slight">Slight rain</string>
+    <string name="weather_condition_rain_moderate">Moderate rain</string>
+    <string name="weather_condition_rain_heavy">Heavy rain</string>
+    <string name="weather_condition_freezing_rain_light">Light freezing rain</string>
+    <string name="weather_condition_freezing_rain_heavy">Heavy freezing rain</string>
+    <string name="weather_condition_snow_slight">Slight snow</string>
+    <string name="weather_condition_snow_moderate">Moderate snow</string>
+    <string name="weather_condition_snow_heavy">Heavy snow</string>
+    <string name="weather_condition_snow_grains">Snow grains</string>
+    <string name="weather_condition_rain_showers_slight">Slight rain showers</string>
+    <string name="weather_condition_rain_showers_moderate">Moderate rain showers</string>
+    <string name="weather_condition_rain_showers_violent">Violent rain showers</string>
+    <string name="weather_condition_snow_showers_slight">Slight snow showers</string>
+    <string name="weather_condition_snow_showers_heavy">Heavy snow showers</string>
+    <string name="weather_condition_thunderstorm">Thunderstorm</string>
+    <string name="weather_condition_thunderstorm_slight_hail">Thunderstorm with slight hail</string>
+    <string name="weather_condition_thunderstorm_heavy_hail">Thunderstorm with heavy hail</string>
+    <string name="weather_condition_unknown">Unknown</string>
+
     <!-- Alerts Screen -->
     <string name="alerts_create">Create Alert</string>
     <string name="alerts_empty_title">No Proximity Alerts</string>
@@ -582,4 +613,134 @@
     <string name="group_detail_delete">Delete Group</string>
     <string name="group_detail_delete_warning">Warning: Deleting this group will remove all members and cannot be undone.</string>
     <string name="group_detail_edit_description">Edit description</string>
+
+    <!-- Auth Screens -->
+    <string name="auth_email">Email</string>
+    <string name="auth_password">Password</string>
+    <string name="auth_forgot_password">Forgot Password?</string>
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_sign_out">Sign Out</string>
+    <string name="auth_create_account">Create Account</string>
+    <string name="auth_continue_google">Continue with Google</string>
+    <string name="auth_continue_apple">Continue with Apple</string>
+    <string name="auth_display_name">Display Name</string>
+    <string name="auth_confirm_password">Confirm Password</string>
+    <string name="auth_passwords_mismatch">Passwords do not match</string>
+    <string name="auth_reset_password">Reset Password</string>
+    <string name="auth_back_to_login">Back to Login</string>
+    <string name="auth_send_reset_link">Send Reset Link</string>
+    <string name="auth_signed_in_as">Signed in as %1$s</string>
+    <string name="auth_sign_out_confirm_title">Sign Out</string>
+    <string name="auth_sign_out_confirm_message">Are you sure you want to sign out?</string>
+
+    <!-- Admin Screens -->
+    <string name="admin_selected_count">%1$d selected</string>
+    <string name="admin_member_devices">Member Devices</string>
+    <string name="admin_select_all">Select All</string>
+    <string name="admin_search_placeholder">Search devices or owners…</string>
+    <string name="admin_filter_all">All (%1$d)</string>
+    <string name="admin_filter_online">Online (%1$d)</string>
+    <string name="admin_filter_offline">Offline (%1$d)</string>
+    <string name="admin_lock_setting">Lock Setting</string>
+    <string name="admin_unlock_setting">Unlock Setting</string>
+    <string name="admin_lock">Lock</string>
+    <string name="admin_unlock">Unlock</string>
+    <string name="admin_settings_history">Settings History</string>
+    <string name="admin_settings_templates">Settings Templates</string>
+    <string name="admin_template_name">Template Name</string>
+    <string name="admin_template_description">Description (optional)</string>
+    <string name="admin_share_admins">Share with other admins</string>
+    <string name="admin_delete_template">Delete Template</string>
+    <string name="admin_delete_template_confirm">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
+    <string name="admin_bulk_settings">Bulk Settings Update</string>
+    <string name="admin_applying_settings">Applying settings to %1$d devices…</string>
+    <string name="admin_apply_settings">Apply Settings</string>
+    <string name="admin_done">Done</string>
+
+    <!-- Group Dialogs -->
+    <string name="group_dialog_delete_title">Delete Group?</string>
+    <string name="group_dialog_delete_message">This will permanently delete the group and remove all members.</string>
+    <string name="group_dialog_leave_title">Leave Group?</string>
+    <string name="group_dialog_leave_message">You will no longer have access to this group\'s location data.</string>
+    <string name="group_dialog_leave">Leave</string>
+    <string name="group_dialog_edit_name_title">Edit Group Name</string>
+    <string name="group_dialog_group_name">Group Name</string>
+    <string name="group_dialog_edit_description_title">Edit Description</string>
+    <string name="group_dialog_description_hint">What\'s this group for?</string>
+    <string name="group_dialog_change_role_title">Change Role</string>
+    <string name="group_dialog_change_role">Change Role</string>
+    <string name="group_dialog_remove_member_title">Remove Member?</string>
+    <string name="group_dialog_remove_member_message">Are you sure you want to remove this member from the group?</string>
+    <string name="group_dialog_remove">Remove</string>
+    <string name="group_dialog_transfer_title">Transfer Ownership?</string>
+    <string name="group_dialog_transfer_message">You will become a regular member of this group.</string>
+    <string name="group_dialog_transfer">Transfer</string>
+
+    <!-- Group Screens -->
+    <string name="group_go_back">Go Back</string>
+    <string name="group_manage_members">Manage Members</string>
+    <string name="group_invite_members">Invite Members</string>
+    <string name="group_pending_invites">Pending Invites</string>
+    <string name="group_view_all">View All (%1$d)</string>
+    <string name="group_share_invite">Share Invite</string>
+    <string name="group_copy_code">Copy Code</string>
+    <string name="group_generate_code">Generate New Code</string>
+    <string name="group_retry">Retry</string>
+    <string name="group_revoke_invite_title">Revoke Invite?</string>
+    <string name="group_revoke_invite_message">Are you sure you want to revoke this invite?</string>
+    <string name="group_revoke">Revoke</string>
+    <string name="group_transfer_ownership">Transfer Ownership</string>
+
+    <!-- Enrollment Screens -->
+    <string name="enrollment_company_title">Company Enrollment</string>
+    <string name="enrollment_code_hint">Enter 16–20 character code</string>
+    <string name="enrollment_code_label">Enrollment Code</string>
+    <string name="enrollment_scan_qr">Scan QR Code</string>
+    <string name="enrollment_enroll">Enroll Device</string>
+    <string name="enrollment_try_again">Try Again</string>
+    <string name="enrollment_get_started">Get Started</string>
+    <string name="enrollment_welcome">Welcome</string>
+    <string name="enrollment_grant_permission">Grant Permission</string>
+    <string name="enrollment_enter_manually">Enter Code Manually</string>
+    <string name="enrollment_scan_title">Scan Enrollment QR</string>
+
+    <!-- Device Management -->
+    <string name="device_details">Device Details</string>
+    <string name="device_unlink_this">Unlink This Device</string>
+    <string name="device_unlink">Unlink Device</string>
+    <string name="device_unlink_title">Unlink Device?</string>
+    <string name="device_unlink_message">Are you sure you want to unlink \"%1$s\"?</string>
+    <string name="device_unlink_warning">Warning: This will sign you out of this device.</string>
+    <string name="device_transfer_title">Transfer Ownership</string>
+    <string name="device_new_owner_label">New Owner User ID</string>
+    <string name="device_new_owner_hint">Enter user UUID</string>
+    <string name="device_invalid_user_id">Please enter a valid user ID</string>
+
+    <!-- QR Scanner -->
+    <string name="qr_scan_title">Scan QR Code</string>
+    <string name="qr_grant_permission">Grant Permission</string>
+    <string name="qr_enter_manually">Enter Code Manually</string>
+
+    <!-- Unlock Requests -->
+    <string name="unlock_requests_title">Unlock Requests</string>
+    <string name="unlock_reason_label">Reason</string>
+    <string name="unlock_reason_hint">Why do you need to change this setting?</string>
+    <string name="unlock_submitting">Submitting…</string>
+    <string name="unlock_submit">Submit Request</string>
+    <string name="unlock_withdraw">Withdraw</string>
+    <string name="unlock_close">Close</string>
+
+    <!-- History Screen -->
+    <string name="history_date_range">%1$s - %2$s</string>
+
+    <!-- Location Tracking Toggle Preview -->
+    <string name="location_tracking_preview">Location Tracking Toggle Preview</string>
+
+    <!-- Settings Screen - Account Section -->
+    <string name="settings_account">Account</string>
+    <string name="settings_my_devices">My Devices</string>
+    <string name="settings_groups">Groups</string>
+    <string name="settings_navigate_to_devices">Navigate to devices</string>
+    <string name="settings_navigate_to_groups">Navigate to groups</string>
+    <string name="settings_sign_in_prompt">Sign in to access advanced features</string>
 </resources>

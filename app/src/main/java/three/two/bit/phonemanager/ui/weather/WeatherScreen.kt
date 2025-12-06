@@ -366,7 +366,7 @@ private fun CurrentWeatherHero(weather: Weather) {
 
         // Condition
         Text(
-            text = weather.current.weatherCode.description,
+            text = stringResource(weather.current.weatherCode.descriptionResId),
             color = Color.White.copy(alpha = 0.9f),
             style = MaterialTheme.typography.headlineSmall,
         )

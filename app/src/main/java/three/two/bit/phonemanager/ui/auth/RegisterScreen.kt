@@ -47,9 +47,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 
 /**
  * Story E9.11, Task 6: Register Screen UI
@@ -154,7 +156,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = displayName,
                 onValueChange = { displayName = it },
-                label = { Text("Display Name") },
+                label = { Text(stringResource(R.string.auth_display_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
@@ -175,7 +177,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.auth_email)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -196,7 +198,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.auth_password)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (passwordVisible) {
                     VisualTransformation.None
@@ -249,7 +251,7 @@ fun RegisterScreen(
             OutlinedTextField(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
-                label = { Text("Confirm Password") },
+                label = { Text(stringResource(R.string.auth_confirm_password)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (confirmPasswordVisible) {
                     VisualTransformation.None
@@ -300,7 +302,7 @@ fun RegisterScreen(
                 isError = confirmPassword.isNotEmpty() && !passwordsMatch,
                 supportingText = {
                     if (confirmPassword.isNotEmpty() && !passwordsMatch) {
-                        Text("Passwords do not match")
+                        Text(stringResource(R.string.auth_passwords_mismatch))
                     }
                 },
                 enabled = uiState !is AuthUiState.Loading
@@ -350,7 +352,7 @@ fun RegisterScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Create Account")
+                    Text(stringResource(R.string.auth_create_account))
                 }
             }
 
@@ -369,7 +371,7 @@ fun RegisterScreen(
                     onClick = onNavigateToLogin,
                     enabled = uiState !is AuthUiState.Loading
                 ) {
-                    Text("Sign In")
+                    Text(stringResource(R.string.auth_sign_in))
                 }
             }
         }

@@ -234,7 +234,7 @@ fun SettingsScreen(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Text(
-                        text = "Account",
+                        text = stringResource(R.string.settings_account),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.fillMaxWidth()
                     )
@@ -242,11 +242,11 @@ fun SettingsScreen(
                     OutlinedTextField(
                         value = user.email,
                         onValueChange = {},
-                        label = { Text("Email") },
+                        label = { Text(stringResource(R.string.auth_email)) },
                         enabled = false,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        supportingText = { Text("Signed in as ${user.displayName}") }
+                        supportingText = { Text(stringResource(R.string.auth_signed_in_as, user.displayName)) }
                     )
 
                     Row(
@@ -254,7 +254,7 @@ fun SettingsScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         OutlinedTextField(
-                            value = "My Devices",
+                            value = stringResource(R.string.settings_my_devices),
                             onValueChange = {},
                             enabled = true,
                             readOnly = true,
@@ -264,13 +264,13 @@ fun SettingsScreen(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = "Navigate to devices"
+                                    contentDescription = stringResource(R.string.settings_navigate_to_devices)
                                 )
                             }
                         )
 
                         OutlinedTextField(
-                            value = "Groups",
+                            value = stringResource(R.string.settings_groups),
                             onValueChange = {},
                             enabled = true,
                             readOnly = true,
@@ -280,7 +280,7 @@ fun SettingsScreen(
                             trailingIcon = {
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = "Navigate to groups"
+                                    contentDescription = stringResource(R.string.settings_navigate_to_groups)
                                 )
                             }
                         )
@@ -290,7 +290,7 @@ fun SettingsScreen(
                         onClick = { showLogoutDialog = true },
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Sign Out")
+                        Text(stringResource(R.string.auth_sign_out))
                     }
                 }
 
@@ -303,7 +303,7 @@ fun SettingsScreen(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Text(
-                        text = "Sign in to access advanced features",
+                        text = stringResource(R.string.settings_sign_in_prompt),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -312,7 +312,7 @@ fun SettingsScreen(
                         onClick = onNavigateToLogin,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Text("Sign In")
+                        Text(stringResource(R.string.auth_sign_in))
                     }
                 }
 
@@ -641,8 +641,8 @@ fun SettingsScreen(
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
-            title = { Text("Sign Out") },
-            text = { Text("Are you sure you want to sign out?") },
+            title = { Text(stringResource(R.string.auth_sign_out)) },
+            text = { Text(stringResource(R.string.auth_sign_out_confirm_message)) },
             confirmButton = {
                 Button(
                     onClick = {
@@ -650,12 +650,12 @@ fun SettingsScreen(
                         viewModel.logout()
                     }
                 ) {
-                    Text("Sign Out")
+                    Text(stringResource(R.string.auth_sign_out))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showLogoutDialog = false }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )

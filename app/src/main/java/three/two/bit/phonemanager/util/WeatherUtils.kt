@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.util
 
+import android.content.Context
 import three.two.bit.phonemanager.domain.model.Weather
 import three.two.bit.phonemanager.domain.model.WeatherCode
 import kotlin.math.roundToInt
@@ -26,9 +27,11 @@ fun Weather.toNotificationTitle(): String {
  * Format weather condition for notification text
  * AC E7.2.2: Weather condition description
  *
+ * @param context Context to resolve the localized weather condition string
  * @return Condition description like "Partly Cloudy"
  */
-fun Weather.toNotificationText(): String = current.weatherCode.description
+fun Weather.toNotificationText(context: Context): String =
+    context.getString(current.weatherCode.descriptionResId)
 
 /**
  * Maps WeatherCode to emoji for notification display

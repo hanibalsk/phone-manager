@@ -47,6 +47,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -138,7 +139,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text(stringResource(R.string.auth_email)) },
                 modifier = Modifier.fillMaxWidth(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
@@ -159,7 +160,7 @@ fun LoginScreen(
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text(stringResource(R.string.auth_password)) },
                 modifier = Modifier.fillMaxWidth(),
                 visualTransformation = if (passwordVisible) {
                     VisualTransformation.None
@@ -206,7 +207,7 @@ fun LoginScreen(
                 modifier = Modifier.align(Alignment.End),
                 enabled = uiState !is AuthUiState.Loading
             ) {
-                Text("Forgot Password?")
+                Text(stringResource(R.string.auth_forgot_password))
             }
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -225,7 +226,7 @@ fun LoginScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                 } else {
-                    Text("Sign In")
+                    Text(stringResource(R.string.auth_sign_in))
                 }
             }
 
@@ -262,7 +263,7 @@ fun LoginScreen(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Continue with Google")
+                Text(stringResource(R.string.auth_continue_google))
             }
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -281,7 +282,7 @@ fun LoginScreen(
                     modifier = Modifier.size(20.dp)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Continue with Apple")
+                Text(stringResource(R.string.auth_continue_apple))
             }
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -299,7 +300,7 @@ fun LoginScreen(
                     onClick = onNavigateToRegister,
                     enabled = uiState !is AuthUiState.Loading
                 ) {
-                    Text("Create Account")
+                    Text(stringResource(R.string.auth_create_account))
                 }
             }
         }
