@@ -227,6 +227,39 @@ fun OfflineBanner(
 }
 
 /**
+ * Story E12.6: Not authenticated banner.
+ *
+ * Shows when user is not signed in and settings sync requires authentication.
+ */
+@Composable
+fun NotAuthenticatedBanner(
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        ),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Text(
+                text = stringResource(R.string.sign_in_to_sync_settings),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSecondaryContainer,
+            )
+        }
+    }
+}
+
+/**
  * Story E13.10: Enterprise enrollment status card.
  *
  * AC E13.10.8: Managed device indicator

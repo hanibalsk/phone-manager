@@ -14,7 +14,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 
 /**
  * Story E11.8 Task 7: Create Group Dialog
@@ -37,15 +39,18 @@ fun CreateGroupDialog(
     var description by remember { mutableStateOf("") }
     var nameError by remember { mutableStateOf<String?>(null) }
 
+    val errorRequired = stringResource(R.string.create_group_name_required)
+    val errorTooLong = stringResource(R.string.create_group_name_too_long)
+
     // Validate name
     fun validateName(): Boolean {
         return when {
             groupName.isBlank() -> {
-                nameError = "Group name is required"
+                nameError = errorRequired
                 false
             }
             groupName.length > 50 -> {
-                nameError = "Group name must be 50 characters or less"
+                nameError = errorTooLong
                 false
             }
             else -> {
@@ -59,7 +64,7 @@ fun CreateGroupDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Create Group",
+                text = stringResource(R.string.create_group_title),
                 style = MaterialTheme.typography.headlineSmall,
             )
         },
@@ -70,7 +75,7 @@ fun CreateGroupDialog(
             ) {
                 // Explanation
                 Text(
-                    text = "Create a group to share device locations with family and friends.",
+                    text = stringResource(R.string.create_group_subtitle),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -84,8 +89,8 @@ fun CreateGroupDialog(
                             nameError = null
                         }
                     },
-                    label = { Text("Group Name *") },
-                    placeholder = { Text("e.g., Family") },
+                    label = { Text(stringResource(R.string.create_group_name_label)) },
+                    placeholder = { Text(stringResource(R.string.create_group_name_placeholder)) },
                     singleLine = true,
                     isError = nameError != null,
                     supportingText = {
@@ -108,8 +113,8 @@ fun CreateGroupDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { description = it },
-                    label = { Text("Description (optional)") },
-                    placeholder = { Text("What's this group for?") },
+                    label = { Text(stringResource(R.string.create_group_description_label)) },
+                    placeholder = { Text(stringResource(R.string.create_group_description_placeholder)) },
                     minLines = 2,
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
@@ -128,12 +133,12 @@ fun CreateGroupDialog(
                 },
                 enabled = groupName.isNotBlank(),
             ) {
-                Text("Create")
+                Text(stringResource(R.string.create_group_confirm))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

@@ -42,8 +42,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
@@ -105,10 +107,10 @@ fun DeviceListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Devices") },
+                title = { Text(stringResource(R.string.devices_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )
@@ -119,7 +121,7 @@ fun DeviceListScreen(
                 FloatingActionButton(
                     onClick = { showLinkDialog = true },
                 ) {
-                    Icon(Icons.Default.Add, "Link This Device")
+                    Icon(Icons.Default.Add, stringResource(R.string.link_device_title))
                 }
             }
         },
@@ -265,7 +267,7 @@ private fun DeviceCard(
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = Icons.Default.Star,
-                            contentDescription = "Primary device",
+                            contentDescription = stringResource(R.string.devices_primary_device),
                             modifier = Modifier.size(16.dp),
                             tint = MaterialTheme.colorScheme.primary,
                         )
@@ -275,7 +277,7 @@ private fun DeviceCard(
                     if (isCurrentDevice) {
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = "(This device)",
+                            text = stringResource(R.string.devices_this_device),
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.primary,
                         )
@@ -292,7 +294,7 @@ private fun DeviceCard(
                 // Last seen timestamp
                 device.lastSeenAt?.let { lastSeen ->
                     Text(
-                        text = "Last seen: ${formatTimestamp(lastSeen)}",
+                        text = stringResource(R.string.last_seen, formatTimestamp(lastSeen)),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -338,12 +340,12 @@ private fun EmptyState(onLinkDevice: () -> Unit) {
             )
 
             Text(
-                text = "No Devices Linked",
+                text = stringResource(R.string.devices_empty_title),
                 style = MaterialTheme.typography.titleLarge,
             )
 
             Text(
-                text = "Link this device to your account to manage it from anywhere.",
+                text = stringResource(R.string.devices_empty_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -351,7 +353,7 @@ private fun EmptyState(onLinkDevice: () -> Unit) {
             androidx.compose.material3.Button(onClick = onLinkDevice) {
                 Icon(Icons.Default.Add, null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Link This Device")
+                Text(stringResource(R.string.link_device_title))
             }
         }
     }
@@ -382,7 +384,7 @@ private fun ErrorState(
             )
 
             androidx.compose.material3.Button(onClick = onRetry) {
-                Text("Retry")
+                Text(stringResource(R.string.button_retry))
             }
         }
     }

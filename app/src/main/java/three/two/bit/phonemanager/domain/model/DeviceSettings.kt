@@ -144,6 +144,11 @@ enum class SettingsSyncStatus {
      * Device is offline, showing cached settings.
      */
     OFFLINE,
+
+    /**
+     * User is not authenticated, sign-in required to sync settings.
+     */
+    NOT_AUTHENTICATED,
 }
 
 /**

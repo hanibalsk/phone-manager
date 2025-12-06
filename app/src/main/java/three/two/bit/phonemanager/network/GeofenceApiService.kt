@@ -9,8 +9,10 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.patch
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import three.two.bit.phonemanager.network.models.CreateGeofenceRequest
 import three.two.bit.phonemanager.network.models.GeofenceDto
 import three.two.bit.phonemanager.network.models.ListGeofencesResponse
@@ -79,24 +81,33 @@ class GeofenceApiServiceImpl @Inject constructor(
         Result.failure(e)
     }
 
-    override suspend fun listGeofences(deviceId: String, includeInactive: Boolean): Result<ListGeofencesResponse> =
-        try {
+    override suspend fun listGeofences(deviceId: String, includeInactive: Boolean): Result<ListGeofencesResponse> {
+        return try {
             Timber.d("Listing geofences for device: $deviceId")
 
-            val response: ListGeofencesResponse = httpClient.get("${apiConfig.baseUrl}/api/v1/geofences") {
+            val httpResponse: HttpResponse = httpClient.get("${apiConfig.baseUrl}/api/v1/geofences") {
                 header("X-API-Key", apiConfig.apiKey)
                 parameter("deviceId", deviceId)
                 if (includeInactive) {
                     parameter("includeInactive", true)
                 }
-            }.body()
+            }
 
+            if (!httpResponse.status.isSuccess()) {
+                Timber.w("Geofences API returned ${httpResponse.status.value}")
+                return Result.failure(
+                    GeofenceApiException("Geofences API error (${httpResponse.status.value})")
+                )
+            }
+
+            val response: ListGeofencesResponse = httpResponse.body()
             Timber.i("Fetched ${response.total} geofences")
             Result.success(response)
         } catch (e: Exception) {
             Timber.e(e, "Failed to list geofences")
             Result.failure(e)
         }
+    }
 
     override suspend fun getGeofence(geofenceId: String): Result<GeofenceDto> = try {
         Timber.d("Getting geofence: $geofenceId")
@@ -142,3 +153,8 @@ class GeofenceApiServiceImpl @Inject constructor(
         Result.failure(e)
     }
 }
+
+/**
+ * Custom exception for Geofence API errors
+ */
+class GeofenceApiException(message: String) : Exception(message)

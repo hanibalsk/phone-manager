@@ -426,6 +426,7 @@
     <string name="syncing">Syncing…</string>
     <string name="sync_now">Sync Now</string>
     <string name="offline_indicator">Offline - Showing cached settings</string>
+    <string name="sign_in_to_sync_settings">Sign in to sync settings</string>
     <string name="settings_updated_by">Settings updated by %1$s</string>
 
     <!-- Story E12.6: FCM Push Notifications -->
@@ -465,4 +466,120 @@
     <string name="enrollment_unenroll_message">This will remove your device from %1$s and clear all enterprise policies.</string>
     <string name="enrollment_unenroll_warning">You may need to re-enroll to access company resources.</string>
     <string name="enrollment_unenroll_confirm">Unenroll</string>
+
+    <!-- Device Management - Link Device Dialog -->
+    <string name="link_device_title">Link This Device</string>
+    <string name="link_device_intro">Link this device to your account to:</string>
+    <string name="link_device_benefit_manage">Manage it from other devices</string>
+    <string name="link_device_benefit_view">View it in your device list</string>
+    <string name="link_device_benefit_transfer">Transfer ownership to others</string>
+    <string name="link_device_name_label">Device Name (optional)</string>
+    <string name="link_device_name_placeholder">e.g., My Phone</string>
+    <string name="link_device_set_primary">Set as primary device</string>
+    <string name="link_device_primary_hint">Primary device is used for notifications</string>
+    <string name="link_device_privacy_notice">This device\'s location will be visible to you from your other devices.</string>
+    <string name="link_device_button">Link Device</string>
+
+    <!-- Device Management - Device List Screen -->
+    <string name="devices_title">My Devices</string>
+    <string name="devices_empty_title">No Devices Linked</string>
+    <string name="devices_empty_subtitle">Link this device to your account to manage it from anywhere.</string>
+    <string name="devices_this_device">(This device)</string>
+    <string name="devices_primary_device">Primary device</string>
+
+    <!-- Device Management - Device Detail Screen -->
+    <string name="device_detail_title">Device Details</string>
+    <string name="device_detail_info_title">Device Information</string>
+    <string name="device_detail_device_id">Device ID</string>
+    <string name="device_detail_platform">Platform</string>
+    <string name="device_detail_status">Status</string>
+    <string name="device_detail_active">Active</string>
+    <string name="device_detail_inactive">Inactive</string>
+    <string name="device_detail_linked">Linked</string>
+    <string name="device_detail_this_device">This device</string>
+    <string name="device_detail_edit_name">Edit name</string>
+    <string name="device_detail_unlink_this">Unlink This Device</string>
+    <string name="device_detail_unlink">Unlink Device</string>
+    <string name="device_detail_transfer">Transfer Ownership</string>
+    <string name="device_detail_unlink_warning">Warning: Unlinking this device will sign you out and remove it from your account.</string>
+    <string name="device_detail_go_back">Go Back</string>
+
+    <!-- Device Management - Unlink Dialog -->
+    <string name="unlink_dialog_title">Unlink Device?</string>
+    <string name="unlink_dialog_message">Are you sure you want to unlink \"%1$s\" from your account?</string>
+    <string name="unlink_dialog_warning">Warning: This will sign you out of this device.</string>
+    <string name="unlink_dialog_confirm">Unlink</string>
+
+    <!-- Device Management - Transfer Dialog -->
+    <string name="transfer_dialog_title">Transfer Ownership</string>
+    <string name="transfer_dialog_message">Transfer \"%1$s\" to another user. You will lose ownership of this device.</string>
+    <string name="transfer_dialog_owner_label">New Owner User ID</string>
+    <string name="transfer_dialog_owner_placeholder">Enter user UUID</string>
+    <string name="transfer_dialog_owner_error">Please enter a valid user ID</string>
+    <string name="transfer_dialog_hint">The new owner must have an account. You can find their user ID in their profile.</string>
+    <string name="transfer_dialog_confirm">Transfer</string>
+
+    <!-- Group Management - Group List Screen -->
+    <string name="groups_title">My Groups</string>
+    <string name="groups_join">Join Group</string>
+    <string name="groups_create">Create Group</string>
+    <string name="groups_empty_title">No Groups Yet</string>
+    <string name="groups_empty_subtitle">Create a group to share device locations with family and friends.</string>
+    <string name="groups_create_first">Create Your First Group</string>
+    <string name="groups_member_count_one">%1$d member</string>
+    <string name="groups_member_count">%1$d members</string>
+    <string name="groups_role_owner">Owner</string>
+    <string name="groups_role_admin">Admin</string>
+    <string name="groups_role_member">Member</string>
+
+    <!-- Group Management - Create Group Dialog -->
+    <string name="create_group_title">Create Group</string>
+    <string name="create_group_subtitle">Create a group to share device locations with family and friends.</string>
+    <string name="create_group_name_label">Group Name *</string>
+    <string name="create_group_name_placeholder">e.g., Family</string>
+    <string name="create_group_name_required">Group name is required</string>
+    <string name="create_group_name_too_long">Group name must be 50 characters or less</string>
+    <string name="create_group_description_label">Description (optional)</string>
+    <string name="create_group_description_placeholder">What\'s this group for?</string>
+    <string name="create_group_confirm">Create</string>
+    <string name="create_group_success">Group \"%1$s\" created</string>
+
+    <!-- Group Management - Join Group Screen -->
+    <string name="join_group_title">Join Group</string>
+    <string name="join_group_success">Successfully joined the group!</string>
+    <string name="join_group_sign_in_required">Please sign in to join the group</string>
+    <string name="join_group_enter_code_title">Enter Invite Code</string>
+    <string name="join_group_enter_code_subtitle">Enter the 8-character code you received or scan a QR code</string>
+    <string name="join_group_code_label">Invite Code</string>
+    <string name="join_group_code_placeholder">ABCD1234</string>
+    <string name="join_group_code_counter">%1$d/8 characters</string>
+    <string name="join_group_scan_qr">Scan QR</string>
+    <string name="join_group_validate">Validate</string>
+    <string name="join_group_joining">Joining…</string>
+    <string name="join_group_button">Join Group</string>
+    <string name="join_group_sign_in_hint">Sign in to join this group</string>
+    <string name="join_group_sign_in">Sign In</string>
+    <string name="join_group_confirm_title">Join %1$s?</string>
+    <string name="join_group_confirm_message">You\'re about to join this group with %1$d members.</string>
+    <string name="join_group_confirm_hint">As a member, you\'ll be able to share your location with other group members.</string>
+    <string name="join_group_confirm_button">Join</string>
+
+    <!-- Group Management - Group Detail Screen -->
+    <string name="group_detail_title">Group Details</string>
+    <string name="group_detail_manage_members">Manage Members</string>
+    <string name="group_detail_deleted">Group deleted</string>
+    <string name="group_detail_left">You left the group</string>
+    <string name="group_detail_info_title">Group Information</string>
+    <string name="group_detail_add_description">Tap to add a description</string>
+    <string name="group_detail_created">Created</string>
+    <string name="group_detail_your_role">Your Role</string>
+    <string name="group_detail_members_title">Members (%1$d)</string>
+    <string name="group_detail_view_all">View All</string>
+    <string name="group_detail_no_members">No members yet</string>
+    <string name="group_detail_invite_members">Invite Members</string>
+    <string name="group_detail_manage_devices">Manage Member Devices</string>
+    <string name="group_detail_leave">Leave Group</string>
+    <string name="group_detail_delete">Delete Group</string>
+    <string name="group_detail_delete_warning">Warning: Deleting this group will remove all members and cannot be undone.</string>
+    <string name="group_detail_edit_description">Edit description</string>
 </resources>

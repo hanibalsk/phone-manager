@@ -199,8 +199,10 @@ fun SettingsScreen(
             }
 
             // Story E12.6: Offline indicator (AC E12.6.8)
-            if (syncStatus == SettingsSyncStatus.OFFLINE) {
-                OfflineBanner()
+            when (syncStatus) {
+                SettingsSyncStatus.OFFLINE -> OfflineBanner()
+                SettingsSyncStatus.NOT_AUTHENTICATED -> NotAuthenticatedBanner()
+                else -> { /* No banner needed */ }
             }
 
             // Story E12.6: Managed device status card (AC E12.6.6)

@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.network.models
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -15,9 +16,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class CreateWebhookRequest(
-    val ownerDeviceId: String,
+    @SerialName("owner_device_id") val ownerDeviceId: String,
     val name: String,
-    val targetUrl: String,
+    @SerialName("target_url") val targetUrl: String,
     val secret: String,
     val enabled: Boolean = true,
 )
@@ -29,7 +30,7 @@ data class CreateWebhookRequest(
 @Serializable
 data class UpdateWebhookRequest(
     val name: String? = null,
-    val targetUrl: String? = null,
+    @SerialName("target_url") val targetUrl: String? = null,
     val secret: String? = null,
     val enabled: Boolean? = null,
 )
@@ -39,14 +40,14 @@ data class UpdateWebhookRequest(
  */
 @Serializable
 data class WebhookDto(
-    val webhookId: String,
-    val ownerDeviceId: String,
+    @SerialName("webhook_id") val webhookId: String,
+    @SerialName("owner_device_id") val ownerDeviceId: String,
     val name: String,
-    val targetUrl: String,
+    @SerialName("target_url") val targetUrl: String,
     val secret: String,
     val enabled: Boolean,
-    val createdAt: String,
-    val updatedAt: String,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String,
 )
 
 /**

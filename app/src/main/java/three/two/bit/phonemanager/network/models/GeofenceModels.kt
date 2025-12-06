@@ -30,12 +30,12 @@ enum class GeofenceEventType {
  */
 @Serializable
 data class CreateGeofenceRequest(
-    val deviceId: String,
+    @SerialName("device_id") val deviceId: String,
     val name: String,
     val latitude: Double,
     val longitude: Double,
-    val radiusMeters: Double,
-    val eventTypes: List<GeofenceEventType> = listOf(GeofenceEventType.ENTER, GeofenceEventType.EXIT),
+    @SerialName("radius_meters") val radiusMeters: Double,
+    @SerialName("event_types") val eventTypes: List<GeofenceEventType> = listOf(GeofenceEventType.ENTER, GeofenceEventType.EXIT),
     val active: Boolean = true,
     val metadata: Map<String, String>? = null,
 )
@@ -49,8 +49,8 @@ data class UpdateGeofenceRequest(
     val name: String? = null,
     val latitude: Double? = null,
     val longitude: Double? = null,
-    val radiusMeters: Double? = null,
-    val eventTypes: List<GeofenceEventType>? = null,
+    @SerialName("radius_meters") val radiusMeters: Double? = null,
+    @SerialName("event_types") val eventTypes: List<GeofenceEventType>? = null,
     val active: Boolean? = null,
     val metadata: Map<String, String>? = null,
 )
@@ -60,17 +60,17 @@ data class UpdateGeofenceRequest(
  */
 @Serializable
 data class GeofenceDto(
-    val geofenceId: String,
-    val deviceId: String,
+    @SerialName("geofence_id") val geofenceId: String,
+    @SerialName("device_id") val deviceId: String,
     val name: String,
     val latitude: Double,
     val longitude: Double,
-    val radiusMeters: Double,
-    val eventTypes: List<GeofenceEventType>,
+    @SerialName("radius_meters") val radiusMeters: Double,
+    @SerialName("event_types") val eventTypes: List<GeofenceEventType>,
     val active: Boolean,
     val metadata: Map<String, String>? = null,
-    val createdAt: String,
-    val updatedAt: String,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String,
 )
 
 /**

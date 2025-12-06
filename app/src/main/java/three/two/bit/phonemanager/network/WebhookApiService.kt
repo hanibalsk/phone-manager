@@ -9,8 +9,10 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.put
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import three.two.bit.phonemanager.network.models.CreateWebhookRequest
 import three.two.bit.phonemanager.network.models.ListWebhooksResponse
 import three.two.bit.phonemanager.network.models.UpdateWebhookRequest
@@ -123,18 +125,33 @@ class WebhookApiServiceImpl @Inject constructor(
         Result.failure(e)
     }
 
-    override suspend fun listWebhooks(ownerDeviceId: String): Result<ListWebhooksResponse> = try {
-        Timber.d("Listing webhooks for device: $ownerDeviceId")
+    override suspend fun listWebhooks(ownerDeviceId: String): Result<ListWebhooksResponse> {
+        return try {
+            Timber.d("Listing webhooks for device: $ownerDeviceId")
 
-        val response: ListWebhooksResponse = httpClient.get("${apiConfig.baseUrl}/api/v1/webhooks") {
-            header("X-API-Key", apiConfig.apiKey)
-            parameter("ownerDeviceId", ownerDeviceId)
-        }.body()
+            val httpResponse: HttpResponse = httpClient.get("${apiConfig.baseUrl}/api/v1/webhooks") {
+                header("X-API-Key", apiConfig.apiKey)
+                parameter("ownerDeviceId", ownerDeviceId)
+            }
 
-        Timber.i("Fetched ${response.total} webhooks")
-        Result.success(response)
-    } catch (e: Exception) {
-        Timber.e(e, "Failed to list webhooks")
-        Result.failure(e)
+            if (!httpResponse.status.isSuccess()) {
+                Timber.w("Webhooks API returned ${httpResponse.status.value}: endpoint may not be implemented")
+                return Result.failure(
+                    WebhookApiException("Webhooks API not available (${httpResponse.status.value})")
+                )
+            }
+
+            val response: ListWebhooksResponse = httpResponse.body()
+            Timber.i("Fetched ${response.total} webhooks")
+            Result.success(response)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to list webhooks")
+            Result.failure(e)
+        }
     }
 }
+
+/**
+ * Custom exception for Webhook API errors
+ */
+class WebhookApiException(message: String) : Exception(message)

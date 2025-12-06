@@ -44,8 +44,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.domain.model.Group
@@ -109,16 +111,16 @@ fun GroupListScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Groups") },
+                title = { Text(stringResource(R.string.groups_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 // Story E11.9: Add "Join Group" action
                 actions = {
                     IconButton(onClick = onNavigateToJoinGroup) {
-                        Icon(Icons.Default.PersonAdd, "Join Group")
+                        Icon(Icons.Default.PersonAdd, stringResource(R.string.groups_join))
                     }
                 },
             )
@@ -127,7 +129,7 @@ fun GroupListScreen(
             FloatingActionButton(
                 onClick = { showCreateGroupDialog = true },
             ) {
-                Icon(Icons.Default.Add, "Create Group")
+                Icon(Icons.Default.Add, stringResource(R.string.groups_create))
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -263,7 +265,11 @@ private fun GroupCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${group.memberCount} ${if (group.memberCount == 1) "member" else "members"}",
+                        text = if (group.memberCount == 1) {
+                            stringResource(R.string.groups_member_count_one, group.memberCount)
+                        } else {
+                            stringResource(R.string.groups_member_count, group.memberCount)
+                        },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -290,9 +296,9 @@ private fun GroupCard(
 @Composable
 private fun RoleBadge(role: GroupRole) {
     val (text, containerColor) = when (role) {
-        GroupRole.OWNER -> "Owner" to MaterialTheme.colorScheme.primary
-        GroupRole.ADMIN -> "Admin" to MaterialTheme.colorScheme.secondary
-        GroupRole.MEMBER -> "Member" to MaterialTheme.colorScheme.surfaceVariant
+        GroupRole.OWNER -> stringResource(R.string.groups_role_owner) to MaterialTheme.colorScheme.primary
+        GroupRole.ADMIN -> stringResource(R.string.groups_role_admin) to MaterialTheme.colorScheme.secondary
+        GroupRole.MEMBER -> stringResource(R.string.groups_role_member) to MaterialTheme.colorScheme.surfaceVariant
     }
 
     val contentColor = when (role) {
@@ -350,12 +356,12 @@ private fun EmptyState(onCreateGroup: () -> Unit) {
             )
 
             Text(
-                text = "No Groups Yet",
+                text = stringResource(R.string.groups_empty_title),
                 style = MaterialTheme.typography.titleLarge,
             )
 
             Text(
-                text = "Create a group to share device locations with family and friends.",
+                text = stringResource(R.string.groups_empty_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -363,7 +369,7 @@ private fun EmptyState(onCreateGroup: () -> Unit) {
             Button(onClick = onCreateGroup) {
                 Icon(Icons.Default.Add, null)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Create Your First Group")
+                Text(stringResource(R.string.groups_create_first))
             }
         }
     }
@@ -394,7 +400,7 @@ private fun ErrorState(
             )
 
             Button(onClick = onRetry) {
-                Text("Retry")
+                Text(stringResource(R.string.button_retry))
             }
         }
     }

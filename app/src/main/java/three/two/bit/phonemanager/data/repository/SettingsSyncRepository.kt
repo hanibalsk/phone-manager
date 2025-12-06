@@ -169,7 +169,7 @@ class SettingsSyncRepositoryImpl @Inject constructor(
 
         if (accessToken == null) {
             Timber.d("No access token, cannot fetch server settings")
-            _syncStatus.value = SettingsSyncStatus.OFFLINE
+            _syncStatus.value = SettingsSyncStatus.NOT_AUTHENTICATED
             return Result.failure(IllegalStateException("Not authenticated"))
         }
 

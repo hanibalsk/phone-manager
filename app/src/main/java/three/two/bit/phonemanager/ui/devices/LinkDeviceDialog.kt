@@ -21,7 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 
 /**
  * Story E10.6 Task 6: Device Link Dialog
@@ -47,7 +49,7 @@ fun LinkDeviceDialog(
         onDismissRequest = onDismiss,
         title = {
             Text(
-                text = "Link This Device",
+                text = stringResource(R.string.link_device_title),
                 style = MaterialTheme.typography.headlineSmall,
             )
         },
@@ -58,7 +60,7 @@ fun LinkDeviceDialog(
             ) {
                 // Explanation
                 Text(
-                    text = "Link this device to your account to:",
+                    text = stringResource(R.string.link_device_intro),
                     style = MaterialTheme.typography.bodyMedium,
                 )
 
@@ -66,9 +68,9 @@ fun LinkDeviceDialog(
                     modifier = Modifier.padding(start = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
-                    BulletPoint("Manage it from other devices")
-                    BulletPoint("View it in your device list")
-                    BulletPoint("Transfer ownership to others")
+                    BulletPoint(stringResource(R.string.link_device_benefit_manage))
+                    BulletPoint(stringResource(R.string.link_device_benefit_view))
+                    BulletPoint(stringResource(R.string.link_device_benefit_transfer))
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -77,8 +79,8 @@ fun LinkDeviceDialog(
                 OutlinedTextField(
                     value = displayName,
                     onValueChange = { displayName = it },
-                    label = { Text("Device Name (optional)") },
-                    placeholder = { Text("e.g., My Phone") },
+                    label = { Text(stringResource(R.string.link_device_name_label)) },
+                    placeholder = { Text(stringResource(R.string.link_device_name_placeholder)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(),
                 )
@@ -95,11 +97,11 @@ fun LinkDeviceDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     Column {
                         Text(
-                            text = "Set as primary device",
+                            text = stringResource(R.string.link_device_set_primary),
                             style = MaterialTheme.typography.bodyMedium,
                         )
                         Text(
-                            text = "Primary device is used for notifications",
+                            text = stringResource(R.string.link_device_primary_hint),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -108,7 +110,7 @@ fun LinkDeviceDialog(
 
                 // Privacy notice
                 Text(
-                    text = "This device's location will be visible to you from your other devices.",
+                    text = stringResource(R.string.link_device_privacy_notice),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -123,12 +125,12 @@ fun LinkDeviceDialog(
                     )
                 },
             ) {
-                Text("Link Device")
+                Text(stringResource(R.string.link_device_button))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
