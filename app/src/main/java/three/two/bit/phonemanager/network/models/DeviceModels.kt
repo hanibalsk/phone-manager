@@ -1,6 +1,7 @@
 package three.two.bit.phonemanager.network.models
 
 import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.DeviceLocation
@@ -12,11 +13,11 @@ import three.two.bit.phonemanager.domain.model.DeviceLocation
  */
 @Serializable
 data class DeviceRegistrationRequest(
-    val deviceId: String,
-    val displayName: String,
-    val groupId: String,
+    @SerialName("device_id") val deviceId: String,
+    @SerialName("display_name") val displayName: String,
+    @SerialName("group_id") val groupId: String,
     val platform: String = "android",
-    val fcmToken: String? = null,
+    @SerialName("fcm_token") val fcmToken: String? = null,
 )
 
 /**
@@ -26,11 +27,11 @@ data class DeviceRegistrationRequest(
  */
 @Serializable
 data class DeviceRegistrationResponse(
-    val deviceId: String,
-    val displayName: String,
-    val groupId: String,
-    val createdAt: String,
-    val updatedAt: String,
+    @SerialName("device_id") val deviceId: String,
+    @SerialName("display_name") val displayName: String,
+    @SerialName("group_id") val groupId: String,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String,
 )
 
 /**
@@ -38,10 +39,10 @@ data class DeviceRegistrationResponse(
  */
 @Serializable
 data class DeviceInfo(
-    val deviceId: String,
-    val displayName: String,
-    val groupId: String,
-    val lastLocation: DeviceLastLocation? = null,
+    @SerialName("device_id") val deviceId: String,
+    @SerialName("display_name") val displayName: String,
+    @SerialName("group_id") val groupId: String,
+    @SerialName("last_location") val lastLocation: DeviceLastLocation? = null,
 )
 
 /**
@@ -70,10 +71,10 @@ data class DevicesResponse(val devices: List<DeviceDto>)
  */
 @Serializable
 data class DeviceDto(
-    val deviceId: String,
-    val displayName: String,
-    val lastLocation: LocationDto? = null,
-    val lastSeenAt: String? = null,
+    @SerialName("device_id") val deviceId: String,
+    @SerialName("display_name") val displayName: String,
+    @SerialName("last_location") val lastLocation: LocationDto? = null,
+    @SerialName("last_seen_at") val lastSeenAt: String? = null,
 )
 
 /**
@@ -109,9 +110,9 @@ fun DeviceDto.toDomain(): Device = Device(
  */
 @Serializable
 data class DataExportResponse(
-    val deviceId: String,
-    val exportUrl: String,
-    val expiresAt: String,
+    @SerialName("device_id") val deviceId: String,
+    @SerialName("export_url") val exportUrl: String,
+    @SerialName("expires_at") val expiresAt: String,
     val format: String = "json",
 )
 
@@ -125,8 +126,8 @@ data class DataExportResponse(
  */
 @Serializable
 data class LinkDeviceRequest(
-    val displayName: String? = null,
-    val isPrimary: Boolean = false,
+    @SerialName("display_name") val displayName: String? = null,
+    @SerialName("is_primary") val isPrimary: Boolean = false,
 )
 
 /**
@@ -144,11 +145,11 @@ data class LinkedDeviceResponse(
 @Serializable
 data class LinkedDeviceInfo(
     val id: Long,
-    val deviceUuid: String,
-    val displayName: String,
-    val ownerUserId: String,
-    val isPrimary: Boolean,
-    val linkedAt: String,
+    @SerialName("device_uuid") val deviceUuid: String,
+    @SerialName("display_name") val displayName: String,
+    @SerialName("owner_user_id") val ownerUserId: String,
+    @SerialName("is_primary") val isPrimary: Boolean,
+    @SerialName("linked_at") val linkedAt: String,
 )
 
 /**
@@ -167,13 +168,13 @@ data class ListUserDevicesResponse(
 @Serializable
 data class UserDeviceDto(
     val id: Long,
-    val deviceUuid: String,
-    val displayName: String,
+    @SerialName("device_uuid") val deviceUuid: String,
+    @SerialName("display_name") val displayName: String,
     val platform: String,
-    val isPrimary: Boolean,
+    @SerialName("is_primary") val isPrimary: Boolean,
     val active: Boolean,
-    val linkedAt: String?,
-    val lastSeenAt: String?,
+    @SerialName("linked_at") val linkedAt: String?,
+    @SerialName("last_seen_at") val lastSeenAt: String?,
 )
 
 /**
@@ -182,7 +183,7 @@ data class UserDeviceDto(
  */
 @Serializable
 data class UnlinkDeviceResponse(
-    val deviceUuid: String,
+    @SerialName("device_uuid") val deviceUuid: String,
     val unlinked: Boolean,
 )
 
@@ -192,7 +193,7 @@ data class UnlinkDeviceResponse(
  */
 @Serializable
 data class TransferDeviceRequest(
-    val newOwnerId: String,
+    @SerialName("new_owner_id") val newOwnerId: String,
 )
 
 /**
@@ -201,8 +202,8 @@ data class TransferDeviceRequest(
 @Serializable
 data class TransferDeviceResponse(
     val device: LinkedDeviceInfo,
-    val previousOwnerId: String,
-    val newOwnerId: String,
+    @SerialName("previous_owner_id") val previousOwnerId: String,
+    @SerialName("new_owner_id") val newOwnerId: String,
     val transferred: Boolean,
 )
 

@@ -10,7 +10,8 @@
     "type-check": "tsc --noEmit",
     "test": "jest",
     "test:watch": "jest --watch",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "deploy:local": "npm run build && rm -rf .local-deploy && mkdir -p .local-deploy/staging && cp -r out/* .local-deploy/staging/"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",

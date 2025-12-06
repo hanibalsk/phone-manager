@@ -458,7 +458,7 @@ class DeviceApiServiceImpl @Inject constructor(
 
     /**
      * Get all devices in a group
-     * GET /api/v1/devices?groupId={id}
+     * GET /api/v1/devices?group_id={id}
      *
      * Story E1.2: AC E1.2.1 - Fetch group members with proper API call and headers
      */
@@ -466,7 +466,7 @@ class DeviceApiServiceImpl @Inject constructor(
         Timber.d("Fetching group members for groupId=$groupId")
 
         val response: DevicesResponse = httpClient.get("${apiConfig.baseUrl}/api/v1/devices") {
-            parameter("groupId", groupId)
+            parameter("group_id", groupId)
             header("X-API-Key", apiConfig.apiKey)
         }.body()
 

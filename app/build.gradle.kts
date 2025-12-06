@@ -50,6 +50,8 @@ android {
 
     buildTypes {
         debug {
+            applicationIdSuffix = ".dev"
+
             // Debug builds can use test endpoints
             val debugBaseUrl =
                 getLocalProperty("API_BASE_URL_DEBUG").ifBlank {
@@ -61,6 +63,13 @@ android {
                 }
             buildConfigField("String", "API_BASE_URL", "\"$debugBaseUrl\"")
             buildConfigField("String", "API_KEY", "\"$debugApiKey\"")
+
+            // Debug Maps API key (with .dev package name)
+            val debugMapsKey =
+                getLocalProperty("MAPS_API_KEY_DEBUG").ifBlank {
+                    getLocalProperty("MAPS_API_KEY")
+                }
+            manifestPlaceholders["MAPS_API_KEY"] = debugMapsKey
         }
         release {
             isMinifyEnabled = true
