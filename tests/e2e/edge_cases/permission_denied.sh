@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Permission Denial Edge Case Tests
 # Tests app behavior when permissions are denied or revoked
 #
@@ -43,7 +43,7 @@ trap cleanup EXIT
 grant_permission() {
     local device_role="$1"
     local permission="$2"
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     adb -s "$serial" shell pm grant "$APP_PACKAGE" "$permission"
     log "Granted $permission on $device_role"
 }
@@ -51,7 +51,7 @@ grant_permission() {
 revoke_permission() {
     local device_role="$1"
     local permission="$2"
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     adb -s "$serial" shell pm revoke "$APP_PACKAGE" "$permission"
     log "Revoked $permission on $device_role"
 }
@@ -59,7 +59,7 @@ revoke_permission() {
 check_permission() {
     local device_role="$1"
     local permission="$2"
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     adb -s "$serial" shell dumpsys package "$APP_PACKAGE" | grep -q "$permission: granted=true"
 }
 
@@ -159,7 +159,7 @@ test_background_location_denied() {
 
     # Put app in background
     log "Sending app to background..."
-    local serial="${DEVICE_SERIALS[PARENT]}"
+    local serial="$(get_device_serial "PARENT")"
     adb -s "$serial" shell input keyevent KEYCODE_HOME
     sleep 5
 
@@ -216,7 +216,7 @@ test_camera_denied_qr_scan() {
 
     # Navigate to QR scan screen (join group)
     log "Attempting to access QR scanner without camera permission..."
-    local serial="${DEVICE_SERIALS[PARENT]}"
+    local serial="$(get_device_serial "PARENT")"
 
     # Simulate navigation to groups -> join -> scan QR
     # This would trigger camera permission request

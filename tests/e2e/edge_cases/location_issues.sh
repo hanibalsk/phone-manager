@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Location Edge Case Tests
 # Tests app behavior with various GPS/location issues
 #
@@ -37,7 +37,7 @@ log() {
 cleanup() {
     log "Cleaning up..."
     # Re-enable location services
-    for serial in "${DEVICE_SERIALS[@]:-}"; do
+    for serial in "$DEVICE_SERIALS_PARENT" "$DEVICE_SERIALS_CHILD1" "$DEVICE_SERIALS_CHILD2"; do
         adb -s "$serial" shell settings put secure location_mode 3 2>/dev/null || true
     done
     shutdown_all_emulators 2>/dev/null || true
@@ -48,7 +48,7 @@ trap cleanup EXIT
 # Location control functions
 disable_location_services() {
     local device_role="$1"
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     log "Disabling location services on $device_role..."
     # 0 = off, 1 = sensors only, 2 = battery saving, 3 = high accuracy
     adb -s "$serial" shell settings put secure location_mode 0
@@ -56,7 +56,7 @@ disable_location_services() {
 
 enable_location_services() {
     local device_role="$1"
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     log "Enabling location services on $device_role..."
     adb -s "$serial" shell settings put secure location_mode 3  # High accuracy
 }
@@ -64,7 +64,7 @@ enable_location_services() {
 set_location_mode() {
     local device_role="$1"
     local mode="$2"  # 0=off, 1=sensors, 2=battery, 3=high
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     adb -s "$serial" shell settings put secure location_mode "$mode"
 }
 

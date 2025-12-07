@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Emulator management library for multi-device E2E testing
 # Provides parallel emulator launch, coordination, and cleanup
 
@@ -12,8 +12,32 @@ EMULATOR_PORTS=(5554 5556 5558)
 # AVD names for test devices
 EMULATOR_AVDS=("phone_manager_e2e_1" "phone_manager_e2e_2" "phone_manager_e2e_3")
 
-# Device role to serial mapping (populated by launch_emulators)
-declare -A DEVICE_SERIALS
+# Device role to serial mapping (using indexed arrays for bash 3.x compatibility)
+# Index 0=PARENT, 1=CHILD1, 2=CHILD2
+DEVICE_SERIALS_PARENT=""
+DEVICE_SERIALS_CHILD1=""
+DEVICE_SERIALS_CHILD2=""
+
+# Helper functions for device serial access (replaces associative array)
+get_device_serial() {
+    local role="$1"
+    case "$role" in
+        PARENT) echo "$DEVICE_SERIALS_PARENT" ;;
+        CHILD1) echo "$DEVICE_SERIALS_CHILD1" ;;
+        CHILD2) echo "$DEVICE_SERIALS_CHILD2" ;;
+        *) echo "" ;;
+    esac
+}
+
+set_device_serial() {
+    local role="$1"
+    local serial="$2"
+    case "$role" in
+        PARENT) DEVICE_SERIALS_PARENT="$serial" ;;
+        CHILD1) DEVICE_SERIALS_CHILD1="$serial" ;;
+        CHILD2) DEVICE_SERIALS_CHILD2="$serial" ;;
+    esac
+}
 
 # Android SDK paths
 ANDROID_SDK="${ANDROID_HOME:-$HOME/Library/Android/sdk}"
@@ -205,9 +229,9 @@ launch_emulators() {
 
         # Assign device role
         case $i in
-            0) DEVICE_SERIALS["PARENT"]="emulator-$port" ;;
-            1) DEVICE_SERIALS["CHILD1"]="emulator-$port" ;;
-            2) DEVICE_SERIALS["CHILD2"]="emulator-$port" ;;
+            0) set_device_serial "PARENT" "emulator-$port" ;;
+            1) set_device_serial "CHILD1" "emulator-$port" ;;
+            2) set_device_serial "CHILD2" "emulator-$port" ;;
         esac
     done
 
@@ -219,8 +243,8 @@ launch_emulators() {
         wait_for_emulator "$serial" || return 1
     done
 
-    # Export DEVICE_SERIALS for child scripts
-    export DEVICE_SERIALS
+    # Export device serials for child scripts
+    export DEVICE_SERIALS_PARENT DEVICE_SERIALS_CHILD1 DEVICE_SERIALS_CHILD2
 
     log_success "All $count emulators ready"
     return 0
@@ -355,15 +379,15 @@ grant_permissions_on_all() {
 # Get serial for device role
 get_serial_for_role() {
     local role="$1"
-    echo "${DEVICE_SERIALS[$role]}"
+    get_device_serial "$role"
 }
 
 # List device roles and serials
 list_device_roles() {
     log_info "Device role mappings:"
-    for role in "${!DEVICE_SERIALS[@]}"; do
-        echo "  $role -> ${DEVICE_SERIALS[$role]}"
-    done
+    echo "  PARENT -> $(get_device_serial PARENT)"
+    echo "  CHILD1 -> $(get_device_serial CHILD1)"
+    echo "  CHILD2 -> $(get_device_serial CHILD2)"
 }
 
 # Print emulator status
@@ -457,6 +481,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
             ;;
     esac
 else
-    # Sourced as library - just export functions
+    # Sourced as library - define fallback logging if not already defined
+    if ! type log_info &>/dev/null; then
+        log_info() { echo "[INFO] $1"; }
+        log_success() { echo "[OK] $1"; }
+        log_warning() { echo "[WARN] $1"; }
+        log_error() { echo "[ERROR] $1"; }
+        log_debug() { [[ "${DEBUG:-}" == "true" ]] && echo "[DEBUG] $1" || true; }
+    fi
     echo "Emulator manager library loaded"
 fi

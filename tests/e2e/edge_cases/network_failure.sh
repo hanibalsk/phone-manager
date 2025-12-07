@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Network Failure Edge Case Tests
 # Tests app behavior during network outages and reconnection
 #
@@ -35,7 +35,7 @@ log() {
 cleanup() {
     log "Cleaning up..."
     # Restore network on all devices
-    for serial in "${DEVICE_SERIALS[@]:-}"; do
+    for serial in "$DEVICE_SERIALS_PARENT" "$DEVICE_SERIALS_CHILD1" "$DEVICE_SERIALS_CHILD2"; do
         adb -s "$serial" shell svc wifi enable 2>/dev/null || true
         adb -s "$serial" shell svc data enable 2>/dev/null || true
     done
@@ -47,7 +47,7 @@ trap cleanup EXIT
 # Network control functions
 disable_network() {
     local device_role="$1"
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     log "Disabling network on $device_role ($serial)..."
     adb -s "$serial" shell svc wifi disable
     adb -s "$serial" shell svc data disable
@@ -55,7 +55,7 @@ disable_network() {
 
 enable_network() {
     local device_role="$1"
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     log "Enabling network on $device_role ($serial)..."
     adb -s "$serial" shell svc wifi enable
     adb -s "$serial" shell svc data enable
@@ -64,7 +64,7 @@ enable_network() {
 set_airplane_mode() {
     local device_role="$1"
     local enabled="$2"  # true or false
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial="$(get_device_serial "$device_role")"
     log "Setting airplane mode to $enabled on $device_role..."
     if [[ "$enabled" == "true" ]]; then
         adb -s "$serial" shell settings put global airplane_mode_on 1

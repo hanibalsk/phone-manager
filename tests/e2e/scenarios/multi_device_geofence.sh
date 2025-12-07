@@ -22,7 +22,7 @@ source "${E2E_ROOT}/lib/adb.sh"
 
 # Parse arguments
 HEADLESS="${1:-true}"
-[[ "$1" == "--headless" ]] && HEADLESS="true"
+[[ "${1:-}" == "--headless" ]] && HEADLESS="true"
 
 # Test configuration
 DEVICE_COUNT=2

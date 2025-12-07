@@ -879,3 +879,13 @@ adb_get_device_id() {
     adb shell cat /data/data/three.two.bit.phonemanager/shared_prefs/*.xml 2>/dev/null | grep -oP "(?<=device_id\">)[^<]+" || generate_uuid
 }
 
+# =============================================================================
+# App Management
+# =============================================================================
+
+# Check if an app is installed
+adb_is_app_installed() {
+    local package="$1"
+    adb shell pm list packages 2>/dev/null | grep -q "package:${package}$"
+}
+

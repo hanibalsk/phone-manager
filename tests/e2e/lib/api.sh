@@ -125,6 +125,11 @@ api_get_devices() {
     api_request "GET" "/api/v1/devices?group_id=$group_id"
 }
 
+# Alias for backward compatibility
+api_get_group_devices() {
+    api_get_devices "$@"
+}
+
 api_deactivate_device() {
     local device_id="$1"
     api_request "DELETE" "/api/v1/devices/$device_id"

@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Multi-device coordination helpers for E2E testing
 # Provides device-specific commands, parallel operations, and location coordination
 
@@ -7,7 +7,7 @@
 # =============================================================================
 
 # Source emulator manager if not already loaded
-if [[ -z "${DEVICE_SERIALS+x}" ]]; then
+if [[ -z "${DEVICE_SERIALS_PARENT+x}" ]]; then
     SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
     source "$SCRIPT_DIR/emulator_manager.sh" 2>/dev/null || true
 fi
@@ -20,11 +20,12 @@ fi
 adb_for_device() {
     local device_role="$1"
     shift
-    local serial="${DEVICE_SERIALS[$device_role]}"
+    local serial
+    serial=$(get_device_serial "$device_role")
 
     if [[ -z "$serial" ]]; then
         log_error "Unknown device role: $device_role"
-        log_error "Available roles: ${!DEVICE_SERIALS[*]}"
+        log_error "Available roles: PARENT, CHILD1, CHILD2"
         return 1
     fi
 
