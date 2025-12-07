@@ -37,7 +37,7 @@ class AuthRepositoryTest {
 
     private lateinit var authApiService: AuthApiService
     private lateinit var secureStorage: SecureStorage
-    private lateinit var authRepository: AuthRepository
+    private lateinit var authRepository: AuthRepositoryImpl
 
     private val testUserResponse = UserResponse(
         id = "user-123",
@@ -71,7 +71,7 @@ class AuthRepositoryTest {
     fun setup() {
         authApiService = mockk(relaxed = true)
         secureStorage = mockk(relaxed = true)
-        authRepository = AuthRepository(authApiService, secureStorage)
+        authRepository = AuthRepositoryImpl(authApiService, secureStorage)
     }
 
     // AC E9.11.4: Registration Tests

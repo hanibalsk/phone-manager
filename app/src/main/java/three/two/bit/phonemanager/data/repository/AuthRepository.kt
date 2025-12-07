@@ -18,7 +18,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Story E9.11, Task 4: Authentication Repository
+ * Story E9.11, Task 4: Authentication Repository Interface
  *
  * Handles user authentication, token management, and session state.
  *
@@ -26,17 +26,64 @@ import javax.inject.Singleton
  * AC E9.11.8: Implement token refresh with mutex to prevent concurrent requests
  *
  * Dependencies: Backend E9.1-E9.10 (auth endpoints)
+ */
+interface AuthRepository {
+    /** Current authenticated user flow */
+    val currentUser: Flow<User?>
+
+    /** Register a new user account */
+    suspend fun register(email: String, password: String, displayName: String): Result<User>
+
+    /** Login with email and password */
+    suspend fun login(email: String, password: String): Result<User>
+
+    /** OAuth login with provider token */
+    suspend fun oauthLogin(provider: String, idToken: String): Result<User>
+
+    /** Logout from current session or all devices */
+    suspend fun logout(allDevices: Boolean = false): Result<Unit>
+
+    /** Refresh the access token */
+    suspend fun refreshToken(): Result<String>
+
+    /** Send password reset email */
+    suspend fun forgotPassword(email: String): Result<String>
+
+    /** Reset password with token */
+    suspend fun resetPassword(token: String, newPassword: String): Result<String>
+
+    /** Verify email with token */
+    suspend fun verifyEmail(token: String): Result<Boolean>
+
+    /** Request verification email */
+    suspend fun requestVerification(): Result<String>
+
+    /** Check if user is currently logged in */
+    fun isLoggedIn(): Boolean
+
+    /** Get current access token */
+    fun getAccessToken(): String?
+
+    /** Get current user ID */
+    fun getUserId(): String?
+
+    /** Get current authenticated user */
+    fun getCurrentUser(): User?
+}
+
+/**
+ * Implementation of AuthRepository.
  *
  * Note: Currently blocked by backend implementation.
  */
 @Singleton
-class AuthRepository @Inject constructor(
+class AuthRepositoryImpl @Inject constructor(
     private val authApiService: AuthApiService,
     private val secureStorage: SecureStorage
-) {
+) : AuthRepository {
 
     private val _currentUser = MutableStateFlow<User?>(null)
-    val currentUser: Flow<User?> = _currentUser.asStateFlow()
+    override val currentUser: Flow<User?> = _currentUser.asStateFlow()
 
     // Mutex to prevent concurrent token refresh requests
     private val refreshMutex = Mutex()
@@ -80,7 +127,7 @@ class AuthRepository @Inject constructor(
      * @param displayName User display name
      * @return Result with User on success, exception on failure
      */
-    suspend fun register(
+    override suspend fun register(
         email: String,
         password: String,
         displayName: String
@@ -130,7 +177,7 @@ class AuthRepository @Inject constructor(
      * @param password User password
      * @return Result with User on success, exception on failure
      */
-    suspend fun login(
+    override suspend fun login(
         email: String,
         password: String
     ): Result<User> = runCatching {
@@ -178,7 +225,7 @@ class AuthRepository @Inject constructor(
      * @param idToken ID token from OAuth provider
      * @return Result with User on success, exception on failure
      */
-    suspend fun oauthLogin(
+    override suspend fun oauthLogin(
         provider: String,
         idToken: String
     ): Result<User> = runCatching {
@@ -227,7 +274,7 @@ class AuthRepository @Inject constructor(
      *
      * @param allDevices If true, invalidate all sessions for the user
      */
-    suspend fun logout(allDevices: Boolean = false): Result<Unit> = runCatching {
+    override suspend fun logout(allDevices: Boolean): Result<Unit> = runCatching {
         Timber.d("Logging out user")
 
         val refreshToken = secureStorage.getRefreshToken()
@@ -257,7 +304,7 @@ class AuthRepository @Inject constructor(
      *
      * @return Result with new access token on success, exception on failure
      */
-    suspend fun refreshToken(): Result<String> = refreshMutex.withLock {
+    override suspend fun refreshToken(): Result<String> = refreshMutex.withLock {
         runCatching {
             Timber.d("Refreshing access token")
 
@@ -286,7 +333,7 @@ class AuthRepository @Inject constructor(
      * @param email User email address
      * @return Result with success message
      */
-    suspend fun forgotPassword(email: String): Result<String> = runCatching {
+    override suspend fun forgotPassword(email: String): Result<String> = runCatching {
         Timber.d("Requesting password reset for: $email")
         val response = authApiService.forgotPassword(email)
         Timber.i("Password reset email requested")
@@ -300,7 +347,7 @@ class AuthRepository @Inject constructor(
      * @param newPassword New password
      * @return Result with success message
      */
-    suspend fun resetPassword(token: String, newPassword: String): Result<String> = runCatching {
+    override suspend fun resetPassword(token: String, newPassword: String): Result<String> = runCatching {
         Timber.d("Resetting password with token")
         val response = authApiService.resetPassword(token, newPassword)
         Timber.i("Password reset successfully")
@@ -313,7 +360,7 @@ class AuthRepository @Inject constructor(
      * @param token Email verification token
      * @return Result with verification status
      */
-    suspend fun verifyEmail(token: String): Result<Boolean> = runCatching {
+    override suspend fun verifyEmail(token: String): Result<Boolean> = runCatching {
         Timber.d("Verifying email with token")
         val response = authApiService.verifyEmail(token)
         Timber.i("Email verified: ${response.emailVerified}")
@@ -325,7 +372,7 @@ class AuthRepository @Inject constructor(
      *
      * @return Result with success message
      */
-    suspend fun requestVerification(): Result<String> = runCatching {
+    override suspend fun requestVerification(): Result<String> = runCatching {
         Timber.d("Requesting verification email")
         val response = authApiService.requestVerification()
         Timber.i("Verification email sent")
@@ -337,7 +384,7 @@ class AuthRepository @Inject constructor(
      *
      * @return true if user has valid tokens and session
      */
-    fun isLoggedIn(): Boolean {
+    override fun isLoggedIn(): Boolean {
         return secureStorage.isAuthenticated()
     }
 
@@ -346,7 +393,7 @@ class AuthRepository @Inject constructor(
      *
      * @return Current user or null if not authenticated
      */
-    fun getCurrentUser(): User? {
+    override fun getCurrentUser(): User? {
         return _currentUser.value
     }
 
@@ -355,7 +402,7 @@ class AuthRepository @Inject constructor(
      *
      * @return Access token if available, null if not authenticated
      */
-    fun getAccessToken(): String? {
+    override fun getAccessToken(): String? {
         return secureStorage.getAccessToken()
     }
 
@@ -364,7 +411,7 @@ class AuthRepository @Inject constructor(
      *
      * @return User ID if authenticated, null otherwise
      */
-    fun getUserId(): String? {
+    override fun getUserId(): String? {
         return _currentUser.value?.userId
     }
 

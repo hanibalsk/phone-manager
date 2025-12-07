@@ -79,10 +79,10 @@ class EnrollmentViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        enrollmentRepository = mockk(relaxed = true)
         savedStateHandle = SavedStateHandle()
+        enrollmentRepository = mockk(relaxed = true)
 
-        // Set up mock flows
+        // Mock EnrollmentRepository interface flows - now works because it's an interface
         every { enrollmentRepository.enrollmentStatus } returns enrollmentStatusFlow
         every { enrollmentRepository.isLoading } returns isLoadingFlow
         every { enrollmentRepository.error } returns errorFlow
@@ -311,11 +311,11 @@ class EnrollmentViewModelTest {
     fun `initial token from savedStateHandle is loaded`() = runTest {
         // Given
         val savedState = SavedStateHandle(mapOf("token" to "DEEPLINK1234567890123"))
-        every { enrollmentRepository.enrollmentStatus } returns enrollmentStatusFlow
-        every { enrollmentRepository.isLoading } returns isLoadingFlow
-        every { enrollmentRepository.error } returns errorFlow
-        every { enrollmentRepository.organizationInfo } returns organizationInfoFlow
-        every { enrollmentRepository.devicePolicy } returns devicePolicyFlow
+        every { enrollmentRepository.enrollmentStatus } answers { enrollmentStatusFlow }
+        every { enrollmentRepository.isLoading } answers { isLoadingFlow }
+        every { enrollmentRepository.error } answers { errorFlow }
+        every { enrollmentRepository.organizationInfo } answers { organizationInfoFlow }
+        every { enrollmentRepository.devicePolicy } answers { devicePolicyFlow }
 
         // When
         val vm = EnrollmentViewModel(enrollmentRepository, savedState)

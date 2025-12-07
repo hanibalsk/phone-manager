@@ -928,12 +928,19 @@ class TripHistoryViewModelTest {
 
     @Test
     fun `grouping handles multiple trips per day`() = runTest {
-        // Given - create trips in the past (not future) to avoid filtering issues
+        // Given - create trips at safe time offsets that are always within "today"
+        // regardless of when the test runs (use minutes instead of hours to avoid
+        // midnight crossing issues)
+        val timeZone = TimeZone.currentSystemDefault()
         val now = Clock.System.now()
+        val today = now.toLocalDateTime(timeZone).date
+        // Use the middle of the day to ensure all trips are on the same day
+        val middayToday = today.atStartOfDayIn(timeZone).plus(12, DateTimeUnit.HOUR)
+
         val testTrips = listOf(
-            createTestTrip(id = "today-1", startTime = now.plus(-1, DateTimeUnit.HOUR)),
-            createTestTrip(id = "today-2", startTime = now.plus(-2, DateTimeUnit.HOUR)),
-            createTestTrip(id = "today-3", startTime = now.plus(-3, DateTimeUnit.HOUR)),
+            createTestTrip(id = "today-1", startTime = middayToday.plus(-1, DateTimeUnit.MINUTE)),
+            createTestTrip(id = "today-2", startTime = middayToday.plus(-2, DateTimeUnit.MINUTE)),
+            createTestTrip(id = "today-3", startTime = middayToday.plus(-3, DateTimeUnit.MINUTE)),
         )
 
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips

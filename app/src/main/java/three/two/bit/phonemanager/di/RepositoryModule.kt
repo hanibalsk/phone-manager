@@ -6,6 +6,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import three.two.bit.phonemanager.data.repository.AlertRepository
 import three.two.bit.phonemanager.data.repository.AlertRepositoryImpl
+import three.two.bit.phonemanager.data.repository.AuthRepository
+import three.two.bit.phonemanager.data.repository.AuthRepositoryImpl
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepositoryImpl
 import three.two.bit.phonemanager.data.repository.GeofenceRepository
@@ -18,6 +20,8 @@ import three.two.bit.phonemanager.data.repository.TripRepository
 import three.two.bit.phonemanager.data.repository.TripRepositoryImpl
 import three.two.bit.phonemanager.data.repository.AdminSettingsRepository
 import three.two.bit.phonemanager.data.repository.AdminSettingsRepositoryImpl
+import three.two.bit.phonemanager.data.repository.EnrollmentRepository
+import three.two.bit.phonemanager.data.repository.EnrollmentRepositoryImpl
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepositoryImpl
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
@@ -96,4 +100,18 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindUnlockRequestRepository(impl: UnlockRequestRepositoryImpl): UnlockRequestRepository
+
+    /**
+     * Story E13.10: Enrollment Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindEnrollmentRepository(impl: EnrollmentRepositoryImpl): EnrollmentRepository
+
+    /**
+     * Story E9.11: Auth Repository binding
+     */
+    @Binds
+    @Singleton
+    abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
 }

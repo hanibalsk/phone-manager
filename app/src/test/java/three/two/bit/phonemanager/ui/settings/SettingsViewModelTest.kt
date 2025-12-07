@@ -9,8 +9,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -52,10 +54,14 @@ class SettingsViewModelTest {
     private val devicePolicyFlow = MutableStateFlow<DevicePolicy?>(null)
     private val enrollmentLoadingFlow = MutableStateFlow(false)
     private val enrollmentErrorFlow = MutableStateFlow<String?>(null)
+    private val currentUserFlow = MutableStateFlow<three.two.bit.phonemanager.domain.auth.User?>(null)
+    private val mapPollingIntervalFlow = kotlinx.coroutines.flow.flowOf(15)
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+
+        // Create all mocks first
         deviceRepository = mockk(relaxed = true)
         preferencesRepository = mockk(relaxed = true)
         permissionManager = mockk(relaxed = true)
@@ -63,20 +69,27 @@ class SettingsViewModelTest {
         settingsSyncRepository = mockk(relaxed = true)
         unlockRequestRepository = mockk(relaxed = true)
         enrollmentRepository = mockk(relaxed = true)
+
+        // Device repository stubs
         coEvery { deviceRepository.getDeviceId() } returns "test-device-id"
-        every { preferencesRepository.mapPollingIntervalSeconds } returns flowOf(15)
-        // Mock AuthRepository.currentUser Flow to prevent ClassCastException
-        every { authRepository.currentUser } returns flowOf(null)
-        // Mock SettingsSyncRepository flows
+
+        // Stub all Flow/StateFlow properties that SettingsViewModel uses
+        // These must return real flows, not mock flows, because ViewModel uses .stateIn()
         every { settingsSyncRepository.syncStatus } returns syncStatusFlow
         every { settingsSyncRepository.serverSettings } returns serverSettingsFlow
         every { settingsSyncRepository.managedStatus } returns managedStatusFlow
-        // Mock EnrollmentRepository flows
         every { enrollmentRepository.enrollmentStatus } returns enrollmentStatusFlow
         every { enrollmentRepository.organizationInfo } returns organizationInfoFlow
         every { enrollmentRepository.devicePolicy } returns devicePolicyFlow
         every { enrollmentRepository.isLoading } returns enrollmentLoadingFlow
         every { enrollmentRepository.error } returns enrollmentErrorFlow
+        every { authRepository.currentUser } returns currentUserFlow
+        every { preferencesRepository.mapPollingIntervalSeconds } returns mapPollingIntervalFlow
+    }
+
+    @After
+    fun tearDown() {
+        Dispatchers.resetMain()
     }
 
     @Test

@@ -17,6 +17,7 @@ import three.two.bit.phonemanager.domain.model.EnrollmentResult
 import three.two.bit.phonemanager.domain.model.EnrollmentStatus
 import three.two.bit.phonemanager.domain.model.EnrollmentToken
 import three.two.bit.phonemanager.domain.model.OrganizationInfo
+// Note: EnrollmentRepository is now an interface, tests use EnrollmentRepositoryImpl
 import three.two.bit.phonemanager.domain.policy.PolicyApplicator
 import three.two.bit.phonemanager.domain.policy.PolicyApplicationResult
 import three.two.bit.phonemanager.network.EnrollmentApiService
@@ -41,7 +42,7 @@ class EnrollmentRepositoryTest {
     private lateinit var enrollmentApiService: EnrollmentApiService
     private lateinit var secureStorage: SecureStorage
     private lateinit var policyApplicator: PolicyApplicator
-    private lateinit var enrollmentRepository: EnrollmentRepository
+    private lateinit var enrollmentRepository: EnrollmentRepositoryImpl
 
     private val testOrganizationInfo = OrganizationInfo(
         id = "org-123",
@@ -79,7 +80,7 @@ class EnrollmentRepositoryTest {
         every { secureStorage.getDeviceId() } returns "device-123"
         every { secureStorage.getEnrollmentStatus() } returns EnrollmentStatus.NOT_ENROLLED
 
-        enrollmentRepository = EnrollmentRepository(
+        enrollmentRepository = EnrollmentRepositoryImpl(
             enrollmentApiService = enrollmentApiService,
             secureStorage = secureStorage,
             policyApplicator = policyApplicator,
@@ -423,9 +424,12 @@ class EnrollmentRepositoryTest {
 
     @Test
     fun `clearError clears the error state`() = runTest {
-        // Given - cause an error
-        val invalidToken = EnrollmentToken("ABC") // Too short
-        enrollmentRepository.enrollDevice(invalidToken)
+        // Given - cause an API error (validation errors don't set _error state)
+        val token = EnrollmentToken("ABC12345678901234567")
+        coEvery {
+            enrollmentApiService.enrollDevice(any(), any())
+        } returns Result.failure(Exception("Network connection failed"))
+        enrollmentRepository.enrollDevice(token)
         assertTrue(enrollmentRepository.error.first() != null)
 
         // When

@@ -19,7 +19,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Story E13.10: Android Enrollment Flow - Repository
+ * Story E13.10: Android Enrollment Flow - Repository Interface
  *
  * Handles device enrollment, unenrollment, and policy management.
  *
@@ -28,27 +28,71 @@ import javax.inject.Singleton
  * AC E13.10.8: Check enrollment status
  * AC E13.10.9: Unenroll device
  */
+interface EnrollmentRepository {
+    /** Current enrollment status */
+    val enrollmentStatus: StateFlow<EnrollmentStatus>
+
+    /** Organization info for enrolled device */
+    val organizationInfo: StateFlow<OrganizationInfo?>
+
+    /** Current device policy */
+    val devicePolicy: StateFlow<DevicePolicy?>
+
+    /** Loading state */
+    val isLoading: StateFlow<Boolean>
+
+    /** Error state */
+    val error: StateFlow<String?>
+
+    /** Enroll device with token */
+    suspend fun enrollDevice(token: EnrollmentToken): Result<EnrollmentResult>
+
+    /** Unenroll device from organization */
+    suspend fun unenrollDevice(): Result<Unit>
+
+    /** Save policies to secure storage */
+    fun savePolicies(policy: DevicePolicy)
+
+    /** Apply policies to device settings */
+    suspend fun applyPolicies(policy: DevicePolicy): Result<Unit>
+
+    /** Check if device is enrolled */
+    fun isEnrolled(): Boolean
+
+    /** Check if a setting is locked by policy */
+    fun isSettingLocked(key: String): Boolean
+
+    /** Get a policy value */
+    fun <T> getPolicyValue(key: String, default: T): T
+
+    /** Clear error state */
+    fun clearError()
+}
+
+/**
+ * Implementation of EnrollmentRepository.
+ */
 @Singleton
-class EnrollmentRepository @Inject constructor(
+class EnrollmentRepositoryImpl @Inject constructor(
     private val enrollmentApiService: EnrollmentApiService,
     private val secureStorage: SecureStorage,
     private val policyApplicator: PolicyApplicator,
-) {
+) : EnrollmentRepository {
 
     private val _enrollmentStatus = MutableStateFlow(EnrollmentStatus.NOT_ENROLLED)
-    val enrollmentStatus: StateFlow<EnrollmentStatus> = _enrollmentStatus.asStateFlow()
+    override val enrollmentStatus: StateFlow<EnrollmentStatus> = _enrollmentStatus.asStateFlow()
 
     private val _organizationInfo = MutableStateFlow<OrganizationInfo?>(null)
-    val organizationInfo: StateFlow<OrganizationInfo?> = _organizationInfo.asStateFlow()
+    override val organizationInfo: StateFlow<OrganizationInfo?> = _organizationInfo.asStateFlow()
 
     private val _devicePolicy = MutableStateFlow<DevicePolicy?>(null)
-    val devicePolicy: StateFlow<DevicePolicy?> = _devicePolicy.asStateFlow()
+    override val devicePolicy: StateFlow<DevicePolicy?> = _devicePolicy.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    override val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    override val error: StateFlow<String?> = _error.asStateFlow()
 
     init {
         // Load enrollment status from secure storage on initialization
@@ -75,7 +119,7 @@ class EnrollmentRepository @Inject constructor(
      * @param token The enrollment token/code
      * @return Result with EnrollmentResult on success
      */
-    suspend fun enrollDevice(token: EnrollmentToken): Result<EnrollmentResult> {
+    override suspend fun enrollDevice(token: EnrollmentToken): Result<EnrollmentResult> {
         if (!token.isValid) {
             return Result.failure(IllegalArgumentException("Invalid enrollment token format"))
         }
@@ -129,7 +173,7 @@ class EnrollmentRepository @Inject constructor(
      *
      * @return Result with Unit on success
      */
-    suspend fun unenrollDevice(): Result<Unit> {
+    override suspend fun unenrollDevice(): Result<Unit> {
         val accessToken = secureStorage.getAccessToken()
             ?: return Result.failure(IllegalStateException("Not authenticated"))
         val deviceId = secureStorage.getDeviceId()
@@ -176,7 +220,7 @@ class EnrollmentRepository @Inject constructor(
      * Save policies to secure storage.
      * AC E13.10.5: Save policies to local storage.
      */
-    fun savePolicies(policy: DevicePolicy) {
+    override fun savePolicies(policy: DevicePolicy) {
         secureStorage.saveDevicePolicy(policy)
         _devicePolicy.value = policy
         Timber.d("Policies saved: ${policy.settings.size} settings, ${policy.locks.size} locks")
@@ -188,7 +232,7 @@ class EnrollmentRepository @Inject constructor(
      *
      * Uses PolicyApplicator to map policy values to local preferences.
      */
-    suspend fun applyPolicies(policy: DevicePolicy): Result<Unit> {
+    override suspend fun applyPolicies(policy: DevicePolicy): Result<Unit> {
         return try {
             // Save policy to storage first
             savePolicies(policy)
@@ -214,7 +258,7 @@ class EnrollmentRepository @Inject constructor(
      * Check if device is enrolled.
      * AC E13.10.8: Managed device indicator.
      */
-    fun isEnrolled(): Boolean = _enrollmentStatus.value == EnrollmentStatus.ENROLLED
+    override fun isEnrolled(): Boolean = _enrollmentStatus.value == EnrollmentStatus.ENROLLED
 
     /**
      * Get organization info for enrolled device.
@@ -230,21 +274,21 @@ class EnrollmentRepository @Inject constructor(
     /**
      * Check if a setting is locked by policy.
      */
-    fun isSettingLocked(key: String): Boolean {
+    override fun isSettingLocked(key: String): Boolean {
         return _devicePolicy.value?.isLocked(key) == true
     }
 
     /**
      * Get a policy value.
      */
-    fun <T> getPolicyValue(key: String, default: T): T {
+    override fun <T> getPolicyValue(key: String, default: T): T {
         return _devicePolicy.value?.getPolicyValue(key, default) ?: default
     }
 
     /**
      * Clear error state.
      */
-    fun clearError() {
+    override fun clearError() {
         _error.value = null
     }
 
@@ -254,9 +298,9 @@ class EnrollmentRepository @Inject constructor(
     private fun createDeviceInfo(): DeviceEnrollmentInfo {
         return DeviceEnrollmentInfo(
             deviceId = secureStorage.getDeviceId(),
-            manufacturer = Build.MANUFACTURER,
-            model = Build.MODEL,
-            osVersion = "Android ${Build.VERSION.RELEASE}",
+            manufacturer = Build.MANUFACTURER ?: "Unknown",
+            model = Build.MODEL ?: "Unknown",
+            osVersion = "Android ${Build.VERSION.RELEASE ?: "Unknown"}",
             appVersion = BuildConfig.VERSION_NAME,
         )
     }

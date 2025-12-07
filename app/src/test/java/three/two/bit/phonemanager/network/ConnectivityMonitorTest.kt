@@ -101,7 +101,7 @@ class ConnectivityMonitorTest {
     }
 
     @Test
-    fun `isNetworkAvailable returns false when network not validated`() {
+    fun `isNetworkAvailable returns true when network not validated in debug mode`() {
         // Given
         val network = mockk<Network>()
         val networkCapabilities = mockk<NetworkCapabilities>()
@@ -117,7 +117,9 @@ class ConnectivityMonitorTest {
         val result = connectivityMonitor.isNetworkAvailable()
 
         // Then
-        assertFalse(result)
+        // In DEBUG mode (which unit tests run with), VALIDATED check is skipped
+        // for emulator testing compatibility. Only INTERNET capability matters.
+        assertTrue(result)
     }
 
     @Test
