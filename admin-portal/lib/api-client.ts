@@ -149,6 +149,17 @@ export const usersApi = {
       method: "POST",
       body: JSON.stringify(data),
     }),
+
+  suspend: (id: string, reason: string) =>
+    request<AdminUser>(`/api/admin/users/${id}/suspend`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+
+  reactivate: (id: string) =>
+    request<AdminUser>(`/api/admin/users/${id}/reactivate`, {
+      method: "POST",
+    }),
 };
 
 // Unlock Requests

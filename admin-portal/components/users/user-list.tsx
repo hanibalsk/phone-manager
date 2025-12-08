@@ -29,6 +29,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { UserCreateDialog } from "./user-create-dialog";
+import { UserActionsMenu } from "./user-actions-menu";
 
 type SortField = "email" | "display_name" | "created_at" | "last_login";
 type SortOrder = "asc" | "desc";
@@ -319,6 +320,9 @@ export function UserList() {
                         {getSortIcon("last_login")}
                       </div>
                     </th>
+                    <th className="text-right py-3 px-4 font-medium">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
@@ -360,6 +364,9 @@ export function UserList() {
                       </td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
                         {formatDateTime(user.last_login)}
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <UserActionsMenu user={user} onActionComplete={fetchUsers} />
                       </td>
                     </tr>
                   ))}
