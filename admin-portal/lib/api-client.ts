@@ -6,6 +6,9 @@ import type {
   DailyLimit,
   AdminSettings,
   PublicConfig,
+  AdminUser,
+  UserListParams,
+  PaginatedResponse,
 } from "@/types";
 import type {
   LoginResponse,
@@ -118,6 +121,27 @@ export const deviceApi = {
     const params = date ? `?date=${date}` : "";
     return request<AppUsage[]>(`/api/admin/devices/${id}/usage${params}`);
   },
+};
+
+// User Administration (Story AP-3.1)
+export const usersApi = {
+  list: (params?: UserListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+      if (params.search) searchParams.set("search", params.search);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.role) searchParams.set("role", params.role);
+      if (params.sort_by) searchParams.set("sort_by", params.sort_by);
+      if (params.sort_order) searchParams.set("sort_order", params.sort_order);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/users${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AdminUser>>(endpoint);
+  },
+
+  get: (id: string) => request<AdminUser>(`/api/admin/users/${id}`),
 };
 
 // Unlock Requests

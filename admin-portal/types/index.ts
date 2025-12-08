@@ -71,3 +71,38 @@ export interface FeaturesConfig {
   b2b: boolean;
   geofence_events: boolean;
 }
+
+// User Administration types (Story AP-3.1)
+export type UserStatus = "active" | "suspended" | "pending_verification" | "locked";
+export type UserRole = "super_admin" | "org_admin" | "org_manager" | "support" | "viewer";
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  display_name: string;
+  avatar_url: string | null;
+  status: UserStatus;
+  role: UserRole;
+  organization_id: string | null;
+  organization_name: string | null;
+  mfa_enabled: boolean;
+  created_at: string;
+  last_login: string | null;
+}
+
+export interface UserListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: UserStatus;
+  role?: UserRole;
+  sort_by?: "email" | "display_name" | "created_at" | "last_login";
+  sort_order?: "asc" | "desc";
+}
+
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page: number;
+  limit: number;
+}

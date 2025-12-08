@@ -10,11 +10,13 @@ import {
   Settings,
   LayoutDashboard,
   SlidersHorizontal,
+  Users,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Devices", href: "/devices", icon: Smartphone },
+  { name: "Users", href: "/users", icon: Users },
   { name: "Unlock Requests", href: "/unlock-requests", icon: Bell },
   { name: "App Limits", href: "/limits", icon: Clock },
   { name: "Settings", href: "/settings", icon: Settings },
