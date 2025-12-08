@@ -81,6 +81,16 @@ fun RegisterScreen(
     val passwordError by viewModel.passwordError.collectAsState()
     val displayNameError by viewModel.displayNameError.collectAsState()
 
+    // Feature flag state - registration must be enabled
+    val isRegistrationEnabled by viewModel.isRegistrationEnabled.collectAsState()
+
+    // Redirect to login if registration is disabled
+    LaunchedEffect(isRegistrationEnabled) {
+        if (!isRegistrationEnabled) {
+            onNavigateToLogin()
+        }
+    }
+
     var displayName by rememberSaveable { mutableStateOf("") }
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }

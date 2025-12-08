@@ -9,6 +9,7 @@ import {
   Clock,
   Settings,
   LayoutDashboard,
+  SlidersHorizontal,
 } from "lucide-react";
 
 const navigation = [
@@ -17,6 +18,7 @@ const navigation = [
   { name: "Unlock Requests", href: "/unlock-requests", icon: Bell },
   { name: "App Limits", href: "/limits", icon: Clock },
   { name: "Settings", href: "/settings", icon: Settings },
+  { name: "Configuration", href: "/config", icon: SlidersHorizontal },
 ];
 
 export function Sidebar() {

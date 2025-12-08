@@ -120,3 +120,5 @@ tests/e2e/reports/
 admin-portal/.env.local
 admin-portal/.env.local.backup
 admin-portal/.env.docker
+
+app/google-services.json

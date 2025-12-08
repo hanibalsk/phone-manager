@@ -85,6 +85,20 @@ fun LoginScreen(
     val emailError by viewModel.emailError.collectAsState()
     val passwordError by viewModel.passwordError.collectAsState()
 
+    // Feature flag states
+    val isGoogleSignInEnabled by viewModel.isGoogleSignInEnabled.collectAsState()
+    val isAppleSignInEnabled by viewModel.isAppleSignInEnabled.collectAsState()
+    val isRegistrationEnabled by viewModel.isRegistrationEnabled.collectAsState()
+    val isOAuthOnly by viewModel.isOAuthOnly.collectAsState()
+    val isConfigLoaded by viewModel.isConfigLoaded.collectAsState()
+    val isConfigLoading by viewModel.isConfigLoading.collectAsState()
+
+    // Show retry banner when config failed to load (not loading and not loaded)
+    val showConfigRetryBanner = !isConfigLoading && !isConfigLoaded
+
+    // Show OAuth buttons only if at least one OAuth provider is enabled
+    val showOAuthSection = isGoogleSignInEnabled || isAppleSignInEnabled
+
     var email by rememberSaveable { mutableStateOf("") }
     var password by rememberSaveable { mutableStateOf("") }
     var passwordVisible by rememberSaveable { mutableStateOf(false) }
@@ -133,174 +147,211 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // Email TextField (AC E9.11.3, E9.11.7)
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text(stringResource(R.string.auth_email)) },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
-                ),
-                keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
-                ),
-                singleLine = true,
-                isError = emailError != null,
-                supportingText = emailError?.let { { Text(it) } },
-                enabled = uiState !is AuthUiState.Loading
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Password TextField (AC E9.11.3, E9.11.7)
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text(stringResource(R.string.auth_password)) },
-                modifier = Modifier.fillMaxWidth(),
-                visualTransformation = if (passwordVisible) {
-                    VisualTransformation.None
-                } else {
-                    PasswordVisualTransformation()
-                },
-                keyboardOptions = KeyboardOptions(
-                    keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(
-                    onDone = {
-                        focusManager.clearFocus()
-                        viewModel.login(email, password)
-                    }
-                ),
-                trailingIcon = {
-                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                        Icon(
-                            imageVector = if (passwordVisible) {
-                                Icons.Filled.Visibility
-                            } else {
-                                Icons.Filled.VisibilityOff
-                            },
-                            contentDescription = if (passwordVisible) {
-                                "Hide password"
-                            } else {
-                                "Show password"
-                            }
-                        )
-                    }
-                },
-                singleLine = true,
-                isError = passwordError != null,
-                supportingText = passwordError?.let { { Text(it) } },
-                enabled = uiState !is AuthUiState.Loading
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Forgot Password Link
-            TextButton(
-                onClick = onNavigateToForgotPassword,
-                modifier = Modifier.align(Alignment.End),
-                enabled = uiState !is AuthUiState.Loading
-            ) {
-                Text(stringResource(R.string.auth_forgot_password))
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Sign In Button (AC E9.11.3)
-            Button(
-                onClick = { viewModel.login(email, password) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                enabled = uiState !is AuthUiState.Loading
-            ) {
-                if (uiState is AuthUiState.Loading) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+            // Config retry banner - shown when config failed to load
+            if (showConfigRetryBanner) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Unable to load server settings.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                } else {
-                    Text(stringResource(R.string.auth_sign_in))
+                    TextButton(
+                        onClick = { viewModel.refreshConfig() }
+                    ) {
+                        Text("Retry")
+                    }
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
-            // Divider with "OR"
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                HorizontalDivider(modifier = Modifier.weight(1f))
-                Text(
-                    text = "OR",
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+            // Email/Password login section - hidden in OAuth-only mode
+            if (!isOAuthOnly) {
+                // Email TextField (AC E9.11.3, E9.11.7)
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text(stringResource(R.string.auth_email)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    ),
+                    singleLine = true,
+                    isError = emailError != null,
+                    supportingText = emailError?.let { { Text(it) } },
+                    enabled = uiState !is AuthUiState.Loading
                 )
-                HorizontalDivider(modifier = Modifier.weight(1f))
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Password TextField (AC E9.11.3, E9.11.7)
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text(stringResource(R.string.auth_password)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    visualTransformation = if (passwordVisible) {
+                        VisualTransformation.None
+                    } else {
+                        PasswordVisualTransformation()
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    ),
+                    keyboardActions = KeyboardActions(
+                        onDone = {
+                            focusManager.clearFocus()
+                            viewModel.login(email, password)
+                        }
+                    ),
+                    trailingIcon = {
+                        IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                            Icon(
+                                imageVector = if (passwordVisible) {
+                                    Icons.Filled.Visibility
+                                } else {
+                                    Icons.Filled.VisibilityOff
+                                },
+                                contentDescription = if (passwordVisible) {
+                                    "Hide password"
+                                } else {
+                                    "Show password"
+                                }
+                            )
+                        }
+                    },
+                    singleLine = true,
+                    isError = passwordError != null,
+                    supportingText = passwordError?.let { { Text(it) } },
+                    enabled = uiState !is AuthUiState.Loading
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Forgot Password Link
+                TextButton(
+                    onClick = onNavigateToForgotPassword,
+                    modifier = Modifier.align(Alignment.End),
+                    enabled = uiState !is AuthUiState.Loading
+                ) {
+                    Text(stringResource(R.string.auth_forgot_password))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
+
+                // Sign In Button (AC E9.11.3)
+                Button(
+                    onClick = { viewModel.login(email, password) },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    enabled = uiState !is AuthUiState.Loading
+                ) {
+                    if (uiState is AuthUiState.Loading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(24.dp),
+                            color = MaterialTheme.colorScheme.onPrimary
+                        )
+                    } else {
+                        Text(stringResource(R.string.auth_sign_in))
+                    }
+                }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            // Divider with "OR" - only shown when both email/password and OAuth are available
+            if (!isOAuthOnly && showOAuthSection) {
+                Spacer(modifier = Modifier.height(24.dp))
 
-            // Google Sign-In Button (AC E9.11.5)
-            OutlinedButton(
-                onClick = onGoogleSignIn,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                enabled = uiState !is AuthUiState.Loading
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_google),
-                    contentDescription = "Google",
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.auth_continue_google))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    HorizontalDivider(modifier = Modifier.weight(1f))
+                    Text(
+                        text = "OR",
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    HorizontalDivider(modifier = Modifier.weight(1f))
+                }
+
+                Spacer(modifier = Modifier.height(24.dp))
             }
 
-            Spacer(modifier = Modifier.height(12.dp))
+            // OAuth buttons section - shown when at least one provider is enabled
+            if (showOAuthSection) {
+                // Google Sign-In Button (AC E9.11.5)
+                if (isGoogleSignInEnabled) {
+                    OutlinedButton(
+                        onClick = onGoogleSignIn,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        enabled = uiState !is AuthUiState.Loading
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_google),
+                            contentDescription = "Google",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.auth_continue_google))
+                    }
 
-            // Apple Sign-In Button (AC E9.11.5)
-            OutlinedButton(
-                onClick = onAppleSignIn,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                enabled = uiState !is AuthUiState.Loading
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_apple),
-                    contentDescription = "Apple",
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(stringResource(R.string.auth_continue_apple))
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+
+                // Apple Sign-In Button (AC E9.11.5)
+                if (isAppleSignInEnabled) {
+                    OutlinedButton(
+                        onClick = onAppleSignIn,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                        enabled = uiState !is AuthUiState.Loading
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_apple),
+                            contentDescription = "Apple",
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(stringResource(R.string.auth_continue_apple))
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.height(32.dp))
 
-            // Create Account Link
-            Row(
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Don't have an account?",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                TextButton(
-                    onClick = onNavigateToRegister,
-                    enabled = uiState !is AuthUiState.Loading
+            // Create Account Link - only shown when registration is enabled
+            if (isRegistrationEnabled && !isOAuthOnly) {
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(stringResource(R.string.auth_create_account))
+                    Text(
+                        text = "Don't have an account?",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    TextButton(
+                        onClick = onNavigateToRegister,
+                        enabled = uiState !is AuthUiState.Loading
+                    ) {
+                        Text(stringResource(R.string.auth_create_account))
+                    }
                 }
             }
         }

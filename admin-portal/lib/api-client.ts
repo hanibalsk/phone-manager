@@ -5,6 +5,7 @@ import type {
   AppUsage,
   DailyLimit,
   AdminSettings,
+  PublicConfig,
 } from "@/types";
 import type {
   LoginResponse,
@@ -169,4 +170,9 @@ export const settingsApi = {
 // Health Check
 export const healthApi = {
   check: () => request<{ status: string }>("/api/health"),
+};
+
+// Public Configuration (feature flags & auth config)
+export const configApi = {
+  getPublic: () => request<PublicConfig>("/api/v1/config/public", {}, false),
 };

@@ -8,6 +8,17 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.hilt)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.google.services) apply false
+}
+
+// Conditionally apply Google Services plugin only if google-services.json exists
+// This allows builds to succeed without Firebase configuration for development
+val googleServicesFile = file("google-services.json")
+if (googleServicesFile.exists()) {
+    apply(plugin = "com.google.gms.google-services")
+} else {
+    logger.warn("google-services.json not found. Firebase features will be disabled.")
+    logger.warn("Copy app/google-services.json.example to app/google-services.json and configure it.")
 }
 
 // Load local.properties

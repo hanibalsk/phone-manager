@@ -4,10 +4,14 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.AuthRepository
+import three.two.bit.phonemanager.data.repository.ConfigRepository
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
@@ -27,12 +31,84 @@ import javax.inject.Inject
 @HiltViewModel
 class AuthViewModel @Inject constructor(
     private val authRepository: AuthRepository,
+    private val configRepository: ConfigRepository,
     private val deviceApiService: DeviceApiService,
     private val secureStorage: SecureStorage,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
     val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
+
+    // Feature flag states for UI visibility
+    // Default to permissive values (true) until config explicitly disables features
+    // This ensures OAuth buttons remain visible during loading/failures
+    val isGoogleSignInEnabled: StateFlow<Boolean> = configRepository.config
+        .map { it?.auth?.googleEnabled ?: true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val isAppleSignInEnabled: StateFlow<Boolean> = configRepository.config
+        .map { it?.auth?.appleEnabled ?: true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val isRegistrationEnabled: StateFlow<Boolean> = configRepository.config
+        .map { it?.auth?.registrationEnabled ?: true }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    val isOAuthOnly: StateFlow<Boolean> = configRepository.config
+        .map { it?.auth?.oauthOnly ?: false }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val isConfigLoaded: StateFlow<Boolean> = configRepository.config
+        .map { it != null }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    // Config loading state for UI feedback
+    private val _isConfigLoading = MutableStateFlow(true)
+    val isConfigLoading: StateFlow<Boolean> = _isConfigLoading.asStateFlow()
+
+    init {
+        // Fetch public config on initialization with retry
+        fetchPublicConfigWithRetry()
+    }
+
+    /**
+     * Fetch public configuration from server with retry logic
+     */
+    private fun fetchPublicConfigWithRetry(
+        maxRetries: Int = 3,
+        initialDelayMs: Long = 1000L
+    ) {
+        viewModelScope.launch {
+            _isConfigLoading.value = true
+            var currentDelay = initialDelayMs
+            var attempt = 0
+
+            while (attempt < maxRetries) {
+                val result = configRepository.fetchConfig()
+                if (result.isSuccess) {
+                    _isConfigLoading.value = false
+                    return@launch
+                }
+
+                attempt++
+                if (attempt < maxRetries) {
+                    Timber.w("Config fetch attempt $attempt failed, retrying in ${currentDelay}ms")
+                    kotlinx.coroutines.delay(currentDelay)
+                    currentDelay *= 2 // Exponential backoff
+                }
+            }
+
+            Timber.e("Failed to fetch public config after $maxRetries attempts")
+            _isConfigLoading.value = false
+        }
+    }
+
+    /**
+     * Manual refresh of public configuration (for retry after failure)
+     */
+    fun refreshConfig() {
+        fetchPublicConfigWithRetry()
+    }
 
     // Form validation state
     private val _emailError = MutableStateFlow<String?>(null)

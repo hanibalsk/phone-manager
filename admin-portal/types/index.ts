@@ -48,3 +48,26 @@ export interface ApiResponse<T> {
   error?: string;
   status: number;
 }
+
+// Public configuration types
+export interface PublicConfig {
+  auth: AuthConfig;
+  features: FeaturesConfig;
+}
+
+export interface AuthConfig {
+  registration_enabled: boolean;
+  invite_only: boolean;
+  oauth_only: boolean;
+  google_enabled: boolean;
+  apple_enabled: boolean;
+}
+
+export interface FeaturesConfig {
+  geofences: boolean;
+  proximity_alerts: boolean;
+  webhooks: boolean;
+  movement_tracking: boolean;
+  b2b: boolean;
+  geofence_events: boolean;
+}

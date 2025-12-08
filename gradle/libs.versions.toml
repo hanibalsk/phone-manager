@@ -60,7 +60,8 @@ mlkitBarcode = "17.3.0"
 zxing = "3.5.3"
 
 # Firebase (Story E12.6: FCM Push Notifications)
-firebaseBom = "33.7.0"
+firebaseBom = "34.6.0"
+googleServices = "4.4.4"
 
 # Testing
 junit = "4.13.2"
@@ -184,3 +185,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }

@@ -28,6 +28,8 @@ import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepositoryImpl
 import three.two.bit.phonemanager.data.repository.WebhookRepository
 import three.two.bit.phonemanager.data.repository.WebhookRepositoryImpl
+import three.two.bit.phonemanager.data.repository.ConfigRepository
+import three.two.bit.phonemanager.data.repository.ConfigRepositoryImpl
 import javax.inject.Singleton
 
 /**
@@ -114,4 +116,11 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindAuthRepository(impl: AuthRepositoryImpl): AuthRepository
+
+    /**
+     * Config Repository binding - Public configuration and feature flags
+     */
+    @Binds
+    @Singleton
+    abstract fun bindConfigRepository(impl: ConfigRepositoryImpl): ConfigRepository
 }
