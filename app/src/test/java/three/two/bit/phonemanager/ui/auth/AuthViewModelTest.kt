@@ -16,6 +16,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.AuthRepository
+import three.two.bit.phonemanager.data.repository.ConfigRepository
 import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.network.models.LinkedDeviceInfo
@@ -39,6 +40,7 @@ import kotlin.test.assertTrue
 class AuthViewModelTest {
 
     private lateinit var authRepository: AuthRepository
+    private lateinit var configRepository: ConfigRepository
     private lateinit var deviceApiService: DeviceApiService
     private lateinit var secureStorage: SecureStorage
     private lateinit var viewModel: AuthViewModel
@@ -67,6 +69,7 @@ class AuthViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         authRepository = mockk(relaxed = true)
+        configRepository = mockk(relaxed = true)
         deviceApiService = mockk(relaxed = true)
         secureStorage = mockk(relaxed = true)
 
@@ -74,12 +77,15 @@ class AuthViewModelTest {
         every { secureStorage.getAccessToken() } returns "test-access-token"
         every { secureStorage.getDeviceId() } returns "test-device-uuid"
 
+        // Mock configRepository.config to return empty flow (config not loaded scenario)
+        every { configRepository.config } returns kotlinx.coroutines.flow.flowOf(null)
+
         // Mock deviceApiService.linkDevice to return a proper Result (fixes ClassCastException)
         coEvery {
             deviceApiService.linkDevice(any(), any(), any(), any(), any())
         } returns Result.success(testLinkedDeviceResponse)
 
-        viewModel = AuthViewModel(authRepository, deviceApiService, secureStorage)
+        viewModel = AuthViewModel(authRepository, configRepository, deviceApiService, secureStorage)
     }
 
     @After
