@@ -26,7 +26,9 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
+  UserPlus,
 } from "lucide-react";
+import { UserCreateDialog } from "./user-create-dialog";
 
 type SortField = "email" | "display_name" | "created_at" | "last_login";
 type SortOrder = "asc" | "desc";
@@ -51,6 +53,9 @@ const ROLE_OPTIONS: { value: UserRole | "all"; label: string }[] = [
 ];
 
 export function UserList() {
+  // Dialog state
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+
   // Search and filter state
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<UserStatus | "all">("all");
@@ -167,17 +172,23 @@ export function UserList() {
               {totalUsers > 0 && ` • ${totalUsers} total users`}
             </CardDescription>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchUsers}
-            disabled={loading}
-          >
-            <RefreshCw
-              className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={fetchUsers}
+              disabled={loading}
+            >
+              <RefreshCw
+                className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`}
+              />
+              Refresh
+            </Button>
+            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+              <UserPlus className="h-4 w-4 mr-2" />
+              Add User
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -392,6 +403,17 @@ export function UserList() {
           </>
         )}
       </CardContent>
+
+      {/* Create User Dialog */}
+      {showCreateDialog && (
+        <UserCreateDialog
+          onSuccess={() => {
+            setShowCreateDialog(false);
+            fetchUsers();
+          }}
+          onCancel={() => setShowCreateDialog(false)}
+        />
+      )}
     </Card>
   );
 }

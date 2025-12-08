@@ -106,3 +106,11 @@ export interface PaginatedResponse<T> {
   page: number;
   limit: number;
 }
+
+export interface CreateUserRequest {
+  email: string;
+  display_name: string;
+  organization_id?: string;
+  role: UserRole;
+  send_welcome_email?: boolean;
+}

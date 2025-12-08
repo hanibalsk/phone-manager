@@ -9,6 +9,7 @@ import type {
   AdminUser,
   UserListParams,
   PaginatedResponse,
+  CreateUserRequest,
 } from "@/types";
 import type {
   LoginResponse,
@@ -142,6 +143,12 @@ export const usersApi = {
   },
 
   get: (id: string) => request<AdminUser>(`/api/admin/users/${id}`),
+
+  create: (data: CreateUserRequest) =>
+    request<AdminUser>("/api/admin/users", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
 };
 
 // Unlock Requests
