@@ -79,6 +79,7 @@ class AuthViewModelTest {
 
         // Mock configRepository.config to return empty flow (config not loaded scenario)
         every { configRepository.config } returns kotlinx.coroutines.flow.flowOf(null)
+        coEvery { configRepository.fetchConfig() } returns Result.failure(IllegalStateException("config unavailable"))
 
         // Mock deviceApiService.linkDevice to return a proper Result (fixes ClassCastException)
         coEvery {
