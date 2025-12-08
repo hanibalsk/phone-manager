@@ -13,6 +13,7 @@ import type {
   User,
   Tokens,
   LoginCredentials,
+  RegisterCredentials,
   AuthState,
 } from "@/types/auth";
 import { authApi } from "@/lib/api-client";
@@ -21,6 +22,7 @@ const TOKEN_STORAGE_KEY = "auth_tokens";
 
 interface AuthContextValue extends AuthState {
   login: (credentials: LoginCredentials) => Promise<{ success: boolean; error?: string }>;
+  register: (credentials: RegisterCredentials) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   refreshToken: () => Promise<boolean>;
 }
@@ -112,6 +114,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { success: false, error: response.error || "Login failed" };
   }, []);
 
+  const register = useCallback(async (credentials: RegisterCredentials): Promise<{ success: boolean; error?: string }> => {
+    const response = await authApi.register(credentials);
+    if (response.data) {
+      const { user: userData, tokens: newTokens } = response.data;
+      setUser(userData);
+      setTokens(newTokens);
+      setStoredTokens(newTokens);
+      return { success: true };
+    }
+    return { success: false, error: response.error || "Registration failed" };
+  }, []);
+
   const logout = useCallback(async (): Promise<void> => {
     if (tokens?.access_token) {
       await authApi.logout();
@@ -127,6 +141,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated,
     isLoading,
     login,
+    register,
     logout,
     refreshToken,
   };

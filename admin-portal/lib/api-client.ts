@@ -11,6 +11,7 @@ import type {
   LoginResponse,
   RefreshResponse,
   LoginCredentials,
+  RegisterCredentials,
   ForgotPasswordRequest,
   ResetPasswordRequest,
   User,
@@ -68,6 +69,12 @@ async function request<T>(
 export const authApi = {
   login: (credentials: LoginCredentials) =>
     request<LoginResponse>("/api/v1/auth/login", {
+      method: "POST",
+      body: JSON.stringify(credentials),
+    }, false),
+
+  register: (credentials: RegisterCredentials) =>
+    request<LoginResponse>("/api/v1/auth/register", {
       method: "POST",
       body: JSON.stringify(credentials),
     }, false),

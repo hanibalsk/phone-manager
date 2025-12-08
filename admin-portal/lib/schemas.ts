@@ -8,6 +8,28 @@ export const loginSchema = z.object({
 
 export type LoginInput = z.infer<typeof loginSchema>;
 
+// Register Schema
+export const registerSchema = z.object({
+  display_name: z
+    .string()
+    .min(2, "Display name must be at least 2 characters")
+    .max(50, "Display name is too long"),
+  email: z.string().email("Invalid email format"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter")
+    .regex(/[a-z]/, "Password must contain a lowercase letter")
+    .regex(/[0-9]/, "Password must contain a number")
+    .regex(/[^a-zA-Z0-9]/, "Password must contain a special character"),
+  confirm_password: z.string().min(1, "Please confirm your password"),
+}).refine((data) => data.password === data.confirm_password, {
+  message: "Passwords don't match",
+  path: ["confirm_password"],
+});
+
+export type RegisterInput = z.infer<typeof registerSchema>;
+
 // Forgot Password Schema
 export const forgotPasswordSchema = z.object({
   email: z.string().email("Invalid email format"),

@@ -1,11 +1,12 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/contexts/auth-context";
 import { loginSchema, getFieldErrors } from "@/lib/schemas";
 import type { LoginInput } from "@/lib/schemas";
+import { configApi } from "@/lib/api-client";
 
 function LoginForm() {
   const router = useRouter();
@@ -19,8 +20,20 @@ function LoginForm() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [registrationEnabled, setRegistrationEnabled] = useState<boolean>(false);
 
   const returnUrl = searchParams.get("returnUrl") || "/";
+
+  // Check if registration is enabled
+  useEffect(() => {
+    const checkConfig = async () => {
+      const response = await configApi.getPublic();
+      if (response.data) {
+        setRegistrationEnabled(response.data.auth.registration_enabled);
+      }
+    };
+    checkConfig();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -150,6 +163,18 @@ function LoginForm() {
           {isSubmitting ? "Signing in..." : "Sign In"}
         </button>
       </form>
+
+      {registrationEnabled && (
+        <div className="text-center text-sm">
+          <span className="text-muted-foreground">Don&apos;t have an account? </span>
+          <Link
+            href="/register"
+            className="text-primary hover:underline font-medium"
+          >
+            Create Account
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
