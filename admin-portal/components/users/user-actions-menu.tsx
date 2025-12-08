@@ -5,6 +5,9 @@ import type { AdminUser } from "@/types";
 import { usersApi } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
 import { UserSuspendDialog } from "./user-suspend-dialog";
+import { UserResetPasswordDialog } from "./user-reset-password-dialog";
+import { UserSessionsDialog } from "./user-sessions-dialog";
+import { UserMfaDialog } from "./user-mfa-dialog";
 import {
   MoreHorizontal,
   UserX,
@@ -19,7 +22,7 @@ interface UserActionsMenuProps {
   onActionComplete: () => void;
 }
 
-type ActionType = "suspend" | "reactivate" | null;
+type ActionType = "suspend" | "reset-password" | "sessions" | "mfa" | null;
 
 export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps) {
   const [showMenu, setShowMenu] = useState(false);
@@ -97,10 +100,10 @@ export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps
             <div className="border-t my-1" />
 
             <button
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
               onClick={(e) => {
                 e.stopPropagation();
-                // TODO: Story AP-3.4
+                setActiveAction("reset-password");
                 setShowMenu(false);
               }}
             >
@@ -109,10 +112,10 @@ export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps
             </button>
 
             <button
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
               onClick={(e) => {
                 e.stopPropagation();
-                // TODO: Story AP-3.5
+                setActiveAction("sessions");
                 setShowMenu(false);
               }}
             >
@@ -121,10 +124,10 @@ export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps
             </button>
 
             <button
-              className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
               onClick={(e) => {
                 e.stopPropagation();
-                // TODO: Story AP-3.6
+                setActiveAction("mfa");
                 setShowMenu(false);
               }}
             >
@@ -144,6 +147,34 @@ export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps
             onActionComplete();
           }}
           onCancel={() => setActiveAction(null)}
+        />
+      )}
+
+      {/* Reset Password Dialog */}
+      {activeAction === "reset-password" && (
+        <UserResetPasswordDialog
+          user={user}
+          onSuccess={() => {
+            setActiveAction(null);
+            onActionComplete();
+          }}
+          onCancel={() => setActiveAction(null)}
+        />
+      )}
+
+      {/* Sessions Dialog */}
+      {activeAction === "sessions" && (
+        <UserSessionsDialog
+          user={user}
+          onClose={() => setActiveAction(null)}
+        />
+      )}
+
+      {/* MFA Dialog */}
+      {activeAction === "mfa" && (
+        <UserMfaDialog
+          user={user}
+          onClose={() => setActiveAction(null)}
         />
       )}
     </div>

@@ -114,3 +114,22 @@ export interface CreateUserRequest {
   role: UserRole;
   send_welcome_email?: boolean;
 }
+
+// Story AP-3.5: Session Management
+export interface UserSession {
+  id: string;
+  device: string;
+  ip_address: string;
+  user_agent: string;
+  last_activity: string;
+  created_at: string;
+  is_current: boolean;
+}
+
+// Story AP-3.6: MFA Management
+export interface MfaStatus {
+  enabled: boolean;
+  method: "totp" | "sms" | "email" | null;
+  enrolled_at: string | null;
+  backup_codes_remaining: number;
+}

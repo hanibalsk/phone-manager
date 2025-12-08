@@ -10,6 +10,8 @@ import type {
   UserListParams,
   PaginatedResponse,
   CreateUserRequest,
+  UserSession,
+  MfaStatus,
 } from "@/types";
 import type {
   LoginResponse,
@@ -159,6 +161,41 @@ export const usersApi = {
   reactivate: (id: string) =>
     request<AdminUser>(`/api/admin/users/${id}/reactivate`, {
       method: "POST",
+    }),
+
+  // Story AP-3.4: Password Reset
+  resetPassword: (id: string, forceChange: boolean = true) =>
+    request<{ success: boolean }>(`/api/admin/users/${id}/reset-password`, {
+      method: "POST",
+      body: JSON.stringify({ force_change_on_login: forceChange }),
+    }),
+
+  // Story AP-3.5: Session Management
+  getSessions: (id: string) =>
+    request<UserSession[]>(`/api/admin/users/${id}/sessions`),
+
+  revokeSession: (userId: string, sessionId: string) =>
+    request<{ success: boolean }>(`/api/admin/users/${userId}/sessions/${sessionId}`, {
+      method: "DELETE",
+    }),
+
+  revokeAllSessions: (id: string) =>
+    request<{ success: boolean }>(`/api/admin/users/${id}/sessions`, {
+      method: "DELETE",
+    }),
+
+  // Story AP-3.6: MFA Management
+  getMfaStatus: (id: string) =>
+    request<MfaStatus>(`/api/admin/users/${id}/mfa`),
+
+  forceMfaEnrollment: (id: string) =>
+    request<{ success: boolean }>(`/api/admin/users/${id}/mfa/force`, {
+      method: "POST",
+    }),
+
+  resetMfa: (id: string) =>
+    request<{ success: boolean }>(`/api/admin/users/${id}/mfa`, {
+      method: "DELETE",
     }),
 };
 

@@ -4,3 +4,6 @@ export { UserRoleBadge } from "./user-role-badge";
 export { UserCreateDialog } from "./user-create-dialog";
 export { UserActionsMenu } from "./user-actions-menu";
 export { UserSuspendDialog } from "./user-suspend-dialog";
+export { UserResetPasswordDialog } from "./user-reset-password-dialog";
+export { UserSessionsDialog } from "./user-sessions-dialog";
+export { UserMfaDialog } from "./user-mfa-dialog";
