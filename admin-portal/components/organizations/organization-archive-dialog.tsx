@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useId } from "react";
-import type { Organization, OrganizationFeatures } from "@/types";
+import type { Organization } from "@/types";
 import { organizationsApi } from "@/lib/api-client";
-import { FEATURE_CONFIGS } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -13,19 +12,16 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { X, ToggleLeft, AlertCircle } from "lucide-react";
+import { X, Archive, AlertCircle } from "lucide-react";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 
-interface OrganizationFeaturesDialogProps {
+interface OrganizationArchiveDialogProps {
   organization: Organization;
   onSuccess: () => void;
   onCancel: () => void;
 }
 
-export function OrganizationFeaturesDialog({ organization, onSuccess, onCancel }: OrganizationFeaturesDialogProps) {
-  const [features, setFeatures] = useState<OrganizationFeatures>({ ...organization.features });
+export function OrganizationArchiveDialog({ organization, onSuccess, onCancel }: OrganizationArchiveDialogProps) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,34 +29,14 @@ export function OrganizationFeaturesDialog({ organization, onSuccess, onCancel }
   const titleId = useId();
   const descriptionId = useId();
 
-  const handleToggle = (key: keyof OrganizationFeatures) => {
-    setFeatures((prev) => ({
-      ...prev,
-      [key]: !prev[key],
-    }));
-  };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Check if any features changed
-    const changes: Partial<OrganizationFeatures> = {};
-    for (const config of FEATURE_CONFIGS) {
-      if (features[config.key] !== organization.features[config.key]) {
-        changes[config.key] = features[config.key];
-      }
-    }
-
-    if (Object.keys(changes).length === 0) {
-      onSuccess();
-      return;
-    }
 
     setSubmitting(true);
     setError(null);
 
     try {
-      const result = await organizationsApi.updateFeatures(organization.id, changes);
+      const result = await organizationsApi.archive(organization.id);
 
       if (result.error) {
         setError(result.error);
@@ -69,7 +45,7 @@ export function OrganizationFeaturesDialog({ organization, onSuccess, onCancel }
 
       onSuccess();
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to update features");
+      setError(err instanceof Error ? err.message : "Failed to archive organization");
     } finally {
       setSubmitting(false);
     }
@@ -97,11 +73,11 @@ export function OrganizationFeaturesDialog({ organization, onSuccess, onCancel }
               <X className="h-4 w-4" aria-hidden="true" />
             </Button>
             <CardTitle id={titleId} className="flex items-center gap-2">
-              <ToggleLeft className="h-5 w-5" aria-hidden="true" />
-              Manage Features
+              <Archive className="h-5 w-5" aria-hidden="true" />
+              Archive Organization
             </CardTitle>
             <CardDescription id={descriptionId}>
-              Enable or disable features for {organization.name}
+              Archive {organization.name}. This action can be undone.
             </CardDescription>
           </CardHeader>
 
@@ -113,27 +89,14 @@ export function OrganizationFeaturesDialog({ organization, onSuccess, onCancel }
               </div>
             )}
 
-            <div className="space-y-4">
-              {FEATURE_CONFIGS.map((config) => (
-                <div
-                  key={config.key}
-                  className="flex items-start justify-between gap-4 p-3 border rounded-lg"
-                >
-                  <div className="space-y-1">
-                    <Label htmlFor={config.key} className="font-medium">
-                      {config.label}
-                    </Label>
-                    <p className="text-xs text-muted-foreground">
-                      {config.description}
-                    </p>
-                  </div>
-                  <Switch
-                    id={config.key}
-                    checked={features[config.key]}
-                    onCheckedChange={() => handleToggle(config.key)}
-                  />
-                </div>
-              ))}
+            <div className="p-3 bg-muted rounded-lg text-sm">
+              <p className="font-medium mb-1">What happens when you archive?</p>
+              <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                <li>Organization will be hidden from active lists</li>
+                <li>All users will lose access</li>
+                <li>Data will be preserved for future reference</li>
+                <li>You can restore this organization later</li>
+              </ul>
             </div>
           </CardContent>
 
@@ -146,8 +109,8 @@ export function OrganizationFeaturesDialog({ organization, onSuccess, onCancel }
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={submitting}>
-              {submitting ? "Saving..." : "Save Features"}
+            <Button type="submit" variant="secondary" disabled={submitting}>
+              {submitting ? "Archiving..." : "Archive Organization"}
             </Button>
           </CardFooter>
         </form>

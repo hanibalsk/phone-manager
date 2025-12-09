@@ -61,6 +61,20 @@
 | 2025-12-02 | E14.* | 14 | Security | Medium | TBD | Open | Add API response validation with Zod - Prevent type confusion from backend mismatches. File: admin-portal/lib/api-client.ts |
 | 2025-12-02 | E14.8 | 14 | Security | Low | TBD | Open | Migrate token storage from localStorage to httpOnly cookies - Enhanced XSS protection for production. Files: admin-portal/contexts/auth-context.tsx, admin-portal/middleware.ts |
 | 2025-12-02 | E14.8 | 14 | Enhancement | Low | TBD | Open | Add request queuing during token refresh - Prevent race conditions with concurrent requests. File: admin-portal/contexts/auth-context.tsx |
+| 2025-12-09 | AP-2.2 | AP-2 | TechDebt | Medium | Claude | Done | Add unit tests for OrganizationLimitsDialog - Test form validation, API calls, error handling. File: admin-portal/components/organizations/__tests__/organization-limits-dialog.test.tsx |
+| 2025-12-09 | AP-2.2 | AP-2 | Enhancement | Low | TBD | Open | Add limit usage warning (compare current vs max) - Display warning when usage approaches limits. File: admin-portal/components/organizations/organization-limits-dialog.tsx, PRD FR-2.2 |
+| 2025-12-09 | AP-2.2 | AP-2 | Enhancement | Low | TBD | Open | Backend: Validate limits are reasonable (e.g., not below current usage). File: Backend API |
+| 2025-12-09 | AP-2.3 | AP-2 | TechDebt | Medium | Claude | Done | Add unit tests for OrganizationSuspendDialog - Test form validation, status transitions. File: admin-portal/components/organizations/__tests__/organization-suspend-dialog.test.tsx |
+| 2025-12-09 | AP-2.3 | AP-2 | Enhancement | Medium | Claude | Done | Add confirmation dialog for archive action - Prevent accidental archival. File: admin-portal/components/organizations/organization-actions-menu.tsx, AC3 |
+| 2025-12-09 | AP-2.3 | AP-2 | Bug | Low | Claude | Done | Display error messages for reactivate/archive failures - Currently silent failure. File: admin-portal/components/organizations/organization-actions-menu.tsx |
+| 2025-12-09 | AP-2.3 | AP-2 | Enhancement | Low | TBD | Open | Backend: Log status changes in audit trail. File: Backend API |
+| 2025-12-09 | AP-2.4 | AP-2 | TechDebt | Medium | Claude | Done | Add unit tests for OrganizationFeaturesDialog - Test toggle state, API calls. File: admin-portal/components/organizations/__tests__/organization-features-dialog.test.tsx |
+| 2025-12-09 | AP-2.4 | AP-2 | Enhancement | Low | Claude | Done | Move FEATURE_CONFIGS to shared constants - Currently hardcoded in component. File: admin-portal/lib/constants.ts |
+| 2025-12-09 | AP-2.4 | AP-2 | Enhancement | Low | TBD | Open | Backend: Enforce feature checks in API middleware. File: Backend API |
+| 2025-12-09 | AP-2.5 | AP-2 | TechDebt | Medium | Claude | Done | Add unit tests for OrganizationStatsDialog - Test loading, error, data rendering. File: admin-portal/components/organizations/__tests__/organization-stats-dialog.test.tsx |
+| 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Medium | TBD | Open | Add CSV export for statistics - Missing from current implementation. File: admin-portal/components/organizations/organization-stats-dialog.tsx, PRD FR-2.5 |
+| 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Low | TBD | Open | Add progress bars for limit utilization - Improve UX. File: admin-portal/components/organizations/organization-stats-dialog.tsx |
+| 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Low | TBD | Open | Add charts for usage trends visualization - Use Recharts. File: admin-portal/components/organizations/organization-stats-dialog.tsx |
 
 ---
 

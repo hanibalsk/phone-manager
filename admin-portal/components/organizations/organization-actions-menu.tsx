@@ -9,6 +9,7 @@ import { OrganizationSuspendDialog } from "./organization-suspend-dialog";
 import { OrganizationLimitsDialog } from "./organization-limits-dialog";
 import { OrganizationFeaturesDialog } from "./organization-features-dialog";
 import { OrganizationStatsDialog } from "./organization-stats-dialog";
+import { OrganizationArchiveDialog } from "./organization-archive-dialog";
 import {
   MoreHorizontal,
   Pencil,
@@ -18,6 +19,7 @@ import {
   Settings,
   ToggleLeft,
   BarChart3,
+  AlertCircle,
 } from "lucide-react";
 
 interface OrganizationActionsMenuProps {
@@ -25,38 +27,33 @@ interface OrganizationActionsMenuProps {
   onActionComplete: () => void;
 }
 
-type ActionType = "edit" | "suspend" | "limits" | "features" | "stats" | null;
+type ActionType = "edit" | "suspend" | "limits" | "features" | "stats" | "archive" | null;
 
 export function OrganizationActionsMenu({ organization, onActionComplete }: OrganizationActionsMenuProps) {
   const [showMenu, setShowMenu] = useState(false);
   const [activeAction, setActiveAction] = useState<ActionType>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleReactivate = async () => {
     setLoading(true);
+    setError(null);
     try {
       const result = await organizationsApi.reactivate(organization.id);
-      if (!result.error) {
-        onActionComplete();
+      if (result.error) {
+        setError(result.error);
+        return;
       }
+      onActionComplete();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to reactivate organization");
     } finally {
       setLoading(false);
       setShowMenu(false);
     }
   };
 
-  const handleArchive = async () => {
-    setLoading(true);
-    try {
-      const result = await organizationsApi.archive(organization.id);
-      if (!result.error) {
-        onActionComplete();
-      }
-    } finally {
-      setLoading(false);
-      setShowMenu(false);
-    }
-  };
+  const clearError = () => setError(null);
 
   const isSuspended = organization.status === "suspended";
   const isActive = organization.status === "active";
@@ -170,15 +167,34 @@ export function OrganizationActionsMenu({ organization, onActionComplete }: Orga
                 className="w-full flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-muted"
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleArchive();
+                  setActiveAction("archive");
+                  setShowMenu(false);
                 }}
                 disabled={loading}
               >
                 <Archive className="h-4 w-4" />
-                {loading ? "Archiving..." : "Archive"}
+                Archive
               </button>
             )}
           </div>
+
+          {/* Error display */}
+          {error && (
+            <div className="absolute right-0 top-full mt-1 z-50 w-64 p-3 bg-destructive/10 border border-destructive/20 rounded-md shadow-lg">
+              <div className="flex items-start gap-2 text-sm text-destructive">
+                <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+                <div className="flex-1">
+                  <p>{error}</p>
+                  <button
+                    className="text-xs underline mt-1"
+                    onClick={clearError}
+                  >
+                    Dismiss
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
 
@@ -235,6 +251,18 @@ export function OrganizationActionsMenu({ organization, onActionComplete }: Orga
         <OrganizationStatsDialog
           organization={organization}
           onClose={() => setActiveAction(null)}
+        />
+      )}
+
+      {/* Archive Dialog */}
+      {activeAction === "archive" && (
+        <OrganizationArchiveDialog
+          organization={organization}
+          onSuccess={() => {
+            setActiveAction(null);
+            onActionComplete();
+          }}
+          onCancel={() => setActiveAction(null)}
         />
       )}
     </div>
