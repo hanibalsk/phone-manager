@@ -8,6 +8,7 @@ import { OrganizationEditDialog } from "./organization-edit-dialog";
 import { OrganizationSuspendDialog } from "./organization-suspend-dialog";
 import { OrganizationLimitsDialog } from "./organization-limits-dialog";
 import { OrganizationFeaturesDialog } from "./organization-features-dialog";
+import { OrganizationStatsDialog } from "./organization-stats-dialog";
 import {
   MoreHorizontal,
   Pencil,
@@ -16,6 +17,7 @@ import {
   Archive,
   Settings,
   ToggleLeft,
+  BarChart3,
 } from "lucide-react";
 
 interface OrganizationActionsMenuProps {
@@ -23,7 +25,7 @@ interface OrganizationActionsMenuProps {
   onActionComplete: () => void;
 }
 
-type ActionType = "edit" | "suspend" | "limits" | "features" | null;
+type ActionType = "edit" | "suspend" | "limits" | "features" | "stats" | null;
 
 export function OrganizationActionsMenu({ organization, onActionComplete }: OrganizationActionsMenuProps) {
   const [showMenu, setShowMenu] = useState(false);
@@ -121,6 +123,18 @@ export function OrganizationActionsMenu({ organization, onActionComplete }: Orga
               Manage Features
             </button>
 
+            <button
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveAction("stats");
+                setShowMenu(false);
+              }}
+            >
+              <BarChart3 className="h-4 w-4" />
+              View Statistics
+            </button>
+
             <div className="border-t my-1" />
 
             {(isActive || isPending) && (
@@ -213,6 +227,14 @@ export function OrganizationActionsMenu({ organization, onActionComplete }: Orga
             onActionComplete();
           }}
           onCancel={() => setActiveAction(null)}
+        />
+      )}
+
+      {/* Stats Dialog */}
+      {activeAction === "stats" && (
+        <OrganizationStatsDialog
+          organization={organization}
+          onClose={() => setActiveAction(null)}
         />
       )}
     </div>
