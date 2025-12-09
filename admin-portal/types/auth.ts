@@ -1,5 +1,11 @@
 // Authentication types for the admin portal
 
+export interface UserRole {
+  role_code: string;
+  role_name: string;
+  organization_id: string | null;
+}
+
 export interface User {
   id: string;
   email: string;
@@ -9,6 +15,8 @@ export interface User {
   auth_provider: string;
   organization_id: string | null;
   created_at: string;
+  roles?: UserRole[];
+  permissions?: string[]; // Array of permission codes like "users.read", "devices.create"
 }
 
 export interface Tokens {
