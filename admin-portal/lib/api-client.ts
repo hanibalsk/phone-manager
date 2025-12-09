@@ -12,6 +12,10 @@ import type {
   CreateUserRequest,
   UserSession,
   MfaStatus,
+  Organization,
+  OrganizationListParams,
+  CreateOrganizationRequest,
+  UpdateOrganizationRequest,
 } from "@/types";
 import type {
   LoginResponse,
@@ -257,6 +261,84 @@ export const settingsApi = {
 export const healthApi = {
   check: () => request<{ status: string }>("/api/health"),
 };
+
+// Organization Management (Epic AP-2)
+export const organizationsApi = {
+  list: (params?: OrganizationListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+      if (params.search) searchParams.set("search", params.search);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.type) searchParams.set("type", params.type);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/organizations${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<Organization>>(endpoint);
+  },
+
+  get: (id: string) => request<Organization>(`/api/admin/organizations/${id}`),
+
+  create: (data: CreateOrganizationRequest) =>
+    request<Organization>("/api/admin/organizations", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  update: (id: string, data: UpdateOrganizationRequest) =>
+    request<Organization>(`/api/admin/organizations/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Story AP-2.2: Update organization limits
+  updateLimits: (id: string, limits: { max_devices?: number; max_users?: number; max_groups?: number }) =>
+    request<Organization>(`/api/admin/organizations/${id}/limits`, {
+      method: "PUT",
+      body: JSON.stringify(limits),
+    }),
+
+  // Story AP-2.3: Status management
+  suspend: (id: string, reason: string) =>
+    request<Organization>(`/api/admin/organizations/${id}/suspend`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+
+  reactivate: (id: string) =>
+    request<Organization>(`/api/admin/organizations/${id}/reactivate`, {
+      method: "POST",
+    }),
+
+  archive: (id: string) =>
+    request<Organization>(`/api/admin/organizations/${id}/archive`, {
+      method: "POST",
+    }),
+
+  // Story AP-2.4: Feature flags
+  updateFeatures: (id: string, features: Partial<Organization["features"]>) =>
+    request<Organization>(`/api/admin/organizations/${id}/features`, {
+      method: "PUT",
+      body: JSON.stringify(features),
+    }),
+
+  // Story AP-2.5: Statistics
+  getStats: (id: string) =>
+    request<OrganizationStats>(`/api/admin/organizations/${id}/stats`),
+};
+
+export interface OrganizationStats {
+  users_count: number;
+  devices_count: number;
+  groups_count: number;
+  storage_used_mb: number;
+  usage_trends: {
+    period: string;
+    users: number;
+    devices: number;
+  }[];
+}
 
 // Public Configuration (feature flags & auth config)
 export const configApi = {

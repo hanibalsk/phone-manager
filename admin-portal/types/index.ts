@@ -133,3 +133,51 @@ export interface MfaStatus {
   enrolled_at: string | null;
   backup_codes_remaining: number;
 }
+
+// Epic AP-2: Organization Management
+export type OrganizationType = "enterprise" | "smb" | "startup" | "personal";
+export type OrganizationStatus = "active" | "suspended" | "pending" | "archived";
+
+export interface Organization {
+  id: string;
+  name: string;
+  slug: string;
+  type: OrganizationType;
+  status: OrganizationStatus;
+  contact_email: string;
+  max_devices: number;
+  max_users: number;
+  max_groups: number;
+  features: OrganizationFeatures;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface OrganizationFeatures {
+  geofences: boolean;
+  proximity_alerts: boolean;
+  webhooks: boolean;
+  trips: boolean;
+  movement_tracking: boolean;
+}
+
+export interface CreateOrganizationRequest {
+  name: string;
+  slug: string;
+  type: OrganizationType;
+  contact_email: string;
+}
+
+export interface UpdateOrganizationRequest {
+  name?: string;
+  type?: OrganizationType;
+  contact_email?: string;
+}
+
+export interface OrganizationListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: OrganizationStatus;
+  type?: OrganizationType;
+}
