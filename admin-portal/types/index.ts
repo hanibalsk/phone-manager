@@ -181,3 +181,70 @@ export interface OrganizationListParams {
   status?: OrganizationStatus;
   type?: OrganizationType;
 }
+
+// Epic AP-1: RBAC & Access Control
+export type SystemRole = "super_admin" | "org_admin" | "org_manager" | "support" | "viewer";
+
+export type PermissionCategory =
+  | "users"
+  | "organizations"
+  | "devices"
+  | "locations"
+  | "geofences"
+  | "alerts"
+  | "webhooks"
+  | "trips"
+  | "groups"
+  | "enrollment"
+  | "audit"
+  | "config"
+  | "reports"
+  | "api_keys";
+
+export interface Permission {
+  id: string;
+  code: string; // e.g., "USERS.CREATE", "DEVICES.READ"
+  name: string;
+  description: string;
+  category: PermissionCategory;
+}
+
+export interface Role {
+  id: string;
+  name: string;
+  code: SystemRole;
+  description: string;
+  is_system: boolean; // true for predefined roles
+  permissions: Permission[];
+  user_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateRoleRequest {
+  name: string;
+  code: string;
+  description: string;
+  permission_ids: string[];
+}
+
+export interface UpdateRoleRequest {
+  name?: string;
+  description?: string;
+  permission_ids?: string[];
+}
+
+// Story AP-1.2: User Role Assignment
+export interface UserRoleAssignment {
+  id: string;
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  role_id: string;
+  role_code: SystemRole;
+  role_name: string;
+  organization_id: string | null;
+  organization_name: string | null;
+  assigned_at: string;
+  assigned_by: string;
+}

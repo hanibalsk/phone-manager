@@ -16,6 +16,11 @@ import type {
   OrganizationListParams,
   CreateOrganizationRequest,
   UpdateOrganizationRequest,
+  Role,
+  Permission,
+  CreateRoleRequest,
+  UpdateRoleRequest,
+  UserRoleAssignment,
 } from "@/types";
 import type {
   LoginResponse,
@@ -343,4 +348,53 @@ export interface OrganizationStats {
 // Public Configuration (feature flags & auth config)
 export const configApi = {
   getPublic: () => request<PublicConfig>("/api/v1/config/public", {}, false),
+};
+
+// Epic AP-1: Roles & Permissions Management
+export const rolesApi = {
+  // Story AP-1.1: List all roles
+  list: () => request<Role[]>("/api/admin/roles"),
+
+  // Story AP-1.1: Get role details
+  get: (id: string) => request<Role>(`/api/admin/roles/${id}`),
+
+  // Story AP-1.3: Create custom role
+  create: (data: CreateRoleRequest) =>
+    request<Role>("/api/admin/roles", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Story AP-1.3: Update role
+  update: (id: string, data: UpdateRoleRequest) =>
+    request<Role>(`/api/admin/roles/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Story AP-1.3: Delete custom role
+  delete: (id: string) =>
+    request<void>(`/api/admin/roles/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Story AP-1.1: List all permissions
+  listPermissions: () => request<Permission[]>("/api/admin/permissions"),
+
+  // Story AP-1.2: Get user role assignments
+  getUserAssignments: (userId: string) =>
+    request<UserRoleAssignment[]>(`/api/admin/users/${userId}/roles`),
+
+  // Story AP-1.2: Assign role to user
+  assignRole: (userId: string, roleId: string, organizationId?: string) =>
+    request<UserRoleAssignment>(`/api/admin/users/${userId}/roles`, {
+      method: "POST",
+      body: JSON.stringify({ role_id: roleId, organization_id: organizationId }),
+    }),
+
+  // Story AP-1.2: Remove role from user
+  removeRole: (userId: string, assignmentId: string) =>
+    request<void>(`/api/admin/users/${userId}/roles/${assignmentId}`, {
+      method: "DELETE",
+    }),
 };

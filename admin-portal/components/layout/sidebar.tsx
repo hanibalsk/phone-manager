@@ -12,12 +12,14 @@ import {
   SlidersHorizontal,
   Users,
   Building2,
+  Shield,
 } from "lucide-react";
 
 const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Organizations", href: "/organizations", icon: Building2 },
   { name: "Users", href: "/users", icon: Users },
+  { name: "Roles", href: "/roles", icon: Shield },
   { name: "Devices", href: "/devices", icon: Smartphone },
   { name: "Unlock Requests", href: "/unlock-requests", icon: Bell },
   { name: "App Limits", href: "/limits", icon: Clock },
