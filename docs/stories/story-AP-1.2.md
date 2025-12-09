@@ -46,3 +46,73 @@ As a super admin, I want to assign roles to users for specific organizations so 
 - Role assignment changes should take effect immediately (no page reload needed)
 - Super admins can assign roles to any organization
 - Org admins can only assign roles within their organization scope
+
+## Change Log
+- 2025-12-09: UserRoleAssignmentDialog component created
+- 2025-12-09: "Manage Roles" action added to user actions menu
+- 2025-12-09: Senior Developer Review notes appended
+
+---
+
+## Senior Developer Review (AI)
+
+### Reviewer
+Martin
+
+### Date
+2025-12-09
+
+### Outcome
+**Approve** (with minor recommendations)
+
+### Summary
+Story AP-1.2 implements the role assignment UI allowing administrators to view, add, and remove role assignments for users. The UserRoleAssignmentDialog component integrates well with the existing user management system and provides a complete workflow for role management with organization scoping.
+
+### Key Findings
+
+#### Low Severity
+1. **Missing RoleAssignmentCard component** - Story mentions this component but it was not created; functionality is inline in the dialog
+2. **Missing unit tests** - No test files for UserRoleAssignmentDialog
+3. **Select element styling** - Native `<select>` elements used instead of Radix UI Select for consistency
+
+#### Medium Severity
+1. **Super admin check is client-side only** - The check preventing removal of the last super_admin role at line 90-98 in user-role-assignment-dialog.tsx should also be enforced on the backend
+
+### Acceptance Criteria Coverage
+
+| Criteria | Status | Notes |
+|----------|--------|-------|
+| User can have different roles in organizations | ✅ Complete | Dialog supports multiple role assignments |
+| Role assignment UI with org selector | ✅ Complete | Dropdown for organizations implemented |
+| Role changes take effect immediately | ✅ Complete | Uses loadData() refresh after changes |
+| Audit log captures role changes | N/A | Backend responsibility |
+
+### Test Coverage and Gaps
+
+- **Gap**: No unit tests for UserRoleAssignmentDialog
+- **Gap**: No integration tests for role assignment API calls
+- **Recommendation**: Add tests covering role assignment, removal, and super_admin protection
+
+### Architectural Alignment
+
+- ✅ Follows existing dialog patterns (Card, useFocusTrap)
+- ✅ Uses useApi hook for data fetching
+- ✅ Integrates with existing UserActionsMenu
+- ✅ Proper error handling with user feedback
+
+### Security Notes
+
+- ✅ Uses authenticated API calls
+- ⚠️ Super admin protection should be backend-enforced, not just frontend
+- ✅ No sensitive data exposed in UI
+
+### Best-Practices and References
+
+- [React Hook Form](https://react-hook-form.com/) - Consider for form management
+- [Radix UI Select](https://www.radix-ui.com/docs/primitives/components/select) - For consistent styling
+
+### Action Items
+
+1. **[Med]** Ensure backend enforces super_admin role removal protection
+2. **[Low]** Add unit tests for UserRoleAssignmentDialog component
+3. **[Low]** Consider using Radix UI Select for consistent styling

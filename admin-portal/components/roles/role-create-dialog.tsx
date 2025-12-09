@@ -3,6 +3,7 @@
 import { useState, useEffect, useId, useCallback } from "react";
 import type { Permission, PermissionCategory, CreateRoleRequest } from "@/types";
 import { rolesApi } from "@/lib/api-client";
+import { CATEGORY_LABELS } from "@/lib/permissions";
 import { useApi } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,23 +25,6 @@ interface RoleCreateDialogProps {
   onSuccess: () => void;
   onCancel: () => void;
 }
-
-const CATEGORY_LABELS: Record<PermissionCategory, string> = {
-  users: "Users",
-  organizations: "Organizations",
-  devices: "Devices",
-  locations: "Locations",
-  geofences: "Geofences",
-  alerts: "Alerts",
-  webhooks: "Webhooks",
-  trips: "Trips",
-  groups: "Groups",
-  enrollment: "Enrollment",
-  audit: "Audit",
-  config: "Configuration",
-  reports: "Reports",
-  api_keys: "API Keys",
-};
 
 interface FormErrors {
   name?: string;

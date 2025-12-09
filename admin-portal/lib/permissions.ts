@@ -94,6 +94,28 @@ export const ROLES_UPDATE = "roles.update";
 export const ROLES_DELETE = "roles.delete";
 
 /**
+ * Human-readable labels for permission categories.
+ * Used in role creation/editing dialogs and permission displays.
+ */
+export const CATEGORY_LABELS: Record<string, string> = {
+  users: "Users",
+  organizations: "Organizations",
+  devices: "Devices",
+  locations: "Locations",
+  geofences: "Geofences",
+  alerts: "Alerts",
+  webhooks: "Webhooks",
+  trips: "Trips",
+  groups: "Groups",
+  enrollment: "Enrollment",
+  audit: "Audit",
+  config: "Configuration",
+  reports: "Reports",
+  api_keys: "API Keys",
+  roles: "Roles",
+};
+
+/**
  * Permission groups for common use cases
  */
 export const PERMISSION_GROUPS = {

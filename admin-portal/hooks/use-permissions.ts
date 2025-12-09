@@ -6,6 +6,32 @@ import { useAuth } from "@/contexts/auth-context";
 /**
  * Hook for checking user permissions.
  * Permissions are derived from the user's roles and stored in the auth context.
+ *
+ * ## Super Admin Bypass
+ *
+ * Users with the `super_admin` role automatically bypass all permission checks.
+ * This is implemented in each permission checking function (hasPermission,
+ * hasAnyPermission, hasAllPermissions) by checking if any of the user's roles
+ * has `role_code === "super_admin"`.
+ *
+ * **Important**: This is a UX optimization only. The backend MUST also enforce
+ * the super_admin bypass to ensure security. Frontend permission checks
+ * should never be relied upon for actual access control.
+ *
+ * @example
+ * ```tsx
+ * const { hasPermission, isSuperAdmin } = usePermissions();
+ *
+ * // isSuperAdmin is true for super_admin role holders
+ * if (isSuperAdmin) {
+ *   // Show admin-only UI
+ * }
+ *
+ * // hasPermission returns true for super_admin even without explicit permission
+ * if (hasPermission("users.delete")) {
+ *   // This will be true for super_admin regardless of explicit permissions
+ * }
+ * ```
  */
 export function usePermissions() {
   const { user, isAuthenticated } = useAuth();
