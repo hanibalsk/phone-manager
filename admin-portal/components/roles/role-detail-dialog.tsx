@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useState, useId } from "react";
 import type { Role, PermissionCategory } from "@/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,8 +11,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { X, Shield, Check, Users } from "lucide-react";
+import { X, Shield, Check, Users, Pencil, Trash2 } from "lucide-react";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
+import { RoleEditDialog } from "./role-edit-dialog";
+import { RoleDeleteDialog } from "./role-delete-dialog";
 
 interface RoleDetailDialogProps {
   role: Role;
@@ -37,7 +39,10 @@ const CATEGORY_LABELS: Record<PermissionCategory, string> = {
   api_keys: "API Keys",
 };
 
-export function RoleDetailDialog({ role, onClose }: RoleDetailDialogProps) {
+export function RoleDetailDialog({ role, onClose, onUpdate }: RoleDetailDialogProps) {
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+
   const dialogRef = useFocusTrap<HTMLDivElement>({ onEscape: onClose });
   const titleId = useId();
   const descriptionId = useId();
@@ -150,15 +155,58 @@ export function RoleDetailDialog({ role, onClose }: RoleDetailDialogProps) {
           </div>
         </CardContent>
 
-        <div className="flex justify-end gap-2 p-6 border-t">
-          <Button variant="outline" onClick={onClose}>
-            Close
-          </Button>
-          {!role.is_system && (
-            <Button>Edit Role</Button>
-          )}
+        <div className="flex justify-between gap-2 p-6 border-t">
+          <div>
+            {!role.is_system && (
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            )}
+          </div>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={onClose}>
+              Close
+            </Button>
+            {!role.is_system && (
+              <Button onClick={() => setShowEditDialog(true)}>
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit Role
+              </Button>
+            )}
+          </div>
         </div>
       </Card>
+
+      {/* Edit Dialog */}
+      {showEditDialog && (
+        <RoleEditDialog
+          role={role}
+          onSuccess={() => {
+            setShowEditDialog(false);
+            onUpdate();
+            onClose();
+          }}
+          onCancel={() => setShowEditDialog(false)}
+        />
+      )}
+
+      {/* Delete Dialog */}
+      {showDeleteDialog && (
+        <RoleDeleteDialog
+          role={role}
+          onSuccess={() => {
+            setShowDeleteDialog(false);
+            onUpdate();
+            onClose();
+          }}
+          onCancel={() => setShowDeleteDialog(false)}
+        />
+      )}
     </div>
   );
 }
