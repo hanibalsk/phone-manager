@@ -7,3 +7,4 @@ export { UserSuspendDialog } from "./user-suspend-dialog";
 export { UserResetPasswordDialog } from "./user-reset-password-dialog";
 export { UserSessionsDialog } from "./user-sessions-dialog";
 export { UserMfaDialog } from "./user-mfa-dialog";
+export { UserRoleAssignmentDialog } from "./user-role-assignment-dialog";

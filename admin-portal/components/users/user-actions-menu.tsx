@@ -8,6 +8,7 @@ import { UserSuspendDialog } from "./user-suspend-dialog";
 import { UserResetPasswordDialog } from "./user-reset-password-dialog";
 import { UserSessionsDialog } from "./user-sessions-dialog";
 import { UserMfaDialog } from "./user-mfa-dialog";
+import { UserRoleAssignmentDialog } from "./user-role-assignment-dialog";
 import {
   MoreHorizontal,
   UserX,
@@ -15,6 +16,7 @@ import {
   KeyRound,
   Shield,
   Monitor,
+  Users,
 } from "lucide-react";
 
 interface UserActionsMenuProps {
@@ -22,7 +24,7 @@ interface UserActionsMenuProps {
   onActionComplete: () => void;
 }
 
-type ActionType = "suspend" | "reset-password" | "sessions" | "mfa" | null;
+type ActionType = "suspend" | "reset-password" | "sessions" | "mfa" | "roles" | null;
 
 export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps) {
   const [showMenu, setShowMenu] = useState(false);
@@ -134,6 +136,18 @@ export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps
               <Shield className="h-4 w-4" />
               Manage MFA
             </button>
+
+            <button
+              className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-muted"
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveAction("roles");
+                setShowMenu(false);
+              }}
+            >
+              <Users className="h-4 w-4" />
+              Manage Roles
+            </button>
           </div>
         </>
       )}
@@ -175,6 +189,15 @@ export function UserActionsMenu({ user, onActionComplete }: UserActionsMenuProps
         <UserMfaDialog
           user={user}
           onClose={() => setActiveAction(null)}
+        />
+      )}
+
+      {/* Role Assignment Dialog */}
+      {activeAction === "roles" && (
+        <UserRoleAssignmentDialog
+          user={user}
+          onClose={() => setActiveAction(null)}
+          onUpdate={onActionComplete}
         />
       )}
     </div>
