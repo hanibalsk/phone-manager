@@ -82,6 +82,7 @@ import type {
   AutoApprovalRule,
   CreateAutoApprovalRuleRequest,
   AutoApprovalLogEntry,
+  AutoApprovalConditions,
 } from "@/types";
 import type {
   LoginResponse,
@@ -1172,9 +1173,29 @@ export const unlockRequestsApi = {
     return request<{ items: AutoApprovalRule[] }>(endpoint);
   },
 
+  // Alias for consistency with component usage
+  listAutoApprovalRules: (params?: { organization_id?: string; enabled?: boolean }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.enabled !== undefined) searchParams.set("enabled", String(params.enabled));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/auto-approval-rules${queryString ? `?${queryString}` : ""}`;
+    return request<{ items: AutoApprovalRule[] }>(endpoint);
+  },
+
   getRule: (id: string) => request<AutoApprovalRule>(`/api/admin/auto-approval-rules/${id}`),
 
+  getAutoApprovalRule: (id: string) => request<AutoApprovalRule>(`/api/admin/auto-approval-rules/${id}`),
+
   createRule: (data: CreateAutoApprovalRuleRequest) =>
+    request<AutoApprovalRule>("/api/admin/auto-approval-rules", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  createAutoApprovalRule: (data: CreateAutoApprovalRuleRequest) =>
     request<AutoApprovalRule>("/api/admin/auto-approval-rules", {
       method: "POST",
       body: JSON.stringify(data),
@@ -1186,7 +1207,18 @@ export const unlockRequestsApi = {
       body: JSON.stringify(data),
     }),
 
+  updateAutoApprovalRule: (id: string, data: Partial<CreateAutoApprovalRuleRequest>) =>
+    request<AutoApprovalRule>(`/api/admin/auto-approval-rules/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
   deleteRule: (id: string) =>
+    request<void>(`/api/admin/auto-approval-rules/${id}`, {
+      method: "DELETE",
+    }),
+
+  deleteAutoApprovalRule: (id: string) =>
     request<void>(`/api/admin/auto-approval-rules/${id}`, {
       method: "DELETE",
     }),
@@ -1202,12 +1234,19 @@ export const unlockRequestsApi = {
       body: JSON.stringify({ rule_ids: ruleIds }),
     }),
 
+  reorderAutoApprovalRules: (data: { rule_ids: string[] }) =>
+    request<void>("/api/admin/auto-approval-rules/reorder", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
   // Auto-approval log
-  getAutoApprovalLog: (params?: { from?: string; to?: string; rule_id?: string; page?: number; limit?: number }) => {
+  getAutoApprovalLog: (params?: { from?: string; to?: string; organization_id?: string; rule_id?: string; page?: number; limit?: number }) => {
     const searchParams = new URLSearchParams();
     if (params) {
       if (params.from) searchParams.set("from", params.from);
       if (params.to) searchParams.set("to", params.to);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
       if (params.rule_id) searchParams.set("rule_id", params.rule_id);
       if (params.page) searchParams.set("page", String(params.page));
       if (params.limit) searchParams.set("limit", String(params.limit));

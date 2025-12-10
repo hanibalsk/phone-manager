@@ -818,7 +818,8 @@ export interface AppUsageParams {
 export interface TimeWindow {
   start_time: string; // HH:MM format (24h)
   end_time: string;
-  days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+  days?: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+  days_of_week?: number[]; // 0-6 (Sunday-Saturday) - for auto-approval rules
 }
 
 export interface AppLimit {
@@ -944,12 +945,12 @@ export interface DenyUnlockRequest {
 }
 
 // Story AP-8.5: Auto-Approval Rules
-export interface AutoApprovalCondition {
-  type: "time_window" | "user" | "device" | "group";
+export interface AutoApprovalConditions {
   time_window?: TimeWindow;
   user_ids?: string[];
   device_ids?: string[];
   group_ids?: string[];
+  max_daily_requests?: number;
 }
 
 export interface AutoApprovalRule {
@@ -959,7 +960,7 @@ export interface AutoApprovalRule {
   organization_id: string;
   organization_name: string;
   priority: number;
-  conditions: AutoApprovalCondition[];
+  conditions: AutoApprovalConditions;
   max_duration_minutes: number;
   enabled: boolean;
   approval_count: number;
@@ -971,8 +972,10 @@ export interface AutoApprovalRule {
 export interface CreateAutoApprovalRuleRequest {
   name: string;
   description?: string;
-  conditions: AutoApprovalCondition[];
+  organization_id: string;
+  conditions: AutoApprovalConditions;
   max_duration_minutes: number;
+  enabled?: boolean;
 }
 
 export interface AutoApprovalLogEntry {
@@ -980,10 +983,12 @@ export interface AutoApprovalLogEntry {
   request_id: string;
   rule_id: string;
   rule_name: string;
+  organization_id: string;
   device_id: string;
   device_name: string;
   user_id: string;
   user_name: string;
+  requested_duration_minutes: number;
   approved_duration_minutes: number;
-  triggered_at: string;
+  approved_at: string;
 }

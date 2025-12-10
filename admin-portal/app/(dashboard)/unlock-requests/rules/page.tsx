@@ -1,11 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { AutoApprovalRules, AutoApprovalLog } from "@/components/unlock-requests";
 
-// Placeholder page - will be fully implemented in AP-8.5
 export default function AutoApprovalRulesPage() {
+  const [activeTab, setActiveTab] = useState<"rules" | "log">("rules");
+
   return (
     <div className="container mx-auto py-6">
       <div className="mb-6">
@@ -17,12 +20,23 @@ export default function AutoApprovalRulesPage() {
         </Link>
       </div>
 
-      <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-        <Settings className="h-16 w-16 mb-4 opacity-50" />
-        <h2 className="text-xl font-semibold mb-2">Auto-Approval Rules</h2>
-        <p>Configure automatic approval rules for unlock requests.</p>
-        <p className="text-sm mt-2">(Full implementation in Story AP-8.5)</p>
+      {/* Tab Navigation */}
+      <div className="flex gap-2 mb-6">
+        <Button
+          variant={activeTab === "rules" ? "default" : "outline"}
+          onClick={() => setActiveTab("rules")}
+        >
+          Rules
+        </Button>
+        <Button
+          variant={activeTab === "log" ? "default" : "outline"}
+          onClick={() => setActiveTab("log")}
+        >
+          Audit Log
+        </Button>
       </div>
+
+      {activeTab === "rules" ? <AutoApprovalRules /> : <AutoApprovalLog />}
     </div>
   );
 }

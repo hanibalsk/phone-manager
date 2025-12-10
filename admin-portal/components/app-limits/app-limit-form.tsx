@@ -114,10 +114,11 @@ export function AppLimitForm({ limit }: AppLimitFormProps) {
   const toggleDay = (windowIndex: number, day: "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun") => {
     const updated = [...timeWindows];
     const window = updated[windowIndex];
-    if (window.days.includes(day)) {
-      window.days = window.days.filter((d) => d !== day);
+    const days = window.days || [];
+    if (days.includes(day)) {
+      window.days = days.filter((d) => d !== day);
     } else {
-      window.days = [...window.days, day];
+      window.days = [...days, day];
     }
     setTimeWindows(updated);
   };
@@ -457,7 +458,7 @@ export function AppLimitForm({ limit }: AppLimitFormProps) {
                         key={day.value}
                         type="button"
                         className={`px-3 py-1 rounded text-sm ${
-                          window.days.includes(day.value)
+                          window.days?.includes(day.value)
                             ? "bg-primary text-primary-foreground"
                             : "bg-secondary text-secondary-foreground"
                         }`}

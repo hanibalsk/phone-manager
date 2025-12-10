@@ -4,7 +4,7 @@
 **Epic**: AP-8 - App Usage & Unlock Requests
 **Priority**: Medium
 **Estimate**: 2 story points (1-2 days)
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Created**: 2025-12-10
 **PRD Reference**: FR-8.5 (Admin Portal PRD)
 
@@ -38,26 +38,28 @@ so that I can reduce manual work.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add Auto-Approval Types (AC: AP-8.5.1)
-  - [ ] Add AutoApprovalRule type to types/index.ts
-  - [ ] Add RuleCondition type
-  - [ ] Add auto-approval API endpoints
-- [ ] Task 2: Create Auto-Approval Page (AC: AP-8.5.1)
-  - [ ] Create app/(dashboard)/unlock-requests/rules/page.tsx
-- [ ] Task 3: Create Rules List Component (AC: AP-8.5.1, AP-8.5.3)
-  - [ ] Create components/unlock-requests/auto-approval-rules.tsx
-  - [ ] Show rules with priority
-  - [ ] Drag to reorder or priority buttons
-  - [ ] Toggle enable/disable
-- [ ] Task 4: Create Rule Form (AC: AP-8.5.1, AP-8.5.2)
-  - [ ] Create components/unlock-requests/auto-approval-rule-form.tsx
-  - [ ] Time window conditions
-  - [ ] User/device conditions
-  - [ ] Max duration setting
-- [ ] Task 5: Create Audit Log Component (AC: AP-8.5.4)
-  - [ ] Create components/unlock-requests/auto-approval-log.tsx
-  - [ ] Show auto-approved requests
-  - [ ] Which rule triggered
+- [x] Task 1: Add Auto-Approval Types (AC: AP-8.5.1)
+  - [x] Add AutoApprovalRule type to types/index.ts (added in AP-8.1)
+  - [x] Add AutoApprovalConditions type
+  - [x] Add auto-approval API endpoints (added in AP-8.1)
+- [x] Task 2: Create Auto-Approval Page (AC: AP-8.5.1)
+  - [x] Update app/(dashboard)/unlock-requests/rules/page.tsx with tabs
+- [x] Task 3: Create Rules List Component (AC: AP-8.5.1, AP-8.5.3)
+  - [x] Create components/unlock-requests/auto-approval-rules.tsx
+  - [x] Show rules with priority number badge
+  - [x] Up/down arrows to reorder
+  - [x] Toggle enable/disable with icon
+- [x] Task 4: Create Rule Form (AC: AP-8.5.1, AP-8.5.2)
+  - [x] Create components/unlock-requests/auto-approval-rule-form.tsx
+  - [x] Time window conditions (start/end time, day selection)
+  - [x] User/device/group conditions with multi-select
+  - [x] Max duration setting with presets
+  - [x] Max daily requests limit
+- [x] Task 5: Create Audit Log Component (AC: AP-8.5.4)
+  - [x] Create components/unlock-requests/auto-approval-log.tsx
+  - [x] Show auto-approved requests with filters
+  - [x] Statistics summary (total, rules triggered, avg duration)
+  - [x] Rule name and trigger details
 - [ ] Task 6: Testing (All ACs) - Deferred
   - [ ] Test auto-approval rules
 
@@ -104,13 +106,32 @@ GET /api/admin/auto-approval-log?from=...&to=...
 Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-(To be filled during development)
+- Types and API endpoints added in AP-8.1 for efficiency
 
 ### Completion Notes List
-(To be filled during development)
+- Auto-approval rules list with priority badges and reorder controls
+- Toggle enable/disable with visual indicator
+- Comprehensive rule form with multiple condition types:
+  - Time window with start/end time and day selection
+  - User-specific rules with multi-select
+  - Device-specific rules with multi-select
+  - Group-specific rules with multi-select
+  - Maximum daily requests limit
+- Duration presets (15m, 30m, 1h, 2h) + custom option
+- Audit log with org/rule filters and date range
+- Statistics summary (total, rules triggered, avg duration)
+- Tab navigation between Rules and Audit Log
 
 ### File List
-(To be filled during development)
+- `admin-portal/types/index.ts` (MODIFIED - updated AutoApprovalConditions, TimeWindow)
+- `admin-portal/lib/api-client.ts` (MODIFIED - added alias methods for auto-approval)
+- `admin-portal/components/unlock-requests/auto-approval-rules.tsx` (NEW)
+- `admin-portal/components/unlock-requests/auto-approval-rule-form.tsx` (NEW)
+- `admin-portal/components/unlock-requests/auto-approval-log.tsx` (NEW)
+- `admin-portal/components/unlock-requests/index.tsx` (MODIFIED)
+- `admin-portal/app/(dashboard)/unlock-requests/rules/page.tsx` (MODIFIED)
+- `admin-portal/app/(dashboard)/unlock-requests/rules/new/page.tsx` (NEW)
+- `admin-portal/app/(dashboard)/unlock-requests/rules/[id]/edit/page.tsx` (NEW)
 
 ---
 
@@ -119,9 +140,10 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-10 | Claude | Initial story creation from PRD |
+| 2025-12-10 | Claude | Implemented auto-approval rules feature |
 
 ---
 
 **Last Updated**: 2025-12-10
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Dependencies**: Story AP-8.4 (Manage Unlock Requests)
