@@ -4,7 +4,7 @@
 **Epic**: AP-7 - Webhooks & Trips Administration
 **Priority**: Medium
 **Estimate**: 2 story points (1-2 days)
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Created**: 2025-12-10
 **PRD Reference**: FR-7.5 (Admin Portal PRD)
 
@@ -37,22 +37,22 @@ so that I can perform offline analysis.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add Export Types (AC: AP-7.5.1)
-  - [ ] Add TripExportRequest type to types/index.ts
-  - [ ] Add trip export API endpoint
-- [ ] Task 2: Create Export Modal (AC: AP-7.5.1, AP-7.5.2, AP-7.5.3)
-  - [ ] Create components/trips/trip-export-modal.tsx
-  - [ ] Device/organization selection
-  - [ ] Date range picker
-  - [ ] Format selection (CSV/JSON)
-  - [ ] Include coordinates checkbox
-- [ ] Task 3: Implement Export Functionality (AC: AP-7.5.2)
-  - [ ] CSV export with trip summary data
-  - [ ] JSON export with full trip data
-  - [ ] Include path coordinates when selected
-- [ ] Task 4: Add Export to Trip List (AC: AP-7.5.1)
-  - [ ] Add export button to trips page
-  - [ ] Pass current filters to export
+- [x] Task 1: Add Export Types (AC: AP-7.5.1)
+  - [x] Add TripExportRequest type to types/index.ts
+  - [x] Add trip export API endpoint
+- [x] Task 2: Create Export Modal (AC: AP-7.5.1, AP-7.5.2, AP-7.5.3)
+  - [x] Create components/trips/trip-export-modal.tsx
+  - [x] Device/organization selection
+  - [x] Date range picker
+  - [x] Format selection (CSV/JSON)
+  - [x] Include coordinates checkbox
+- [x] Task 3: Implement Export Functionality (AC: AP-7.5.2)
+  - [x] CSV export with trip summary data
+  - [x] JSON export with full trip data
+  - [x] Include path coordinates when selected
+- [x] Task 4: Add Export to Trip List (AC: AP-7.5.1)
+  - [x] Add export button to trips page
+  - [x] Pass current filters to export
 - [ ] Task 5: Testing (All ACs) - Deferred
   - [ ] Test export functionality
   - [ ] Test different formats
@@ -92,13 +92,21 @@ POST /api/admin/trips/export - For async large exports (future)
 Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-(To be filled during development)
+- TripExportRequest type added in Story AP-7.1 (already existed)
+- Export runs client-side for datasets up to 1000 trips
 
 ### Completion Notes List
-(To be filled during development)
+- Created export modal with org/device/date filters
+- Format selection: CSV and JSON
+- Optional path coordinates inclusion (fetched in batches of 10)
+- Progress indicator during export
+- Export button added to trip list header
+- Current filters passed to export modal as initial values
 
 ### File List
-(To be filled during development)
+- `admin-portal/components/trips/trip-export-modal.tsx` (NEW)
+- `admin-portal/components/trips/admin-trip-list.tsx` (MODIFIED - added export button)
+- `admin-portal/components/trips/index.tsx` (MODIFIED - added export)
 
 ---
 
@@ -107,9 +115,10 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-10 | Claude | Initial story creation from PRD |
+| 2025-12-10 | Claude | Implemented export modal with CSV/JSON support |
 
 ---
 
 **Last Updated**: 2025-12-10
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Dependencies**: Story AP-7.4 (Trip Data View)

@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { Trip, Organization, AdminDevice, TripStatus } from "@/types";
 import { TripStatusBadge } from "./trip-status-badge";
+import { TripExportModal } from "./trip-export-modal";
 import { tripsApi, organizationsApi, adminDevicesApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
 import {
@@ -22,6 +23,7 @@ import {
   MapPin,
   Clock,
   Gauge,
+  Download,
 } from "lucide-react";
 
 const ITEMS_PER_PAGE = 20;
@@ -34,6 +36,7 @@ export function AdminTripList() {
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [page, setPage] = useState(1);
+  const [showExportModal, setShowExportModal] = useState(false);
 
   const { data: orgsData, execute: fetchOrgs } = useApi<{ items: Organization[] }>();
   const { data: devicesData, execute: fetchDevices } = useApi<{ items: AdminDevice[] }>();
@@ -101,10 +104,16 @@ export function AdminTripList() {
               {total} trip{total !== 1 ? "s" : ""} total
             </CardDescription>
           </div>
-          <Button variant="outline" size="sm" onClick={loadTrips} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" size="sm" onClick={() => setShowExportModal(true)}>
+              <Download className="h-4 w-4 mr-2" />
+              Export
+            </Button>
+            <Button variant="outline" size="sm" onClick={loadTrips} disabled={loading}>
+              <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -288,6 +297,19 @@ export function AdminTripList() {
           </>
         )}
       </CardContent>
+
+      {/* Export Modal */}
+      {showExportModal && (
+        <TripExportModal
+          initialFilters={{
+            organization_id: organizationId || undefined,
+            device_id: deviceId || undefined,
+            from: fromDate || undefined,
+            to: toDate || undefined,
+          }}
+          onClose={() => setShowExportModal(false)}
+        />
+      )}
     </Card>
   );
 }
