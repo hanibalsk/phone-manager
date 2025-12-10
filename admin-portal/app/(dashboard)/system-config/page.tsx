@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Shield, Flag, Gauge, Key, Database, Settings } from "lucide-react";
-import { AuthSettings, FeatureFlags, RateLimits, ApiKeys } from "@/components/system-config";
+import { AuthSettings, FeatureFlags, RateLimits, ApiKeys, RetentionSettings } from "@/components/system-config";
 
 type ConfigTab =
   | "auth"
@@ -66,11 +66,7 @@ export default function SystemConfigPage() {
       case "api-keys":
         return <ApiKeys />;
       case "retention":
-        return (
-          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            Data Retention - Coming in AP-9.5
-          </div>
-        );
+        return <RetentionSettings />;
       default:
         return null;
     }

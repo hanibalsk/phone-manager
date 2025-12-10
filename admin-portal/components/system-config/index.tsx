@@ -12,5 +12,5 @@ export { RateLimits } from "./rate-limits";
 // Story AP-9.4: API Keys
 export { ApiKeys } from "./api-keys";
 
-// Story AP-9.5: Data Retention (coming soon)
-// export { RetentionSettings } from "./retention-settings";
+// Story AP-9.5: Data Retention
+export { RetentionSettings } from "./retention-settings";
