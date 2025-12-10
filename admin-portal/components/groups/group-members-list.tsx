@@ -39,8 +39,11 @@ export function GroupMembersList({ groupId, groupName }: GroupMembersListProps) 
   // Role change
   const { loading: roleLoading, execute: executeRoleChange } = useApi<GroupMember>();
 
-  // Remove member
-  const { loading: removeLoading, execute: executeRemove } = useApi<void>();
+  // Remove member - track success/failure via ref since void response returns null either way
+  const removeSuccessRef = { current: true };
+  const { loading: removeLoading, execute: executeRemove } = useApi<void>({
+    onError: () => { removeSuccessRef.current = false; },
+  });
 
   const fetchMembers = useCallback(() => {
     execute(() => adminGroupsApi.getMembers(groupId));
@@ -71,15 +74,21 @@ export function GroupMembersList({ groupId, groupName }: GroupMembersListProps) 
   const handleRemoveMember = async () => {
     if (!memberToRemove) return;
 
+    const memberName = memberToRemove.user_name;
+    removeSuccessRef.current = true; // Reset before call
+
     await executeRemove(() =>
       adminGroupsApi.removeMember(groupId, memberToRemove.id)
     );
 
-    // For void responses, we check if an error was set on the hook
-    // We need to re-fetch and check for success
-    showNotification("success", `${memberToRemove.user_name} removed from group`);
-    fetchMembers();
     setMemberToRemove(null);
+
+    if (removeSuccessRef.current) {
+      showNotification("success", `${memberName} removed from group`);
+      fetchMembers();
+    } else {
+      showNotification("error", "Failed to remove member. Please try again.");
+    }
   };
 
   const formatDateTime = (dateString: string) => {

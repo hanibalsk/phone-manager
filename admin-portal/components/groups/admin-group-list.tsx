@@ -155,7 +155,7 @@ export function AdminGroupList() {
   };
 
   return (
-    <Card>
+    <Card data-testid="group-list-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -188,12 +188,14 @@ export function AdminGroupList() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
+              data-testid="group-search-input"
             />
           </div>
           <select
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
             value={organizationFilter}
             onChange={(e) => setOrganizationFilter(e.target.value)}
+            data-testid="group-org-filter"
           >
             <option value="all">All Organizations</option>
             {organizations.map((org) => (
@@ -206,6 +208,7 @@ export function AdminGroupList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[130px]"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as GroupStatus | "all")}
+            data-testid="group-status-filter"
           >
             {STATUS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -263,7 +266,7 @@ export function AdminGroupList() {
         {!error && groups.length > 0 && (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" data-testid="group-table">
                 <thead>
                   <tr className="border-b">
                     <th
@@ -313,6 +316,7 @@ export function AdminGroupList() {
                     <tr
                       key={group.id}
                       className="border-b hover:bg-muted/50"
+                      data-testid={`group-row-${group.id}`}
                     >
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">

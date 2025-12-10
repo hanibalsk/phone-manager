@@ -46,8 +46,11 @@ export function GroupInvitesList({ groupId, groupName }: GroupInvitesListProps) 
   // Fetch invites
   const { data: invites, loading, error, execute } = useApi<GroupInvite[]>();
 
-  // Revoke single invite
-  const { loading: revokeLoading, execute: executeRevoke } = useApi<void>();
+  // Revoke single invite - track success/failure via ref since void response returns null either way
+  const revokeSuccessRef = { current: true };
+  const { loading: revokeLoading, execute: executeRevoke } = useApi<void>({
+    onError: () => { revokeSuccessRef.current = false; },
+  });
 
   // Bulk revoke
   const { loading: bulkRevokeLoading, execute: executeBulkRevoke } = useApi<{ revoked_count: number }>();
@@ -69,13 +72,20 @@ export function GroupInvitesList({ groupId, groupName }: GroupInvitesListProps) 
   const handleRevokeInvite = async () => {
     if (!inviteToRevoke) return;
 
+    revokeSuccessRef.current = true; // Reset before call
+
     await executeRevoke(() =>
       adminGroupsApi.revokeInvite(groupId, inviteToRevoke.id)
     );
 
-    showNotification("success", "Invite revoked successfully");
     setInviteToRevoke(null);
-    fetchInvites();
+
+    if (revokeSuccessRef.current) {
+      showNotification("success", "Invite revoked successfully");
+      fetchInvites();
+    } else {
+      showNotification("error", "Failed to revoke invite. Please try again.");
+    }
   };
 
   const handleBulkRevoke = async () => {
