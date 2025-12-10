@@ -4,7 +4,7 @@
 **Epic**: AP-8 - App Usage & Unlock Requests
 **Priority**: Medium
 **Estimate**: 2 story points (1-2 days)
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Created**: 2025-12-10
 **PRD Reference**: FR-8.3 (Admin Portal PRD)
 
@@ -40,20 +40,20 @@ so that I can reuse configurations.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add Template Types (AC: AP-8.3.1)
-  - [ ] Add LimitTemplate type to types/index.ts
-  - [ ] Add template API endpoints
-- [ ] Task 2: Create Templates Page (AC: AP-8.3.1)
-  - [ ] Create app/(dashboard)/app-limits/templates/page.tsx
-- [ ] Task 3: Create Template List Component (AC: AP-8.3.1, AP-8.3.4)
-  - [ ] Create components/app-limits/limit-template-list.tsx
-  - [ ] Show templates with linked device count
-  - [ ] Delete with replacement modal
-- [ ] Task 4: Create Template Form (AC: AP-8.3.1, AP-8.3.2, AP-8.3.3)
-  - [ ] Create components/app-limits/limit-template-form.tsx
-  - [ ] Template name
-  - [ ] Multiple limit rules
-  - [ ] Device/group assignment
+- [x] Task 1: Add Template Types (AC: AP-8.3.1)
+  - [x] Add LimitTemplate type to types/index.ts
+  - [x] Add template API endpoints
+- [x] Task 2: Create Templates Page (AC: AP-8.3.1)
+  - [x] Create app/(dashboard)/app-limits/templates/page.tsx
+- [x] Task 3: Create Template List Component (AC: AP-8.3.1, AP-8.3.4)
+  - [x] Create components/app-limits/limit-template-list.tsx
+  - [x] Show templates with linked device count
+  - [x] Delete with replacement modal
+- [x] Task 4: Create Template Form (AC: AP-8.3.1, AP-8.3.2, AP-8.3.3)
+  - [x] Create components/app-limits/limit-template-form.tsx
+  - [x] Template name
+  - [x] Multiple limit rules
+  - [x] Device/group assignment
 - [ ] Task 5: Testing (All ACs) - Deferred
   - [ ] Test template management
 
@@ -97,13 +97,22 @@ POST /api/admin/limit-templates/:id/apply - Apply to devices/groups
 Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-(To be filled during development)
+- Types and API added in AP-8.1
 
 ### Completion Notes List
-(To be filled during development)
+- Template list with expandable rules preview
+- Delete with replacement template option for linked devices
+- Multi-rule template form with duplicate/remove functionality
+- Apply to devices/groups modal
+- Rule preview showing target and limit type
 
 ### File List
-(To be filled during development)
+- `admin-portal/app/(dashboard)/app-limits/templates/page.tsx` (NEW)
+- `admin-portal/app/(dashboard)/app-limits/templates/new/page.tsx` (NEW)
+- `admin-portal/app/(dashboard)/app-limits/templates/[id]/edit/page.tsx` (NEW)
+- `admin-portal/components/app-limits/limit-template-list.tsx` (NEW)
+- `admin-portal/components/app-limits/limit-template-form.tsx` (NEW)
+- `admin-portal/components/app-limits/index.tsx` (MODIFIED)
 
 ---
 
@@ -112,9 +121,10 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-10 | Claude | Initial story creation from PRD |
+| 2025-12-10 | Claude | Implemented limit templates feature |
 
 ---
 
 **Last Updated**: 2025-12-10
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Dependencies**: Story AP-8.2 (Configure App Limits)
