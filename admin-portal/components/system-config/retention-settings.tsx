@@ -176,7 +176,7 @@ export function RetentionSettings() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="retention-settings-container">
       {/* Notification */}
       {notification && (
         <div
@@ -213,6 +213,7 @@ export function RetentionSettings() {
           variant={activeView === "settings" ? "default" : "outline"}
           onClick={() => setActiveView("settings")}
           className="flex items-center gap-2"
+          data-testid="retention-tab-settings"
         >
           <Database className="h-4 w-4" />
           Retention Settings
@@ -221,6 +222,7 @@ export function RetentionSettings() {
           variant={activeView === "stats" ? "default" : "outline"}
           onClick={() => setActiveView("stats")}
           className="flex items-center gap-2"
+          data-testid="retention-tab-stats"
         >
           <HardDrive className="h-4 w-4" />
           Storage Statistics
@@ -250,6 +252,7 @@ export function RetentionSettings() {
                     onClick={() =>
                       handleFormChange("default_retention_period", period)
                     }
+                    data-testid={`retention-default-period-${period}`}
                   >
                     {retentionPeriodLabels[period]}
                   </Button>
@@ -278,6 +281,7 @@ export function RetentionSettings() {
                   <div
                     key={dt.data_type}
                     className="p-4 rounded-lg border flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    data-testid={`retention-data-type-${dt.data_type}`}
                   >
                     <div className="flex items-start gap-3">
                       <Icon className="h-5 w-5 text-muted-foreground mt-0.5" />
@@ -297,6 +301,7 @@ export function RetentionSettings() {
                         )
                       }
                       className="px-3 py-2 border rounded-md bg-background text-sm min-w-[140px]"
+                      data-testid={`retention-data-type-select-${dt.data_type}`}
                     >
                       {(
                         Object.keys(retentionPeriodLabels) as RetentionPeriod[]
@@ -335,6 +340,7 @@ export function RetentionSettings() {
                       )
                     }
                     className="w-24"
+                    data-testid="retention-inactive-device-threshold"
                   />
                   <span className="text-sm text-muted-foreground">days</span>
                 </div>
@@ -351,6 +357,7 @@ export function RetentionSettings() {
                     onClick={() =>
                       handleFormChange("inactive_device_threshold_days", days)
                     }
+                    data-testid={`retention-inactive-preset-${days}d`}
                   >
                     {days}d
                   </Button>
@@ -372,6 +379,7 @@ export function RetentionSettings() {
                 ? "border-primary bg-primary/5"
                 : "border-border"
             }`}
+            data-testid="retention-auto-cleanup-toggle"
           >
             <div>
               <div className="font-medium">Automatic Cleanup</div>
@@ -413,6 +421,7 @@ export function RetentionSettings() {
               variant="outline"
               onClick={handlePreview}
               disabled={loadingPreview}
+              data-testid="retention-preview-cleanup"
             >
               {loadingPreview ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -422,7 +431,7 @@ export function RetentionSettings() {
               Preview Cleanup
             </Button>
 
-            <Button onClick={handleSave} disabled={!hasChanges || savingConfig}>
+            <Button onClick={handleSave} disabled={!hasChanges || savingConfig} data-testid="retention-save-button">
               {savingConfig ? (
                 <Loader2 className="h-4 w-4 animate-spin mr-2" />
               ) : (
@@ -446,6 +455,7 @@ export function RetentionSettings() {
               size="sm"
               onClick={() => fetchStats(() => systemRetentionApi.getStats())}
               disabled={loadingStats}
+              data-testid="retention-refresh-stats"
             >
               {loadingStats ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -458,7 +468,7 @@ export function RetentionSettings() {
 
           {/* Total Storage Summary */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="p-4 rounded-lg bg-blue-50 border border-blue-200">
+            <div className="p-4 rounded-lg bg-blue-50 border border-blue-200" data-testid="retention-total-storage">
               <div className="text-2xl font-bold text-blue-700">
                 {formatStorage(
                   stats.reduce((sum, s) => sum + s.storage_used_mb, 0)
@@ -466,13 +476,13 @@ export function RetentionSettings() {
               </div>
               <div className="text-sm text-blue-600">Total Storage</div>
             </div>
-            <div className="p-4 rounded-lg bg-green-50 border border-green-200">
+            <div className="p-4 rounded-lg bg-green-50 border border-green-200" data-testid="retention-total-records">
               <div className="text-2xl font-bold text-green-700">
                 {stats.reduce((sum, s) => sum + s.total_records, 0).toLocaleString()}
               </div>
               <div className="text-sm text-green-600">Total Records</div>
             </div>
-            <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+            <div className="p-4 rounded-lg bg-amber-50 border border-amber-200" data-testid="retention-pending-deletion">
               <div className="text-2xl font-bold text-amber-700">
                 {stats
                   .reduce((sum, s) => sum + s.records_to_delete, 0)
@@ -480,7 +490,7 @@ export function RetentionSettings() {
               </div>
               <div className="text-sm text-amber-600">Pending Deletion</div>
             </div>
-            <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+            <div className="p-4 rounded-lg bg-gray-50 border border-gray-200" data-testid="retention-data-types-count">
               <div className="text-2xl font-bold text-gray-700">
                 {stats.length}
               </div>
@@ -503,7 +513,7 @@ export function RetentionSettings() {
                   : 0;
 
               return (
-                <div key={stat.data_type} className="p-4 rounded-lg border">
+                <div key={stat.data_type} className="p-4 rounded-lg border" data-testid={`retention-stat-${stat.data_type}`}>
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Icon className="h-4 w-4 text-muted-foreground" />
@@ -570,7 +580,7 @@ export function RetentionSettings() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowPreview(false)}
           />
-          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-lg mx-4 p-6">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-lg mx-4 p-6" data-testid="retention-preview-dialog">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle className="h-6 w-6 text-amber-500" />
               <h3 className="text-lg font-semibold">Cleanup Preview</h3>
@@ -622,7 +632,7 @@ export function RetentionSettings() {
             </div>
 
             <div className="flex justify-end">
-              <Button onClick={() => setShowPreview(false)}>Close</Button>
+              <Button onClick={() => setShowPreview(false)} data-testid="retention-preview-close">Close</Button>
             </div>
           </div>
         </div>

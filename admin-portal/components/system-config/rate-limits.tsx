@@ -187,7 +187,7 @@ export function RateLimits() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="rate-limits-container">
       {/* Notification */}
       {notification && (
         <div
@@ -212,6 +212,7 @@ export function RateLimits() {
           variant={activeView === "limits" ? "default" : "outline"}
           onClick={() => setActiveView("limits")}
           className="flex items-center gap-2"
+          data-testid="rate-limits-tab-limits"
         >
           <Gauge className="h-4 w-4" />
           Default Limits
@@ -220,6 +221,7 @@ export function RateLimits() {
           variant={activeView === "overrides" ? "default" : "outline"}
           onClick={() => setActiveView("overrides")}
           className="flex items-center gap-2"
+          data-testid="rate-limits-tab-overrides"
         >
           <Building className="h-4 w-4" />
           Organization Overrides
@@ -233,6 +235,7 @@ export function RateLimits() {
           variant={activeView === "metrics" ? "default" : "outline"}
           onClick={() => setActiveView("metrics")}
           className="flex items-center gap-2"
+          data-testid="rate-limits-tab-metrics"
         >
           <BarChart3 className="h-4 w-4" />
           Metrics
@@ -256,6 +259,7 @@ export function RateLimits() {
                     ? "border-border"
                     : "border-amber-200 bg-amber-50/50"
                 }`}
+                data-testid={`rate-limit-item-${limit.endpoint_category}`}
               >
                 {editingLimit?.id === limit.id ? (
                   <div className="space-y-4">
@@ -271,6 +275,7 @@ export function RateLimits() {
                           size="sm"
                           variant="outline"
                           onClick={() => setEditingLimit(null)}
+                          data-testid={`rate-limit-cancel-${limit.endpoint_category}`}
                         >
                           <X className="h-4 w-4" />
                         </Button>
@@ -278,6 +283,7 @@ export function RateLimits() {
                           size="sm"
                           onClick={handleSaveLimit}
                           disabled={savingLimit}
+                          data-testid={`rate-limit-save-${limit.endpoint_category}`}
                         >
                           {savingLimit ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -300,6 +306,7 @@ export function RateLimits() {
                               requests_per_minute: parseInt(e.target.value, 10),
                             }))
                           }
+                          data-testid={`rate-limit-per-minute-${limit.endpoint_category}`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -313,6 +320,7 @@ export function RateLimits() {
                               requests_per_hour: parseInt(e.target.value, 10),
                             }))
                           }
+                          data-testid={`rate-limit-per-hour-${limit.endpoint_category}`}
                         />
                       </div>
                       <div className="space-y-1">
@@ -326,6 +334,7 @@ export function RateLimits() {
                               requests_per_day: parseInt(e.target.value, 10),
                             }))
                           }
+                          data-testid={`rate-limit-per-day-${limit.endpoint_category}`}
                         />
                       </div>
                     </div>
@@ -387,6 +396,7 @@ export function RateLimits() {
                       variant="ghost"
                       size="sm"
                       onClick={() => startEditingLimit(limit)}
+                      data-testid={`rate-limit-edit-${limit.endpoint_category}`}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -419,6 +429,7 @@ export function RateLimits() {
                 });
                 setShowOverrideForm(true);
               }}
+              data-testid="rate-limits-add-override"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Override
@@ -439,6 +450,7 @@ export function RateLimits() {
                 <div
                   key={override.id}
                   className="p-4 rounded-lg border"
+                  data-testid={`rate-limit-override-${override.id}`}
                 >
                   <div className="flex items-center justify-between">
                     <div>
@@ -465,6 +477,7 @@ export function RateLimits() {
                         variant="ghost"
                         size="sm"
                         onClick={() => startEditingOverride(override)}
+                        data-testid={`rate-limit-override-edit-${override.id}`}
                       >
                         <Edit className="h-4 w-4" />
                       </Button>
@@ -473,6 +486,7 @@ export function RateLimits() {
                         size="sm"
                         className="text-red-600 hover:text-red-700 hover:bg-red-50"
                         onClick={() => setOverrideToDelete(override)}
+                        data-testid={`rate-limit-override-delete-${override.id}`}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -497,6 +511,7 @@ export function RateLimits() {
               size="sm"
               onClick={() => fetchMetrics(() => rateLimitsApi.getMetrics())}
               disabled={loadingMetrics}
+              data-testid="rate-limits-refresh-metrics"
             >
               {loadingMetrics ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -526,7 +541,7 @@ export function RateLimits() {
                   : 0;
 
                 return (
-                  <div key={metric.endpoint_category} className="p-4 rounded-lg border">
+                  <div key={metric.endpoint_category} className="p-4 rounded-lg border" data-testid={`rate-limit-metric-${metric.endpoint_category}`}>
                     <div className="flex items-center justify-between mb-2">
                       <span className="font-medium">{metric.endpoint_category}</span>
                       {metric.rate_limited_requests_today > 0 && (
@@ -602,7 +617,7 @@ export function RateLimits() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowOverrideForm(false)}
           />
-          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-lg mx-4 p-6">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-lg mx-4 p-6" data-testid="rate-limit-override-form-dialog">
             <h3 className="text-lg font-semibold mb-4">
               {editingOverride ? "Edit Override" : "Add Rate Limit Override"}
             </h3>
@@ -620,6 +635,7 @@ export function RateLimits() {
                   }
                   className="w-full px-3 py-2 border rounded-md bg-background text-sm"
                   disabled={!!editingOverride}
+                  data-testid="rate-limit-override-org-select"
                 >
                   <option value="">Select organization...</option>
                   {organizations.map((org) => (
@@ -642,6 +658,7 @@ export function RateLimits() {
                   }
                   className="w-full px-3 py-2 border rounded-md bg-background text-sm"
                   disabled={!!editingOverride}
+                  data-testid="rate-limit-override-category-select"
                 >
                   <option value="">Select category...</option>
                   {limits.map((limit) => (
@@ -664,6 +681,7 @@ export function RateLimits() {
                         requests_per_minute: parseInt(e.target.value, 10),
                       }))
                     }
+                    data-testid="rate-limit-override-per-minute"
                   />
                 </div>
                 <div className="space-y-1">
@@ -677,6 +695,7 @@ export function RateLimits() {
                         requests_per_hour: parseInt(e.target.value, 10),
                       }))
                     }
+                    data-testid="rate-limit-override-per-hour"
                   />
                 </div>
                 <div className="space-y-1">
@@ -690,6 +709,7 @@ export function RateLimits() {
                         requests_per_day: parseInt(e.target.value, 10),
                       }))
                     }
+                    data-testid="rate-limit-override-per-day"
                   />
                 </div>
               </div>
@@ -705,6 +725,7 @@ export function RateLimits() {
                     }))
                   }
                   placeholder="Why does this org need custom limits?"
+                  data-testid="rate-limit-override-reason"
                 />
               </div>
             </div>
@@ -713,6 +734,7 @@ export function RateLimits() {
               <Button
                 variant="outline"
                 onClick={() => setShowOverrideForm(false)}
+                data-testid="rate-limit-override-cancel"
               >
                 Cancel
               </Button>
@@ -724,6 +746,7 @@ export function RateLimits() {
                   !overrideFormData.endpoint_category ||
                   !overrideFormData.reason
                 }
+                data-testid="rate-limit-override-save"
               >
                 {savingOverride ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -748,7 +771,7 @@ export function RateLimits() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setOverrideToDelete(null)}
           />
-          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6" data-testid="rate-limit-delete-dialog">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="h-6 w-6 text-red-500" />
               <h3 className="text-lg font-semibold">Delete Override</h3>
@@ -762,6 +785,7 @@ export function RateLimits() {
               <Button
                 variant="outline"
                 onClick={() => setOverrideToDelete(null)}
+                data-testid="rate-limit-delete-cancel"
               >
                 Cancel
               </Button>
@@ -769,6 +793,7 @@ export function RateLimits() {
                 variant="destructive"
                 onClick={handleDeleteOverride}
                 disabled={deletingOverride}
+                data-testid="rate-limit-delete-confirm"
               >
                 {deletingOverride ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />

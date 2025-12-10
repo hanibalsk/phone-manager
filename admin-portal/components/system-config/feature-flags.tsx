@@ -166,7 +166,7 @@ export function FeatureFlags() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="feature-flags-container">
       {/* Notification */}
       {notification && (
         <div
@@ -206,12 +206,14 @@ export function FeatureFlags() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-10"
+            data-testid="feature-flags-search-input"
           />
         </div>
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
           className="px-3 py-2 border rounded-md bg-background text-sm"
+          data-testid="feature-flags-category-filter"
         >
           <option value="">All Categories</option>
           {categories.map((cat) => (
@@ -224,13 +226,13 @@ export function FeatureFlags() {
 
       {/* Feature Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="p-3 rounded-lg bg-green-50 border border-green-200">
+        <div className="p-3 rounded-lg bg-green-50 border border-green-200" data-testid="feature-flags-enabled-count">
           <div className="text-2xl font-bold text-green-700">
             {features.filter((f) => f.enabled).length}
           </div>
           <div className="text-sm text-green-600">Enabled</div>
         </div>
-        <div className="p-3 rounded-lg bg-gray-50 border border-gray-200">
+        <div className="p-3 rounded-lg bg-gray-50 border border-gray-200" data-testid="feature-flags-disabled-count">
           <div className="text-2xl font-bold text-gray-700">
             {features.filter((f) => !f.enabled).length}
           </div>
@@ -242,7 +244,7 @@ export function FeatureFlags() {
           </div>
           <div className="text-sm text-blue-600">Core Features</div>
         </div>
-        <div className="p-3 rounded-lg bg-purple-50 border border-purple-200">
+        <div className="p-3 rounded-lg bg-purple-50 border border-purple-200" data-testid="feature-flags-total-count">
           <div className="text-2xl font-bold text-purple-700">
             {features.length}
           </div>
@@ -278,6 +280,7 @@ export function FeatureFlags() {
                       ? "border-green-200 bg-green-50/50"
                       : "border-border"
                   }`}
+                  data-testid={`feature-flag-item-${feature.key}`}
                 >
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
@@ -326,6 +329,7 @@ export function FeatureFlags() {
                           ? "text-green-600 hover:bg-green-100"
                           : "text-muted-foreground hover:bg-muted"
                       }`}
+                      data-testid={`feature-flag-toggle-${feature.key}`}
                     >
                       {feature.enabled ? (
                         <ToggleRight className="h-8 w-8" />
@@ -360,7 +364,7 @@ export function FeatureFlags() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setPendingToggle(null)}
           />
-          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6" data-testid="feature-flag-confirm-dialog">
             <div className="flex items-center gap-3 mb-4">
               <AlertTriangle className="h-6 w-6 text-amber-500" />
               <h3 className="text-lg font-semibold">Confirm Feature Change</h3>
@@ -408,13 +412,14 @@ export function FeatureFlags() {
               )}
 
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setPendingToggle(null)}>
+              <Button variant="outline" onClick={() => setPendingToggle(null)} data-testid="feature-flag-cancel">
                 Cancel
               </Button>
               <Button
                 onClick={confirmToggle}
                 disabled={togglingFeature}
                 variant={pendingToggle.newState ? "default" : "destructive"}
+                data-testid="feature-flag-confirm"
               >
                 {togglingFeature ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />

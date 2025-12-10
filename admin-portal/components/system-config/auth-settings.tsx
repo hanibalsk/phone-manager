@@ -180,7 +180,7 @@ export function AuthSettings() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8" data-testid="auth-settings-container">
       {/* Notification */}
       {notification && (
         <div
@@ -216,6 +216,7 @@ export function AuthSettings() {
                   ? "border-primary bg-primary/5"
                   : "border-border hover:border-primary/50"
               }`}
+              data-testid={`registration-mode-${mode.value}`}
             >
               <div className="flex items-center justify-between">
                 <span className="font-medium">{mode.label}</span>
@@ -270,6 +271,7 @@ export function AuthSettings() {
                 variant="outline"
                 size="sm"
                 onClick={() => startEditingProvider(provider)}
+                data-testid={`oauth-configure-${provider.provider}`}
               >
                 Configure
               </Button>
@@ -297,6 +299,7 @@ export function AuthSettings() {
               onChange={(e) =>
                 handleFormChange("session_timeout_minutes", parseInt(e.target.value, 10))
               }
+              data-testid="session-timeout-input"
             />
             <div className="flex flex-wrap gap-1">
               {sessionTimeoutPresets.map((preset) => (
@@ -325,6 +328,7 @@ export function AuthSettings() {
               onChange={(e) =>
                 handleFormChange("max_login_attempts", parseInt(e.target.value, 10))
               }
+              data-testid="max-login-attempts-input"
             />
             <p className="text-xs text-muted-foreground">
               Account locked after this many failed attempts
@@ -352,6 +356,7 @@ export function AuthSettings() {
               onChange={(e) =>
                 handleFormChange("lockout_duration_minutes", parseInt(e.target.value, 10))
               }
+              data-testid="lockout-duration-input"
             />
             <div className="flex flex-wrap gap-1">
               {lockoutDurationPresets.map((preset) => (
@@ -380,6 +385,7 @@ export function AuthSettings() {
               onChange={(e) =>
                 handleFormChange("password_min_length", parseInt(e.target.value, 10))
               }
+              data-testid="password-min-length-input"
             />
           </div>
         </div>
@@ -393,6 +399,7 @@ export function AuthSettings() {
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50"
             }`}
+            data-testid="require-mfa-toggle"
           >
             <div>
               <div className="font-medium">Require MFA</div>
@@ -422,6 +429,7 @@ export function AuthSettings() {
                 ? "border-primary bg-primary/5"
                 : "border-border hover:border-primary/50"
             }`}
+            data-testid="password-require-special-toggle"
           >
             <div>
               <div className="font-medium">Require Special Characters</div>
@@ -446,7 +454,7 @@ export function AuthSettings() {
 
       {/* Save Button */}
       <div className="flex justify-end pt-4 border-t">
-        <Button onClick={handleSaveConfig} disabled={!hasChanges || savingConfig}>
+        <Button onClick={handleSaveConfig} disabled={!hasChanges || savingConfig} data-testid="auth-settings-save-button">
           {savingConfig ? (
             <Loader2 className="h-4 w-4 animate-spin mr-2" />
           ) : (
@@ -462,6 +470,7 @@ export function AuthSettings() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="registration-mode-confirm-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"
@@ -480,10 +489,10 @@ export function AuthSettings() {
               ? This will affect how users can sign up for the platform.
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setPendingModeChange(null)}>
+              <Button variant="outline" onClick={() => setPendingModeChange(null)} data-testid="registration-mode-cancel">
                 Cancel
               </Button>
-              <Button onClick={confirmModeChange}>Confirm Change</Button>
+              <Button onClick={confirmModeChange} data-testid="registration-mode-confirm">Confirm Change</Button>
             </div>
           </div>
         </div>
@@ -495,6 +504,7 @@ export function AuthSettings() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="oauth-provider-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"
@@ -605,10 +615,10 @@ export function AuthSettings() {
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <Button variant="outline" onClick={() => setEditingProvider(null)}>
+              <Button variant="outline" onClick={() => setEditingProvider(null)} data-testid="oauth-provider-cancel">
                 Cancel
               </Button>
-              <Button onClick={handleSaveProvider} disabled={savingProvider}>
+              <Button onClick={handleSaveProvider} disabled={savingProvider} data-testid="oauth-provider-save">
                 {savingProvider ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (

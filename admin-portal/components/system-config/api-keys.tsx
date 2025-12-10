@@ -259,7 +259,7 @@ export function ApiKeys() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="api-keys-container">
       {/* Notification */}
       {notification && (
         <div
@@ -280,7 +280,7 @@ export function ApiKeys() {
 
       {/* New Key Secret Display */}
       {newKeySecret && (
-        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200">
+        <div className="p-4 rounded-lg bg-amber-50 border border-amber-200" data-testid="api-key-secret-display">
           <div className="flex items-center gap-2 mb-2">
             <AlertCircle className="h-5 w-5 text-amber-600" />
             <span className="font-semibold text-amber-800">
@@ -298,6 +298,7 @@ export function ApiKeys() {
               variant="outline"
               size="sm"
               onClick={() => setShowSecret(!showSecret)}
+              data-testid="api-key-toggle-secret"
             >
               {showSecret ? (
                 <EyeOff className="h-4 w-4" />
@@ -310,6 +311,7 @@ export function ApiKeys() {
               size="sm"
               onClick={copySecret}
               className={copiedSecret ? "text-green-600" : ""}
+              data-testid="api-key-copy-secret"
             >
               {copiedSecret ? (
                 <Check className="h-4 w-4" />
@@ -334,7 +336,7 @@ export function ApiKeys() {
         <p className="text-sm text-muted-foreground">
           Manage API keys for system integrations and external access.
         </p>
-        <Button onClick={startCreating}>
+        <Button onClick={startCreating} data-testid="api-keys-create-button">
           <Plus className="h-4 w-4 mr-2" />
           Create API Key
         </Button>
@@ -362,6 +364,7 @@ export function ApiKeys() {
                     ? "border-border hover:border-primary/50"
                     : "border-amber-200 bg-amber-50/50"
                 }`}
+                data-testid={`api-key-item-${key.id}`}
               >
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -402,6 +405,7 @@ export function ApiKeys() {
                           ? "text-green-600 hover:bg-green-50"
                           : "text-muted-foreground hover:bg-muted"
                       }`}
+                      data-testid={`api-key-toggle-${key.id}`}
                     >
                       {key.is_active ? (
                         <ToggleRight className="h-5 w-5" />
@@ -413,6 +417,7 @@ export function ApiKeys() {
                       variant="ghost"
                       size="sm"
                       onClick={() => startEditing(key)}
+                      data-testid={`api-key-edit-${key.id}`}
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -420,6 +425,7 @@ export function ApiKeys() {
                       variant="ghost"
                       size="sm"
                       onClick={() => setKeyToRotate(key)}
+                      data-testid={`api-key-rotate-${key.id}`}
                     >
                       <RefreshCw className="h-4 w-4" />
                     </Button>
@@ -428,6 +434,7 @@ export function ApiKeys() {
                       size="sm"
                       className="text-red-600 hover:text-red-700 hover:bg-red-50"
                       onClick={() => setKeyToDelete(key)}
+                      data-testid={`api-key-delete-${key.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -441,7 +448,7 @@ export function ApiKeys() {
         {/* Usage Stats Panel */}
         <div className="lg:col-span-1">
           {selectedKey ? (
-            <div className="p-4 rounded-lg border space-y-4">
+            <div className="p-4 rounded-lg border space-y-4" data-testid="api-key-usage-stats">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold flex items-center gap-2">
                   <BarChart3 className="h-4 w-4" />
@@ -565,7 +572,7 @@ export function ApiKeys() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setShowForm(false)}
           />
-          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-2xl mx-4 p-6 max-h-[90vh] overflow-y-auto">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-2xl mx-4 p-6 max-h-[90vh] overflow-y-auto" data-testid="api-key-form-dialog">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">
                 {editingKey ? "Edit API Key" : "Create API Key"}
@@ -588,6 +595,7 @@ export function ApiKeys() {
                     setFormData((prev) => ({ ...prev, name: e.target.value }))
                   }
                   placeholder="My API Key"
+                  data-testid="api-key-name-input"
                 />
               </div>
 
@@ -602,6 +610,7 @@ export function ApiKeys() {
                     }))
                   }
                   placeholder="What is this key used for?"
+                  data-testid="api-key-description-input"
                 />
               </div>
 
@@ -634,6 +643,7 @@ export function ApiKeys() {
                                   checked={hasPermission(scope, perm)}
                                   onChange={() => togglePermission(scope, perm)}
                                   className="h-4 w-4 rounded border-gray-300"
+                                  data-testid={`api-key-permission-${scope}-${perm}`}
                                 />
                               </td>
                             )
@@ -660,6 +670,7 @@ export function ApiKeys() {
                       }))
                     }
                     placeholder="Leave blank for no limit"
+                    data-testid="api-key-rate-limit-input"
                   />
                 </div>
 
@@ -678,13 +689,14 @@ export function ApiKeys() {
                         expires_at: e.target.value || undefined,
                       }))
                     }
+                    data-testid="api-key-expiration-input"
                   />
                 </div>
               </div>
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <Button variant="outline" onClick={() => setShowForm(false)}>
+              <Button variant="outline" onClick={() => setShowForm(false)} data-testid="api-key-form-cancel">
                 Cancel
               </Button>
               <Button
@@ -694,6 +706,7 @@ export function ApiKeys() {
                   !formData.name ||
                   formData.permissions.length === 0
                 }
+                data-testid="api-key-form-save"
               >
                 {savingKey ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -718,7 +731,7 @@ export function ApiKeys() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setKeyToDelete(null)}
           />
-          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6" data-testid="api-key-delete-dialog">
             <div className="flex items-center gap-3 mb-4">
               <AlertCircle className="h-6 w-6 text-red-500" />
               <h3 className="text-lg font-semibold">Delete API Key</h3>
@@ -729,13 +742,14 @@ export function ApiKeys() {
               stop working immediately.
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setKeyToDelete(null)}>
+              <Button variant="outline" onClick={() => setKeyToDelete(null)} data-testid="api-key-delete-cancel">
                 Cancel
               </Button>
               <Button
                 variant="destructive"
                 onClick={handleDeleteKey}
                 disabled={deletingKey}
+                data-testid="api-key-delete-confirm"
               >
                 {deletingKey ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -760,7 +774,7 @@ export function ApiKeys() {
             className="absolute inset-0 bg-black/50"
             onClick={() => setKeyToRotate(null)}
           />
-          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
+          <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6" data-testid="api-key-rotate-dialog">
             <div className="flex items-center gap-3 mb-4">
               <RefreshCw className="h-6 w-6 text-amber-500" />
               <h3 className="text-lg font-semibold">Rotate API Key</h3>
@@ -781,6 +795,7 @@ export function ApiKeys() {
                   setRotateGracePeriod(parseInt(e.target.value, 10) || 0)
                 }
                 placeholder="0 = immediate (no grace period)"
+                data-testid="api-key-rotate-grace-period"
               />
               <p className="text-xs text-muted-foreground">
                 Set to 0 for immediate rotation, or enter hours to keep the old
@@ -788,10 +803,10 @@ export function ApiKeys() {
               </p>
             </div>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setKeyToRotate(null)}>
+              <Button variant="outline" onClick={() => setKeyToRotate(null)} data-testid="api-key-rotate-cancel">
                 Cancel
               </Button>
-              <Button onClick={handleRotateKey} disabled={rotatingKey}>
+              <Button onClick={handleRotateKey} disabled={rotatingKey} data-testid="api-key-rotate-confirm">
                 {rotatingKey ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
                 ) : (
