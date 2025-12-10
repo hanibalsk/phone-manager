@@ -144,7 +144,7 @@ export function WebhookDeliveryLog({ webhookId, webhookName }: WebhookDeliveryLo
         </Link>
       </div>
 
-      <Card>
+      <Card data-testid="delivery-log-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -179,6 +179,7 @@ export function WebhookDeliveryLog({ webhookId, webhookName }: WebhookDeliveryLo
               className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as DeliveryStatus | "")}
+              data-testid="delivery-status-filter"
             >
               <option value="">All Status</option>
               <option value="success">Success</option>
@@ -224,7 +225,7 @@ export function WebhookDeliveryLog({ webhookId, webhookName }: WebhookDeliveryLo
             <>
               <div className="space-y-2">
                 {deliveries.map((delivery) => (
-                  <div key={delivery.id} className="border rounded-lg">
+                  <div key={delivery.id} className="border rounded-lg" data-testid={`delivery-row-${delivery.id}`}>
                     <div
                       className="flex items-center justify-between p-4 cursor-pointer hover:bg-muted/50"
                       onClick={() => toggleExpanded(delivery.id)}
@@ -307,6 +308,7 @@ export function WebhookDeliveryLog({ webhookId, webhookName }: WebhookDeliveryLo
                               variant="outline"
                               onClick={() => handleResend(delivery)}
                               disabled={resendLoading}
+                              data-testid={`delivery-resend-${delivery.id}`}
                             >
                               {resendLoading && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
                               <Send className="h-4 w-4 mr-2" />

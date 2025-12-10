@@ -72,6 +72,7 @@ export function WebhookTestModal({ webhook, onClose }: WebhookTestModalProps) {
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
+      data-testid="webhook-test-dialog"
     >
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       <div className="relative bg-background rounded-lg shadow-lg w-full max-w-lg mx-4 max-h-[80vh] overflow-hidden flex flex-col">
@@ -120,7 +121,7 @@ export function WebhookTestModal({ webhook, onClose }: WebhookTestModalProps) {
 
           {/* Test Button */}
           <div className="mb-6">
-            <Button onClick={handleTest} disabled={loading} className="w-full">
+            <Button onClick={handleTest} disabled={loading} className="w-full" data-testid="webhook-test-button">
               {loading ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -148,7 +149,7 @@ export function WebhookTestModal({ webhook, onClose }: WebhookTestModalProps) {
 
           {/* Test Result */}
           {testResult && (
-            <div className="space-y-4">
+            <div className="space-y-4" data-testid="webhook-test-result">
               {/* Overall Result */}
               <div
                 className={`p-4 rounded-md ${

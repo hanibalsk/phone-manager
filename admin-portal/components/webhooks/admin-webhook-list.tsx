@@ -125,7 +125,7 @@ export function AdminWebhookList() {
 
   return (
     <>
-      <Card>
+      <Card data-testid="webhook-list-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -172,6 +172,7 @@ export function AdminWebhookList() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9"
+                  data-testid="webhook-search-input"
                 />
               </div>
             </div>
@@ -179,6 +180,7 @@ export function AdminWebhookList() {
               className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[180px]"
               value={organizationId}
               onChange={(e) => setOrganizationId(e.target.value)}
+              data-testid="webhook-org-filter"
             >
               <option value="">All Organizations</option>
               {orgsData?.items?.map((org) => (
@@ -191,6 +193,7 @@ export function AdminWebhookList() {
               className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[120px]"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as WebhookStatus | "")}
+              data-testid="webhook-status-filter"
             >
               <option value="">All Status</option>
               <option value="active">Active</option>
@@ -201,6 +204,7 @@ export function AdminWebhookList() {
               className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
               value={eventTypeFilter}
               onChange={(e) => setEventTypeFilter(e.target.value as WebhookEventType | "")}
+              data-testid="webhook-event-filter"
             >
               <option value="">All Event Types</option>
               {EVENT_TYPES.map((type) => (
@@ -253,7 +257,7 @@ export function AdminWebhookList() {
           {!error && webhooks.length > 0 && (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full" data-testid="webhook-table">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium">Name</th>
@@ -266,7 +270,7 @@ export function AdminWebhookList() {
                   </thead>
                   <tbody>
                     {webhooks.map((webhook) => (
-                      <tr key={webhook.id} className="border-b hover:bg-muted/50">
+                      <tr key={webhook.id} className="border-b hover:bg-muted/50" data-testid={`webhook-row-${webhook.id}`}>
                         <td className="py-3 px-4">
                           <div>
                             <p className="font-medium">{webhook.name}</p>
@@ -394,6 +398,7 @@ export function AdminWebhookList() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="webhook-delete-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"
@@ -410,6 +415,7 @@ export function AdminWebhookList() {
                 variant="outline"
                 onClick={() => setWebhookToDelete(null)}
                 disabled={deleteLoading}
+                data-testid="webhook-delete-cancel"
               >
                 Cancel
               </Button>
@@ -417,6 +423,7 @@ export function AdminWebhookList() {
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={deleteLoading}
+                data-testid="webhook-delete-confirm"
               >
                 {deleteLoading && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
                 Delete

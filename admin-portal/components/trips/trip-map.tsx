@@ -59,7 +59,7 @@ export function TripMap({ points, startLabel = "Start", endLabel = "End" }: Trip
     .join(" ");
 
   return (
-    <div className="relative bg-muted/30 rounded-lg overflow-hidden">
+    <div className="relative bg-muted/30 rounded-lg overflow-hidden" data-testid="trip-map">
       <svg
         viewBox={`0 0 ${width} ${height}`}
         className="w-full h-auto"

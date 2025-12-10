@@ -219,6 +219,7 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
       className="fixed inset-0 z-50 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
+      data-testid="trip-export-dialog"
     >
       <div
         className="absolute inset-0 bg-black/50"
@@ -244,6 +245,7 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
                 setOrganizationId(e.target.value);
                 setDeviceId(""); // Reset device when org changes
               }}
+              data-testid="export-org-filter"
             >
               <option value="">All Organizations</option>
               {orgsData?.items?.map((org) => (
@@ -262,6 +264,7 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
               className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               value={deviceId}
               onChange={(e) => setDeviceId(e.target.value)}
+              data-testid="export-device-filter"
             >
               <option value="">All Devices</option>
               {filteredDevices?.map((device) => (
@@ -350,10 +353,10 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
 
           {/* Actions */}
           <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={onClose} disabled={exporting}>
+            <Button variant="outline" onClick={onClose} disabled={exporting} data-testid="export-cancel">
               Cancel
             </Button>
-            <Button onClick={handleExport} disabled={exporting}>
+            <Button onClick={handleExport} disabled={exporting} data-testid="export-button">
               {exporting ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />

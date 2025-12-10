@@ -95,7 +95,7 @@ export function AdminTripList() {
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   return (
-    <Card>
+    <Card data-testid="trip-list-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -126,6 +126,7 @@ export function AdminTripList() {
               setOrganizationId(e.target.value);
               setDeviceId(""); // Reset device when org changes
             }}
+            data-testid="trip-org-filter"
           >
             <option value="">All Organizations</option>
             {orgsData?.items?.map((org) => (
@@ -138,6 +139,7 @@ export function AdminTripList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[180px]"
             value={deviceId}
             onChange={(e) => setDeviceId(e.target.value)}
+            data-testid="trip-device-filter"
           >
             <option value="">All Devices</option>
             {filteredDevices?.map((device) => (
@@ -150,6 +152,7 @@ export function AdminTripList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[130px]"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as TripStatus | "")}
+            data-testid="trip-status-filter"
           >
             <option value="">All Status</option>
             <option value="in_progress">In Progress</option>
@@ -208,7 +211,7 @@ export function AdminTripList() {
         {!error && trips.length > 0 && (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" data-testid="trip-table">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 font-medium">Device</th>
@@ -222,7 +225,7 @@ export function AdminTripList() {
                 </thead>
                 <tbody>
                   {trips.map((trip) => (
-                    <tr key={trip.id} className="border-b hover:bg-muted/50">
+                    <tr key={trip.id} className="border-b hover:bg-muted/50" data-testid={`trip-row-${trip.id}`}>
                       <td className="py-3 px-4">
                         <div>
                           <p className="font-medium">{trip.device_name}</p>
