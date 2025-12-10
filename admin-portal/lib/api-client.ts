@@ -21,6 +21,15 @@ import type {
   CreateRoleRequest,
   UpdateRoleRequest,
   UserRoleAssignment,
+  AdminDevice,
+  DeviceListParams,
+  DeviceDetails,
+  BulkOperationResult,
+  EnrollmentToken,
+  CreateEnrollmentTokenRequest,
+  TokenUsage,
+  InactiveDevice,
+  NotifyOwnersResult,
 } from "@/types";
 import type {
   LoginResponse,
@@ -123,7 +132,7 @@ export const authApi = {
     }, false),
 };
 
-// Device Management
+// Device Management (Legacy - simple list)
 export const deviceApi = {
   list: () => request<Device[]>("/api/admin/devices"),
 
@@ -133,6 +142,126 @@ export const deviceApi = {
     const params = date ? `?date=${date}` : "";
     return request<AppUsage[]>(`/api/admin/devices/${id}/usage${params}`);
   },
+};
+
+// Epic AP-4: Admin Device Fleet Management
+export const adminDevicesApi = {
+  // Story AP-4.1: List devices with filtering
+  list: (params?: DeviceListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+      if (params.search) searchParams.set("search", params.search);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.group_id) searchParams.set("group_id", params.group_id);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.platform) searchParams.set("platform", params.platform);
+      if (params.sort_by) searchParams.set("sort_by", params.sort_by);
+      if (params.sort_order) searchParams.set("sort_order", params.sort_order);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/devices/fleet${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AdminDevice>>(endpoint);
+  },
+
+  // Story AP-4.2: Get device details
+  get: (id: string) => request<DeviceDetails>(`/api/admin/devices/fleet/${id}`),
+
+  // Story AP-4.2: Suspend device
+  suspend: (id: string, reason?: string) =>
+    request<DeviceDetails>(`/api/admin/devices/fleet/${id}/suspend`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+
+  // Story AP-4.2: Reactivate device
+  reactivate: (id: string) =>
+    request<DeviceDetails>(`/api/admin/devices/fleet/${id}/reactivate`, {
+      method: "POST",
+    }),
+
+  // Story AP-4.2: Delete device
+  delete: (id: string) =>
+    request<{ success: boolean }>(`/api/admin/devices/fleet/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Story AP-4.4: Bulk suspend
+  bulkSuspend: (deviceIds: string[]) =>
+    request<BulkOperationResult>("/api/admin/devices/fleet/bulk/suspend", {
+      method: "POST",
+      body: JSON.stringify({ device_ids: deviceIds }),
+    }),
+
+  // Story AP-4.4: Bulk reactivate
+  bulkReactivate: (deviceIds: string[]) =>
+    request<BulkOperationResult>("/api/admin/devices/fleet/bulk/reactivate", {
+      method: "POST",
+      body: JSON.stringify({ device_ids: deviceIds }),
+    }),
+
+  // Story AP-4.4: Bulk delete
+  bulkDelete: (deviceIds: string[]) =>
+    request<BulkOperationResult>("/api/admin/devices/fleet/bulk/delete", {
+      method: "POST",
+      body: JSON.stringify({ device_ids: deviceIds }),
+    }),
+
+  // Story AP-4.5: Get inactive devices
+  getInactive: (params?: { days?: number; page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.days) searchParams.set("days", String(params.days));
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/devices/fleet/inactive${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<InactiveDevice>>(endpoint);
+  },
+
+  // Story AP-4.5: Send notification to device owners
+  notifyOwners: (deviceIds: string[], messageTemplate?: string) =>
+    request<NotifyOwnersResult>("/api/admin/devices/fleet/notify", {
+      method: "POST",
+      body: JSON.stringify({ device_ids: deviceIds, message_template: messageTemplate }),
+    }),
+};
+
+// Story AP-4.3: Enrollment Token Management
+export const enrollmentApi = {
+  // List all tokens
+  list: (params?: { page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/enrollment/tokens${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<EnrollmentToken>>(endpoint);
+  },
+
+  // Create new token
+  create: (data: CreateEnrollmentTokenRequest) =>
+    request<EnrollmentToken>("/api/admin/enrollment/tokens", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Get token details
+  get: (id: string) => request<EnrollmentToken>(`/api/admin/enrollment/tokens/${id}`),
+
+  // Get token usage history
+  getUsage: (id: string) =>
+    request<{ enrollments: TokenUsage[] }>(`/api/admin/enrollment/tokens/${id}/usage`),
+
+  // Revoke token
+  revoke: (id: string) =>
+    request<{ success: boolean }>(`/api/admin/enrollment/tokens/${id}`, {
+      method: "DELETE",
+    }),
 };
 
 // User Administration (Story AP-3.1)

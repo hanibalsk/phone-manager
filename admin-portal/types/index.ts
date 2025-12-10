@@ -248,3 +248,110 @@ export interface UserRoleAssignment {
   assigned_at: string;
   assigned_by: string;
 }
+
+// Epic AP-4: Device Fleet Administration
+export type DevicePlatform = "android" | "ios";
+export type AdminDeviceStatus = "active" | "suspended" | "offline" | "pending";
+
+export interface AdminDevice {
+  id: string;
+  device_id: string;
+  display_name: string;
+  platform: DevicePlatform;
+  status: AdminDeviceStatus;
+  owner_id: string;
+  owner_email: string;
+  organization_id: string;
+  organization_name: string;
+  group_id: string | null;
+  group_name: string | null;
+  last_seen: string | null;
+  location_count: number;
+  trip_count: number;
+  created_at: string;
+}
+
+export interface DeviceListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  organization_id?: string;
+  group_id?: string;
+  status?: AdminDeviceStatus;
+  platform?: DevicePlatform;
+  sort_by?: "display_name" | "last_seen" | "location_count" | "created_at";
+  sort_order?: "asc" | "desc";
+}
+
+// Story AP-4.2: Device Details
+export interface DeviceDetails extends AdminDevice {
+  enrollment_status: "enrolled" | "pending" | "expired";
+  policy_id: string | null;
+  policy_name: string | null;
+  policy_compliant: boolean;
+  compliance_issues: string[];
+  last_location: {
+    latitude: number;
+    longitude: number;
+    timestamp: string;
+  } | null;
+}
+
+// Story AP-4.4: Bulk Operations
+export interface BulkOperationResult {
+  total: number;
+  success_count: number;
+  failure_count: number;
+  failures: {
+    device_id: string;
+    device_name: string;
+    error: string;
+  }[];
+}
+
+// Story AP-4.3: Enrollment Token Management
+export type EnrollmentTokenStatus = "active" | "expired" | "revoked" | "exhausted";
+
+export interface EnrollmentToken {
+  id: string;
+  name: string;
+  code: string;
+  max_uses: number | null;
+  uses_count: number;
+  status: EnrollmentTokenStatus;
+  expires_at: string | null;
+  policy_id: string | null;
+  policy_name: string | null;
+  created_at: string;
+  created_by: string;
+}
+
+export interface CreateEnrollmentTokenRequest {
+  name: string;
+  max_uses?: number;
+  expires_at?: string;
+  policy_id?: string;
+}
+
+export interface TokenUsage {
+  device_id: string;
+  device_name: string;
+  enrolled_at: string;
+}
+
+// Story AP-4.5: Inactive Device Management
+export interface InactiveDevice extends AdminDevice {
+  days_inactive: number;
+  last_activity_type: "location" | "sync" | "login";
+}
+
+export interface DataRetentionPolicy {
+  locations_retained_days: number;
+  trips_retained: boolean;
+  user_data_deleted: boolean;
+}
+
+export interface NotifyOwnersResult {
+  sent: number;
+  failed: number;
+}
