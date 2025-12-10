@@ -83,6 +83,23 @@ import type {
   CreateAutoApprovalRuleRequest,
   AutoApprovalLogEntry,
   AutoApprovalConditions,
+  // Epic AP-9: System Configuration
+  AuthConfig,
+  UpdateAuthConfigRequest,
+  OAuthProviderConfig,
+  UpdateOAuthProviderRequest,
+  FeatureFlag,
+  RateLimitConfig,
+  RateLimitOverride,
+  CreateRateLimitOverrideRequest,
+  RateLimitMetrics,
+  ApiKey,
+  CreateApiKeyRequest,
+  CreateApiKeyResponse,
+  ApiKeyUsageStats,
+  RetentionConfig,
+  UpdateRetentionConfigRequest,
+  RetentionStats,
 } from "@/types";
 import type {
   LoginResponse,
@@ -1255,4 +1272,128 @@ export const unlockRequestsApi = {
     const endpoint = `/api/admin/auto-approval-log${queryString ? `?${queryString}` : ""}`;
     return request<PaginatedResponse<AutoApprovalLogEntry>>(endpoint);
   },
+};
+
+// ==============================================
+// Epic AP-9: System Configuration API
+// ==============================================
+
+// Story AP-9.1: Authentication Settings
+export const authConfigApi = {
+  get: () => request<AuthConfig>("/api/admin/system-config/auth"),
+  update: (data: UpdateAuthConfigRequest) =>
+    request<AuthConfig>("/api/admin/system-config/auth", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  getOAuthProviders: () =>
+    request<OAuthProviderConfig[]>("/api/admin/system-config/oauth-providers"),
+  updateOAuthProvider: (provider: string, data: UpdateOAuthProviderRequest) =>
+    request<OAuthProviderConfig>(
+      `/api/admin/system-config/oauth-providers/${provider}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }
+    ),
+};
+
+// Story AP-9.2: Feature Flags
+export const featureFlagsApi = {
+  list: () => request<FeatureFlag[]>("/api/admin/system-config/features"),
+  toggle: (featureId: string, enabled: boolean) =>
+    request<FeatureFlag>(`/api/admin/system-config/features/${featureId}`, {
+      method: "PUT",
+      body: JSON.stringify({ enabled }),
+    }),
+};
+
+// Story AP-9.3: Rate Limits
+export const rateLimitsApi = {
+  list: () => request<RateLimitConfig[]>("/api/admin/system-config/rate-limits"),
+  update: (id: string, data: Partial<RateLimitConfig>) =>
+    request<RateLimitConfig>(`/api/admin/system-config/rate-limits/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  listOverrides: () =>
+    request<RateLimitOverride[]>(
+      "/api/admin/system-config/rate-limits/overrides"
+    ),
+  createOverride: (data: CreateRateLimitOverrideRequest) =>
+    request<RateLimitOverride>(
+      "/api/admin/system-config/rate-limits/overrides",
+      {
+        method: "POST",
+        body: JSON.stringify(data),
+      }
+    ),
+  updateOverride: (id: string, data: Partial<CreateRateLimitOverrideRequest>) =>
+    request<RateLimitOverride>(
+      `/api/admin/system-config/rate-limits/overrides/${id}`,
+      {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }
+    ),
+  deleteOverride: (id: string) =>
+    request<void>(`/api/admin/system-config/rate-limits/overrides/${id}`, {
+      method: "DELETE",
+    }),
+  getMetrics: () =>
+    request<RateLimitMetrics[]>(
+      "/api/admin/system-config/rate-limits/metrics"
+    ),
+};
+
+// Story AP-9.4: API Keys
+export const apiKeysApi = {
+  list: () => request<ApiKey[]>("/api/admin/system-config/api-keys"),
+  get: (id: string) =>
+    request<ApiKey>(`/api/admin/system-config/api-keys/${id}`),
+  create: (data: CreateApiKeyRequest) =>
+    request<CreateApiKeyResponse>("/api/admin/system-config/api-keys", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  update: (id: string, data: Partial<CreateApiKeyRequest>) =>
+    request<ApiKey>(`/api/admin/system-config/api-keys/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  delete: (id: string) =>
+    request<void>(`/api/admin/system-config/api-keys/${id}`, {
+      method: "DELETE",
+    }),
+  rotate: (id: string, gracePeriodHours?: number) =>
+    request<CreateApiKeyResponse>(
+      `/api/admin/system-config/api-keys/${id}/rotate`,
+      {
+        method: "POST",
+        body: JSON.stringify({ grace_period_hours: gracePeriodHours }),
+      }
+    ),
+  getUsage: (id: string) =>
+    request<ApiKeyUsageStats>(
+      `/api/admin/system-config/api-keys/${id}/usage`
+    ),
+  toggleActive: (id: string, active: boolean) =>
+    request<ApiKey>(`/api/admin/system-config/api-keys/${id}`, {
+      method: "PUT",
+      body: JSON.stringify({ is_active: active }),
+    }),
+};
+
+// Story AP-9.5: System-wide Data Retention Config
+export const systemRetentionApi = {
+  get: () => request<RetentionConfig>("/api/admin/system-config/retention"),
+  update: (data: UpdateRetentionConfigRequest) =>
+    request<RetentionConfig>("/api/admin/system-config/retention", {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  getStats: () =>
+    request<RetentionStats[]>("/api/admin/system-config/retention/stats"),
+  preview: () =>
+    request<RetentionStats[]>("/api/admin/system-config/retention/preview"),
 };

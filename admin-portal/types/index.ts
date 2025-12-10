@@ -992,3 +992,184 @@ export interface AutoApprovalLogEntry {
   approved_duration_minutes: number;
   approved_at: string;
 }
+
+// ==============================================
+// Epic AP-9: System Configuration
+// ==============================================
+
+// Story AP-9.1: Authentication Settings
+export type RegistrationMode = "open" | "invite_only" | "oauth_only" | "disabled";
+
+export interface OAuthProviderConfig {
+  provider: "google" | "apple";
+  enabled: boolean;
+  client_id: string;
+  client_secret_set: boolean; // True if secret is configured (not shown)
+  allowed_domains?: string[]; // Optional domain restrictions
+}
+
+export interface AuthConfig {
+  registration_mode: RegistrationMode;
+  oauth_providers: OAuthProviderConfig[];
+  session_timeout_minutes: number;
+  max_login_attempts: number;
+  lockout_duration_minutes: number;
+  require_mfa: boolean;
+  password_min_length: number;
+  password_require_special: boolean;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+export interface UpdateAuthConfigRequest {
+  registration_mode?: RegistrationMode;
+  session_timeout_minutes?: number;
+  max_login_attempts?: number;
+  lockout_duration_minutes?: number;
+  require_mfa?: boolean;
+  password_min_length?: number;
+  password_require_special?: boolean;
+}
+
+export interface UpdateOAuthProviderRequest {
+  enabled?: boolean;
+  client_id?: string;
+  client_secret?: string;
+  allowed_domains?: string[];
+}
+
+// Story AP-9.2: Feature Flags
+export interface FeatureFlag {
+  id: string;
+  name: string;
+  key: string;
+  description: string;
+  enabled: boolean;
+  dependencies?: string[]; // Other feature keys this depends on
+  dependents?: string[]; // Features that depend on this
+  category: "core" | "tracking" | "communication" | "analytics";
+  updated_at: string;
+  updated_by: string | null;
+}
+
+// Story AP-9.3: Rate Limits
+export interface RateLimitConfig {
+  id: string;
+  endpoint_category: string;
+  description: string;
+  requests_per_minute: number;
+  requests_per_hour: number;
+  requests_per_day: number;
+  enabled: boolean;
+}
+
+export interface RateLimitOverride {
+  id: string;
+  organization_id: string;
+  organization_name: string;
+  endpoint_category: string;
+  requests_per_minute: number;
+  requests_per_hour: number;
+  requests_per_day: number;
+  reason: string;
+  created_at: string;
+  created_by: string;
+}
+
+export interface CreateRateLimitOverrideRequest {
+  organization_id: string;
+  endpoint_category: string;
+  requests_per_minute: number;
+  requests_per_hour: number;
+  requests_per_day: number;
+  reason: string;
+}
+
+export interface RateLimitMetrics {
+  endpoint_category: string;
+  total_requests_today: number;
+  rate_limited_requests_today: number;
+  peak_requests_per_minute: number;
+  last_rate_limited_at: string | null;
+}
+
+// Story AP-9.4: API Keys
+export type ApiKeyPermission = "read" | "write" | "admin";
+export type ApiKeyScope = "devices" | "locations" | "users" | "organizations" | "webhooks" | "all";
+
+export interface ApiKeyPermissionSet {
+  scope: ApiKeyScope;
+  permission: ApiKeyPermission;
+}
+
+export interface ApiKey {
+  id: string;
+  name: string;
+  description: string | null;
+  key_prefix: string; // First 8 chars of key for identification
+  permissions: ApiKeyPermissionSet[];
+  rate_limit_per_minute: number | null;
+  expires_at: string | null;
+  last_used_at: string | null;
+  total_requests: number;
+  created_at: string;
+  created_by: string;
+  is_active: boolean;
+}
+
+export interface CreateApiKeyRequest {
+  name: string;
+  description?: string;
+  permissions: ApiKeyPermissionSet[];
+  rate_limit_per_minute?: number;
+  expires_at?: string;
+}
+
+export interface CreateApiKeyResponse {
+  api_key: ApiKey;
+  secret_key: string; // Only shown once at creation
+}
+
+export interface ApiKeyUsageStats {
+  total_requests: number;
+  requests_last_24h: number;
+  requests_last_7d: number;
+  error_count_last_24h: number;
+  last_used_at: string | null;
+  most_used_endpoints: { endpoint: string; count: number }[];
+}
+
+// Story AP-9.5: Data Retention
+export type RetentionPeriod = "30d" | "60d" | "90d" | "180d" | "365d" | "unlimited";
+
+export interface DataTypeRetention {
+  data_type: "locations" | "audit_logs" | "trips" | "alerts" | "device_events";
+  retention_period: RetentionPeriod;
+  description: string;
+}
+
+export interface RetentionConfig {
+  default_retention_period: RetentionPeriod;
+  data_types: DataTypeRetention[];
+  inactive_device_threshold_days: number;
+  auto_cleanup_enabled: boolean;
+  last_cleanup_at: string | null;
+  next_cleanup_at: string | null;
+  updated_at: string;
+  updated_by: string | null;
+}
+
+export interface UpdateRetentionConfigRequest {
+  default_retention_period?: RetentionPeriod;
+  data_types?: { data_type: string; retention_period: RetentionPeriod }[];
+  inactive_device_threshold_days?: number;
+  auto_cleanup_enabled?: boolean;
+}
+
+export interface RetentionStats {
+  data_type: string;
+  total_records: number;
+  records_to_delete: number;
+  oldest_record_date: string | null;
+  storage_used_mb: number;
+}
