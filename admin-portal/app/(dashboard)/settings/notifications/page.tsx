@@ -159,9 +159,9 @@ export default function NotificationSettingsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="notification-settings-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-testid="notification-settings-header">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">
@@ -181,12 +181,12 @@ export default function NotificationSettingsPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link href="/settings">
-            <Button variant="outline">
+            <Button variant="outline" data-testid="notification-settings-back-button">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Settings
             </Button>
           </Link>
-          <Button onClick={handleSave} disabled={!hasChanges || saving}>
+          <Button onClick={handleSave} disabled={!hasChanges || saving} data-testid="notification-settings-save-button">
             {saving ? (
               <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
             ) : (
@@ -198,13 +198,13 @@ export default function NotificationSettingsPage() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-12">
+        <div className="flex items-center justify-center py-12" data-testid="notification-settings-loading">
           <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
         </div>
       ) : (
-        <div className="grid gap-6">
+        <div className="grid gap-6" data-testid="notification-settings-content">
           {/* Global Email Settings */}
-          <Card>
+          <Card data-testid="notification-settings-email-card">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Mail className="h-5 w-5 text-muted-foreground" />
@@ -227,11 +227,12 @@ export default function NotificationSettingsPage() {
                   onCheckedChange={(checked) =>
                     updatePreference("email_enabled", checked)
                   }
+                  data-testid="notification-settings-email-toggle"
                 />
               </div>
 
               {preferences.email_enabled && (
-                <div className="space-y-2">
+                <div className="space-y-2" data-testid="notification-settings-email-digest">
                   <Label>Digest Frequency</Label>
                   <Select
                     value={preferences.email_digest}
@@ -239,12 +240,12 @@ export default function NotificationSettingsPage() {
                       updatePreference("email_digest", value as NotificationPreferences["email_digest"])
                     }
                   >
-                    <SelectTrigger className="w-48">
+                    <SelectTrigger className="w-48" data-testid="notification-settings-digest-select">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {DIGEST_OPTIONS.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
+                        <SelectItem key={option.value} value={option.value} data-testid={`notification-settings-digest-${option.value}`}>
                           {option.label}
                         </SelectItem>
                       ))}
@@ -259,7 +260,7 @@ export default function NotificationSettingsPage() {
           </Card>
 
           {/* Global In-App Settings */}
-          <Card>
+          <Card data-testid="notification-settings-inapp-card">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Monitor className="h-5 w-5 text-muted-foreground" />
@@ -282,13 +283,14 @@ export default function NotificationSettingsPage() {
                   onCheckedChange={(checked) =>
                     updatePreference("in_app_enabled", checked)
                   }
+                  data-testid="notification-settings-inapp-toggle"
                 />
               </div>
             </CardContent>
           </Card>
 
           {/* Per-Category Settings */}
-          <Card>
+          <Card data-testid="notification-settings-categories-card">
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Bell className="h-5 w-5 text-muted-foreground" />
@@ -300,12 +302,13 @@ export default function NotificationSettingsPage() {
             </CardHeader>
             <CardContent>
               {/* Quick toggles */}
-              <div className="flex items-center gap-4 pb-4 mb-4 border-b">
+              <div className="flex items-center gap-4 pb-4 mb-4 border-b" data-testid="notification-settings-quick-actions">
                 <span className="text-sm font-medium">Quick actions:</span>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => toggleAllCategories(true)}
+                  data-testid="notification-settings-enable-all"
                 >
                   Enable all
                 </Button>
@@ -313,13 +316,14 @@ export default function NotificationSettingsPage() {
                   variant="outline"
                   size="sm"
                   onClick={() => toggleAllCategories(false)}
+                  data-testid="notification-settings-disable-all"
                 >
                   Disable all
                 </Button>
               </div>
 
               {/* Category list */}
-              <div className="space-y-4">
+              <div className="space-y-4" data-testid="notification-settings-category-list">
                 {(Object.keys(CATEGORY_CONFIG) as NotificationCategory[]).map(
                   (category) => {
                     const config = CATEGORY_CONFIG[category];
@@ -330,6 +334,7 @@ export default function NotificationSettingsPage() {
                       <div
                         key={category}
                         className="flex items-center justify-between py-3 border-b last:border-0"
+                        data-testid={`notification-settings-category-${category}`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="p-2 bg-muted rounded-lg">
@@ -347,6 +352,7 @@ export default function NotificationSettingsPage() {
                           onCheckedChange={(checked) =>
                             updateCategoryPreference(category, checked)
                           }
+                          data-testid={`notification-settings-category-${category}-toggle`}
                         />
                       </div>
                     );

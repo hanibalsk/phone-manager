@@ -101,13 +101,13 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
   const displayedNotifications = notifications.slice(0, 10);
 
   return (
-    <div className="w-[380px] max-h-[500px] flex flex-col bg-background border rounded-lg shadow-lg">
+    <div className="w-[380px] max-h-[500px] flex flex-col bg-background border rounded-lg shadow-lg" data-testid="notification-center">
       {/* Header */}
-      <div className="flex items-center justify-between p-4 border-b">
+      <div className="flex items-center justify-between p-4 border-b" data-testid="notification-center-header">
         <div className="flex items-center gap-2">
           <h3 className="font-semibold">Notifications</h3>
           {unreadCount > 0 && (
-            <Badge variant="secondary" className="text-xs">
+            <Badge variant="secondary" className="text-xs" data-testid="notification-unread-badge">
               {unreadCount} unread
             </Badge>
           )}
@@ -120,16 +120,17 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
             onClick={handleMarkAllRead}
             disabled={unreadCount === 0}
             title="Mark all as read"
+            data-testid="notification-mark-all-read-button"
           >
             <CheckCheck className="h-4 w-4" />
           </Button>
           <Link href="/settings/notifications">
-            <Button variant="ghost" size="icon" className="h-8 w-8" title="Settings">
+            <Button variant="ghost" size="icon" className="h-8 w-8" title="Settings" data-testid="notification-settings-button">
               <Settings className="h-4 w-4" />
             </Button>
           </Link>
           {onClose && (
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
+            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose} data-testid="notification-close-button">
               <X className="h-4 w-4" />
             </Button>
           )}
@@ -137,12 +138,13 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
       </div>
 
       {/* Filter */}
-      <div className="px-4 py-2 border-b">
+      <div className="px-4 py-2 border-b" data-testid="notification-filter">
         <div className="flex gap-2">
           <Button
             variant={!showUnreadOnly ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setShowUnreadOnly(false)}
+            data-testid="notification-filter-all"
           >
             All
           </Button>
@@ -150,6 +152,7 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
             variant={showUnreadOnly ? "secondary" : "ghost"}
             size="sm"
             onClick={() => setShowUnreadOnly(true)}
+            data-testid="notification-filter-unread"
           >
             Unread
           </Button>
@@ -157,13 +160,13 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
       </div>
 
       {/* Notifications List */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1 overflow-y-auto" data-testid="notification-list">
         {loading ? (
-          <div className="flex items-center justify-center py-8">
+          <div className="flex items-center justify-center py-8" data-testid="notification-loading">
             <RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
           </div>
         ) : displayedNotifications.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+          <div className="flex flex-col items-center justify-center py-8 text-muted-foreground" data-testid="notification-empty">
             <Bell className="h-10 w-10 mb-2" />
             <p className="text-sm">No notifications</p>
           </div>
@@ -179,6 +182,7 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
                   className={`p-3 hover:bg-muted/50 transition-colors ${
                     !notification.read ? "bg-muted/30" : ""
                   }`}
+                  data-testid={`notification-item-${notification.id}`}
                 >
                   <div className="flex gap-3">
                     <div className={`mt-0.5 ${TYPE_CONFIG[notification.type].color}`}>
@@ -202,6 +206,7 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
                               className="h-6 w-6"
                               onClick={() => handleMarkRead(notification.id)}
                               title="Mark as read"
+                              data-testid={`notification-mark-read-${notification.id}`}
                             >
                               <Check className="h-3 w-3" />
                             </Button>
@@ -212,6 +217,7 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
                             className="h-6 w-6 text-muted-foreground hover:text-destructive"
                             onClick={() => handleDelete(notification.id)}
                             title="Delete"
+                            data-testid={`notification-delete-${notification.id}`}
                           >
                             <Trash2 className="h-3 w-3" />
                           </Button>
@@ -246,9 +252,9 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
 
       {/* Footer */}
       {notifications.length > 10 && (
-        <div className="p-3 border-t text-center">
+        <div className="p-3 border-t text-center" data-testid="notification-footer">
           <Link href="/settings/notifications" onClick={onClose}>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" data-testid="notification-view-all-button">
               View all notifications
             </Button>
           </Link>
@@ -304,10 +310,11 @@ export function NotificationBell({ onClick }: NotificationBellProps) {
       className="relative"
       onClick={onClick}
       title="Notifications"
+      data-testid="notification-bell"
     >
       <Bell className="h-5 w-5" />
       {unreadCount > 0 && (
-        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-medium">
+        <span className="absolute -top-1 -right-1 h-5 w-5 rounded-full bg-red-500 text-white text-xs flex items-center justify-center font-medium" data-testid="notification-bell-badge">
           {unreadCount > 9 ? "9+" : unreadCount}
         </span>
       )}
