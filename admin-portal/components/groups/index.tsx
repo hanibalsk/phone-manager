@@ -1,3 +1,6 @@
 export { AdminGroupList } from "./admin-group-list";
 export { GroupStatusBadge } from "./group-status-badge";
 export { GroupActionsMenu } from "./group-actions-menu";
+export { MemberRoleBadge } from "./member-role-badge";
+export { GroupMembersList } from "./group-members-list";
+export { AddMemberDialog } from "./add-member-dialog";
