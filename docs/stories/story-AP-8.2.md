@@ -4,7 +4,7 @@
 **Epic**: AP-8 - App Usage & Unlock Requests
 **Priority**: Medium
 **Estimate**: 3 story points (2-3 days)
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Created**: 2025-12-10
 **PRD Reference**: FR-8.2 (Admin Portal PRD)
 
@@ -40,23 +40,23 @@ so that I can control device usage.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add App Limit Types (AC: AP-8.2.1)
-  - [ ] Add AppLimit type to types/index.ts
-  - [ ] Add TimeWindow type
-  - [ ] Add app limits API endpoints
-- [ ] Task 2: Create App Limits Page (AC: AP-8.2.1)
-  - [ ] Create app/(dashboard)/app-limits/page.tsx
-- [ ] Task 3: Create App Limits List Component (AC: AP-8.2.1, AP-8.2.3)
-  - [ ] Create components/app-limits/admin-app-limits-list.tsx
-  - [ ] Show existing limits with status
-  - [ ] Delete limit functionality
-- [ ] Task 4: Create App Limit Form (AC: AP-8.2.1, AP-8.2.2, AP-8.2.3, AP-8.2.4)
-  - [ ] Create components/app-limits/app-limit-form.tsx
-  - [ ] App/category selection
-  - [ ] Time limit inputs (daily/weekly)
-  - [ ] Time window configuration
-  - [ ] Block toggle
-  - [ ] Device/group assignment
+- [x] Task 1: Add App Limit Types (AC: AP-8.2.1)
+  - [x] Add AppLimit type to types/index.ts
+  - [x] Add TimeWindow type
+  - [x] Add app limits API endpoints
+- [x] Task 2: Create App Limits Page (AC: AP-8.2.1)
+  - [x] Create app/(dashboard)/app-limits/page.tsx
+- [x] Task 3: Create App Limits List Component (AC: AP-8.2.1, AP-8.2.3)
+  - [x] Create components/app-limits/admin-app-limits-list.tsx
+  - [x] Show existing limits with status
+  - [x] Delete limit functionality
+- [x] Task 4: Create App Limit Form (AC: AP-8.2.1, AP-8.2.2, AP-8.2.3, AP-8.2.4)
+  - [x] Create components/app-limits/app-limit-form.tsx
+  - [x] App/category selection
+  - [x] Time limit inputs (daily/weekly)
+  - [x] Time window configuration
+  - [x] Block toggle
+  - [x] Device/group assignment
 - [ ] Task 5: Testing (All ACs) - Deferred
   - [ ] Test app limits configuration
 
@@ -102,13 +102,24 @@ DELETE /api/admin/app-limits/:id
 Claude Opus 4.5 (claude-opus-4-5-20251101)
 
 ### Debug Log References
-(To be filled during development)
+- Types and API added in AP-8.1
 
 ### Completion Notes List
-(To be filled during development)
+- App limits list with filtering by org/device/group/target type
+- Toggle enable/disable functionality
+- Delete with confirmation modal
+- Full form with time limits, time windows, and block mode
+- Quick preset buttons for common time limits
+- Device/group assignment with organization filtering
 
 ### File List
-(To be filled during development)
+- `admin-portal/app/(dashboard)/app-limits/page.tsx` (NEW)
+- `admin-portal/app/(dashboard)/app-limits/new/page.tsx` (NEW)
+- `admin-portal/app/(dashboard)/app-limits/[id]/edit/page.tsx` (NEW)
+- `admin-portal/components/app-limits/admin-app-limits-list.tsx` (NEW)
+- `admin-portal/components/app-limits/app-limit-form.tsx` (NEW)
+- `admin-portal/components/app-limits/limit-type-badge.tsx` (NEW)
+- `admin-portal/components/app-limits/index.tsx` (NEW)
 
 ---
 
@@ -117,9 +128,10 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-10 | Claude | Initial story creation from PRD |
+| 2025-12-10 | Claude | Implemented app limits configuration |
 
 ---
 
 **Last Updated**: 2025-12-10
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Dependencies**: Story AP-8.1 (App Usage)
