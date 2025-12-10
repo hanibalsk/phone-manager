@@ -6,8 +6,8 @@ export { AuthSettings } from "./auth-settings";
 // Story AP-9.2: Feature Flags
 export { FeatureFlags } from "./feature-flags";
 
-// Story AP-9.3: Rate Limits (coming soon)
-// export { RateLimits } from "./rate-limits";
+// Story AP-9.3: Rate Limits
+export { RateLimits } from "./rate-limits";
 
 // Story AP-9.4: API Keys (coming soon)
 // export { ApiKeysList } from "./api-keys-list";

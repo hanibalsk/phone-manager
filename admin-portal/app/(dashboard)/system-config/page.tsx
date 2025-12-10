@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Shield, Flag, Gauge, Key, Database, Settings } from "lucide-react";
-import { AuthSettings, FeatureFlags } from "@/components/system-config";
+import { AuthSettings, FeatureFlags, RateLimits } from "@/components/system-config";
 
 type ConfigTab =
   | "auth"
@@ -62,11 +62,7 @@ export default function SystemConfigPage() {
       case "features":
         return <FeatureFlags />;
       case "rate-limits":
-        return (
-          <div className="flex items-center justify-center h-64 text-muted-foreground">
-            Rate Limits - Coming in AP-9.3
-          </div>
-        );
+        return <RateLimits />;
       case "api-keys":
         return (
           <div className="flex items-center justify-center h-64 text-muted-foreground">
