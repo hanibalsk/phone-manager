@@ -98,7 +98,7 @@ function StatCard({
   icon: React.ComponentType<{ className?: string }>;
 }) {
   return (
-    <Card>
+    <Card data-testid={`audit-stat-card-${title.toLowerCase().replace(/\s+/g, "-")}`}>
       <CardContent className="p-4">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-muted rounded-lg">
@@ -127,7 +127,7 @@ function LogDetailSheet({
 
   return (
     <Sheet open={open} onOpenChange={onClose}>
-      <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto">
+      <SheetContent className="w-[500px] sm:w-[600px] overflow-y-auto" data-testid="audit-log-detail-sheet">
         <SheetHeader>
           <SheetTitle>Audit Log Details</SheetTitle>
           <SheetDescription>
@@ -335,9 +335,9 @@ export default function AuditLogsPage() {
   const totalPages = Math.ceil(total / 20);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="audit-logs-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-testid="audit-logs-header">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">
@@ -352,11 +352,11 @@ export default function AuditLogsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => loadData()} disabled={logsLoading}>
+          <Button variant="outline" onClick={() => loadData()} disabled={logsLoading} data-testid="audit-logs-refresh-button">
             <RefreshCw className={`h-4 w-4 mr-2 ${logsLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
-          <Button variant="outline" onClick={() => handleExport("csv")} disabled={exporting}>
+          <Button variant="outline" onClick={() => handleExport("csv")} disabled={exporting} data-testid="audit-logs-export-button">
             <Download className="h-4 w-4 mr-2" />
             Export CSV
           </Button>
@@ -364,7 +364,7 @@ export default function AuditLogsPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-testid="audit-logs-stats-section">
         <StatCard
           title="Total Entries"
           value={stats?.total_entries.toLocaleString() || 0}
@@ -388,8 +388,8 @@ export default function AuditLogsPage() {
       </div>
 
       {/* Quick Links */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Link href="/audit/users">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4" data-testid="audit-logs-quick-links">
+        <Link href="/audit/users" data-testid="audit-link-user-activity">
           <Card className="hover:border-primary transition-colors cursor-pointer">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -402,7 +402,7 @@ export default function AuditLogsPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/audit/organizations">
+        <Link href="/audit/organizations" data-testid="audit-link-org-activity">
           <Card className="hover:border-primary transition-colors cursor-pointer">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -415,7 +415,7 @@ export default function AuditLogsPage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/audit/gdpr">
+        <Link href="/audit/gdpr" data-testid="audit-link-gdpr">
           <Card className="hover:border-primary transition-colors cursor-pointer">
             <CardContent className="p-4">
               <div className="flex items-center gap-3">
@@ -431,7 +431,7 @@ export default function AuditLogsPage() {
       </div>
 
       {/* Filters */}
-      <Card>
+      <Card data-testid="audit-logs-filter-card">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">Search & Filter</CardTitle>
         </CardHeader>
@@ -447,6 +447,7 @@ export default function AuditLogsPage() {
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-10"
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  data-testid="audit-logs-search-input"
                 />
               </div>
             </div>
@@ -456,6 +457,7 @@ export default function AuditLogsPage() {
                 className="w-full h-10 px-3 rounded-md border border-input bg-background"
                 value={actionFilter}
                 onChange={(e) => setActionFilter(e.target.value as AuditActionType | "")}
+                data-testid="audit-logs-action-filter"
               >
                 <option value="">All Actions</option>
                 {Object.keys(ACTION_COLORS).map((action) => (
@@ -471,6 +473,7 @@ export default function AuditLogsPage() {
                 className="w-full h-10 px-3 rounded-md border border-input bg-background"
                 value={resourceFilter}
                 onChange={(e) => setResourceFilter(e.target.value as AuditResourceType | "")}
+                data-testid="audit-logs-resource-filter"
               >
                 <option value="">All Resources</option>
                 {Object.keys(RESOURCE_ICONS).map((resource) => (
@@ -481,7 +484,7 @@ export default function AuditLogsPage() {
               </select>
             </div>
             <div>
-              <Button onClick={handleSearch} className="w-full">
+              <Button onClick={handleSearch} className="w-full" data-testid="audit-logs-apply-filters-button">
                 <Filter className="h-4 w-4 mr-2" />
                 Apply Filters
               </Button>
@@ -494,6 +497,7 @@ export default function AuditLogsPage() {
                 type="date"
                 value={dateFrom}
                 onChange={(e) => setDateFrom(e.target.value)}
+                data-testid="audit-logs-date-from"
               />
             </div>
             <div>
@@ -502,6 +506,7 @@ export default function AuditLogsPage() {
                 type="date"
                 value={dateTo}
                 onChange={(e) => setDateTo(e.target.value)}
+                data-testid="audit-logs-date-to"
               />
             </div>
           </div>
@@ -509,17 +514,17 @@ export default function AuditLogsPage() {
       </Card>
 
       {/* Logs Table */}
-      <Card>
+      <Card data-testid="audit-logs-table-card">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg">
             Audit Log Entries
-            <span className="text-sm font-normal text-muted-foreground ml-2">
+            <span className="text-sm font-normal text-muted-foreground ml-2" data-testid="audit-logs-total-count">
               ({total.toLocaleString()} total)
             </span>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table>
+          <Table data-testid="audit-logs-table">
             <TableHeader>
               <TableRow>
                 <TableHead>Timestamp</TableHead>
@@ -545,7 +550,7 @@ export default function AuditLogsPage() {
                 </TableRow>
               ) : (
                 logs.map((log) => (
-                  <TableRow key={log.id}>
+                  <TableRow key={log.id} data-testid={`audit-log-row-${log.id}`}>
                     <TableCell className="font-mono text-xs">
                       {new Date(log.timestamp).toLocaleString()}
                     </TableCell>
@@ -576,6 +581,7 @@ export default function AuditLogsPage() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleViewDetails(log)}
+                        data-testid={`audit-log-view-details-${log.id}`}
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -588,7 +594,7 @@ export default function AuditLogsPage() {
 
           {/* Pagination */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center justify-between mt-4" data-testid="audit-logs-pagination">
               <p className="text-sm text-muted-foreground">
                 Page {page} of {totalPages}
               </p>
@@ -598,6 +604,7 @@ export default function AuditLogsPage() {
                   size="sm"
                   onClick={() => setPage(Math.max(1, page - 1))}
                   disabled={page === 1}
+                  data-testid="audit-logs-prev-page"
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
@@ -606,6 +613,7 @@ export default function AuditLogsPage() {
                   size="sm"
                   onClick={() => setPage(Math.min(totalPages, page + 1))}
                   disabled={page === totalPages}
+                  data-testid="audit-logs-next-page"
                 >
                   <ChevronRight className="h-4 w-4" />
                 </Button>

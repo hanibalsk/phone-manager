@@ -61,7 +61,7 @@ function StatCard({
   trend?: "up" | "down" | null;
 }) {
   return (
-    <Card>
+    <Card data-testid={`org-activity-stat-card-${title.toLowerCase().replace(/\s+/g, "-")}`}>
       <CardContent className="p-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -185,9 +185,9 @@ export default function OrganizationActivityPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="org-activity-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-testid="org-activity-header">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">
@@ -206,7 +206,7 @@ export default function OrganizationActivityPage() {
           </p>
         </div>
         <Link href="/audit">
-          <Button variant="outline">
+          <Button variant="outline" data-testid="org-activity-back-button">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Audit
           </Button>
@@ -215,7 +215,7 @@ export default function OrganizationActivityPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Organization Selection */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1" data-testid="org-activity-selection-card">
           <CardHeader>
             <CardTitle className="text-lg">Select Organization</CardTitle>
             <CardDescription>
@@ -232,20 +232,21 @@ export default function OrganizationActivityPage() {
                   onChange={(e) => setOrgSearch(e.target.value)}
                   className="pl-10"
                   onKeyDown={(e) => e.key === "Enter" && handleOrgSearch()}
+                  data-testid="org-activity-search-input"
                 />
               </div>
-              <Button variant="outline" onClick={handleOrgSearch}>
+              <Button variant="outline" onClick={handleOrgSearch} data-testid="org-activity-search-button">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            <div className="space-y-2 max-h-[400px] overflow-y-auto" data-testid="org-activity-org-list">
               {orgsLoading ? (
-                <div className="text-center py-4">
+                <div className="text-center py-4" data-testid="org-activity-loading">
                   <RefreshCw className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
                 </div>
               ) : organizations.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4" data-testid="org-activity-empty">
                   No organizations found
                 </p>
               ) : (
@@ -258,6 +259,7 @@ export default function OrganizationActivityPage() {
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     }`}
+                    data-testid={`org-activity-org-item-${org.id}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -278,9 +280,9 @@ export default function OrganizationActivityPage() {
         </Card>
 
         {/* Activity Report */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6" data-testid="org-activity-report-section">
           {/* Date Range */}
-          <Card>
+          <Card data-testid="org-activity-date-range-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg">Date Range</CardTitle>
             </CardHeader>
@@ -292,6 +294,7 @@ export default function OrganizationActivityPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => setDatePreset(preset.days)}
+                    data-testid={`org-activity-preset-${preset.days}`}
                   >
                     {preset.label}
                   </Button>
@@ -304,6 +307,7 @@ export default function OrganizationActivityPage() {
                     type="date"
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
+                    data-testid="org-activity-date-from"
                   />
                 </div>
                 <div>
@@ -312,6 +316,7 @@ export default function OrganizationActivityPage() {
                     type="date"
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
+                    data-testid="org-activity-date-to"
                   />
                 </div>
               </div>
@@ -319,7 +324,7 @@ export default function OrganizationActivityPage() {
           </Card>
 
           {!selectedOrgId ? (
-            <Card>
+            <Card data-testid="org-activity-no-selection">
               <CardContent className="py-12 text-center">
                 <Building className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
@@ -328,7 +333,7 @@ export default function OrganizationActivityPage() {
               </CardContent>
             </Card>
           ) : reportLoading ? (
-            <Card>
+            <Card data-testid="org-activity-report-loading">
               <CardContent className="py-12 text-center">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
               </CardContent>
@@ -336,7 +341,7 @@ export default function OrganizationActivityPage() {
           ) : report ? (
             <>
               {/* Summary Stats */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="org-activity-stats">
                 <StatCard
                   title="Total Actions"
                   value={report.total_actions.toLocaleString()}
@@ -365,7 +370,7 @@ export default function OrganizationActivityPage() {
 
               {/* Anomalies */}
               {report.anomalies.length > 0 && (
-                <Card className="border-yellow-200 bg-yellow-50/50">
+                <Card className="border-yellow-200 bg-yellow-50/50" data-testid="org-activity-anomalies-card">
                   <CardHeader className="pb-4">
                     <CardTitle className="text-lg flex items-center gap-2">
                       <AlertTriangle className="h-5 w-5 text-yellow-600" />
@@ -376,7 +381,7 @@ export default function OrganizationActivityPage() {
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-3">
+                    <div className="space-y-3" data-testid="org-activity-anomalies-list">
                       {report.anomalies.map((anomaly, idx) => (
                         <AnomalyCard key={idx} anomaly={anomaly} />
                       ))}
@@ -386,7 +391,7 @@ export default function OrganizationActivityPage() {
               )}
 
               {/* User Action Counts */}
-              <Card>
+              <Card data-testid="org-activity-users-card">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">User Activity</CardTitle>
                   <CardDescription>
@@ -394,7 +399,7 @@ export default function OrganizationActivityPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
+                  <Table data-testid="org-activity-users-table">
                     <TableHeader>
                       <TableRow>
                         <TableHead>User</TableHead>
@@ -445,7 +450,7 @@ export default function OrganizationActivityPage() {
               </Card>
 
               {/* Resource Changes */}
-              <Card>
+              <Card data-testid="org-activity-resources-card">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Resource Changes</CardTitle>
                   <CardDescription>
@@ -453,7 +458,7 @@ export default function OrganizationActivityPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Table>
+                  <Table data-testid="org-activity-resources-table">
                     <TableHeader>
                       <TableRow>
                         <TableHead>Resource Type</TableHead>

@@ -97,7 +97,7 @@ function StatCard({
   };
 
   return (
-    <Card>
+    <Card data-testid={`integrity-stat-card-${title.toLowerCase().replace(/\s+/g, "-")}`}>
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div
@@ -168,9 +168,9 @@ export default function IntegrityPage() {
   const StatusIcon = statusConfig.icon;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="integrity-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-testid="integrity-header">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">
@@ -190,12 +190,12 @@ export default function IntegrityPage() {
         </div>
         <div className="flex items-center gap-2">
           <Link href="/audit">
-            <Button variant="outline">
+            <Button variant="outline" data-testid="integrity-back-button">
               <ArrowLeft className="h-4 w-4 mr-2" />
               Back to Audit
             </Button>
           </Link>
-          <Button onClick={loadStatus} disabled={statusLoading}>
+          <Button onClick={loadStatus} disabled={statusLoading} data-testid="integrity-refresh-button">
             <RefreshCw
               className={`h-4 w-4 mr-2 ${statusLoading ? "animate-spin" : ""}`}
             />
@@ -205,7 +205,7 @@ export default function IntegrityPage() {
       </div>
 
       {statusLoading && !status ? (
-        <Card>
+        <Card data-testid="integrity-loading">
           <CardContent className="py-12 text-center">
             <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
           </CardContent>
@@ -213,9 +213,9 @@ export default function IntegrityPage() {
       ) : status ? (
         <>
           {/* Status Banner */}
-          <Card className={`${statusConfig.bgColor} ${statusConfig.borderColor}`}>
+          <Card className={`${statusConfig.bgColor} ${statusConfig.borderColor}`} data-testid="integrity-status-banner">
             <CardContent className="p-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between" data-testid="integrity-status-content">
                 <div className="flex items-center gap-4">
                   <div
                     className={`p-3 rounded-full ${
@@ -252,6 +252,7 @@ export default function IntegrityPage() {
                   onClick={handleVerify}
                   disabled={verifying || verifyLoading}
                   size="lg"
+                  data-testid="integrity-verify-button"
                 >
                   {(verifying || verifyLoading) && (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
@@ -271,9 +272,10 @@ export default function IntegrityPage() {
                   ? "bg-green-50 border-green-200"
                   : "bg-red-50 border-red-200"
               }
+              data-testid="integrity-verification-result"
             >
               <CardContent className="p-4">
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-3" data-testid={`integrity-verification-${verificationResult.success ? "success" : "failure"}`}>
                   {verificationResult.success ? (
                     <CheckCircle className="h-5 w-5 text-green-600 mt-0.5" />
                   ) : (
@@ -286,9 +288,9 @@ export default function IntegrityPage() {
                         : "Verification Found Issues"}
                     </p>
                     {verificationResult.issues.length > 0 && (
-                      <ul className="text-sm mt-2 space-y-1">
+                      <ul className="text-sm mt-2 space-y-1" data-testid="integrity-verification-issues">
                         {verificationResult.issues.map((issue, idx) => (
-                          <li key={idx} className="text-red-700">
+                          <li key={idx} className="text-red-700" data-testid={`integrity-verification-issue-${idx}`}>
                             {issue}
                           </li>
                         ))}
@@ -301,7 +303,7 @@ export default function IntegrityPage() {
           )}
 
           {/* Stats Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4" data-testid="integrity-stats-grid">
             <StatCard
               title="Chain Length"
               value={status.chain_length.toLocaleString()}
@@ -330,7 +332,7 @@ export default function IntegrityPage() {
           </div>
 
           {/* Alerts */}
-          <Card>
+          <Card data-testid="integrity-alerts-card">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -349,12 +351,12 @@ export default function IntegrityPage() {
             </CardHeader>
             <CardContent>
               {status.alerts.length === 0 ? (
-                <div className="text-center py-8">
+                <div className="text-center py-8" data-testid="integrity-alerts-empty">
                   <CheckCircle className="h-12 w-12 mx-auto text-green-500 mb-3" />
                   <p className="text-muted-foreground">No integrity alerts</p>
                 </div>
               ) : (
-                <Table>
+                <Table data-testid="integrity-alerts-table">
                   <TableHeader>
                     <TableRow>
                       <TableHead>Type</TableHead>
@@ -367,7 +369,7 @@ export default function IntegrityPage() {
                   </TableHeader>
                   <TableBody>
                     {status.alerts.map((alert) => (
-                      <TableRow key={alert.id}>
+                      <TableRow key={alert.id} data-testid={`integrity-alert-row-${alert.id}`}>
                         <TableCell>
                           <Badge variant="outline" className="capitalize">
                             {alert.type}
@@ -402,6 +404,7 @@ export default function IntegrityPage() {
                               variant="outline"
                               onClick={() => handleResolveAlert(alert.id)}
                               disabled={resolvingAlert}
+                              data-testid={`integrity-alert-resolve-${alert.id}`}
                             >
                               <Check className="h-4 w-4 mr-1" />
                               Resolve
@@ -417,7 +420,7 @@ export default function IntegrityPage() {
           </Card>
 
           {/* Retention Policy */}
-          <Card>
+          <Card data-testid="integrity-storage-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Database className="h-5 w-5 text-muted-foreground" />
@@ -425,7 +428,7 @@ export default function IntegrityPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6" data-testid="integrity-storage-grid">
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">Retention Policy</p>
                   <p className="text-lg font-semibold">
@@ -463,7 +466,7 @@ export default function IntegrityPage() {
               </div>
 
               {/* Storage Usage Bar */}
-              <div className="mt-6">
+              <div className="mt-6" data-testid="integrity-storage-usage">
                 <div className="flex items-center justify-between text-sm mb-2">
                   <span className="text-muted-foreground">Storage Usage</span>
                   <span className="font-medium">
@@ -473,6 +476,7 @@ export default function IntegrityPage() {
                 <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
                   <div
                     className="h-full bg-primary rounded-full"
+                    data-testid="integrity-storage-bar"
                     style={{
                       width: `${Math.min(
                         (status.storage_usage.size_bytes / (1024 * 1024 * 1024)) * 100,
@@ -489,7 +493,7 @@ export default function IntegrityPage() {
           </Card>
 
           {/* Hash Chain Info */}
-          <Card>
+          <Card data-testid="integrity-hashchain-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg flex items-center gap-2">
                 <Shield className="h-5 w-5 text-muted-foreground" />
@@ -501,7 +505,7 @@ export default function IntegrityPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="p-4 bg-muted rounded-lg">
+                <div className="p-4 bg-muted rounded-lg" data-testid="integrity-hashchain-info">
                   <p className="text-sm text-muted-foreground mb-2">How it works</p>
                   <p className="text-sm">
                     Each audit log entry is cryptographically linked to the previous entry
@@ -509,8 +513,8 @@ export default function IntegrityPage() {
                     tampering would break the chain and be immediately detectable.
                   </p>
                 </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="p-4 border rounded-lg">
+                <div className="grid grid-cols-2 gap-4" data-testid="integrity-hashchain-grid">
+                  <div className="p-4 border rounded-lg" data-testid="integrity-chain-status">
                     <p className="text-sm text-muted-foreground">Chain Status</p>
                     <div className="flex items-center gap-2 mt-2">
                       {status.broken_links === 0 ? (
@@ -530,7 +534,7 @@ export default function IntegrityPage() {
                       )}
                     </div>
                   </div>
-                  <div className="p-4 border rounded-lg">
+                  <div className="p-4 border rounded-lg" data-testid="integrity-last-verification">
                     <p className="text-sm text-muted-foreground">Last Verification</p>
                     <p className="font-medium mt-2">
                       {new Date(status.last_verified).toLocaleString()}
@@ -542,7 +546,7 @@ export default function IntegrityPage() {
           </Card>
         </>
       ) : (
-        <Card>
+        <Card data-testid="integrity-error">
           <CardContent className="py-12 text-center">
             <p className="text-muted-foreground">Unable to load integrity status</p>
           </CardContent>

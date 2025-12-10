@@ -193,9 +193,9 @@ export default function GDPRPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="gdpr-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-testid="gdpr-header">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">
@@ -214,7 +214,7 @@ export default function GDPRPage() {
           </p>
         </div>
         <Link href="/audit">
-          <Button variant="outline">
+          <Button variant="outline" data-testid="gdpr-back-button">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Audit
           </Button>
@@ -222,7 +222,7 @@ export default function GDPRPage() {
       </div>
 
       {/* Info Banner */}
-      <Card className="bg-blue-50 border-blue-200">
+      <Card className="bg-blue-50 border-blue-200" data-testid="gdpr-info-banner">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <Shield className="h-5 w-5 text-blue-600 mt-0.5" />
@@ -240,7 +240,7 @@ export default function GDPRPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User Selection */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1" data-testid="gdpr-user-selection-card">
           <CardHeader>
             <CardTitle className="text-lg">Select User</CardTitle>
             <CardDescription>
@@ -257,20 +257,21 @@ export default function GDPRPage() {
                   onChange={(e) => setUserSearch(e.target.value)}
                   className="pl-10"
                   onKeyDown={(e) => e.key === "Enter" && handleUserSearch()}
+                  data-testid="gdpr-user-search-input"
                 />
               </div>
-              <Button variant="outline" onClick={handleUserSearch}>
+              <Button variant="outline" onClick={handleUserSearch} data-testid="gdpr-user-search-button">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="space-y-2 max-h-[300px] overflow-y-auto">
+            <div className="space-y-2 max-h-[300px] overflow-y-auto" data-testid="gdpr-user-list">
               {usersLoading ? (
-                <div className="text-center py-4">
+                <div className="text-center py-4" data-testid="gdpr-user-loading">
                   <RefreshCw className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
                 </div>
               ) : users.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4" data-testid="gdpr-user-empty">
                   No users found
                 </p>
               ) : (
@@ -283,6 +284,7 @@ export default function GDPRPage() {
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     }`}
+                    data-testid={`gdpr-user-item-${user.id}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -301,7 +303,7 @@ export default function GDPRPage() {
             </div>
 
             {selectedUser && (
-              <div className="pt-4 border-t space-y-2">
+              <div className="pt-4 border-t space-y-2" data-testid="gdpr-selected-user-actions">
                 <p className="text-sm font-medium">Selected: {selectedUser.display_name}</p>
                 <div className="flex gap-2">
                   <Button
@@ -309,6 +311,7 @@ export default function GDPRPage() {
                     variant="outline"
                     className="flex-1"
                     onClick={openExportDialog}
+                    data-testid="gdpr-export-button"
                   >
                     <Download className="h-4 w-4 mr-2" />
                     Export Data
@@ -318,6 +321,7 @@ export default function GDPRPage() {
                     variant="destructive"
                     className="flex-1"
                     onClick={openDeleteDialog}
+                    data-testid="gdpr-delete-button"
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     Delete Data
@@ -329,16 +333,16 @@ export default function GDPRPage() {
         </Card>
 
         {/* Request History */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6" data-testid="gdpr-requests-section">
           {/* Export Requests */}
-          <Card>
+          <Card data-testid="gdpr-export-requests-card">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-lg">Data Export Requests</CardTitle>
                   <CardDescription>Recent data export requests</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={loadRequests}>
+                <Button variant="outline" size="sm" onClick={loadRequests} data-testid="gdpr-export-refresh">
                   <RefreshCw
                     className={`h-4 w-4 ${exportsLoading ? "animate-spin" : ""}`}
                   />
@@ -346,7 +350,7 @@ export default function GDPRPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
+              <Table data-testid="gdpr-export-requests-table">
                 <TableHeader>
                   <TableRow>
                     <TableHead>User</TableHead>
@@ -408,14 +412,14 @@ export default function GDPRPage() {
           </Card>
 
           {/* Deletion Requests */}
-          <Card>
+          <Card data-testid="gdpr-deletion-requests-card">
             <CardHeader className="pb-4">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-lg">Data Deletion Requests</CardTitle>
                   <CardDescription>Recent data deletion requests</CardDescription>
                 </div>
-                <Button variant="outline" size="sm" onClick={loadRequests}>
+                <Button variant="outline" size="sm" onClick={loadRequests} data-testid="gdpr-deletion-refresh">
                   <RefreshCw
                     className={`h-4 w-4 ${deletionsLoading ? "animate-spin" : ""}`}
                   />
@@ -423,7 +427,7 @@ export default function GDPRPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <Table>
+              <Table data-testid="gdpr-deletion-requests-table">
                 <TableHeader>
                   <TableRow>
                     <TableHead>User</TableHead>
@@ -488,7 +492,7 @@ export default function GDPRPage() {
 
       {/* Export Dialog */}
       <Dialog open={exportDialogOpen} onOpenChange={setExportDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px]" data-testid="gdpr-export-dialog">
           <DialogHeader>
             <DialogTitle>Export User Data</DialogTitle>
             <DialogDescription>
@@ -498,11 +502,11 @@ export default function GDPRPage() {
           <div className="py-4 space-y-4">
             <div className="flex justify-between items-center">
               <Label>Data Types</Label>
-              <Button variant="link" size="sm" onClick={selectAllDataTypes}>
+              <Button variant="link" size="sm" onClick={selectAllDataTypes} data-testid="gdpr-export-select-all">
                 Select All
               </Button>
             </div>
-            <div className="space-y-3">
+            <div className="space-y-3" data-testid="gdpr-export-data-types">
               {DATA_TYPES.map((type) => (
                 <div
                   key={type.id}
@@ -529,12 +533,13 @@ export default function GDPRPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setExportDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setExportDialogOpen(false)} data-testid="gdpr-export-cancel">
               Cancel
             </Button>
             <Button
               onClick={handleExportData}
               disabled={selectedDataTypes.length === 0 || creatingExport}
+              data-testid="gdpr-export-confirm"
             >
               {creatingExport && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
               Export Data
@@ -545,7 +550,7 @@ export default function GDPRPage() {
 
       {/* Delete Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px]" data-testid="gdpr-delete-dialog">
           <DialogHeader>
             <DialogTitle className="text-red-600 flex items-center gap-2">
               <AlertTriangle className="h-5 w-5" />
@@ -558,14 +563,14 @@ export default function GDPRPage() {
 
           {confirmDeleteStep === 0 && (
             <>
-              <div className="py-4 space-y-4">
+              <div className="py-4 space-y-4" data-testid="gdpr-delete-step-1">
                 <div className="flex justify-between items-center">
                   <Label>Data Types to Delete</Label>
-                  <Button variant="link" size="sm" onClick={selectAllDataTypes}>
+                  <Button variant="link" size="sm" onClick={selectAllDataTypes} data-testid="gdpr-delete-select-all">
                     Select All
                   </Button>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-3" data-testid="gdpr-delete-data-types">
                   {DATA_TYPES.map((type) => (
                     <div
                       key={type.id}
@@ -592,13 +597,14 @@ export default function GDPRPage() {
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                <Button variant="outline" onClick={() => setDeleteDialogOpen(false)} data-testid="gdpr-delete-cancel">
                   Cancel
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={() => setConfirmDeleteStep(1)}
                   disabled={selectedDataTypes.length === 0}
+                  data-testid="gdpr-delete-continue"
                 >
                   Continue
                 </Button>
@@ -608,8 +614,8 @@ export default function GDPRPage() {
 
           {confirmDeleteStep === 1 && (
             <>
-              <div className="py-4 space-y-4">
-                <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+              <div className="py-4 space-y-4" data-testid="gdpr-delete-step-2">
+                <div className="p-4 bg-red-50 border border-red-200 rounded-lg" data-testid="gdpr-delete-warning">
                   <p className="text-sm text-red-800 font-medium mb-2">
                     You are about to permanently delete:
                   </p>
@@ -632,17 +638,19 @@ export default function GDPRPage() {
                     onChange={(e) => setDeleteConfirmText(e.target.value)}
                     placeholder="Type DELETE"
                     className="mt-2"
+                    data-testid="gdpr-delete-confirm-input"
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setConfirmDeleteStep(0)}>
+                <Button variant="outline" onClick={() => setConfirmDeleteStep(0)} data-testid="gdpr-delete-back">
                   Back
                 </Button>
                 <Button
                   variant="destructive"
                   onClick={handleDeleteData}
                   disabled={deleteConfirmText !== "DELETE" || creatingDeletion}
+                  data-testid="gdpr-delete-confirm"
                 >
                   {creatingDeletion && (
                     <RefreshCw className="h-4 w-4 mr-2 animate-spin" />

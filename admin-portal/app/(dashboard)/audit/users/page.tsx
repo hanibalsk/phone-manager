@@ -189,9 +189,9 @@ export default function UserActivityPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="user-activity-page">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-testid="user-activity-header">
         <div>
           <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
             <Link href="/" className="hover:text-foreground">
@@ -210,7 +210,7 @@ export default function UserActivityPage() {
           </p>
         </div>
         <Link href="/audit">
-          <Button variant="outline">
+          <Button variant="outline" data-testid="user-activity-back-button">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Audit
           </Button>
@@ -219,7 +219,7 @@ export default function UserActivityPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User Selection */}
-        <Card className="lg:col-span-1">
+        <Card className="lg:col-span-1" data-testid="user-activity-selection-card">
           <CardHeader>
             <CardTitle className="text-lg">Select User</CardTitle>
             <CardDescription>Choose a user to view their activity</CardDescription>
@@ -234,20 +234,21 @@ export default function UserActivityPage() {
                   onChange={(e) => setUserSearch(e.target.value)}
                   className="pl-10"
                   onKeyDown={(e) => e.key === "Enter" && handleUserSearch()}
+                  data-testid="user-activity-search-input"
                 />
               </div>
-              <Button variant="outline" onClick={handleUserSearch}>
+              <Button variant="outline" onClick={handleUserSearch} data-testid="user-activity-search-button">
                 <Search className="h-4 w-4" />
               </Button>
             </div>
 
-            <div className="space-y-2 max-h-[400px] overflow-y-auto">
+            <div className="space-y-2 max-h-[400px] overflow-y-auto" data-testid="user-activity-user-list">
               {usersLoading ? (
-                <div className="text-center py-4">
+                <div className="text-center py-4" data-testid="user-activity-loading">
                   <RefreshCw className="h-5 w-5 animate-spin mx-auto text-muted-foreground" />
                 </div>
               ) : users.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
+                <p className="text-sm text-muted-foreground text-center py-4" data-testid="user-activity-empty">
                   No users found
                 </p>
               ) : (
@@ -260,6 +261,7 @@ export default function UserActivityPage() {
                         ? "border-primary bg-primary/5"
                         : "border-border hover:border-primary/50"
                     }`}
+                    data-testid={`user-activity-user-item-${user.id}`}
                   >
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center">
@@ -280,9 +282,9 @@ export default function UserActivityPage() {
         </Card>
 
         {/* Activity Report */}
-        <div className="lg:col-span-2 space-y-6">
+        <div className="lg:col-span-2 space-y-6" data-testid="user-activity-report-section">
           {/* Date Range */}
-          <Card>
+          <Card data-testid="user-activity-date-range-card">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg">Date Range</CardTitle>
             </CardHeader>
@@ -294,6 +296,7 @@ export default function UserActivityPage() {
                     variant="outline"
                     size="sm"
                     onClick={() => setDatePreset(preset.days)}
+                    data-testid={`user-activity-preset-${preset.days}`}
                   >
                     {preset.label}
                   </Button>
@@ -306,6 +309,7 @@ export default function UserActivityPage() {
                     type="date"
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
+                    data-testid="user-activity-date-from"
                   />
                 </div>
                 <div>
@@ -314,6 +318,7 @@ export default function UserActivityPage() {
                     type="date"
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
+                    data-testid="user-activity-date-to"
                   />
                 </div>
               </div>
@@ -321,7 +326,7 @@ export default function UserActivityPage() {
           </Card>
 
           {!selectedUserId ? (
-            <Card>
+            <Card data-testid="user-activity-no-selection">
               <CardContent className="py-12 text-center">
                 <User className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
                 <p className="text-muted-foreground">
@@ -330,7 +335,7 @@ export default function UserActivityPage() {
               </CardContent>
             </Card>
           ) : reportLoading ? (
-            <Card>
+            <Card data-testid="user-activity-report-loading">
               <CardContent className="py-12 text-center">
                 <RefreshCw className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
               </CardContent>
@@ -338,7 +343,7 @@ export default function UserActivityPage() {
           ) : report ? (
             <>
               {/* Summary */}
-              <Card>
+              <Card data-testid="user-activity-summary-card">
                 <CardHeader className="pb-4">
                   <div className="flex items-center justify-between">
                     <div>
@@ -351,6 +356,7 @@ export default function UserActivityPage() {
                         size="sm"
                         onClick={() => handleExport("csv")}
                         disabled={exporting}
+                        data-testid="user-activity-export-csv"
                       >
                         <Download className="h-4 w-4 mr-2" />
                         CSV
@@ -360,6 +366,7 @@ export default function UserActivityPage() {
                         size="sm"
                         onClick={() => handleExport("pdf")}
                         disabled={exporting}
+                        data-testid="user-activity-export-pdf"
                       >
                         <Download className="h-4 w-4 mr-2" />
                         PDF
@@ -368,7 +375,7 @@ export default function UserActivityPage() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4" data-testid="user-activity-stats">
                     <div className="text-center p-4 bg-muted rounded-lg">
                       <p className="text-3xl font-bold">{report.total_actions}</p>
                       <p className="text-sm text-muted-foreground">Total Actions</p>
@@ -394,12 +401,12 @@ export default function UserActivityPage() {
               </Card>
 
               {/* Actions by Type */}
-              <Card>
+              <Card data-testid="user-activity-actions-card">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Actions by Type</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="space-y-3">
+                  <div className="space-y-3" data-testid="user-activity-actions-list">
                     {Object.entries(report.actions_by_type).map(([action, count]) => (
                       <div key={action} className="flex items-center justify-between">
                         <ActionTypeBadge action={action as AuditActionType} />
@@ -421,13 +428,13 @@ export default function UserActivityPage() {
               </Card>
 
               {/* Timeline */}
-              <Card>
+              <Card data-testid="user-activity-timeline-card">
                 <CardHeader className="pb-4">
                   <CardTitle className="text-lg">Activity Timeline</CardTitle>
                 </CardHeader>
                 <CardContent>
                   {timelineByDate && Object.keys(timelineByDate).length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="space-y-6" data-testid="user-activity-timeline">
                       {Object.entries(timelineByDate).map(([date, items]) => (
                         <div key={date}>
                           <div className="flex items-center gap-2 mb-4">
