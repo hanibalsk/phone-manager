@@ -3,6 +3,8 @@ package three.two.bit.phonemanager.ui.groups
 import android.Manifest
 import android.content.pm.PackageManager
 import android.util.Size
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.camera.core.CameraSelector
@@ -51,6 +53,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
+import androidx.core.view.doOnLayout
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
@@ -154,12 +157,16 @@ private fun CameraPreviewContent(
     Box(modifier = modifier) {
         AndroidView(
             factory = { ctx ->
-                PreviewView(ctx).also { previewView ->
+                PreviewView(ctx).apply {
+                    layoutParams = FrameLayout.LayoutParams(
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                        ViewGroup.LayoutParams.MATCH_PARENT,
+                    )
+                    implementationMode = PreviewView.ImplementationMode.COMPATIBLE
+                }.also { previewView ->
                     val cameraProviderFuture = ProcessCameraProvider.getInstance(ctx)
 
-                    cameraProviderFuture.addListener({
-                        val cameraProvider = cameraProviderFuture.get()
-
+                    fun bindCamera(cameraProvider: ProcessCameraProvider) {
                         val preview = Preview.Builder()
                             .build()
                             .also {
@@ -217,6 +224,17 @@ private fun CameraPreviewContent(
                             )
                         } catch (e: Exception) {
                             Timber.e(e, "Camera binding failed")
+                        }
+                    }
+
+                    cameraProviderFuture.addListener({
+                        val cameraProvider = cameraProviderFuture.get()
+                        // Avoid binding before the view has a size to reduce NaN frame rate logs.
+                        val tryBind = { bindCamera(cameraProvider) }
+                        if (previewView.width == 0 || previewView.height == 0) {
+                            previewView.doOnLayout { tryBind() }
+                        } else {
+                            tryBind()
                         }
                     }, ContextCompat.getMainExecutor(ctx))
                 }

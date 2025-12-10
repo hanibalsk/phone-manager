@@ -192,15 +192,6 @@ export function AdminDeviceList() {
     platformFilter !== "all" ||
     organizationFilter !== "all";
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Never";
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
   const formatDateTime = (dateString: string | null) => {
     if (!dateString) return "Never";
     return new Date(dateString).toLocaleDateString("en-US", {

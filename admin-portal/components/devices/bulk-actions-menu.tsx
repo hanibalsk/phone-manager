@@ -86,6 +86,9 @@ export function BulkActionsMenu({
           size="sm"
           onClick={() => setShowMenu(!showMenu)}
           disabled={isLoading}
+          aria-expanded={showMenu}
+          aria-haspopup="menu"
+          aria-label={`Bulk actions menu for ${selectedDevices.length} selected device${selectedDevices.length !== 1 ? "s" : ""}`}
         >
           Bulk Actions ({selectedDevices.length})
           <ChevronDown className="h-4 w-4 ml-2" />
@@ -98,7 +101,11 @@ export function BulkActionsMenu({
               className="fixed inset-0 z-10"
               onClick={() => setShowMenu(false)}
             />
-            <div className="absolute right-0 mt-1 w-48 rounded-md border bg-background shadow-lg z-20">
+            <div
+              className="absolute right-0 mt-1 w-48 rounded-md border bg-background shadow-lg z-20"
+              role="menu"
+              aria-label="Bulk device actions"
+            >
               <div className="py-1">
                 <button
                   className="flex items-center w-full px-4 py-2 text-sm hover:bg-muted disabled:opacity-50"
@@ -107,8 +114,10 @@ export function BulkActionsMenu({
                     setActiveAction("suspend");
                   }}
                   disabled={activeCount === 0}
+                  role="menuitem"
+                  aria-label={`Suspend ${activeCount} active device${activeCount !== 1 ? "s" : ""}`}
                 >
-                  <Ban className="h-4 w-4 mr-2" />
+                  <Ban className="h-4 w-4 mr-2" aria-hidden="true" />
                   Suspend ({activeCount})
                 </button>
                 <button
@@ -118,8 +127,10 @@ export function BulkActionsMenu({
                     setActiveAction("reactivate");
                   }}
                   disabled={suspendedCount === 0}
+                  role="menuitem"
+                  aria-label={`Reactivate ${suspendedCount} suspended device${suspendedCount !== 1 ? "s" : ""}`}
                 >
-                  <RefreshCw className="h-4 w-4 mr-2" />
+                  <RefreshCw className="h-4 w-4 mr-2" aria-hidden="true" />
                   Reactivate ({suspendedCount})
                 </button>
                 <button
@@ -128,8 +139,10 @@ export function BulkActionsMenu({
                     setShowMenu(false);
                     setActiveAction("delete");
                   }}
+                  role="menuitem"
+                  aria-label={`Delete ${selectedDevices.length} device${selectedDevices.length !== 1 ? "s" : ""} permanently`}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
+                  <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                   Delete ({selectedDevices.length})
                 </button>
               </div>
@@ -140,18 +153,24 @@ export function BulkActionsMenu({
 
       {/* Confirmation Dialogs */}
       {activeAction && !result && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="confirmation-dialog-title"
+        >
           <div
             className="absolute inset-0 bg-black/50"
             onClick={() => setActiveAction(null)}
+            aria-hidden="true"
           />
           <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
             {activeAction === "suspend" && (
               <>
                 <div className="flex items-start gap-3 mb-4">
-                  <Ban className="h-5 w-5 text-yellow-500 mt-0.5" />
+                  <Ban className="h-5 w-5 text-yellow-500 mt-0.5" aria-hidden="true" />
                   <div>
-                    <h2 className="text-lg font-semibold">Suspend Devices</h2>
+                    <h2 id="confirmation-dialog-title" className="text-lg font-semibold">Suspend Devices</h2>
                     <p className="text-sm text-muted-foreground">
                       Are you sure you want to suspend {activeCount} device{activeCount !== 1 ? "s" : ""}?
                       Suspended devices will not be able to sync data.
@@ -173,9 +192,9 @@ export function BulkActionsMenu({
             {activeAction === "reactivate" && (
               <>
                 <div className="flex items-start gap-3 mb-4">
-                  <RefreshCw className="h-5 w-5 text-green-500 mt-0.5" />
+                  <RefreshCw className="h-5 w-5 text-green-500 mt-0.5" aria-hidden="true" />
                   <div>
-                    <h2 className="text-lg font-semibold">Reactivate Devices</h2>
+                    <h2 id="confirmation-dialog-title" className="text-lg font-semibold">Reactivate Devices</h2>
                     <p className="text-sm text-muted-foreground">
                       Are you sure you want to reactivate {suspendedCount} device{suspendedCount !== 1 ? "s" : ""}?
                       Reactivated devices will be able to resume syncing data.
@@ -197,9 +216,9 @@ export function BulkActionsMenu({
             {activeAction === "delete" && (
               <>
                 <div className="flex items-start gap-3 mb-4">
-                  <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" />
+                  <AlertTriangle className="h-5 w-5 text-destructive mt-0.5" aria-hidden="true" />
                   <div>
-                    <h2 className="text-lg font-semibold text-destructive">Delete Devices</h2>
+                    <h2 id="confirmation-dialog-title" className="text-lg font-semibold text-destructive">Delete Devices</h2>
                     <p className="text-sm text-muted-foreground">
                       This action is permanent and cannot be undone. All data for {selectedDevices.length} device{selectedDevices.length !== 1 ? "s" : ""} will be permanently deleted.
                     </p>
@@ -222,18 +241,24 @@ export function BulkActionsMenu({
 
       {/* Result Dialog */}
       {result && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="result-dialog-title"
+        >
           <div
             className="absolute inset-0 bg-black/50"
             onClick={closeResult}
+            aria-hidden="true"
           />
           <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
-            <h2 className="text-lg font-semibold mb-4">Operation Complete</h2>
+            <h2 id="result-dialog-title" className="text-lg font-semibold mb-4">Operation Complete</h2>
 
             <div className="space-y-3 mb-4">
               <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-900/20">
                 <div className="flex items-center gap-2">
-                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
+                  <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" aria-hidden="true" />
                   <span className="font-medium">Successful</span>
                 </div>
                 <span className="font-bold text-green-600 dark:text-green-400">
@@ -244,7 +269,7 @@ export function BulkActionsMenu({
               {result.failure_count > 0 && (
                 <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 dark:bg-red-900/20">
                   <div className="flex items-center gap-2">
-                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                    <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" aria-hidden="true" />
                     <span className="font-medium">Failed</span>
                   </div>
                   <span className="font-bold text-red-600 dark:text-red-400">

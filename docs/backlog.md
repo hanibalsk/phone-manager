@@ -75,6 +75,20 @@
 | 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Medium | TBD | Open | Add CSV export for statistics - Missing from current implementation. File: admin-portal/components/organizations/organization-stats-dialog.tsx, PRD FR-2.5 |
 | 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Low | TBD | Open | Add progress bars for limit utilization - Improve UX. File: admin-portal/components/organizations/organization-stats-dialog.tsx |
 | 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Low | TBD | Open | Add charts for usage trends visualization - Use Recharts. File: admin-portal/components/organizations/organization-stats-dialog.tsx |
+| 2025-12-10 | AP-4.1 | AP-4 | TechDebt | Low | TBD | Open | Remove unused formatDate function. File: admin-portal/components/devices/admin-device-list.tsx:195-202 |
+| 2025-12-10 | AP-4.1 | AP-4 | Enhancement | Low | TBD | Open | Add data-testid attributes for future E2E testing. File: admin-portal/components/devices/admin-device-list.tsx |
+| 2025-12-10 | AP-4.2 | AP-4 | Enhancement | Medium | TBD | Open | Add breadcrumb navigation for full AC AP-4.2.6 compliance. File: admin-portal/app/(dashboard)/devices/fleet/[id]/page.tsx |
+| 2025-12-10 | AP-4.2 | AP-4 | TechDebt | Low | TBD | Open | Consider extracting confirmation dialog into reusable component. File: admin-portal/components/devices/admin-device-actions.tsx |
+| 2025-12-10 | AP-4.3 | AP-4 | Enhancement | Medium | TBD | Open | Add error handling for QR code image load failure (onError handler). File: admin-portal/components/enrollment/token-qr-dialog.tsx |
+| 2025-12-10 | AP-4.3 | AP-4 | Enhancement | Medium | TBD | Open | Consider adding loading state while QR image loads. File: admin-portal/components/enrollment/token-qr-dialog.tsx |
+| 2025-12-10 | AP-4.3 | AP-4 | Enhancement | Low | TBD | Open | Enhance filename sanitization for QR download (handle special characters). File: admin-portal/components/enrollment/token-qr-dialog.tsx |
+| 2025-12-10 | AP-4.4 | AP-4 | Enhancement | Low | TBD | Open | Consider adding batch size warning for very large selections (>100 devices). File: admin-portal/components/devices/bulk-actions-menu.tsx |
+| 2025-12-10 | AP-4.4 | AP-4 | Enhancement | Low | TBD | Open | Add aria-labels to improve accessibility for bulk action buttons. File: admin-portal/components/devices/bulk-actions-menu.tsx |
+| 2025-12-10 | AP-4.5 | AP-4 | Enhancement | Medium | TBD | Open | Implement data retention policy display when backend endpoint available. File: admin-portal/components/devices/inactive-device-list.tsx, AC: AP-4.5.6 |
+| 2025-12-10 | AP-4.5 | AP-4 | Enhancement | Medium | TBD | Open | Add data retention warning to bulk delete confirmation. File: admin-portal/components/devices/inactive-device-list.tsx, AC: AP-4.5.4 |
+| 2025-12-10 | AP-4.5 | AP-4 | Enhancement | Low | TBD | Open | Consider adding notification preview before sending. File: admin-portal/components/devices/inactive-device-list.tsx |
+| 2025-12-10 | AP-4.5 | AP-4 | Enhancement | Low | TBD | Open | Persist threshold selection in URL params for bookmarking. File: admin-portal/components/devices/inactive-device-list.tsx |
+| 2025-12-10 | AP-4.* | AP-4 | Testing | Medium | TBD | Open | Add unit tests for all AP-4 device components - Deferred to testing sprint. Files: admin-portal/components/devices/__tests__/, admin-portal/components/enrollment/__tests__/ |
 
 ---
 

@@ -56,6 +56,7 @@ export function InactiveDeviceList() {
     "Your device {device_name} has been inactive for {days} days. Please connect to resume service."
   );
   const [notifyResult, setNotifyResult] = useState<NotifyOwnersResult | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -123,7 +124,15 @@ export function InactiveDeviceList() {
   const closeNotifyDialog = () => {
     setShowNotifyDialog(false);
     setNotifyResult(null);
+    setShowPreview(false);
     setSelectedIds(new Set());
+  };
+
+  // Generate preview message for a specific device
+  const getPreviewMessage = (device: InactiveDevice) => {
+    return messageTemplate
+      .replace("{device_name}", device.display_name)
+      .replace("{days}", String(device.days_inactive));
   };
 
   const formatDate = (dateString: string | null) => {
@@ -389,18 +398,50 @@ export function InactiveDeviceList() {
                   </p>
                 </div>
 
+                {/* Preview Section */}
+                {showPreview && selectedDevices.length > 0 && (
+                  <div className="mb-4 p-3 rounded-lg border bg-muted/30">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium">Message Preview</span>
+                      <span className="text-xs text-muted-foreground">
+                        Showing {Math.min(3, selectedDevices.length)} of {selectedDevices.length} recipient{selectedDevices.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="space-y-2 max-h-40 overflow-auto">
+                      {selectedDevices.slice(0, 3).map((device) => (
+                        <div key={device.id} className="p-2 rounded bg-background text-sm">
+                          <p className="text-xs text-muted-foreground mb-1">
+                            To: {device.owner_email} ({device.display_name})
+                          </p>
+                          <p className="text-foreground">{getPreviewMessage(device)}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 <div className="flex justify-end gap-2">
                   <Button variant="outline" onClick={closeNotifyDialog} disabled={notifyLoading}>
                     Cancel
                   </Button>
-                  <Button onClick={handleNotifyOwners} disabled={notifyLoading}>
-                    {notifyLoading ? (
-                      <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                    ) : (
-                      <Mail className="h-4 w-4 mr-2" />
-                    )}
-                    Send Notifications
-                  </Button>
+                  {!showPreview ? (
+                    <Button
+                      variant="secondary"
+                      onClick={() => setShowPreview(true)}
+                      disabled={notifyLoading || !messageTemplate.trim()}
+                    >
+                      Preview Message
+                    </Button>
+                  ) : (
+                    <Button onClick={handleNotifyOwners} disabled={notifyLoading || !messageTemplate.trim()}>
+                      {notifyLoading ? (
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Mail className="h-4 w-4 mr-2" />
+                      )}
+                      Send Notifications
+                    </Button>
+                  )}
                 </div>
               </>
             ) : (

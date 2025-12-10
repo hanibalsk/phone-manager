@@ -3,7 +3,7 @@
 import { useState } from "react";
 import type { EnrollmentToken } from "@/types";
 import { Button } from "@/components/ui/button";
-import { X, Copy, Download, Check, QrCode } from "lucide-react";
+import { X, Copy, Download, Check, QrCode, AlertTriangle, RefreshCw } from "lucide-react";
 
 interface TokenQrDialogProps {
   token: EnrollmentToken;
@@ -12,6 +12,8 @@ interface TokenQrDialogProps {
 
 export function TokenQrDialog({ token, onClose }: TokenQrDialogProps) {
   const [copied, setCopied] = useState(false);
+  const [qrLoading, setQrLoading] = useState(true);
+  const [qrError, setQrError] = useState(false);
 
   // Generate enrollment URL
   const enrollmentUrl = `phonemanager://enroll?token=${token.code}`;
@@ -66,11 +68,38 @@ export function TokenQrDialog({ token, onClose }: TokenQrDialogProps) {
           </div>
 
           {/* QR Code */}
-          <div className="flex justify-center p-4 bg-white rounded-lg">
+          <div className="flex justify-center items-center p-4 bg-white rounded-lg min-h-[224px]">
+            {qrLoading && !qrError && (
+              <div className="flex flex-col items-center gap-2 text-muted-foreground">
+                <RefreshCw className="h-8 w-8 animate-spin" />
+                <span className="text-sm">Loading QR code...</span>
+              </div>
+            )}
+            {qrError && (
+              <div className="flex flex-col items-center gap-2 text-destructive">
+                <AlertTriangle className="h-8 w-8" />
+                <span className="text-sm">Failed to load QR code</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setQrError(false);
+                    setQrLoading(true);
+                  }}
+                >
+                  Retry
+                </Button>
+              </div>
+            )}
             <img
               src={qrCodeUrl}
               alt="Enrollment QR Code"
-              className="w-48 h-48"
+              className={`w-48 h-48 ${qrLoading || qrError ? "hidden" : ""}`}
+              onLoad={() => setQrLoading(false)}
+              onError={() => {
+                setQrLoading(false);
+                setQrError(true);
+              }}
             />
           </div>
 

@@ -51,6 +51,15 @@ android {
     namespace = "three.two.bit.phonemanager"
     compileSdk = 36
 
+    signingConfigs {
+        create("release") {
+            storeFile = rootProject.file("release-keystore.jks")
+            storePassword = getLocalProperty("RELEASE_STORE_PASSWORD", "phonemanager123")
+            keyAlias = getLocalProperty("RELEASE_KEY_ALIAS", "phonemanager")
+            keyPassword = getLocalProperty("RELEASE_KEY_PASSWORD", "phonemanager123")
+        }
+    }
+
     defaultConfig {
         applicationId = "three.two.bit.phonemanager"
         minSdk = 26
@@ -97,6 +106,7 @@ android {
         }
         release {
             isMinifyEnabled = true
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
