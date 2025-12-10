@@ -9,9 +9,8 @@ export { FeatureFlags } from "./feature-flags";
 // Story AP-9.3: Rate Limits
 export { RateLimits } from "./rate-limits";
 
-// Story AP-9.4: API Keys (coming soon)
-// export { ApiKeysList } from "./api-keys-list";
-// export { ApiKeyForm } from "./api-key-form";
+// Story AP-9.4: API Keys
+export { ApiKeys } from "./api-keys";
 
 // Story AP-9.5: Data Retention (coming soon)
 // export { RetentionSettings } from "./retention-settings";
