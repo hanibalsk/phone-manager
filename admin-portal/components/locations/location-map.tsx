@@ -120,7 +120,7 @@ export function LocationMap({ locations, loading }: LocationMapProps) {
   }
 
   return (
-    <div className="relative w-full h-[500px] bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden">
+    <div className="relative w-full h-[500px] bg-slate-100 dark:bg-slate-800 rounded-lg overflow-hidden" data-testid="location-map">
       {/* Map grid background */}
       <div
         className="absolute inset-0 opacity-20"
@@ -152,6 +152,7 @@ export function LocationMap({ locations, loading }: LocationMapProps) {
               top: `${pos.y}%`,
               zIndex: isCluster ? 10 : 5,
             }}
+            data-testid={isCluster ? `location-cluster-${index}` : `location-marker-${cluster.devices[0].device_id}`}
             onClick={() => {
               if (isCluster) {
                 setExpandedCluster(expandedCluster === cluster ? null : cluster);
@@ -184,6 +185,7 @@ export function LocationMap({ locations, loading }: LocationMapProps) {
       {expandedCluster && (
         <div
           className="absolute z-20 bg-background border rounded-lg shadow-lg p-3 max-w-[200px]"
+          data-testid="cluster-popup"
           style={{
             left: `${getPosition(expandedCluster.lat, expandedCluster.lng).x}%`,
             top: `${getPosition(expandedCluster.lat, expandedCluster.lng).y}%`,
@@ -224,6 +226,7 @@ export function LocationMap({ locations, loading }: LocationMapProps) {
       {selectedDevice && (
         <div
           className="absolute z-30"
+          data-testid="device-popup"
           style={{
             left: `${getPosition(selectedDevice.latitude, selectedDevice.longitude).x}%`,
             top: `${getPosition(selectedDevice.latitude, selectedDevice.longitude).y}%`,

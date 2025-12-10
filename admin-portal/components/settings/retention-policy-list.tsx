@@ -91,7 +91,7 @@ export function RetentionPolicyList() {
 
   return (
     <>
-      <Card>
+      <Card data-testid="retention-policy-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -145,7 +145,7 @@ export function RetentionPolicyList() {
           {/* Policies Table */}
           {!error && policies && policies.length > 0 && (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" data-testid="retention-policy-table">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 font-medium">Organization</th>
@@ -158,7 +158,7 @@ export function RetentionPolicyList() {
                 </thead>
                 <tbody>
                   {policies.map((policy) => (
-                    <tr key={policy.organization_id} className="border-b hover:bg-muted/50">
+                    <tr key={policy.organization_id} className="border-b hover:bg-muted/50" data-testid={`retention-row-${policy.organization_id}`}>
                       <td className="py-3 px-4 font-medium">{policy.organization_name}</td>
                       <td className="py-3 px-4 text-sm">
                         <div className="space-y-1">
@@ -230,6 +230,7 @@ export function RetentionPolicyList() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="retention-edit-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"
@@ -255,6 +256,7 @@ export function RetentionPolicyList() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="retention-purge-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"
@@ -279,6 +281,7 @@ export function RetentionPolicyList() {
                 variant="outline"
                 onClick={() => setPolicyToPurge(null)}
                 disabled={purging}
+                data-testid="retention-purge-cancel"
               >
                 Cancel
               </Button>
@@ -286,6 +289,7 @@ export function RetentionPolicyList() {
                 variant="destructive"
                 onClick={handlePurge}
                 disabled={purging}
+                data-testid="retention-purge-confirm"
               >
                 {purging && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
                 Purge Data
@@ -301,6 +305,7 @@ export function RetentionPolicyList() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="retention-purge-result-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"

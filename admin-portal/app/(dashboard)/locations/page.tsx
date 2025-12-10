@@ -89,7 +89,7 @@ export default function LocationsPage() {
       <LocationFilters onFilterChange={handleFilterChange} />
 
       {/* Map */}
-      <Card>
+      <Card data-testid="locations-map-card">
         <CardHeader>
           <CardTitle>Location Map</CardTitle>
           <CardDescription>
@@ -114,7 +114,7 @@ export default function LocationsPage() {
       </Card>
 
       {/* Location List */}
-      <Card>
+      <Card data-testid="locations-list-card">
         <CardHeader>
           <CardTitle>Device List</CardTitle>
           <CardDescription>
@@ -139,7 +139,7 @@ export default function LocationsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" data-testid="locations-table">
                 <thead>
                   <tr className="border-b">
                     <th className="text-left py-3 px-4 font-medium">Device</th>
@@ -153,7 +153,7 @@ export default function LocationsPage() {
                 </thead>
                 <tbody>
                   {filteredLocations.map((loc) => (
-                    <tr key={loc.device_id} className="border-b hover:bg-muted/50">
+                    <tr key={loc.device_id} className="border-b hover:bg-muted/50" data-testid={`location-row-${loc.device_id}`}>
                       <td className="py-3 px-4 font-medium">{loc.device_name}</td>
                       <td className="py-3 px-4 text-sm text-muted-foreground">
                         {loc.organization_name}

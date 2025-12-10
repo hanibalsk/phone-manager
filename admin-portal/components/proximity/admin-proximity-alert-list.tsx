@@ -114,7 +114,7 @@ export function AdminProximityAlertList() {
 
   return (
     <>
-      <Card>
+      <Card data-testid="proximity-alert-list-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -150,6 +150,7 @@ export function AdminProximityAlertList() {
                   setOrganizationId(e.target.value);
                   setPage(1);
                 }}
+                data-testid="proximity-org-filter"
               >
                 <option value="">All Organizations</option>
                 {orgsData?.items?.map((org) => (
@@ -170,6 +171,7 @@ export function AdminProximityAlertList() {
                   setEnabledFilter(e.target.value as "" | "true" | "false");
                   setPage(1);
                 }}
+                data-testid="proximity-status-filter"
               >
                 <option value="">All Statuses</option>
                 <option value="true">Enabled</option>
@@ -186,6 +188,7 @@ export function AdminProximityAlertList() {
                   value={searchInput}
                   onChange={(e) => setSearchInput(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  data-testid="proximity-search-input"
                 />
                 <Button variant="outline" size="icon" onClick={handleSearch}>
                   <Search className="h-4 w-4" />
@@ -239,7 +242,7 @@ export function AdminProximityAlertList() {
           {!error && alerts.length > 0 && (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full" data-testid="proximity-alert-table">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium">Alert Name</th>
@@ -253,7 +256,7 @@ export function AdminProximityAlertList() {
                   </thead>
                   <tbody>
                     {alerts.map((alert) => (
-                      <tr key={alert.id} className="border-b hover:bg-muted/50">
+                      <tr key={alert.id} className="border-b hover:bg-muted/50" data-testid={`proximity-alert-row-${alert.id}`}>
                         <td className="py-3 px-4">
                           <div className="font-medium">{alert.name}</div>
                           <div className="text-xs text-muted-foreground">
@@ -358,6 +361,7 @@ export function AdminProximityAlertList() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="proximity-delete-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"
@@ -374,6 +378,7 @@ export function AdminProximityAlertList() {
                 variant="outline"
                 onClick={() => setAlertToDelete(null)}
                 disabled={deleteLoading}
+                data-testid="proximity-delete-cancel"
               >
                 Cancel
               </Button>
@@ -381,6 +386,7 @@ export function AdminProximityAlertList() {
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={deleteLoading}
+                data-testid="proximity-delete-confirm"
               >
                 {deleteLoading && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
                 Delete

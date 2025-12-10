@@ -57,7 +57,7 @@ export function LocationFilters({ onFilterChange }: LocationFiltersProps) {
   ) || [];
 
   return (
-    <div className="bg-muted/30 rounded-lg p-4 space-y-4">
+    <div className="bg-muted/30 rounded-lg p-4 space-y-4" data-testid="location-filters">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Filter className="h-4 w-4 text-muted-foreground" />
@@ -82,6 +82,7 @@ export function LocationFilters({ onFilterChange }: LocationFiltersProps) {
               setOrganizationId(e.target.value);
               setDeviceId(""); // Reset device when org changes
             }}
+            data-testid="location-org-filter"
           >
             <option value="">All Organizations</option>
             {orgsData?.items?.map((org) => (
@@ -99,6 +100,7 @@ export function LocationFilters({ onFilterChange }: LocationFiltersProps) {
             className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={deviceId}
             onChange={(e) => setDeviceId(e.target.value)}
+            data-testid="location-device-filter"
           >
             <option value="">All Devices</option>
             {filteredDevices.map((device) => (

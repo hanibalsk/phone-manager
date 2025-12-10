@@ -104,7 +104,7 @@ export default function LocationHistoryPage() {
       </div>
 
       {/* Query Form */}
-      <Card>
+      <Card data-testid="location-history-query-card">
         <CardHeader>
           <CardTitle>Query Parameters</CardTitle>
           <CardDescription>
@@ -206,7 +206,7 @@ export default function LocationHistoryPage() {
       )}
 
       {hasQueried && !error && (
-        <Card>
+        <Card data-testid="location-history-results-card">
           <CardHeader>
             <div className="flex items-center justify-between">
               <div>

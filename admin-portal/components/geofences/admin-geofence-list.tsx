@@ -98,7 +98,7 @@ export function AdminGeofenceList() {
 
   return (
     <>
-      <Card>
+      <Card data-testid="geofence-list-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -145,6 +145,7 @@ export function AdminGeofenceList() {
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   className="pl-9"
+                  data-testid="geofence-search-input"
                 />
               </div>
             </div>
@@ -152,6 +153,7 @@ export function AdminGeofenceList() {
               className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[180px]"
               value={organizationId}
               onChange={(e) => setOrganizationId(e.target.value)}
+              data-testid="geofence-org-filter"
             >
               <option value="">All Organizations</option>
               {orgsData?.items?.map((org) => (
@@ -164,6 +166,7 @@ export function AdminGeofenceList() {
               className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[120px]"
               value={enabledFilter}
               onChange={(e) => setEnabledFilter(e.target.value)}
+              data-testid="geofence-status-filter"
             >
               <option value="">All Status</option>
               <option value="true">Enabled</option>
@@ -213,7 +216,7 @@ export function AdminGeofenceList() {
           {!error && geofences.length > 0 && (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full" data-testid="geofence-table">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium">Name</th>
@@ -226,7 +229,7 @@ export function AdminGeofenceList() {
                   </thead>
                   <tbody>
                     {geofences.map((geofence) => (
-                      <tr key={geofence.id} className="border-b hover:bg-muted/50">
+                      <tr key={geofence.id} className="border-b hover:bg-muted/50" data-testid={`geofence-row-${geofence.id}`}>
                         <td className="py-3 px-4">
                           <div>
                             <p className="font-medium">{geofence.name}</p>
@@ -347,6 +350,7 @@ export function AdminGeofenceList() {
           className="fixed inset-0 z-50 flex items-center justify-center"
           role="dialog"
           aria-modal="true"
+          data-testid="geofence-delete-dialog"
         >
           <div
             className="absolute inset-0 bg-black/50"
@@ -363,6 +367,7 @@ export function AdminGeofenceList() {
                 variant="outline"
                 onClick={() => setGeofenceToDelete(null)}
                 disabled={deleteLoading}
+                data-testid="geofence-delete-cancel"
               >
                 Cancel
               </Button>
@@ -370,6 +375,7 @@ export function AdminGeofenceList() {
                 variant="destructive"
                 onClick={handleDelete}
                 disabled={deleteLoading}
+                data-testid="geofence-delete-confirm"
               >
                 {deleteLoading && <RefreshCw className="h-4 w-4 mr-2 animate-spin" />}
                 Delete
