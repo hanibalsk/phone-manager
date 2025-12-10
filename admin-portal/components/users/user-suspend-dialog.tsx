@@ -104,7 +104,7 @@ export function UserSuspendDialog({ user, onSuccess, onCancel }: UserSuspendDial
 
             <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg">
               <p className="text-sm text-destructive">
-                This will immediately revoke the user's access and terminate any active sessions.
+                This will immediately revoke the user&apos;s access and terminate any active sessions.
               </p>
             </div>
 

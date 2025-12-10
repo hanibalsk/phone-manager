@@ -109,7 +109,7 @@ export function UserSessionsDialog({ user, onClose }: UserSessionsDialogProps) {
             Active Sessions
           </CardTitle>
           <CardDescription id={descriptionId}>
-            {user.display_name}'s active sessions
+            {user.display_name}&apos;s active sessions
           </CardDescription>
         </CardHeader>
 
