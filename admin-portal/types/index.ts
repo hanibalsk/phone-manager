@@ -607,3 +607,156 @@ export interface PurgeResult {
   trips_deleted: number;
   storage_freed_mb: number;
 }
+
+// Epic AP-7: Webhooks & Trips Administration
+
+// Story AP-7.1: Webhooks
+export type WebhookEventType =
+  | "location_update"
+  | "geofence_event"
+  | "proximity_alert"
+  | "trip_complete"
+  | "device_status";
+
+export type WebhookStatus = "active" | "paused" | "failed";
+
+export interface Webhook {
+  id: string;
+  name: string;
+  url: string;
+  organization_id: string;
+  organization_name: string;
+  status: WebhookStatus;
+  event_types: WebhookEventType[];
+  secret: string | null;
+  success_count: number;
+  failure_count: number;
+  last_delivery_at: string | null;
+  last_delivery_status: "success" | "failed" | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface WebhookListParams {
+  organization_id?: string;
+  status?: WebhookStatus;
+  event_type?: WebhookEventType;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface CreateWebhookRequest {
+  name: string;
+  url: string;
+  event_types: WebhookEventType[];
+  secret?: string;
+}
+
+export interface UpdateWebhookRequest {
+  name?: string;
+  url?: string;
+  event_types?: WebhookEventType[];
+  secret?: string;
+}
+
+// Story AP-7.2: Webhook Deliveries
+export type DeliveryStatus = "success" | "failed" | "pending";
+
+export interface WebhookDelivery {
+  id: string;
+  webhook_id: string;
+  event_type: WebhookEventType;
+  status: DeliveryStatus;
+  request_payload: string;
+  response_status: number | null;
+  response_body: string | null;
+  response_headers: Record<string, string> | null;
+  duration_ms: number | null;
+  retry_count: number;
+  error_message: string | null;
+  created_at: string;
+  completed_at: string | null;
+}
+
+export interface WebhookDeliveryListParams {
+  status?: DeliveryStatus;
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Story AP-7.3: Webhook Test
+export interface WebhookTestResult {
+  success: boolean;
+  status_code: number | null;
+  response_body: string | null;
+  response_time_ms: number | null;
+  error_message: string | null;
+  accessibility: "reachable" | "unreachable" | "timeout";
+}
+
+// Story AP-7.4: Trips
+export type TripStatus = "in_progress" | "completed" | "paused";
+
+export interface Trip {
+  id: string;
+  device_id: string;
+  device_name: string;
+  organization_id: string;
+  organization_name: string;
+  status: TripStatus;
+  start_time: string;
+  end_time: string | null;
+  duration_seconds: number;
+  distance_meters: number;
+  start_latitude: number;
+  start_longitude: number;
+  end_latitude: number | null;
+  end_longitude: number | null;
+  point_count: number;
+  created_at: string;
+}
+
+export interface TripPoint {
+  latitude: number;
+  longitude: number;
+  altitude: number | null;
+  speed: number | null;
+  bearing: number | null;
+  accuracy: number;
+  timestamp: string;
+}
+
+export type TripEventType = "trip_start" | "stop_detected" | "resumed" | "trip_end";
+
+export interface TripEvent {
+  id: string;
+  trip_id: string;
+  event_type: TripEventType;
+  latitude: number;
+  longitude: number;
+  timestamp: string;
+  metadata: Record<string, unknown> | null;
+}
+
+export interface TripListParams {
+  device_id?: string;
+  organization_id?: string;
+  status?: TripStatus;
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Story AP-7.5: Trip Export
+export interface TripExportRequest {
+  device_id?: string;
+  organization_id?: string;
+  from?: string;
+  to?: string;
+  format: "csv" | "json";
+  include_path: boolean;
+}

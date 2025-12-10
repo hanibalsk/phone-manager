@@ -51,6 +51,19 @@ import type {
   RetentionPolicy,
   UpdateRetentionPolicyRequest,
   PurgeResult,
+  // Epic AP-7: Webhooks & Trips
+  Webhook,
+  WebhookListParams,
+  CreateWebhookRequest,
+  UpdateWebhookRequest,
+  WebhookDelivery,
+  WebhookDeliveryListParams,
+  WebhookTestResult,
+  WebhookEventType,
+  Trip,
+  TripPoint,
+  TripEvent,
+  TripListParams,
 } from "@/types";
 import type {
   LoginResponse,
@@ -818,4 +831,116 @@ export const retentionApi = {
     request<PurgeResult>(`/api/admin/retention-policies/${orgId}/purge`, {
       method: "POST",
     }),
+};
+
+// Epic AP-7: Webhooks & Trips Administration
+
+// Story AP-7.1, AP-7.2, AP-7.3: Webhooks API
+export const webhooksApi = {
+  // List webhooks with filtering
+  list: (params?: WebhookListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.event_type) searchParams.set("event_type", params.event_type);
+      if (params.search) searchParams.set("search", params.search);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/webhooks${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<Webhook>>(endpoint);
+  },
+
+  // Get webhook details
+  get: (id: string) => request<Webhook>(`/api/admin/webhooks/${id}`),
+
+  // Create webhook
+  create: (data: CreateWebhookRequest) =>
+    request<Webhook>("/api/admin/webhooks", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Update webhook
+  update: (id: string, data: UpdateWebhookRequest) =>
+    request<Webhook>(`/api/admin/webhooks/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Delete webhook
+  delete: (id: string) =>
+    request<void>(`/api/admin/webhooks/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Toggle webhook enabled/paused
+  toggle: (id: string) =>
+    request<Webhook>(`/api/admin/webhooks/${id}/toggle`, {
+      method: "POST",
+    }),
+
+  // Story AP-7.2: Get delivery logs
+  getDeliveries: (webhookId: string, params?: WebhookDeliveryListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.status) searchParams.set("status", params.status);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/webhooks/${webhookId}/deliveries${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<WebhookDelivery>>(endpoint);
+  },
+
+  // Get delivery details
+  getDelivery: (webhookId: string, deliveryId: string) =>
+    request<WebhookDelivery>(`/api/admin/webhooks/${webhookId}/deliveries/${deliveryId}`),
+
+  // Resend failed delivery
+  resendDelivery: (webhookId: string, deliveryId: string) =>
+    request<WebhookDelivery>(`/api/admin/webhooks/${webhookId}/deliveries/${deliveryId}/resend`, {
+      method: "POST",
+    }),
+
+  // Story AP-7.3: Test webhook
+  test: (id: string, eventType?: WebhookEventType) => {
+    const queryString = eventType ? `?event_type=${eventType}` : "";
+    return request<WebhookTestResult>(`/api/admin/webhooks/${id}/test${queryString}`, {
+      method: "POST",
+    });
+  },
+};
+
+// Story AP-7.4, AP-7.5: Trips API
+export const tripsApi = {
+  // List trips with filtering
+  list: (params?: TripListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/trips${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<Trip>>(endpoint);
+  },
+
+  // Get trip details
+  get: (id: string) => request<Trip>(`/api/admin/trips/${id}`),
+
+  // Get trip path (coordinates)
+  getPath: (id: string) => request<{ points: TripPoint[] }>(`/api/admin/trips/${id}/path`),
+
+  // Get trip events
+  getEvents: (id: string) => request<{ events: TripEvent[] }>(`/api/admin/trips/${id}/events`),
 };
