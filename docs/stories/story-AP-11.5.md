@@ -4,7 +4,7 @@
 **Epic**: AP-11 - Audit & Compliance
 **Priority**: High
 **Estimate**: 4 story points (3-4 days)
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Created**: 2025-12-10
 **PRD Reference**: FR-13.5 (Admin Portal PRD)
 
@@ -115,5 +115,5 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 ---
 
 **Last Updated**: 2025-12-10
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Dependencies**: Story AP-11.1
