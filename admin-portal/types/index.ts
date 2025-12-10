@@ -1390,3 +1390,221 @@ export interface SavedReport {
   updated_at: string;
   last_run?: string;
 }
+
+// ============================================
+// Epic AP-11: Audit & Compliance Types
+// ============================================
+
+export type AuditActionType =
+  | "create"
+  | "update"
+  | "delete"
+  | "login"
+  | "logout"
+  | "view"
+  | "export"
+  | "import"
+  | "approve"
+  | "reject"
+  | "suspend"
+  | "restore"
+  | "archive";
+
+export type AuditResourceType =
+  | "user"
+  | "organization"
+  | "device"
+  | "group"
+  | "role"
+  | "permission"
+  | "location"
+  | "geofence"
+  | "webhook"
+  | "trip"
+  | "app_restriction"
+  | "unlock_request"
+  | "config"
+  | "report"
+  | "audit_log";
+
+export interface AuditLogEntry {
+  id: string;
+  actor_id: string;
+  actor_email: string;
+  actor_name: string;
+  action: AuditActionType;
+  resource_type: AuditResourceType;
+  resource_id: string;
+  resource_name?: string;
+  organization_id?: string;
+  organization_name?: string;
+  ip_address: string;
+  user_agent: string;
+  before_state?: Record<string, unknown>;
+  after_state?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  timestamp: string;
+  hash?: string; // For tamper-evident chain
+  previous_hash?: string;
+}
+
+export interface AuditLogFilter {
+  actor_id?: string;
+  action?: AuditActionType;
+  resource_type?: AuditResourceType;
+  resource_id?: string;
+  organization_id?: string;
+  date_from?: string;
+  date_to?: string;
+  search?: string;
+}
+
+export interface AuditLogStats {
+  total_entries: number;
+  entries_by_action: Record<AuditActionType, number>;
+  entries_by_resource: Record<AuditResourceType, number>;
+  top_actors: Array<{
+    actor_id: string;
+    actor_name: string;
+    action_count: number;
+  }>;
+}
+
+export interface UserActivityReport {
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  period_start: string;
+  period_end: string;
+  total_actions: number;
+  actions_by_type: Record<AuditActionType, number>;
+  actions_by_resource: Record<AuditResourceType, number>;
+  timeline: Array<{
+    date: string;
+    action: AuditActionType;
+    resource_type: AuditResourceType;
+    resource_name?: string;
+    timestamp: string;
+  }>;
+}
+
+export interface OrgActivityReport {
+  organization_id: string;
+  organization_name: string;
+  period_start: string;
+  period_end: string;
+  total_actions: number;
+  user_action_counts: Array<{
+    user_id: string;
+    user_name: string;
+    action_count: number;
+  }>;
+  resource_changes: Array<{
+    resource_type: AuditResourceType;
+    created: number;
+    updated: number;
+    deleted: number;
+  }>;
+  anomalies: Array<{
+    type: string;
+    description: string;
+    severity: "low" | "medium" | "high";
+    timestamp: string;
+  }>;
+}
+
+export interface GDPRDataExportRequest {
+  id: string;
+  user_id: string;
+  user_email: string;
+  requested_by: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  data_types: string[];
+  download_url?: string;
+  expires_at?: string;
+  created_at: string;
+  completed_at?: string;
+}
+
+export interface GDPRDeletionRequest {
+  id: string;
+  user_id: string;
+  user_email: string;
+  requested_by: string;
+  status: "pending" | "processing" | "completed" | "failed";
+  data_types_deleted: string[];
+  verification_report?: {
+    deleted_at: string;
+    deleted_by: string;
+    categories: Array<{
+      name: string;
+      count: number;
+      status: "deleted" | "retained" | "anonymized";
+    }>;
+  };
+  created_at: string;
+  completed_at?: string;
+}
+
+export interface AuditIntegrityStatus {
+  status: "healthy" | "warning" | "error";
+  last_verified: string;
+  chain_length: number;
+  broken_links: number;
+  alerts: Array<{
+    id: string;
+    type: "tampering" | "gap" | "corruption";
+    description: string;
+    severity: "low" | "medium" | "high" | "critical";
+    detected_at: string;
+    resolved?: boolean;
+  }>;
+  retention_policy: {
+    days: number;
+    auto_archive: boolean;
+    archive_location?: string;
+  };
+  storage_usage: {
+    total_entries: number;
+    size_bytes: number;
+    oldest_entry: string;
+  };
+}
+
+// ============================================
+// Epic AP-12: Notification Types
+// ============================================
+
+export type NotificationType =
+  | "info"
+  | "success"
+  | "warning"
+  | "error"
+  | "system";
+
+export type NotificationCategory =
+  | "user"
+  | "organization"
+  | "device"
+  | "security"
+  | "system"
+  | "audit";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  category: NotificationCategory;
+  title: string;
+  message: string;
+  link?: string;
+  read: boolean;
+  created_at: string;
+  expires_at?: string;
+}
+
+export interface NotificationPreferences {
+  email_enabled: boolean;
+  email_digest: "realtime" | "daily" | "weekly" | "never";
+  in_app_enabled: boolean;
+  categories: Record<NotificationCategory, boolean>;
+}

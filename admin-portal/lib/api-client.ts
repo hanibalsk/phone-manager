@@ -120,6 +120,18 @@ import type {
   ReportConfig,
   ReportResult,
   SavedReport,
+  // Epic AP-11: Audit & Compliance
+  AuditLogEntry,
+  AuditLogFilter,
+  AuditLogStats,
+  UserActivityReport,
+  OrgActivityReport,
+  GDPRDataExportRequest,
+  GDPRDeletionRequest,
+  AuditIntegrityStatus,
+  // Epic AP-12: Notifications
+  Notification,
+  NotificationPreferences,
 } from "@/types";
 import type {
   LoginResponse,
@@ -1522,4 +1534,91 @@ export const reportsApi = {
     request<ReportResult>(`/api/admin/reports/saved/${id}/run`, { method: "POST" }),
   export: (id: string, format: "pdf" | "csv") =>
     request<Blob>(`/api/admin/reports/${id}/export?format=${format}`),
+};
+
+// ============================================
+// Epic AP-11: Audit & Compliance API
+// ============================================
+
+export const auditApi = {
+  // Audit log entries
+  getLogs: (filters?: AuditLogFilter, page = 1, limit = 50) =>
+    request<{ data: AuditLogEntry[]; total: number; page: number; limit: number }>(
+      `/api/admin/audit/logs?page=${page}&limit=${limit}${filters ? `&${new URLSearchParams(filters as Record<string, string>).toString()}` : ""}`
+    ),
+  getLog: (id: string) => request<AuditLogEntry>(`/api/admin/audit/logs/${id}`),
+  getStats: (filters?: AuditLogFilter) =>
+    request<AuditLogStats>(
+      `/api/admin/audit/stats${filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : ""}`
+    ),
+  exportLogs: (filters?: AuditLogFilter, format: "csv" | "json" = "csv") =>
+    request<Blob>(
+      `/api/admin/audit/logs/export?format=${format}${filters ? `&${new URLSearchParams(filters as Record<string, string>).toString()}` : ""}`
+    ),
+
+  // User activity reports
+  getUserActivity: (userId: string, dateFrom?: string, dateTo?: string) =>
+    request<UserActivityReport>(
+      `/api/admin/audit/users/${userId}/activity${dateFrom ? `?date_from=${dateFrom}` : ""}${dateTo ? `&date_to=${dateTo}` : ""}`
+    ),
+  exportUserActivity: (userId: string, format: "pdf" | "csv" = "csv") =>
+    request<Blob>(`/api/admin/audit/users/${userId}/export?format=${format}`),
+
+  // Organization activity reports
+  getOrgActivity: (orgId: string, dateFrom?: string, dateTo?: string) =>
+    request<OrgActivityReport>(
+      `/api/admin/audit/organizations/${orgId}/activity${dateFrom ? `?date_from=${dateFrom}` : ""}${dateTo ? `&date_to=${dateTo}` : ""}`
+    ),
+  getOrgAnomalies: (orgId: string) =>
+    request<OrgActivityReport["anomalies"]>(`/api/admin/audit/organizations/${orgId}/anomalies`),
+
+  // GDPR compliance
+  createDataExport: (userId: string, dataTypes: string[]) =>
+    request<GDPRDataExportRequest>("/api/admin/gdpr/export", {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId, data_types: dataTypes }),
+    }),
+  getDataExports: () => request<GDPRDataExportRequest[]>("/api/admin/gdpr/exports"),
+  getDataExport: (id: string) => request<GDPRDataExportRequest>(`/api/admin/gdpr/exports/${id}`),
+  createDeletionRequest: (userId: string, dataTypes: string[]) =>
+    request<GDPRDeletionRequest>("/api/admin/gdpr/delete", {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId, data_types: dataTypes }),
+    }),
+  getDeletionRequests: () => request<GDPRDeletionRequest[]>("/api/admin/gdpr/deletions"),
+  getDeletionRequest: (id: string) => request<GDPRDeletionRequest>(`/api/admin/gdpr/deletions/${id}`),
+
+  // Integrity & tamper-evidence
+  getIntegrityStatus: () => request<AuditIntegrityStatus>("/api/admin/audit/integrity/status"),
+  verifyIntegrity: () =>
+    request<{ success: boolean; issues: string[] }>("/api/admin/audit/integrity/verify", {
+      method: "POST",
+    }),
+  getIntegrityAlerts: () =>
+    request<AuditIntegrityStatus["alerts"]>("/api/admin/audit/integrity/alerts"),
+  resolveAlert: (alertId: string) =>
+    request<void>(`/api/admin/audit/integrity/alerts/${alertId}/resolve`, { method: "POST" }),
+};
+
+// ============================================
+// Epic AP-12: Notifications API
+// ============================================
+
+export const notificationsApi = {
+  getAll: (unreadOnly = false) =>
+    request<Notification[]>(`/api/admin/notifications${unreadOnly ? "?unread=true" : ""}`),
+  getUnreadCount: () => request<{ count: number }>("/api/admin/notifications/unread-count"),
+  markAsRead: (id: string) =>
+    request<void>(`/api/admin/notifications/${id}/read`, { method: "POST" }),
+  markAllAsRead: () =>
+    request<void>("/api/admin/notifications/read-all", { method: "POST" }),
+  delete: (id: string) =>
+    request<void>(`/api/admin/notifications/${id}`, { method: "DELETE" }),
+  getPreferences: () =>
+    request<NotificationPreferences>("/api/admin/notifications/preferences"),
+  updatePreferences: (prefs: Partial<NotificationPreferences>) =>
+    request<NotificationPreferences>("/api/admin/notifications/preferences", {
+      method: "PUT",
+      body: JSON.stringify(prefs),
+    }),
 };

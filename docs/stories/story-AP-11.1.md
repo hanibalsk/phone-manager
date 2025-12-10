@@ -4,7 +4,7 @@
 **Epic**: AP-11 - Audit & Compliance
 **Priority**: High
 **Estimate**: 3 story points (2-3 days)
-**Status**: Ready for Development
+**Status**: Ready for Review
 **Created**: 2025-12-10
 **PRD Reference**: FR-13.1 (Admin Portal PRD)
 
@@ -40,18 +40,18 @@ so that I can track all changes.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add Audit Log Types
-  - [ ] Add AuditLog type to types/index.ts
-  - [ ] Add AuditLogEntry type
-  - [ ] Add AuditAction enum
-  - [ ] Add audit log API endpoints
-- [ ] Task 2: Create Audit Log Page
-  - [ ] Create app/(dashboard)/audit/page.tsx
-  - [ ] Audit log table with filtering
-  - [ ] Log entry detail view
-- [ ] Task 3: Add State Diff Display
-  - [ ] Before/after comparison component
-  - [ ] JSON diff visualization
+- [x] Task 1: Add Audit Log Types
+  - [x] Add AuditLog type to types/index.ts
+  - [x] Add AuditLogEntry type
+  - [x] Add AuditAction enum
+  - [x] Add audit log API endpoints
+- [x] Task 2: Create Audit Log Page
+  - [x] Create app/(dashboard)/audit/page.tsx
+  - [x] Audit log table with filtering
+  - [x] Log entry detail view (Sheet component)
+- [x] Task 3: Add State Diff Display
+  - [x] Before/after comparison component
+  - [x] JSON diff visualization
 - [ ] Task 4: Testing (All ACs) - Deferred
   - [ ] Test audit log components
 
