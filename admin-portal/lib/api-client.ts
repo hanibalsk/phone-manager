@@ -64,6 +64,24 @@ import type {
   TripPoint,
   TripEvent,
   TripListParams,
+  // Epic AP-8: App Usage & Unlock Requests
+  AdminAppUsage,
+  AppUsageByCategory,
+  TopApp,
+  DeviceAppUsage,
+  AppUsageParams,
+  AppLimit,
+  CreateAppLimitRequest,
+  AppLimitListParams,
+  LimitTemplate,
+  CreateLimitTemplateRequest,
+  AdminUnlockRequest,
+  UnlockRequestListParams,
+  ApproveUnlockRequest,
+  DenyUnlockRequest,
+  AutoApprovalRule,
+  CreateAutoApprovalRuleRequest,
+  AutoApprovalLogEntry,
 } from "@/types";
 import type {
   LoginResponse,
@@ -943,4 +961,259 @@ export const tripsApi = {
 
   // Get trip events
   getEvents: (id: string) => request<{ events: TripEvent[] }>(`/api/admin/trips/${id}/events`),
+};
+
+// Epic AP-8: App Usage & Unlock Requests API
+
+// Story AP-8.1: App Usage Statistics API
+export const appUsageApi = {
+  // Get app usage data
+  list: (params?: AppUsageParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.category) searchParams.set("category", params.category);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/app-usage${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AdminAppUsage>>(endpoint);
+  },
+
+  // Get usage by category
+  getByCategory: (params?: { organization_id?: string; from?: string; to?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/app-usage/categories${queryString ? `?${queryString}` : ""}`;
+    return request<{ items: AppUsageByCategory[] }>(endpoint);
+  },
+
+  // Get top apps
+  getTopApps: (params?: { organization_id?: string; from?: string; to?: string; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/app-usage/top-apps${queryString ? `?${queryString}` : ""}`;
+    return request<{ items: TopApp[] }>(endpoint);
+  },
+
+  // Get device usage breakdown
+  getDeviceUsage: (deviceId: string, params?: { from?: string; to?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/app-usage/device/${deviceId}${queryString ? `?${queryString}` : ""}`;
+    return request<DeviceAppUsage>(endpoint);
+  },
+};
+
+// Story AP-8.2 & AP-8.3: App Limits & Templates API
+export const appLimitsApi = {
+  // List app limits
+  list: (params?: AppLimitListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.group_id) searchParams.set("group_id", params.group_id);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.target_type) searchParams.set("target_type", params.target_type);
+      if (params.enabled !== undefined) searchParams.set("enabled", String(params.enabled));
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/app-limits${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AppLimit>>(endpoint);
+  },
+
+  // Get single limit
+  get: (id: string) => request<AppLimit>(`/api/admin/app-limits/${id}`),
+
+  // Create limit
+  create: (data: CreateAppLimitRequest) =>
+    request<AppLimit>("/api/admin/app-limits", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Update limit
+  update: (id: string, data: Partial<CreateAppLimitRequest>) =>
+    request<AppLimit>(`/api/admin/app-limits/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Delete limit
+  delete: (id: string) =>
+    request<void>(`/api/admin/app-limits/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Toggle enabled
+  toggle: (id: string) =>
+    request<AppLimit>(`/api/admin/app-limits/${id}/toggle`, {
+      method: "POST",
+    }),
+
+  // Templates
+  listTemplates: (params?: { organization_id?: string; page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/limit-templates${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<LimitTemplate>>(endpoint);
+  },
+
+  getTemplate: (id: string) => request<LimitTemplate>(`/api/admin/limit-templates/${id}`),
+
+  createTemplate: (data: CreateLimitTemplateRequest) =>
+    request<LimitTemplate>("/api/admin/limit-templates", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateTemplate: (id: string, data: Partial<CreateLimitTemplateRequest>) =>
+    request<LimitTemplate>(`/api/admin/limit-templates/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  deleteTemplate: (id: string, replacementTemplateId?: string) => {
+    const searchParams = new URLSearchParams();
+    if (replacementTemplateId) searchParams.set("replacement_template_id", replacementTemplateId);
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/limit-templates/${id}${queryString ? `?${queryString}` : ""}`;
+    return request<void>(endpoint, { method: "DELETE" });
+  },
+
+  applyTemplate: (id: string, data: { device_ids?: string[]; group_ids?: string[] }) =>
+    request<{ applied_count: number }>(`/api/admin/limit-templates/${id}/apply`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+};
+
+// Story AP-8.4 & AP-8.5: Unlock Requests & Auto-Approval API
+export const unlockRequestsApi = {
+  // List unlock requests
+  list: (params?: UnlockRequestListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/unlock-requests${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AdminUnlockRequest>>(endpoint);
+  },
+
+  // Get single request
+  get: (id: string) => request<AdminUnlockRequest>(`/api/admin/unlock-requests/${id}`),
+
+  // Approve request
+  approve: (id: string, data: ApproveUnlockRequest) =>
+    request<AdminUnlockRequest>(`/api/admin/unlock-requests/${id}/approve`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Deny request
+  deny: (id: string, data: DenyUnlockRequest) =>
+    request<AdminUnlockRequest>(`/api/admin/unlock-requests/${id}/deny`, {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Get request history for device
+  getDeviceHistory: (deviceId: string, params?: { page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/unlock-requests/history/${deviceId}${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AdminUnlockRequest>>(endpoint);
+  },
+
+  // Auto-approval rules
+  listRules: (params?: { organization_id?: string; enabled?: boolean }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.enabled !== undefined) searchParams.set("enabled", String(params.enabled));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/auto-approval-rules${queryString ? `?${queryString}` : ""}`;
+    return request<{ items: AutoApprovalRule[] }>(endpoint);
+  },
+
+  getRule: (id: string) => request<AutoApprovalRule>(`/api/admin/auto-approval-rules/${id}`),
+
+  createRule: (data: CreateAutoApprovalRuleRequest) =>
+    request<AutoApprovalRule>("/api/admin/auto-approval-rules", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  updateRule: (id: string, data: Partial<CreateAutoApprovalRuleRequest>) =>
+    request<AutoApprovalRule>(`/api/admin/auto-approval-rules/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  deleteRule: (id: string) =>
+    request<void>(`/api/admin/auto-approval-rules/${id}`, {
+      method: "DELETE",
+    }),
+
+  toggleRule: (id: string) =>
+    request<AutoApprovalRule>(`/api/admin/auto-approval-rules/${id}/toggle`, {
+      method: "POST",
+    }),
+
+  reorderRules: (ruleIds: string[]) =>
+    request<void>("/api/admin/auto-approval-rules/reorder", {
+      method: "PUT",
+      body: JSON.stringify({ rule_ids: ruleIds }),
+    }),
+
+  // Auto-approval log
+  getAutoApprovalLog: (params?: { from?: string; to?: string; rule_id?: string; page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.rule_id) searchParams.set("rule_id", params.rule_id);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/auto-approval-log${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AutoApprovalLogEntry>>(endpoint);
+  },
 };

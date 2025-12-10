@@ -760,3 +760,230 @@ export interface TripExportRequest {
   format: "csv" | "json";
   include_path: boolean;
 }
+
+// Epic AP-8: App Usage & Unlock Requests
+
+// Story AP-8.1: App Usage Statistics
+export type AppCategory = "social" | "games" | "productivity" | "entertainment" | "education" | "communication" | "other";
+
+export interface AdminAppUsage {
+  id: string;
+  device_id: string;
+  device_name: string;
+  organization_id: string;
+  organization_name: string;
+  package_name: string;
+  app_name: string;
+  category: AppCategory;
+  usage_minutes: number;
+  date: string;
+}
+
+export interface AppUsageByCategory {
+  category: AppCategory;
+  total_minutes: number;
+  app_count: number;
+  percentage: number;
+}
+
+export interface TopApp {
+  package_name: string;
+  app_name: string;
+  category: AppCategory;
+  total_minutes: number;
+  device_count: number;
+}
+
+export interface DeviceAppUsage {
+  device_id: string;
+  device_name: string;
+  apps: {
+    package_name: string;
+    app_name: string;
+    category: AppCategory;
+    usage_minutes: number;
+  }[];
+  total_minutes: number;
+}
+
+export interface AppUsageParams {
+  device_id?: string;
+  organization_id?: string;
+  from?: string;
+  to?: string;
+  category?: AppCategory;
+}
+
+// Story AP-8.2: App Limits
+export interface TimeWindow {
+  start_time: string; // HH:MM format (24h)
+  end_time: string;
+  days: ("mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun")[];
+}
+
+export interface AppLimit {
+  id: string;
+  name: string;
+  target_type: "app" | "category";
+  target_value: string; // package_name or category
+  target_display: string; // app name or category name
+  limit_type: "time" | "blocked";
+  daily_limit_minutes: number | null;
+  weekly_limit_minutes: number | null;
+  time_windows: TimeWindow[];
+  device_id: string | null;
+  device_name: string | null;
+  group_id: string | null;
+  group_name: string | null;
+  organization_id: string;
+  organization_name: string;
+  enabled: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateAppLimitRequest {
+  name: string;
+  target_type: "app" | "category";
+  target_value: string;
+  limit_type: "time" | "blocked";
+  daily_limit_minutes?: number;
+  weekly_limit_minutes?: number;
+  time_windows?: TimeWindow[];
+  device_id?: string;
+  group_id?: string;
+}
+
+export interface AppLimitListParams {
+  device_id?: string;
+  group_id?: string;
+  organization_id?: string;
+  target_type?: "app" | "category";
+  enabled?: boolean;
+  page?: number;
+  limit?: number;
+}
+
+// Story AP-8.3: Limit Templates
+export interface LimitTemplate {
+  id: string;
+  name: string;
+  description: string | null;
+  organization_id: string;
+  organization_name: string;
+  rules: {
+    target_type: "app" | "category";
+    target_value: string;
+    target_display: string;
+    limit_type: "time" | "blocked";
+    daily_limit_minutes: number | null;
+    weekly_limit_minutes: number | null;
+    time_windows: TimeWindow[];
+  }[];
+  linked_device_count: number;
+  linked_group_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateLimitTemplateRequest {
+  name: string;
+  description?: string;
+  rules: {
+    target_type: "app" | "category";
+    target_value: string;
+    limit_type: "time" | "blocked";
+    daily_limit_minutes?: number;
+    weekly_limit_minutes?: number;
+    time_windows?: TimeWindow[];
+  }[];
+}
+
+// Story AP-8.4: Unlock Requests (Admin)
+export type AdminUnlockRequestStatus = "pending" | "approved" | "denied" | "expired" | "cancelled";
+
+export interface AdminUnlockRequest {
+  id: string;
+  device_id: string;
+  device_name: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  organization_id: string;
+  organization_name: string;
+  reason: string;
+  requested_duration_minutes: number;
+  status: AdminUnlockRequestStatus;
+  approved_duration_minutes: number | null;
+  deny_note: string | null;
+  actioned_by: string | null;
+  actioned_by_name: string | null;
+  actioned_at: string | null;
+  expires_at: string | null;
+  auto_approved: boolean;
+  auto_approval_rule_id: string | null;
+  created_at: string;
+}
+
+export interface UnlockRequestListParams {
+  device_id?: string;
+  organization_id?: string;
+  status?: AdminUnlockRequestStatus;
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface ApproveUnlockRequest {
+  duration_minutes: number;
+}
+
+export interface DenyUnlockRequest {
+  note: string;
+}
+
+// Story AP-8.5: Auto-Approval Rules
+export interface AutoApprovalCondition {
+  type: "time_window" | "user" | "device" | "group";
+  time_window?: TimeWindow;
+  user_ids?: string[];
+  device_ids?: string[];
+  group_ids?: string[];
+}
+
+export interface AutoApprovalRule {
+  id: string;
+  name: string;
+  description: string | null;
+  organization_id: string;
+  organization_name: string;
+  priority: number;
+  conditions: AutoApprovalCondition[];
+  max_duration_minutes: number;
+  enabled: boolean;
+  approval_count: number;
+  last_triggered_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CreateAutoApprovalRuleRequest {
+  name: string;
+  description?: string;
+  conditions: AutoApprovalCondition[];
+  max_duration_minutes: number;
+}
+
+export interface AutoApprovalLogEntry {
+  id: string;
+  request_id: string;
+  rule_id: string;
+  rule_name: string;
+  device_id: string;
+  device_name: string;
+  user_id: string;
+  user_name: string;
+  approved_duration_minutes: number;
+  triggered_at: string;
+}
