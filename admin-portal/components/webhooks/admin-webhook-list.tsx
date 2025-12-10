@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import type { Webhook, Organization, WebhookStatus, WebhookEventType } from "@/types";
 import { WebhookStatusBadge } from "./webhook-status-badge";
 import { WebhookEventBadge } from "./webhook-event-badge";
+import { WebhookTestModal } from "./webhook-test-modal";
 import { webhooksApi, organizationsApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
 import { useDebounce } from "@/hooks/use-debounce";
@@ -29,6 +30,7 @@ import {
   CheckCircle2,
   XCircle,
   History,
+  PlayCircle,
 } from "lucide-react";
 
 const ITEMS_PER_PAGE = 20;
@@ -48,6 +50,7 @@ export function AdminWebhookList() {
   const [eventTypeFilter, setEventTypeFilter] = useState<WebhookEventType | "">("");
   const [page, setPage] = useState(1);
   const [webhookToDelete, setWebhookToDelete] = useState<Webhook | null>(null);
+  const [webhookToTest, setWebhookToTest] = useState<Webhook | null>(null);
   const [notification, setNotification] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
   const debouncedSearch = useDebounce(search, 300);
@@ -312,6 +315,14 @@ export function AdminWebhookList() {
                         </td>
                         <td className="py-3 px-4 text-right">
                           <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setWebhookToTest(webhook)}
+                              title="Test Webhook"
+                            >
+                              <PlayCircle className="h-4 w-4" />
+                            </Button>
                             <Link href={`/webhooks/${webhook.id}/deliveries`}>
                               <Button variant="ghost" size="sm" title="View Deliveries">
                                 <History className="h-4 w-4" />
@@ -413,6 +424,14 @@ export function AdminWebhookList() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Test Modal */}
+      {webhookToTest && (
+        <WebhookTestModal
+          webhook={webhookToTest}
+          onClose={() => setWebhookToTest(null)}
+        />
       )}
     </>
   );
