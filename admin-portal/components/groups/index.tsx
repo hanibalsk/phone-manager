@@ -5,3 +5,5 @@ export { MemberRoleBadge } from "./member-role-badge";
 export { GroupMembersList } from "./group-members-list";
 export { AddMemberDialog } from "./add-member-dialog";
 export { TransferOwnershipForm } from "./transfer-ownership-form";
+export { InviteStatusBadge } from "./invite-status-badge";
+export { GroupInvitesList } from "./group-invites-list";
