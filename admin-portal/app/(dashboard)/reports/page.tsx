@@ -93,7 +93,7 @@ function SavedReportCard({
   isRunning: boolean;
 }) {
   return (
-    <Card>
+    <Card data-testid={`saved-report-card-${report.id}`}>
       <CardHeader className="pb-2">
         <div className="flex items-start justify-between">
           <div>
@@ -107,6 +107,7 @@ function SavedReportCard({
             size="icon"
             onClick={onDelete}
             className="text-red-500 hover:text-red-700 hover:bg-red-50"
+            data-testid={`saved-report-delete-${report.id}`}
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -155,6 +156,7 @@ function SavedReportCard({
               onClick={onRun}
               disabled={isRunning}
               className="flex-1"
+              data-testid={`saved-report-run-${report.id}`}
             >
               {isRunning ? (
                 <RefreshCw className="h-4 w-4 mr-1 animate-spin" />
@@ -167,6 +169,7 @@ function SavedReportCard({
               size="sm"
               variant="outline"
               onClick={() => onExport("pdf")}
+              data-testid={`saved-report-export-pdf-${report.id}`}
             >
               <Download className="h-4 w-4 mr-1" />
               PDF
@@ -175,6 +178,7 @@ function SavedReportCard({
               size="sm"
               variant="outline"
               onClick={() => onExport("csv")}
+              data-testid={`saved-report-export-csv-${report.id}`}
             >
               <Download className="h-4 w-4 mr-1" />
               CSV
@@ -262,9 +266,9 @@ function ReportBuilder({
   const canSave = name.length > 0 && selectedMetrics.length > 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="report-builder">
       {/* Basic Info */}
-      <Card>
+      <Card data-testid="report-builder-details-card">
         <CardHeader>
           <CardTitle className="text-lg">Report Details</CardTitle>
         </CardHeader>
@@ -276,6 +280,7 @@ function ReportBuilder({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g., Monthly User Growth"
+              data-testid="report-builder-name-input"
             />
           </div>
           <div className="space-y-2">
@@ -285,13 +290,14 @@ function ReportBuilder({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Optional description"
+              data-testid="report-builder-description-input"
             />
           </div>
         </CardContent>
       </Card>
 
       {/* Metrics Selection */}
-      <Card>
+      <Card data-testid="report-builder-metrics-card">
         <CardHeader>
           <CardTitle className="text-lg">Select Metrics *</CardTitle>
           <CardDescription>Choose the metrics to include in your report</CardDescription>
@@ -311,6 +317,7 @@ function ReportBuilder({
                       ? handleRemoveMetric(metric.type)
                       : handleAddMetric(metric.type)
                   }
+                  data-testid={`report-builder-metric-${metric.type}`}
                 >
                   {isSelected && <Check className="h-3 w-3 mr-1" />}
                   {metric.label}
@@ -360,7 +367,7 @@ function ReportBuilder({
       </Card>
 
       {/* Date Range */}
-      <Card>
+      <Card data-testid="report-builder-date-range-card">
         <CardHeader>
           <CardTitle className="text-lg">Date Range</CardTitle>
         </CardHeader>
@@ -373,6 +380,7 @@ function ReportBuilder({
                 variant="outline"
                 size="sm"
                 onClick={() => handleSetDatePreset(preset.days)}
+                data-testid={`report-builder-date-preset-${preset.days}`}
               >
                 {preset.label}
               </Button>
@@ -389,6 +397,7 @@ function ReportBuilder({
                 onChange={(e) =>
                   setDateRange({ ...dateRange, start: e.target.value })
                 }
+                data-testid="report-builder-start-date"
               />
             </div>
             <div className="space-y-2">
@@ -399,6 +408,7 @@ function ReportBuilder({
                 onChange={(e) =>
                   setDateRange({ ...dateRange, end: e.target.value })
                 }
+                data-testid="report-builder-end-date"
               />
             </div>
           </div>
@@ -406,14 +416,14 @@ function ReportBuilder({
       </Card>
 
       {/* Filters */}
-      <Card>
+      <Card data-testid="report-builder-filters-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-lg">Filters</CardTitle>
               <CardDescription>Add optional filters to narrow down data</CardDescription>
             </div>
-            <Button variant="outline" size="sm" onClick={handleAddFilter}>
+            <Button variant="outline" size="sm" onClick={handleAddFilter} data-testid="report-builder-add-filter-button">
               <Plus className="h-4 w-4 mr-1" />
               Add Filter
             </Button>
@@ -462,7 +472,7 @@ function ReportBuilder({
       </Card>
 
       {/* Group By */}
-      <Card>
+      <Card data-testid="report-builder-group-by-card">
         <CardHeader>
           <CardTitle className="text-lg">Group By</CardTitle>
           <CardDescription>Optional field to group results by</CardDescription>
@@ -472,6 +482,7 @@ function ReportBuilder({
             className="w-full border rounded px-3 py-2"
             value={groupBy}
             onChange={(e) => setGroupBy(e.target.value)}
+            data-testid="report-builder-group-by-select"
           >
             <option value="">No grouping</option>
             <option value="day">Day</option>
@@ -484,8 +495,8 @@ function ReportBuilder({
       </Card>
 
       {/* Actions */}
-      <div className="flex gap-4">
-        <Button onClick={handleSave} disabled={!canSave || isSaving}>
+      <div className="flex gap-4" data-testid="report-builder-actions">
+        <Button onClick={handleSave} disabled={!canSave || isSaving} data-testid="report-builder-save-button">
           {isSaving ? (
             <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
           ) : (
@@ -493,7 +504,7 @@ function ReportBuilder({
           )}
           Save Report
         </Button>
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel} data-testid="report-builder-cancel-button">
           Cancel
         </Button>
       </div>
@@ -580,12 +591,12 @@ export default function ReportsPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="reports-page-container">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between" data-testid="reports-page-header">
         <div className="flex items-center gap-3">
           <Link href="/">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" data-testid="reports-page-back-button">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -598,7 +609,7 @@ export default function ReportsPage() {
           </div>
         </div>
         {!showBuilder && (
-          <Button onClick={() => setShowBuilder(true)}>
+          <Button onClick={() => setShowBuilder(true)} data-testid="reports-page-new-report-button">
             <Plus className="h-4 w-4 mr-2" />
             New Report
           </Button>
@@ -613,6 +624,7 @@ export default function ReportsPage() {
               ? "bg-green-50 text-green-800 border border-green-200"
               : "bg-red-50 text-red-800 border border-red-200"
           }`}
+          data-testid={`reports-page-notification-${notification.type}`}
         >
           {notification.message}
         </div>
@@ -631,25 +643,25 @@ export default function ReportsPage() {
       {!showBuilder && (
         <>
           {loading ? (
-            <div className="flex items-center justify-center py-12">
+            <div className="flex items-center justify-center py-12" data-testid="reports-page-loading">
               <RefreshCw className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : savedReports.length === 0 ? (
-            <Card>
+            <Card data-testid="reports-page-empty-state">
               <CardContent className="flex flex-col items-center justify-center py-12">
                 <FileText className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium mb-2">No saved reports</h3>
                 <p className="text-muted-foreground mb-4">
                   Create your first custom report to get started
                 </p>
-                <Button onClick={() => setShowBuilder(true)}>
+                <Button onClick={() => setShowBuilder(true)} data-testid="reports-page-empty-create-button">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Report
                 </Button>
               </CardContent>
             </Card>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3" data-testid="reports-page-saved-reports-grid">
               {savedReports.map((report) => (
                 <SavedReportCard
                   key={report.id}
@@ -667,7 +679,7 @@ export default function ReportsPage() {
 
       {/* Quick Tips */}
       {!showBuilder && savedReports.length > 0 && (
-        <Card>
+        <Card data-testid="reports-page-tips-card">
           <CardHeader>
             <CardTitle className="text-lg">Tips</CardTitle>
           </CardHeader>

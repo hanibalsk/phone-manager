@@ -400,12 +400,12 @@ export default function ApiAnalyticsPage() {
       : 0;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="api-analytics-container">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" data-testid="api-analytics-back-button">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -418,7 +418,7 @@ export default function ApiAnalyticsPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex border rounded-md">
+          <div className="flex border rounded-md" data-testid="api-analytics-period-selector">
             {(["7d", "30d", "90d"] as TimePeriod[]).map((p) => (
               <Button
                 key={p}
@@ -426,6 +426,7 @@ export default function ApiAnalyticsPage() {
                 size="sm"
                 onClick={() => setPeriod(p)}
                 className="rounded-none first:rounded-l-md last:rounded-r-md"
+                data-testid={`api-analytics-period-${p}`}
               >
                 {p === "7d" ? "7 Days" : p === "30d" ? "30 Days" : "90 Days"}
               </Button>
@@ -436,6 +437,7 @@ export default function ApiAnalyticsPage() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing || loading}
+            data-testid="api-analytics-refresh-button"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isRefreshing || loading ? "animate-spin" : ""}`}
@@ -446,8 +448,8 @@ export default function ApiAnalyticsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="api-analytics-summary-cards">
+        <Card data-testid="api-analytics-total-requests-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Requests</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
@@ -460,7 +462,7 @@ export default function ApiAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="api-analytics-response-time-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Avg Response Time</CardTitle>
             <Clock className="h-4 w-4 text-muted-foreground" />
@@ -487,7 +489,7 @@ export default function ApiAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="api-analytics-error-rate-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Error Rate</CardTitle>
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
@@ -520,7 +522,7 @@ export default function ApiAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="api-analytics-p50-latency-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">P50 Latency</CardTitle>
             <Zap className="h-4 w-4 text-muted-foreground" />
@@ -533,7 +535,7 @@ export default function ApiAnalyticsPage() {
       </div>
 
       {/* Response Time Percentiles */}
-      <Card>
+      <Card data-testid="api-analytics-response-time-chart-card">
         <CardHeader>
           <CardTitle className="text-lg">Response Time Percentiles</CardTitle>
           <CardDescription>P50, P90, P95, P99 latency over time</CardDescription>
@@ -544,9 +546,9 @@ export default function ApiAnalyticsPage() {
       </Card>
 
       {/* Error Rate and Top Consumers */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2" data-testid="api-analytics-error-consumers-section">
         {/* Error Rate Chart */}
-        <Card>
+        <Card data-testid="api-analytics-error-trend-card">
           <CardHeader>
             <CardTitle className="text-lg">Error Rate Trend</CardTitle>
             <CardDescription>Error percentage over time</CardDescription>
@@ -557,7 +559,7 @@ export default function ApiAnalyticsPage() {
         </Card>
 
         {/* Top Consumers */}
-        <Card>
+        <Card data-testid="api-analytics-top-consumers-card">
           <CardHeader>
             <CardTitle className="text-lg">Top API Consumers</CardTitle>
             <CardDescription>Highest volume consumers</CardDescription>
@@ -569,7 +571,7 @@ export default function ApiAnalyticsPage() {
       </div>
 
       {/* Endpoint Metrics Table */}
-      <Card>
+      <Card data-testid="api-analytics-endpoints-card">
         <CardHeader>
           <CardTitle className="text-lg">Endpoint Metrics</CardTitle>
           <CardDescription>Request volume and performance by endpoint</CardDescription>
@@ -580,7 +582,7 @@ export default function ApiAnalyticsPage() {
       </Card>
 
       {/* Quick Stats */}
-      <Card>
+      <Card data-testid="api-analytics-quick-stats-card">
         <CardHeader>
           <CardTitle className="text-lg">Quick Stats</CardTitle>
           <CardDescription>Key metrics at a glance</CardDescription>

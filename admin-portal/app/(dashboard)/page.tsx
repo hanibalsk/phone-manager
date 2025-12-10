@@ -92,9 +92,9 @@ function MetricCard({
   );
 
   if (href) {
-    return <Link href={href}>{content}</Link>;
+    return <Link href={href} data-testid={`metric-card-${title.toLowerCase().replace(/\s+/g, "-")}`}>{content}</Link>;
   }
-  return content;
+  return <div data-testid={`metric-card-${title.toLowerCase().replace(/\s+/g, "-")}`}>{content}</div>;
 }
 
 interface AlertCardProps {
@@ -117,7 +117,7 @@ function AlertCard({ title, count, icon: Icon, variant, href }: AlertCardProps) 
   const badgeVariant = variant === "danger" ? "destructive" : "secondary";
 
   return (
-    <Link href={href}>
+    <Link href={href} data-testid={`alert-card-${title.toLowerCase().replace(/\s+/g, "-")}`}>
       <Card
         className={`${variantStyles[variant]} hover:opacity-80 transition-opacity cursor-pointer`}
       >
@@ -142,7 +142,7 @@ interface QuickActionProps {
 
 function QuickAction({ label, icon: Icon, href, badge }: QuickActionProps) {
   return (
-    <Link href={href}>
+    <Link href={href} data-testid={`quick-action-${label.toLowerCase().replace(/\s+/g, "-")}`}>
       <Button variant="outline" className="w-full justify-start gap-2 relative">
         <Icon className="h-4 w-4" />
         {label}
@@ -224,7 +224,7 @@ export default function DashboardPage() {
     displayAlerts.expiring_api_keys;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="dashboard-container">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -241,6 +241,7 @@ export default function DashboardPage() {
           size="sm"
           onClick={handleRefresh}
           disabled={isRefreshing}
+          data-testid="dashboard-refresh-button"
         >
           <RefreshCw
             className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`}
@@ -251,11 +252,11 @@ export default function DashboardPage() {
 
       {/* Alert Indicators */}
       {totalAlerts > 0 && (
-        <div className="space-y-2">
+        <div className="space-y-2" data-testid="dashboard-alerts-section">
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <Bell className="h-5 w-5" />
             Attention Required
-            <Badge variant="destructive">{totalAlerts}</Badge>
+            <Badge variant="destructive" data-testid="dashboard-total-alerts">{totalAlerts}</Badge>
           </h2>
           <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-3">
             <AlertCard
@@ -298,7 +299,7 @@ export default function DashboardPage() {
       )}
 
       {/* Key Metrics */}
-      <div className="space-y-4">
+      <div className="space-y-4" data-testid="dashboard-metrics-section">
         <h2 className="text-lg font-semibold">Key Metrics</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <MetricCard
@@ -349,8 +350,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Activity Summary */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="dashboard-activity-section">
+        <Card data-testid="dashboard-active-today-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Today</CardTitle>
             <Activity className="h-4 w-4 text-muted-foreground" />
@@ -362,7 +363,7 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">users active today</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card data-testid="dashboard-online-devices-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Online Devices</CardTitle>
             <Smartphone className="h-4 w-4 text-green-500" />
@@ -381,7 +382,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card data-testid="dashboard-offline-devices-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Offline Devices</CardTitle>
             <Smartphone className="h-4 w-4 text-red-500" />
@@ -400,7 +401,7 @@ export default function DashboardPage() {
             </p>
           </CardContent>
         </Card>
-        <Card>
+        <Card data-testid="dashboard-new-today-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">New Today</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
@@ -417,8 +418,8 @@ export default function DashboardPage() {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+      <div className="grid gap-6 md:grid-cols-2" data-testid="dashboard-quick-actions-section">
+        <Card data-testid="dashboard-quick-actions-card">
           <CardHeader>
             <CardTitle className="text-lg">Quick Actions</CardTitle>
             <CardDescription>Common administrative tasks</CardDescription>
@@ -453,7 +454,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="dashboard-analytics-card">
           <CardHeader>
             <CardTitle className="text-lg">Analytics & Reports</CardTitle>
             <CardDescription>View detailed analytics and generate reports</CardDescription>
@@ -490,7 +491,7 @@ export default function DashboardPage() {
 
       {/* Welcome Card for new users */}
       {displayMetrics.users.total === 0 && displayMetrics.devices.total === 0 && (
-        <Card>
+        <Card data-testid="dashboard-welcome-card">
           <CardHeader>
             <CardTitle>Welcome to Phone Manager Admin</CardTitle>
             <CardDescription>

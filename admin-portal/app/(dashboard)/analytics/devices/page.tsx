@@ -343,12 +343,12 @@ export default function DeviceAnalyticsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="device-analytics-container">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" data-testid="device-analytics-back-button">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -361,7 +361,7 @@ export default function DeviceAnalyticsPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex border rounded-md">
+          <div className="flex border rounded-md" data-testid="device-analytics-period-selector">
             {(["7d", "30d", "90d"] as TimePeriod[]).map((p) => (
               <Button
                 key={p}
@@ -369,6 +369,7 @@ export default function DeviceAnalyticsPage() {
                 size="sm"
                 onClick={() => setPeriod(p)}
                 className="rounded-none first:rounded-l-md last:rounded-r-md"
+                data-testid={`device-analytics-period-${p}`}
               >
                 {p === "7d" ? "7 Days" : p === "30d" ? "30 Days" : "90 Days"}
               </Button>
@@ -379,6 +380,7 @@ export default function DeviceAnalyticsPage() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing || loading}
+            data-testid="device-analytics-refresh-button"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isRefreshing || loading ? "animate-spin" : ""}`}
@@ -389,8 +391,8 @@ export default function DeviceAnalyticsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="device-analytics-summary-cards">
+        <Card data-testid="device-analytics-total-devices-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Devices</CardTitle>
             <Smartphone className="h-4 w-4 text-muted-foreground" />
@@ -403,7 +405,7 @@ export default function DeviceAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="device-analytics-online-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Online</CardTitle>
             <Wifi className="h-4 w-4 text-green-500" />
@@ -416,7 +418,7 @@ export default function DeviceAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="device-analytics-offline-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Offline</CardTitle>
             <WifiOff className="h-4 w-4 text-red-500" />
@@ -434,7 +436,7 @@ export default function DeviceAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="device-analytics-uploads-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Location Uploads</CardTitle>
             <MapPin className="h-4 w-4 text-blue-500" />
@@ -449,9 +451,9 @@ export default function DeviceAnalyticsPage() {
       </div>
 
       {/* Distribution Charts */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2" data-testid="device-analytics-distribution-section">
         {/* Platform Distribution */}
-        <Card>
+        <Card data-testid="device-analytics-platform-card">
           <CardHeader>
             <CardTitle className="text-lg">Platform Distribution</CardTitle>
             <CardDescription>Devices by operating system</CardDescription>
@@ -462,7 +464,7 @@ export default function DeviceAnalyticsPage() {
         </Card>
 
         {/* Status Distribution */}
-        <Card>
+        <Card data-testid="device-analytics-status-card">
           <CardHeader>
             <CardTitle className="text-lg">Status Distribution</CardTitle>
             <CardDescription>Devices by current status</CardDescription>
@@ -517,7 +519,7 @@ export default function DeviceAnalyticsPage() {
       </div>
 
       {/* Connectivity Over Time */}
-      <Card>
+      <Card data-testid="device-analytics-connectivity-card">
         <CardHeader>
           <CardTitle className="text-lg">Connectivity Over Time</CardTitle>
           <CardDescription>Online vs offline devices over time</CardDescription>
@@ -533,7 +535,7 @@ export default function DeviceAnalyticsPage() {
       </Card>
 
       {/* Location Upload Volume */}
-      <Card>
+      <Card data-testid="device-analytics-volume-card">
         <CardHeader>
           <CardTitle className="text-lg">Location Upload Volume</CardTitle>
           <CardDescription>Upload count and data points over time</CardDescription>
@@ -549,7 +551,7 @@ export default function DeviceAnalyticsPage() {
       </Card>
 
       {/* Activity Heatmap */}
-      <Card>
+      <Card data-testid="device-analytics-heatmap-card">
         <CardHeader>
           <CardTitle className="text-lg">Device Activity Heatmap</CardTitle>
           <CardDescription>Activity patterns by hour and day of week</CardDescription>
@@ -560,7 +562,7 @@ export default function DeviceAnalyticsPage() {
       </Card>
 
       {/* Quick Stats */}
-      <Card>
+      <Card data-testid="device-analytics-quick-stats-card">
         <CardHeader>
           <CardTitle className="text-lg">Quick Stats</CardTitle>
           <CardDescription>Key metrics at a glance</CardDescription>

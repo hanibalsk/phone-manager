@@ -276,12 +276,12 @@ export default function UserAnalyticsPage() {
   const activeUsersTrend = calculateTrend(displayData.growth, "active_users");
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="user-analytics-container">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <Link href="/">
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" data-testid="user-analytics-back-button">
               <ArrowLeft className="h-4 w-4" />
             </Button>
           </Link>
@@ -294,7 +294,7 @@ export default function UserAnalyticsPage() {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex border rounded-md">
+          <div className="flex border rounded-md" data-testid="user-analytics-period-selector">
             {(["7d", "30d", "90d"] as TimePeriod[]).map((p) => (
               <Button
                 key={p}
@@ -302,6 +302,7 @@ export default function UserAnalyticsPage() {
                 size="sm"
                 onClick={() => setPeriod(p)}
                 className="rounded-none first:rounded-l-md last:rounded-r-md"
+                data-testid={`user-analytics-period-${p}`}
               >
                 {p === "7d" ? "7 Days" : p === "30d" ? "30 Days" : "90 Days"}
               </Button>
@@ -312,6 +313,7 @@ export default function UserAnalyticsPage() {
             size="sm"
             onClick={handleRefresh}
             disabled={isRefreshing || loading}
+            data-testid="user-analytics-refresh-button"
           >
             <RefreshCw
               className={`h-4 w-4 mr-2 ${isRefreshing || loading ? "animate-spin" : ""}`}
@@ -322,8 +324,8 @@ export default function UserAnalyticsPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="user-analytics-summary-cards">
+        <Card data-testid="user-analytics-total-users-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Users</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -349,7 +351,7 @@ export default function UserAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="user-analytics-active-users-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Active Users</CardTitle>
             <UserCheck className="h-4 w-4 text-green-500" />
@@ -375,7 +377,7 @@ export default function UserAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="user-analytics-new-users-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">New Users</CardTitle>
             <UserPlus className="h-4 w-4 text-blue-500" />
@@ -390,7 +392,7 @@ export default function UserAnalyticsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card data-testid="user-analytics-churn-rate-card">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Churn Rate</CardTitle>
             <UserMinus className="h-4 w-4 text-red-500" />
@@ -411,9 +413,9 @@ export default function UserAnalyticsPage() {
       </div>
 
       {/* Charts Row */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2" data-testid="user-analytics-charts-section">
         {/* User Growth Chart */}
-        <Card>
+        <Card data-testid="user-analytics-growth-chart-card">
           <CardHeader>
             <CardTitle className="text-lg">User Growth</CardTitle>
             <CardDescription>Total users over time</CardDescription>
@@ -429,7 +431,7 @@ export default function UserAnalyticsPage() {
         </Card>
 
         {/* Active Users Chart */}
-        <Card>
+        <Card data-testid="user-analytics-active-chart-card">
           <CardHeader>
             <CardTitle className="text-lg">Active Users</CardTitle>
             <CardDescription>Daily active users over time</CardDescription>
@@ -446,9 +448,9 @@ export default function UserAnalyticsPage() {
       </div>
 
       {/* Segments and Retention */}
-      <div className="grid gap-6 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2" data-testid="user-analytics-segments-section">
         {/* User Segments */}
-        <Card>
+        <Card data-testid="user-analytics-segments-card">
           <CardHeader>
             <CardTitle className="text-lg">User Segments</CardTitle>
             <CardDescription>New vs returning vs inactive users</CardDescription>
@@ -459,7 +461,7 @@ export default function UserAnalyticsPage() {
         </Card>
 
         {/* Quick Stats */}
-        <Card>
+        <Card data-testid="user-analytics-quick-stats-card">
           <CardHeader>
             <CardTitle className="text-lg">Quick Stats</CardTitle>
             <CardDescription>Key metrics at a glance</CardDescription>
@@ -502,7 +504,7 @@ export default function UserAnalyticsPage() {
       </div>
 
       {/* Retention Cohorts */}
-      <Card>
+      <Card data-testid="user-analytics-retention-card">
         <CardHeader>
           <CardTitle className="text-lg">Retention Cohorts</CardTitle>
           <CardDescription>
