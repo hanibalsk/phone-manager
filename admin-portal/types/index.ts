@@ -415,3 +415,195 @@ export interface GroupInvite {
   created_at: string;
   used_at: string | null;
 }
+
+// Epic AP-6: Location & Geofence Administration
+
+// Story AP-6.1: Location Map View
+export interface DeviceLocation {
+  id: string;
+  device_id: string;
+  device_name: string;
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  altitude: number | null;
+  speed: number | null;
+  bearing: number | null;
+  battery_level: number | null;
+  timestamp: string;
+  organization_id: string;
+  organization_name: string;
+}
+
+export interface LocationFilter {
+  device_id?: string;
+  organization_id?: string;
+  from?: string;
+  to?: string;
+  bbox?: {
+    north: number;
+    south: number;
+    east: number;
+    west: number;
+  };
+}
+
+export interface LatestDeviceLocation {
+  device_id: string;
+  device_name: string;
+  organization_id: string;
+  organization_name: string;
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  battery_level: number | null;
+  timestamp: string;
+  status: AdminDeviceStatus;
+}
+
+// Story AP-6.3: Geofence Management
+export type GeofenceShape = "circle" | "polygon";
+
+export interface Geofence {
+  id: string;
+  name: string;
+  device_id: string;
+  device_name: string;
+  organization_id: string;
+  organization_name: string;
+  shape: GeofenceShape;
+  center_latitude: number | null;
+  center_longitude: number | null;
+  radius_meters: number | null;
+  polygon_coordinates: Array<{ latitude: number; longitude: number }> | null;
+  enabled: boolean;
+  trigger_on_enter: boolean;
+  trigger_on_exit: boolean;
+  trigger_on_dwell: boolean;
+  dwell_time_seconds: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GeofenceListParams {
+  device_id?: string;
+  organization_id?: string;
+  enabled?: boolean;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+export interface CreateGeofenceRequest {
+  name: string;
+  device_id: string;
+  shape: GeofenceShape;
+  center_latitude?: number;
+  center_longitude?: number;
+  radius_meters?: number;
+  polygon_coordinates?: Array<{ latitude: number; longitude: number }>;
+  trigger_on_enter?: boolean;
+  trigger_on_exit?: boolean;
+  trigger_on_dwell?: boolean;
+  dwell_time_seconds?: number;
+}
+
+// Story AP-6.4: Geofence Events
+export type GeofenceEventType = "ENTER" | "EXIT" | "DWELL";
+
+export interface GeofenceEvent {
+  id: string;
+  geofence_id: string;
+  geofence_name: string;
+  device_id: string;
+  device_name: string;
+  event_type: GeofenceEventType;
+  latitude: number;
+  longitude: number;
+  triggered_at: string;
+  dwell_time_seconds: number | null;
+}
+
+export interface GeofenceEventFilter {
+  geofence_id?: string;
+  device_id?: string;
+  event_type?: GeofenceEventType;
+  from?: string;
+  to?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Story AP-6.5: Proximity Alerts
+export interface ProximityAlert {
+  id: string;
+  name: string;
+  device_a_id: string;
+  device_a_name: string;
+  device_b_id: string;
+  device_b_name: string;
+  organization_id: string;
+  organization_name: string;
+  trigger_distance_meters: number;
+  cooldown_seconds: number;
+  enabled: boolean;
+  last_triggered_at: string | null;
+  trigger_count: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProximityAlertTrigger {
+  id: string;
+  alert_id: string;
+  distance_meters: number;
+  device_a_latitude: number;
+  device_a_longitude: number;
+  device_b_latitude: number;
+  device_b_longitude: number;
+  triggered_at: string;
+}
+
+export interface CreateProximityAlertRequest {
+  name: string;
+  device_a_id: string;
+  device_b_id: string;
+  trigger_distance_meters: number;
+  cooldown_seconds?: number;
+}
+
+export interface ProximityAlertListParams {
+  device_id?: string;
+  organization_id?: string;
+  enabled?: boolean;
+  search?: string;
+  page?: number;
+  limit?: number;
+}
+
+// Story AP-6.6: Data Retention
+export interface RetentionPolicy {
+  organization_id: string;
+  organization_name: string;
+  location_retention_days: number;
+  event_retention_days: number;
+  trip_retention_days: number;
+  auto_delete_enabled: boolean;
+  last_purge_at: string | null;
+  storage_used_mb: number;
+  updated_at: string;
+}
+
+export interface UpdateRetentionPolicyRequest {
+  location_retention_days?: number;
+  event_retention_days?: number;
+  trip_retention_days?: number;
+  auto_delete_enabled?: boolean;
+}
+
+export interface PurgeResult {
+  locations_deleted: number;
+  events_deleted: number;
+  trips_deleted: number;
+  storage_freed_mb: number;
+}

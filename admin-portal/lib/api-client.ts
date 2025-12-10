@@ -35,6 +35,22 @@ import type {
   GroupMember,
   GroupMemberRole,
   GroupInvite,
+  // Epic AP-6: Location & Geofence
+  DeviceLocation,
+  LocationFilter,
+  LatestDeviceLocation,
+  Geofence,
+  GeofenceListParams,
+  CreateGeofenceRequest,
+  GeofenceEvent,
+  GeofenceEventFilter,
+  ProximityAlert,
+  ProximityAlertTrigger,
+  CreateProximityAlertRequest,
+  ProximityAlertListParams,
+  RetentionPolicy,
+  UpdateRetentionPolicyRequest,
+  PurgeResult,
 } from "@/types";
 import type {
   LoginResponse,
@@ -621,5 +637,185 @@ export const adminGroupsApi = {
   revokeAllInvites: (groupId: string) =>
     request<{ revoked_count: number }>(`/api/admin/groups/${groupId}/invites`, {
       method: "DELETE",
+    }),
+};
+
+// Epic AP-6: Location & Geofence Administration
+
+// Story AP-6.1 & AP-6.2: Locations API
+export const locationsApi = {
+  // Get latest location for all devices
+  getLatest: (params?: { organization_id?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params?.organization_id) searchParams.set("organization_id", params.organization_id);
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/locations/latest${queryString ? `?${queryString}` : ""}`;
+    return request<LatestDeviceLocation[]>(endpoint);
+  },
+
+  // Query location history
+  query: (params: LocationFilter & { limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params.device_id) searchParams.set("device_id", params.device_id);
+    if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+    if (params.from) searchParams.set("from", params.from);
+    if (params.to) searchParams.set("to", params.to);
+    if (params.limit) searchParams.set("limit", String(params.limit));
+    if (params.bbox) {
+      searchParams.set("north", String(params.bbox.north));
+      searchParams.set("south", String(params.bbox.south));
+      searchParams.set("east", String(params.bbox.east));
+      searchParams.set("west", String(params.bbox.west));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/locations/history${queryString ? `?${queryString}` : ""}`;
+    return request<{ locations: DeviceLocation[]; total: number; truncated: boolean }>(endpoint);
+  },
+};
+
+// Story AP-6.3 & AP-6.4: Geofences API
+export const geofencesApi = {
+  // List geofences
+  list: (params?: GeofenceListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.enabled !== undefined) searchParams.set("enabled", String(params.enabled));
+      if (params.search) searchParams.set("search", params.search);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/geofences${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<Geofence>>(endpoint);
+  },
+
+  // Get geofence details
+  get: (id: string) => request<Geofence>(`/api/admin/geofences/${id}`),
+
+  // Create geofence
+  create: (data: CreateGeofenceRequest) =>
+    request<Geofence>("/api/admin/geofences", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Update geofence
+  update: (id: string, data: Partial<CreateGeofenceRequest>) =>
+    request<Geofence>(`/api/admin/geofences/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Delete geofence
+  delete: (id: string) =>
+    request<void>(`/api/admin/geofences/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Toggle geofence enabled/disabled
+  toggle: (id: string) =>
+    request<Geofence>(`/api/admin/geofences/${id}/toggle`, {
+      method: "POST",
+    }),
+
+  // Get geofence events
+  getEvents: (params?: GeofenceEventFilter) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.geofence_id) searchParams.set("geofence_id", params.geofence_id);
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.event_type) searchParams.set("event_type", params.event_type);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/geofences/events${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<GeofenceEvent>>(endpoint);
+  },
+};
+
+// Story AP-6.5: Proximity Alerts API
+export const proximityAlertsApi = {
+  // List proximity alerts
+  list: (params?: ProximityAlertListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.enabled !== undefined) searchParams.set("enabled", String(params.enabled));
+      if (params.search) searchParams.set("search", params.search);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/proximity-alerts${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<ProximityAlert>>(endpoint);
+  },
+
+  // Get proximity alert details
+  get: (id: string) => request<ProximityAlert>(`/api/admin/proximity-alerts/${id}`),
+
+  // Create proximity alert
+  create: (data: CreateProximityAlertRequest) =>
+    request<ProximityAlert>("/api/admin/proximity-alerts", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Update proximity alert
+  update: (id: string, data: Partial<CreateProximityAlertRequest>) =>
+    request<ProximityAlert>(`/api/admin/proximity-alerts/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Delete proximity alert
+  delete: (id: string) =>
+    request<void>(`/api/admin/proximity-alerts/${id}`, {
+      method: "DELETE",
+    }),
+
+  // Toggle proximity alert enabled/disabled
+  toggle: (id: string) =>
+    request<ProximityAlert>(`/api/admin/proximity-alerts/${id}/toggle`, {
+      method: "POST",
+    }),
+
+  // Get trigger history
+  getTriggers: (alertId: string, params?: { page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/proximity-alerts/${alertId}/triggers${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<ProximityAlertTrigger>>(endpoint);
+  },
+};
+
+// Story AP-6.6: Data Retention API
+export const retentionApi = {
+  // List all retention policies
+  list: () => request<RetentionPolicy[]>("/api/admin/retention-policies"),
+
+  // Get retention policy for organization
+  get: (orgId: string) => request<RetentionPolicy>(`/api/admin/retention-policies/${orgId}`),
+
+  // Update retention policy
+  update: (orgId: string, data: UpdateRetentionPolicyRequest) =>
+    request<RetentionPolicy>(`/api/admin/retention-policies/${orgId}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+
+  // Manual purge for organization
+  purge: (orgId: string) =>
+    request<PurgeResult>(`/api/admin/retention-policies/${orgId}/purge`, {
+      method: "POST",
     }),
 };
