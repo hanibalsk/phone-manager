@@ -100,6 +100,26 @@ import type {
   RetentionConfig,
   UpdateRetentionConfigRequest,
   RetentionStats,
+  // Epic AP-10: Dashboard & Analytics
+  DashboardMetrics,
+  AlertIndicators,
+  UserAnalytics,
+  UserGrowthData,
+  UserRetentionData,
+  UserSegmentData,
+  DeviceAnalytics,
+  DeviceDistribution,
+  DeviceConnectivityData,
+  LocationVolumeData,
+  DeviceActivityHeatmap,
+  ApiAnalytics,
+  EndpointMetrics,
+  ResponseTimeData,
+  ErrorRateData,
+  ApiConsumer,
+  ReportConfig,
+  ReportResult,
+  SavedReport,
 } from "@/types";
 import type {
   LoginResponse,
@@ -1396,4 +1416,110 @@ export const systemRetentionApi = {
     request<RetentionStats[]>("/api/admin/system-config/retention/stats"),
   preview: () =>
     request<RetentionStats[]>("/api/admin/system-config/retention/preview"),
+};
+
+// ============================================
+// Epic AP-10: Dashboard & Analytics APIs
+// ============================================
+
+// Story AP-10.1: Overview Dashboard
+export const dashboardApi = {
+  getMetrics: () => request<DashboardMetrics>("/api/admin/dashboard/metrics"),
+  getAlerts: () => request<AlertIndicators>("/api/admin/dashboard/alerts"),
+  refreshMetrics: () =>
+    request<DashboardMetrics>("/api/admin/dashboard/metrics/refresh", {
+      method: "POST",
+    }),
+};
+
+// Story AP-10.2: User Analytics
+export const userAnalyticsApi = {
+  getAll: (params?: { period?: string; start?: string; end?: string }) =>
+    request<UserAnalytics>(
+      `/api/admin/analytics/users${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getGrowth: (params?: { period?: string; start?: string; end?: string }) =>
+    request<UserGrowthData[]>(
+      `/api/admin/analytics/users/growth${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getActive: (params?: { period?: string }) =>
+    request<UserGrowthData[]>(
+      `/api/admin/analytics/users/active${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getRetention: (params?: { cohort_count?: string }) =>
+    request<UserRetentionData[]>(
+      `/api/admin/analytics/users/retention${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getSegments: () =>
+    request<UserSegmentData[]>("/api/admin/analytics/users/segments"),
+};
+
+// Story AP-10.3: Device Analytics
+export const deviceAnalyticsApi = {
+  getAll: (params?: { period?: string; start?: string; end?: string }) =>
+    request<DeviceAnalytics>(
+      `/api/admin/analytics/devices${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getDistribution: () =>
+    request<DeviceDistribution[]>("/api/admin/analytics/devices/distribution"),
+  getConnectivity: (params?: { period?: string }) =>
+    request<DeviceConnectivityData[]>(
+      `/api/admin/analytics/devices/connectivity${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getVolume: (params?: { period?: string }) =>
+    request<LocationVolumeData[]>(
+      `/api/admin/analytics/devices/volume${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getHeatmap: () =>
+    request<DeviceActivityHeatmap[]>("/api/admin/analytics/devices/heatmap"),
+};
+
+// Story AP-10.4: API Analytics
+export const apiAnalyticsApi = {
+  getAll: (params?: { period?: string; start?: string; end?: string }) =>
+    request<ApiAnalytics>(
+      `/api/admin/analytics/api${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getEndpoints: (params?: { limit?: string }) =>
+    request<EndpointMetrics[]>(
+      `/api/admin/analytics/api/endpoints${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getLatency: (params?: { period?: string }) =>
+    request<ResponseTimeData[]>(
+      `/api/admin/analytics/api/latency${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getErrors: (params?: { period?: string }) =>
+    request<ErrorRateData[]>(
+      `/api/admin/analytics/api/errors${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+  getConsumers: (params?: { limit?: string }) =>
+    request<ApiConsumer[]>(
+      `/api/admin/analytics/api/consumers${params ? `?${new URLSearchParams(params as Record<string, string>)}` : ""}`
+    ),
+};
+
+// Story AP-10.5: Custom Reports
+export const reportsApi = {
+  generate: (config: Omit<ReportConfig, "id" | "created_at" | "updated_at" | "created_by">) =>
+    request<ReportResult>("/api/admin/reports/generate", {
+      method: "POST",
+      body: JSON.stringify(config),
+    }),
+  getSaved: () => request<SavedReport[]>("/api/admin/reports/saved"),
+  createSaved: (data: Omit<SavedReport, "id" | "created_at" | "updated_at" | "last_run">) =>
+    request<SavedReport>("/api/admin/reports/saved", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+  updateSaved: (id: string, data: Partial<Omit<SavedReport, "id" | "created_at" | "updated_at">>) =>
+    request<SavedReport>(`/api/admin/reports/saved/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }),
+  deleteSaved: (id: string) =>
+    request<void>(`/api/admin/reports/saved/${id}`, { method: "DELETE" }),
+  runSaved: (id: string) =>
+    request<ReportResult>(`/api/admin/reports/saved/${id}/run`, { method: "POST" }),
+  export: (id: string, format: "pdf" | "csv") =>
+    request<Blob>(`/api/admin/reports/${id}/export?format=${format}`),
 };

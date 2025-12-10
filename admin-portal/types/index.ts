@@ -1173,3 +1173,220 @@ export interface RetentionStats {
   oldest_record_date: string | null;
   storage_used_mb: number;
 }
+
+// ============================================
+// Epic AP-10: Dashboard & Analytics Types
+// ============================================
+
+// Story AP-10.1: Overview Dashboard
+export interface DashboardMetrics {
+  users: {
+    total: number;
+    active: number;
+    new_today: number;
+    active_today: number;
+  };
+  devices: {
+    total: number;
+    online: number;
+    offline: number;
+    new_today: number;
+  };
+  organizations: {
+    total: number;
+    active: number;
+    new_today: number;
+  };
+  groups: {
+    total: number;
+    active: number;
+    new_today: number;
+  };
+}
+
+export interface AlertIndicators {
+  pending_unlock_requests: number;
+  pending_registrations: number;
+  failed_webhooks: number;
+  system_alerts: number;
+  expiring_api_keys: number;
+}
+
+export interface QuickAction {
+  id: string;
+  label: string;
+  icon: string;
+  href: string;
+  badge?: number;
+}
+
+// Story AP-10.2: User Analytics
+export interface UserGrowthData {
+  date: string;
+  total_users: number;
+  new_users: number;
+  active_users: number;
+}
+
+export interface UserRetentionData {
+  cohort_date: string;
+  users: number;
+  day_1: number;
+  day_7: number;
+  day_14: number;
+  day_30: number;
+}
+
+export interface UserSegmentData {
+  segment: "new" | "returning" | "inactive";
+  count: number;
+  percentage: number;
+}
+
+export interface UserAnalytics {
+  growth: UserGrowthData[];
+  retention: UserRetentionData[];
+  segments: UserSegmentData[];
+  total_users: number;
+  active_users: number;
+  churn_rate: number;
+}
+
+// Story AP-10.3: Device Analytics
+export interface DeviceDistribution {
+  platform: string;
+  count: number;
+  percentage: number;
+}
+
+export interface DeviceStatusDistribution {
+  status: string;
+  count: number;
+  percentage: number;
+}
+
+export interface DeviceConnectivityData {
+  date: string;
+  online: number;
+  offline: number;
+}
+
+export interface LocationVolumeData {
+  date: string;
+  uploads: number;
+  data_points: number;
+}
+
+export interface DeviceActivityHeatmap {
+  hour: number;
+  day: number;
+  activity: number;
+}
+
+export interface DeviceAnalytics {
+  platform_distribution: DeviceDistribution[];
+  status_distribution: DeviceStatusDistribution[];
+  connectivity: DeviceConnectivityData[];
+  location_volume: LocationVolumeData[];
+  heatmap: DeviceActivityHeatmap[];
+  total_devices: number;
+  online_devices: number;
+}
+
+// Story AP-10.4: API Analytics
+export interface EndpointMetrics {
+  endpoint: string;
+  method: string;
+  request_count: number;
+  avg_response_time_ms: number;
+  error_count: number;
+  error_rate: number;
+}
+
+export interface ResponseTimeData {
+  date: string;
+  p50: number;
+  p90: number;
+  p95: number;
+  p99: number;
+}
+
+export interface ErrorRateData {
+  date: string;
+  total_requests: number;
+  errors: number;
+  error_rate: number;
+}
+
+export interface ApiConsumer {
+  id: string;
+  name: string;
+  type: "api_key" | "user" | "organization";
+  request_count: number;
+  last_request: string;
+}
+
+export interface ApiAnalytics {
+  endpoints: EndpointMetrics[];
+  response_times: ResponseTimeData[];
+  error_rates: ErrorRateData[];
+  top_consumers: ApiConsumer[];
+  total_requests: number;
+  avg_response_time_ms: number;
+  overall_error_rate: number;
+}
+
+// Story AP-10.5: Custom Reports
+export type ReportMetricType =
+  | "users"
+  | "devices"
+  | "organizations"
+  | "locations"
+  | "api_calls"
+  | "errors"
+  | "retention";
+
+export interface ReportMetric {
+  type: ReportMetricType;
+  aggregation: "count" | "sum" | "average" | "min" | "max";
+  label: string;
+}
+
+export interface ReportFilter {
+  field: string;
+  operator: "eq" | "ne" | "gt" | "lt" | "gte" | "lte" | "in" | "contains";
+  value: string | number | string[];
+}
+
+export interface ReportConfig {
+  id: string;
+  name: string;
+  description?: string;
+  metrics: ReportMetric[];
+  filters: ReportFilter[];
+  date_range: {
+    start: string;
+    end: string;
+  };
+  group_by?: string;
+  created_at: string;
+  updated_at: string;
+  created_by: string;
+}
+
+export interface ReportResult {
+  config: ReportConfig;
+  data: Record<string, unknown>[];
+  generated_at: string;
+  row_count: number;
+}
+
+export interface SavedReport {
+  id: string;
+  name: string;
+  description?: string;
+  config: Omit<ReportConfig, "id" | "created_at" | "updated_at" | "created_by">;
+  created_at: string;
+  updated_at: string;
+  last_run?: string;
+}
