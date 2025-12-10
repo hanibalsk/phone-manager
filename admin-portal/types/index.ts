@@ -355,3 +355,63 @@ export interface NotifyOwnersResult {
   sent: number;
   failed: number;
 }
+
+// Epic AP-5: Groups Administration
+export type GroupStatus = "active" | "suspended" | "archived";
+export type GroupMemberRole = "admin" | "member";
+
+export interface AdminGroup {
+  id: string;
+  name: string;
+  description: string | null;
+  owner_id: string;
+  owner_name: string;
+  owner_email: string;
+  organization_id: string;
+  organization_name: string;
+  member_count: number;
+  device_count: number;
+  status: GroupStatus;
+  invite_code: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface GroupListParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  organization_id?: string;
+  status?: GroupStatus;
+  sort_by?: "name" | "member_count" | "device_count" | "created_at";
+  sort_order?: "asc" | "desc";
+}
+
+// Story AP-5.2: Group Membership
+export interface GroupMember {
+  id: string;
+  user_id: string;
+  user_name: string;
+  user_email: string;
+  role: GroupMemberRole;
+  joined_at: string;
+  device_count: number;
+}
+
+// Story AP-5.4: Group Invites
+export type InviteStatus = "pending" | "accepted" | "expired" | "revoked";
+
+export interface GroupInvite {
+  id: string;
+  group_id: string;
+  group_name: string;
+  code: string;
+  created_by: string;
+  created_by_email: string;
+  status: InviteStatus;
+  used_by: string | null;
+  used_by_email: string | null;
+  expires_at: string;
+  created_at: string;
+  used_at: string | null;
+}

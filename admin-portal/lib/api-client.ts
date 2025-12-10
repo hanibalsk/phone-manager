@@ -30,6 +30,11 @@ import type {
   TokenUsage,
   InactiveDevice,
   NotifyOwnersResult,
+  AdminGroup,
+  GroupListParams,
+  GroupMember,
+  GroupMemberRole,
+  GroupInvite,
 } from "@/types";
 import type {
   LoginResponse,
@@ -524,6 +529,97 @@ export const rolesApi = {
   // Story AP-1.2: Remove role from user
   removeRole: (userId: string, assignmentId: string) =>
     request<void>(`/api/admin/users/${userId}/roles/${assignmentId}`, {
+      method: "DELETE",
+    }),
+};
+
+// Epic AP-5: Groups Administration
+export const adminGroupsApi = {
+  // Story AP-5.1: List groups with filtering
+  list: (params?: GroupListParams) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+      if (params.search) searchParams.set("search", params.search);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.status) searchParams.set("status", params.status);
+      if (params.sort_by) searchParams.set("sort_by", params.sort_by);
+      if (params.sort_order) searchParams.set("sort_order", params.sort_order);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/groups${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<AdminGroup>>(endpoint);
+  },
+
+  // Story AP-5.1: Get group details
+  get: (id: string) => request<AdminGroup>(`/api/admin/groups/${id}`),
+
+  // Story AP-5.1: Suspend group
+  suspend: (id: string, reason?: string) =>
+    request<AdminGroup>(`/api/admin/groups/${id}/suspend`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    }),
+
+  // Story AP-5.1: Reactivate group
+  reactivate: (id: string) =>
+    request<AdminGroup>(`/api/admin/groups/${id}/reactivate`, {
+      method: "POST",
+    }),
+
+  // Story AP-5.1: Archive group
+  archive: (id: string) =>
+    request<AdminGroup>(`/api/admin/groups/${id}/archive`, {
+      method: "POST",
+    }),
+
+  // Story AP-5.2: Get group members
+  getMembers: (groupId: string) =>
+    request<GroupMember[]>(`/api/admin/groups/${groupId}/members`),
+
+  // Story AP-5.2: Change member role
+  changeMemberRole: (groupId: string, memberId: string, role: GroupMemberRole) =>
+    request<GroupMember>(`/api/admin/groups/${groupId}/members/${memberId}`, {
+      method: "PUT",
+      body: JSON.stringify({ role }),
+    }),
+
+  // Story AP-5.2: Remove member from group
+  removeMember: (groupId: string, memberId: string) =>
+    request<void>(`/api/admin/groups/${groupId}/members/${memberId}`, {
+      method: "DELETE",
+    }),
+
+  // Story AP-5.2: Add user to group
+  addMember: (groupId: string, userId: string, role: GroupMemberRole = "member") =>
+    request<GroupMember>(`/api/admin/groups/${groupId}/members`, {
+      method: "POST",
+      body: JSON.stringify({ user_id: userId, role }),
+    }),
+
+  // Story AP-5.3: Transfer ownership
+  transferOwnership: (groupId: string, newOwnerId: string) =>
+    request<AdminGroup>(`/api/admin/groups/${groupId}/transfer`, {
+      method: "POST",
+      body: JSON.stringify({ new_owner_id: newOwnerId }),
+    }),
+
+  // Story AP-5.4: Get group invites
+  getInvites: (groupId: string, status?: string) => {
+    const queryString = status ? `?status=${status}` : "";
+    return request<GroupInvite[]>(`/api/admin/groups/${groupId}/invites${queryString}`);
+  },
+
+  // Story AP-5.4: Revoke invite
+  revokeInvite: (groupId: string, inviteId: string) =>
+    request<void>(`/api/admin/groups/${groupId}/invites/${inviteId}`, {
+      method: "DELETE",
+    }),
+
+  // Story AP-5.4: Revoke all invites for group
+  revokeAllInvites: (groupId: string) =>
+    request<{ revoked_count: number }>(`/api/admin/groups/${groupId}/invites`, {
       method: "DELETE",
     }),
 };
