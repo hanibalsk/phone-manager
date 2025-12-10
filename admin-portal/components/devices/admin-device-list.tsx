@@ -204,7 +204,7 @@ export function AdminDeviceList() {
   };
 
   return (
-    <Card>
+    <Card data-testid="device-list-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -249,12 +249,14 @@ export function AdminDeviceList() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
+              data-testid="device-search-input"
             />
           </div>
           <select
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
             value={organizationFilter}
             onChange={(e) => setOrganizationFilter(e.target.value)}
+            data-testid="device-org-filter"
           >
             <option value="all">All Organizations</option>
             {organizations.map((org) => (
@@ -267,6 +269,7 @@ export function AdminDeviceList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[130px]"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as AdminDeviceStatus | "all")}
+            data-testid="device-status-filter"
           >
             {STATUS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -278,6 +281,7 @@ export function AdminDeviceList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[130px]"
             value={platformFilter}
             onChange={(e) => setPlatformFilter(e.target.value as DevicePlatform | "all")}
+            data-testid="device-platform-filter"
           >
             {PLATFORM_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -335,7 +339,7 @@ export function AdminDeviceList() {
         {!error && devices.length > 0 && (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" data-testid="device-table">
                 <thead>
                   <tr className="border-b">
                     <th className="w-10 py-3 px-4">
@@ -377,6 +381,7 @@ export function AdminDeviceList() {
                     <tr
                       key={device.id}
                       className={`border-b hover:bg-muted/50 ${selectedIds.has(device.id) ? "bg-muted/30" : ""}`}
+                      data-testid={`device-row-${device.id}`}
                     >
                       <td className="py-3 px-4">
                         <Checkbox
