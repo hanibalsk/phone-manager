@@ -114,7 +114,7 @@ export function UnlockRequestQueue() {
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   return (
-    <Card>
+    <Card data-testid="unlock-requests-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -168,6 +168,7 @@ export function UnlockRequestQueue() {
               setOrganizationId(e.target.value);
               setDeviceId("");
             }}
+            data-testid="unlock-org-filter"
           >
             <option value="">All Organizations</option>
             {orgsData?.items?.map((org) => (
@@ -180,6 +181,7 @@ export function UnlockRequestQueue() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={deviceId}
             onChange={(e) => setDeviceId(e.target.value)}
+            data-testid="unlock-device-filter"
           >
             <option value="">All Devices</option>
             {filteredDevices?.map((device) => (
@@ -192,6 +194,7 @@ export function UnlockRequestQueue() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as AdminUnlockRequestStatus | "")}
+            data-testid="unlock-status-filter"
           >
             <option value="">All Status</option>
             <option value="pending">Pending</option>
@@ -229,6 +232,7 @@ export function UnlockRequestQueue() {
                     className={`border rounded-lg overflow-hidden ${
                       isPending ? "border-yellow-200 bg-yellow-50/50" : ""
                     }`}
+                    data-testid={`unlock-request-row-${request.id}`}
                   >
                     <div
                       className="p-4 flex items-center justify-between cursor-pointer hover:bg-secondary/30"
@@ -268,6 +272,7 @@ export function UnlockRequestQueue() {
                             <Button
                               size="sm"
                               onClick={() => setRequestToAction({ request, action: "approve" })}
+                              data-testid={`unlock-approve-${request.id}`}
                             >
                               Approve
                             </Button>
@@ -275,6 +280,7 @@ export function UnlockRequestQueue() {
                               size="sm"
                               variant="outline"
                               onClick={() => setRequestToAction({ request, action: "deny" })}
+                              data-testid={`unlock-deny-${request.id}`}
                             >
                               Deny
                             </Button>

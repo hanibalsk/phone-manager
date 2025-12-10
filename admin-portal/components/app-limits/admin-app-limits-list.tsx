@@ -137,7 +137,7 @@ export function AdminAppLimitsList() {
   const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
 
   return (
-    <Card>
+    <Card data-testid="app-limits-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -187,6 +187,7 @@ export function AdminAppLimitsList() {
                 className="pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                data-testid="app-limits-search"
               />
             </div>
           </div>
@@ -198,6 +199,7 @@ export function AdminAppLimitsList() {
               setDeviceId("");
               setGroupId("");
             }}
+            data-testid="app-limits-org-filter"
           >
             <option value="">All Organizations</option>
             {orgsData?.items?.map((org) => (
@@ -210,6 +212,7 @@ export function AdminAppLimitsList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={deviceId}
             onChange={(e) => setDeviceId(e.target.value)}
+            data-testid="app-limits-device-filter"
           >
             <option value="">All Devices</option>
             {filteredDevices?.map((device) => (
@@ -222,6 +225,7 @@ export function AdminAppLimitsList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={groupId}
             onChange={(e) => setGroupId(e.target.value)}
+            data-testid="app-limits-group-filter"
           >
             <option value="">All Groups</option>
             {filteredGroups?.map((group) => (
@@ -234,6 +238,7 @@ export function AdminAppLimitsList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={targetType}
             onChange={(e) => setTargetType(e.target.value as "" | "app" | "category")}
+            data-testid="app-limits-type-filter"
           >
             <option value="">All Types</option>
             <option value="app">App</option>
@@ -264,7 +269,7 @@ export function AdminAppLimitsList() {
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full">
+              <table className="w-full" data-testid="app-limits-table">
                 <thead>
                   <tr className="border-b">
                     <th className="py-3 px-4 text-left text-sm font-medium">Name</th>
@@ -278,7 +283,7 @@ export function AdminAppLimitsList() {
                 </thead>
                 <tbody>
                   {filteredLimits.map((limit) => (
-                    <tr key={limit.id} className="border-b hover:bg-secondary/50">
+                    <tr key={limit.id} className="border-b hover:bg-secondary/50" data-testid={`app-limit-row-${limit.id}`}>
                       <td className="py-3 px-4">
                         <div className="font-medium">{limit.name}</div>
                         <div className="text-xs text-muted-foreground">
@@ -412,7 +417,7 @@ export function AdminAppLimitsList() {
 
       {/* Delete Confirmation Modal */}
       {limitToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" data-testid="app-limit-delete-dialog">
           <div className="absolute inset-0 bg-black/50" onClick={() => setLimitToDelete(null)} />
           <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -426,10 +431,10 @@ export function AdminAppLimitsList() {
               This action cannot be undone.
             </p>
             <div className="flex justify-end gap-3">
-              <Button variant="outline" onClick={() => setLimitToDelete(null)}>
+              <Button variant="outline" onClick={() => setLimitToDelete(null)} data-testid="app-limit-delete-cancel">
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
+              <Button variant="destructive" onClick={handleDelete} data-testid="app-limit-delete-confirm">
                 Delete
               </Button>
             </div>

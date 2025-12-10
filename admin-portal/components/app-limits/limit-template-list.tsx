@@ -110,7 +110,7 @@ export function LimitTemplateList() {
   const otherTemplates = templates.filter((t) => t.id !== templateToDelete?.id);
 
   return (
-    <Card>
+    <Card data-testid="limit-templates-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -165,6 +165,7 @@ export function LimitTemplateList() {
                 className="pl-8"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
+                data-testid="templates-search"
               />
             </div>
           </div>
@@ -172,6 +173,7 @@ export function LimitTemplateList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm"
             value={organizationId}
             onChange={(e) => setOrganizationId(e.target.value)}
+            data-testid="templates-org-filter"
           >
             <option value="">All Organizations</option>
             {orgsData?.items?.map((org) => (
@@ -209,7 +211,7 @@ export function LimitTemplateList() {
                 const isExpanded = expandedTemplates.has(template.id);
 
                 return (
-                  <div key={template.id} className="border rounded-lg overflow-hidden">
+                  <div key={template.id} className="border rounded-lg overflow-hidden" data-testid={`template-row-${template.id}`}>
                     <div
                       className="p-4 flex items-center justify-between cursor-pointer hover:bg-secondary/50"
                       onClick={() => toggleExpand(template.id)}
@@ -338,7 +340,7 @@ export function LimitTemplateList() {
 
       {/* Delete Confirmation Modal */}
       {templateToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true">
+        <div className="fixed inset-0 z-50 flex items-center justify-center" role="dialog" aria-modal="true" data-testid="template-delete-dialog">
           <div className="absolute inset-0 bg-black/50" onClick={() => setTemplateToDelete(null)} />
           <div className="relative bg-background rounded-lg shadow-lg w-full max-w-md mx-4 p-6">
             <div className="flex items-center gap-3 mb-4">
@@ -382,10 +384,11 @@ export function LimitTemplateList() {
                   setTemplateToDelete(null);
                   setReplacementTemplateId("");
                 }}
+                data-testid="template-delete-cancel"
               >
                 Cancel
               </Button>
-              <Button variant="destructive" onClick={handleDelete}>
+              <Button variant="destructive" onClick={handleDelete} data-testid="template-delete-confirm">
                 Delete
               </Button>
             </div>

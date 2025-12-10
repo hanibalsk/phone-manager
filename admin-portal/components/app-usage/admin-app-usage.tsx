@@ -97,9 +97,9 @@ export function AdminAppUsage() {
   const { from, to } = getDateRange();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="app-usage-container">
       {/* Header */}
-      <Card>
+      <Card data-testid="app-usage-header-card">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -126,6 +126,7 @@ export function AdminAppUsage() {
                 className="mt-1 block w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
                 value={organizationId}
                 onChange={(e) => setOrganizationId(e.target.value)}
+                data-testid="app-usage-org-filter"
               >
                 <option value="">All Organizations</option>
                 {orgsData?.items?.map((org) => (
@@ -167,10 +168,11 @@ export function AdminAppUsage() {
       </Card>
 
       {/* Tab Switcher */}
-      <div className="flex gap-2">
+      <div className="flex gap-2" data-testid="app-usage-tabs">
         <Button
           variant={activeTab === "overview" ? "default" : "outline"}
           onClick={() => setActiveTab("overview")}
+          data-testid="app-usage-tab-overview"
         >
           <TrendingUp className="mr-2 h-4 w-4" />
           Overview
@@ -178,6 +180,7 @@ export function AdminAppUsage() {
         <Button
           variant={activeTab === "device" ? "default" : "outline"}
           onClick={() => setActiveTab("device")}
+          data-testid="app-usage-tab-device"
         >
           <Smartphone className="mr-2 h-4 w-4" />
           By Device
@@ -234,7 +237,7 @@ export function AdminAppUsage() {
           {/* Charts */}
           <div className="grid gap-6 lg:grid-cols-2">
             {/* Usage by Category Chart */}
-            <Card>
+            <Card data-testid="app-usage-category-chart">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <TrendingUp className="h-5 w-5" />
@@ -260,7 +263,7 @@ export function AdminAppUsage() {
             </Card>
 
             {/* Top Apps */}
-            <Card>
+            <Card data-testid="app-usage-top-apps">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <Award className="h-5 w-5" />

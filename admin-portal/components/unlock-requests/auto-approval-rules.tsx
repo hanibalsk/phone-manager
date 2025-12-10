@@ -138,7 +138,7 @@ export function AutoApprovalRules() {
   const rules = rulesData?.items || [];
 
   return (
-    <Card>
+    <Card data-testid="auto-approval-rules-card">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -207,6 +207,7 @@ export function AutoApprovalRules() {
               <div
                 key={rule.id}
                 className={`border rounded-lg p-4 ${!rule.enabled ? "opacity-60 bg-secondary/30" : ""}`}
+                data-testid={`auto-approval-rule-${rule.id}`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex-1">
@@ -274,6 +275,7 @@ export function AutoApprovalRules() {
                         disabled={index === 0}
                         onClick={() => handleReorder(rule.id, "up")}
                         title="Move up"
+                        data-testid={`rule-move-up-${rule.id}`}
                       >
                         <ChevronUp className="h-4 w-4" />
                       </button>
@@ -282,6 +284,7 @@ export function AutoApprovalRules() {
                         disabled={index === rules.length - 1}
                         onClick={() => handleReorder(rule.id, "down")}
                         title="Move down"
+                        data-testid={`rule-move-down-${rule.id}`}
                       >
                         <ChevronDown className="h-4 w-4" />
                       </button>
@@ -292,6 +295,7 @@ export function AutoApprovalRules() {
                       className="p-2 hover:bg-secondary rounded"
                       onClick={() => handleToggle(rule)}
                       title={rule.enabled ? "Disable" : "Enable"}
+                      data-testid={`rule-toggle-${rule.id}`}
                     >
                       {rule.enabled ? (
                         <ToggleRight className="h-5 w-5 text-green-600" />
@@ -313,6 +317,7 @@ export function AutoApprovalRules() {
                       size="icon"
                       className="text-red-600 hover:text-red-700"
                       onClick={() => handleDelete(rule.id)}
+                      data-testid={`rule-delete-${rule.id}`}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
