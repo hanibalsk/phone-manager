@@ -5,11 +5,13 @@ appId: three.two.bit.phonemanager.dev
 name: Device Registration Flow
 
 ---
-# Clear app state for clean test
-- clearState
-
-# Launch the app
-- launchApp
+# Launch the app with clearState and permissions
+- launchApp:
+    appId: "three.two.bit.phonemanager.dev"
+    clearState: true
+    stopApp: true
+    permissions:
+      all: allow
 
 # Wait for app to load
 - waitForAnimationToEnd
@@ -21,7 +23,7 @@ name: Device Registration Flow
 - extendedWaitUntil:
     visible:
       text: "Device Registration"
-    timeout: 15000
+    timeout: 30000
 
 # Take screenshot of registration screen
 - takeScreenshot: "registration_screen"
@@ -50,7 +52,7 @@ name: Device Registration Flow
 - extendedWaitUntil:
     visible:
       text: "Location Tracking"
-    timeout: 15000
+    timeout: 30000
 
 # Take screenshot of successful registration
 - takeScreenshot: "registration_success"

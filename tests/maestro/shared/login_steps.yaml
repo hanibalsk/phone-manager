@@ -6,11 +6,14 @@ appId: three.two.bit.phonemanager.dev
 name: Shared Login Steps
 
 ---
-# Clear app state
-- clearState
-
-# Launch the app
-- launchApp
+# Launch the app with clearState and permissions
+# Using explicit launchApp syntax for CI compatibility
+- launchApp:
+    appId: "three.two.bit.phonemanager.dev"
+    clearState: true
+    stopApp: true
+    permissions:
+      all: allow
 
 # Give app time to initialize
 - waitForAnimationToEnd
