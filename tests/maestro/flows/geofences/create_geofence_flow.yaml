@@ -55,7 +55,7 @@ name: Create Geofence Flow
 - tapOn:
     id: "geofence_radius_input"
 
-- clearText
+- eraseText
 
 - inputText: "100"
 
