@@ -122,3 +122,7 @@ admin-portal/.env.local.backup
 admin-portal/.env.docker
 
 app/google-services.json
+# Maestro test artifacts
+.maestro/tests/
+maestro-results.xml
+work/

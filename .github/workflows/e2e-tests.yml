@@ -173,7 +173,23 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
+            # Install the app
             adb install -r app/build/outputs/apk/debug/app-debug.apk
+
+            # Grant all necessary permissions
+            adb shell pm grant three.two.bit.phonemanager.dev android.permission.ACCESS_FINE_LOCATION || true
+            adb shell pm grant three.two.bit.phonemanager.dev android.permission.ACCESS_COARSE_LOCATION || true
+            adb shell pm grant three.two.bit.phonemanager.dev android.permission.ACCESS_BACKGROUND_LOCATION || true
+            adb shell pm grant three.two.bit.phonemanager.dev android.permission.POST_NOTIFICATIONS || true
+
+            # Verify app is installed
+            adb shell pm list packages | grep phonemanager
+
+            # Test that app can launch manually
+            adb shell am start -n three.two.bit.phonemanager.dev/three.two.bit.phonemanager.MainActivity
+            sleep 3
+            adb shell am force-stop three.two.bit.phonemanager.dev
+
             # Run Maestro tests from all subdirectories
             $HOME/.maestro/bin/maestro test tests/maestro/flows/auth/ tests/maestro/flows/location/ tests/maestro/flows/groups/ tests/maestro/flows/geofences/ --format junit --output maestro-results.xml
 
