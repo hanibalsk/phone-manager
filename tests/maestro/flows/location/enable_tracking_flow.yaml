@@ -5,7 +5,7 @@ appId: three.two.bit.phonemanager.dev
 name: Enable Location Tracking Flow
 
 ---
-# Login first
+# Register first
 - runFlow: "../../shared/login_steps.yaml"
 
 # Verify we're on home screen

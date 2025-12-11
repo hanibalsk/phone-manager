@@ -1,8 +1,8 @@
-# Login Flow Test
-# Tests basic user login functionality
+# Device Registration Flow Test
+# Tests initial device registration on first app launch
 
 appId: three.two.bit.phonemanager.dev
-name: Login Flow
+name: Device Registration Flow
 
 ---
 # Clear app state for clean test
@@ -11,52 +11,50 @@ name: Login Flow
 # Launch the app
 - launchApp
 
-# Wait for login screen to appear
+# Wait for registration screen to appear
 - extendedWaitUntil:
     visible:
-      id: "login_screen"
+      id: "registration_screen"
     timeout: 10000
 
-# Wait for email input
-- extendedWaitUntil:
-    visible:
-      id: "email_input"
-    timeout: 5000
-
-# Verify login screen elements
+# Verify registration screen elements are present
 - assertVisible:
-    id: "email_input"
+    id: "display_name_input"
 
 - assertVisible:
-    id: "password_input"
+    id: "group_id_input"
 
 - assertVisible:
-    id: "sign_in_button"
+    id: "register_button"
 
-# Take screenshot of login screen
-- takeScreenshot: "login_screen"
+# Take screenshot of registration screen
+- takeScreenshot: "registration_screen"
 
-# Enter email
+# Enter display name
 - tapOn:
-    id: "email_input"
+    id: "display_name_input"
 
-- inputText: ${TEST_USER_EMAIL}
+- inputText: "TestDevice"
 
-# Enter password
+- hideKeyboard
+
+# Enter group ID
 - tapOn:
-    id: "password_input"
+    id: "group_id_input"
 
-- inputText: ${TEST_USER_PASSWORD}
+- inputText: "test-group"
 
-# Submit login
+- hideKeyboard
+
+# Submit registration
 - tapOn:
-    id: "sign_in_button"
+    id: "register_button"
 
-# Wait for home screen (successful login)
+# Wait for home screen (successful registration)
 - extendedWaitUntil:
     visible:
       id: "home_screen"
     timeout: 15000
 
-# Take screenshot of successful login
-- takeScreenshot: "login_success"
+# Take screenshot of successful registration
+- takeScreenshot: "registration_success"

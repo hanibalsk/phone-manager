@@ -1,14 +1,14 @@
-# Create Geofence Flow
-# Tests basic navigation after login
+# Geofence Navigation Flow
+# Tests basic navigation after registration
 
 appId: three.two.bit.phonemanager.dev
-name: Create Geofence Flow
+name: Geofence Navigation Flow
 
 ---
-# Login first
+# Register first
 - runFlow: "../../shared/login_steps.yaml"
 
-# Verify we're on home screen after login
+# Verify we're on home screen after registration
 - assertVisible:
     id: "home_screen"
 

@@ -1,11 +1,11 @@
-# Logout Flow Test
-# Tests user logout from the app
+# Settings Navigation Flow
+# Tests navigation to settings screen from home
 
 appId: three.two.bit.phonemanager.dev
-name: User Logout Flow
+name: Settings Navigation Flow
 
 ---
-# Include login steps first
+# Include registration steps first
 - runFlow: "../../shared/login_steps.yaml"
 
 # Navigate to settings
@@ -18,31 +18,24 @@ name: User Logout Flow
       id: "settings_screen"
     timeout: 5000
 
-# Scroll to logout button
-- scroll
+# Verify we're on settings screen
+- assertVisible:
+    id: "settings_screen"
 
-# Tap logout
-- tapOn:
-    id: "logout_button"
+# Take screenshot of settings screen
+- takeScreenshot: "settings_screen"
 
-# Wait for confirmation dialog
+# Navigate back to home
+- back
+
+# Verify we're back on home screen
 - extendedWaitUntil:
     visible:
-      id: "confirm_dialog"
-    timeout: 3000
-
-# Confirm logout
-- tapOn:
-    id: "confirm_button"
-
-# Verify we're back on login screen
-- extendedWaitUntil:
-    visible:
-      id: "email_input"
-    timeout: 10000
+      id: "home_screen"
+    timeout: 5000
 
 - assertVisible:
-    id: "sign_in_button"
+    id: "home_screen"
 
-# Take screenshot of logged out state
-- takeScreenshot: "logout_success"
+# Take screenshot of home after returning
+- takeScreenshot: "home_after_settings"

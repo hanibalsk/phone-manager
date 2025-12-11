@@ -29,6 +29,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -69,7 +70,7 @@ fun RegistrationScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        modifier = modifier,
+        modifier = modifier.testTag("registration_screen"),
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -121,7 +122,9 @@ fun RegistrationScreen(
                 keyboardActions = KeyboardActions(
                     onNext = { focusManager.moveFocus(FocusDirection.Down) },
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("display_name_input"),
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -153,7 +156,9 @@ fun RegistrationScreen(
                         }
                     },
                 ),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("group_id_input"),
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -162,7 +167,9 @@ fun RegistrationScreen(
             Button(
                 onClick = viewModel::register,
                 enabled = uiState.isFormValid && !uiState.isLoading,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("register_button"),
             ) {
                 if (uiState.isLoading) {
                     CircularProgressIndicator(
