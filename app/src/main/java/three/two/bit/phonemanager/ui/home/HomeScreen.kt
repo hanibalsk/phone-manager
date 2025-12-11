@@ -51,6 +51,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -149,13 +150,17 @@ fun HomeScreen(
                     )
                 },
                 actions = {
-                    IconButton(onClick = onNavigateToSettings) {
+                    IconButton(
+                        onClick = onNavigateToSettings,
+                        modifier = Modifier.testTag("settings_button")
+                    ) {
                         Icon(Icons.Default.Settings, stringResource(R.string.settings))
                     }
                 },
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = Modifier.testTag("home_screen"),
     ) { paddingValues ->
         Column(
             modifier =

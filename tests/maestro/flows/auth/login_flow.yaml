@@ -1,8 +1,8 @@
-# Device Registration Flow Test
-# Tests device registration with display name and group ID
+# Login Flow Test
+# Tests basic user login functionality
 
 appId: three.two.bit.phonemanager.dev
-name: Device Registration Flow
+name: Login Flow
 
 ---
 # Clear app state for clean test
@@ -11,64 +11,52 @@ name: Device Registration Flow
 # Launch the app
 - launchApp
 
-# Wait for registration screen to appear
+# Wait for login screen to appear
 - extendedWaitUntil:
     visible:
-      text: "Device Registration"
+      id: "login_screen"
     timeout: 10000
 
-# Hide keyboard if visible
-- hideKeyboard
-
-# Verify registration screen elements
-- assertVisible:
-    text: "Display Name"
-
-- assertVisible:
-    text: "Group ID"
-
-# Scroll down to see Register button
-- scrollUntilVisible:
-    element:
-      text: "Register"
-    direction: DOWN
-
-# Take screenshot of registration screen
-- takeScreenshot: "registration_screen"
-
-# Enter display name - tap on the input field area
-- tapOn:
-    text: "Display Name"
-
-- inputText: "TestDevice"
-
-# Hide keyboard
-- hideKeyboard
-
-# Enter group ID
-- tapOn:
-    text: "Group ID"
-
-- inputText: "test-group-123"
-
-# Hide keyboard before tapping Register
-- hideKeyboard
-
-# Scroll to Register button
-- scrollUntilVisible:
-    element:
-      text: "Register"
-    direction: DOWN
-
-# Submit registration
-- tapOn:
-    text: "Register"
-
-# Wait for next screen (could be permission dialog or home)
+# Wait for email input
 - extendedWaitUntil:
-    notVisible:
-      text: "Device Registration"
+    visible:
+      id: "email_input"
+    timeout: 5000
+
+# Verify login screen elements
+- assertVisible:
+    id: "email_input"
+
+- assertVisible:
+    id: "password_input"
+
+- assertVisible:
+    id: "sign_in_button"
+
+# Take screenshot of login screen
+- takeScreenshot: "login_screen"
+
+# Enter email
+- tapOn:
+    id: "email_input"
+
+- inputText: ${TEST_USER_EMAIL}
+
+# Enter password
+- tapOn:
+    id: "password_input"
+
+- inputText: ${TEST_USER_PASSWORD}
+
+# Submit login
+- tapOn:
+    id: "sign_in_button"
+
+# Wait for home screen (successful login)
+- extendedWaitUntil:
+    visible:
+      id: "home_screen"
     timeout: 15000
 
-# Take screenshot of result
-- takeScreenshot: "registration_result"
+# Take screenshot of successful login
+- takeScreenshot: "login_success"

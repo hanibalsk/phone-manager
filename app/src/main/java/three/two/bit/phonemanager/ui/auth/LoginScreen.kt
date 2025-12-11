@@ -42,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -121,6 +122,7 @@ fun LoginScreen(
     }
 
     Scaffold(
+        modifier = Modifier.testTag("login_screen"),
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
@@ -179,7 +181,9 @@ fun LoginScreen(
                     value = email,
                     onValueChange = { email = it },
                     label = { Text(stringResource(R.string.auth_email)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("email_input"),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
@@ -200,7 +204,9 @@ fun LoginScreen(
                     value = password,
                     onValueChange = { password = it },
                     label = { Text(stringResource(R.string.auth_password)) },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag("password_input"),
                     visualTransformation = if (passwordVisible) {
                         VisualTransformation.None
                     } else {
@@ -256,7 +262,8 @@ fun LoginScreen(
                     onClick = { viewModel.login(email, password) },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(48.dp),
+                        .height(48.dp)
+                        .testTag("sign_in_button"),
                     enabled = uiState !is AuthUiState.Loading
                 ) {
                     if (uiState is AuthUiState.Loading) {
@@ -348,6 +355,7 @@ fun LoginScreen(
                     )
                     TextButton(
                         onClick = onNavigateToRegister,
+                        modifier = Modifier.testTag("create_account_link"),
                         enabled = uiState !is AuthUiState.Loading
                     ) {
                         Text(stringResource(R.string.auth_create_account))

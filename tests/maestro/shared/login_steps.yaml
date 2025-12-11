@@ -11,11 +11,17 @@ name: Shared Login Steps
 # Launch the app
 - launchApp
 
-# Wait for login screen
+# Wait for login screen to load
+- extendedWaitUntil:
+    visible:
+      id: "login_screen"
+    timeout: 10000
+
+# Wait for email input to be visible
 - extendedWaitUntil:
     visible:
       id: "email_input"
-    timeout: 10000
+    timeout: 5000
 
 # Enter credentials
 - tapOn:

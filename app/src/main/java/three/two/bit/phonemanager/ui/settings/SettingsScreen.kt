@@ -49,6 +49,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -182,6 +183,7 @@ fun SettingsScreen(
             )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
+        modifier = Modifier.testTag("settings_screen"),
     ) { paddingValues ->
         Column(
             modifier =
@@ -302,7 +304,9 @@ fun SettingsScreen(
 
                     Button(
                         onClick = { showLogoutDialog = true },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .testTag("logout_button")
                     ) {
                         Text(stringResource(R.string.auth_sign_out))
                     }
@@ -654,6 +658,7 @@ fun SettingsScreen(
     // Story E9.11: Logout Confirmation Dialog (AC E9.11.6)
     if (showLogoutDialog) {
         AlertDialog(
+            modifier = Modifier.testTag("confirm_dialog"),
             onDismissRequest = { showLogoutDialog = false },
             title = { Text(stringResource(R.string.auth_sign_out)) },
             text = { Text(stringResource(R.string.auth_sign_out_confirm_message)) },
@@ -662,13 +667,17 @@ fun SettingsScreen(
                     onClick = {
                         showLogoutDialog = false
                         viewModel.logout()
-                    }
+                    },
+                    modifier = Modifier.testTag("confirm_button")
                 ) {
                     Text(stringResource(R.string.auth_sign_out))
                 }
             },
             dismissButton = {
-                TextButton(onClick = { showLogoutDialog = false }) {
+                TextButton(
+                    onClick = { showLogoutDialog = false },
+                    modifier = Modifier.testTag("cancel_button")
+                ) {
                     Text(stringResource(R.string.cancel))
                 }
             }

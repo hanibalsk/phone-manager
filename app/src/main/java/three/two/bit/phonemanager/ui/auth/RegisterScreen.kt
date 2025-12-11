@@ -43,6 +43,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -134,6 +135,7 @@ fun RegisterScreen(
     }
 
     Scaffold(
+        modifier = Modifier.testTag("register_screen"),
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
         Column(
@@ -167,7 +169,9 @@ fun RegisterScreen(
                 value = displayName,
                 onValueChange = { displayName = it },
                 label = { Text(stringResource(R.string.auth_display_name)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("display_name_input"),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
                     imeAction = ImeAction.Next
@@ -188,7 +192,9 @@ fun RegisterScreen(
                 value = email,
                 onValueChange = { email = it },
                 label = { Text(stringResource(R.string.auth_email)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("register_email_input"),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
                     imeAction = ImeAction.Next
@@ -209,7 +215,9 @@ fun RegisterScreen(
                 value = password,
                 onValueChange = { password = it },
                 label = { Text(stringResource(R.string.auth_password)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("register_password_input"),
                 visualTransformation = if (passwordVisible) {
                     VisualTransformation.None
                 } else {
@@ -262,7 +270,9 @@ fun RegisterScreen(
                 value = confirmPassword,
                 onValueChange = { confirmPassword = it },
                 label = { Text(stringResource(R.string.auth_confirm_password)) },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag("confirm_password_input"),
                 visualTransformation = if (confirmPasswordVisible) {
                     VisualTransformation.None
                 } else {
@@ -348,7 +358,8 @@ fun RegisterScreen(
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(48.dp),
+                    .height(48.dp)
+                    .testTag("create_account_button"),
                 enabled = uiState !is AuthUiState.Loading &&
                     passwordsMatch &&
                     acceptedTerms &&
