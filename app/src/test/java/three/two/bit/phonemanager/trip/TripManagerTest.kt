@@ -117,6 +117,8 @@ class TripManagerTest {
         coEvery { tripRepository.getActiveTrip() } returns activeTrip
 
         tripManager.startMonitoring()
+        // Allow coroutines to complete
+        testScheduler.advanceUntilIdle()
 
         assertEquals(activeTrip, tripManager.activeTrip.value)
         assertEquals(TripState.ACTIVE, tripManager.currentTripState.value)
