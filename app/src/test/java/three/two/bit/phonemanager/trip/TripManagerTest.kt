@@ -5,6 +5,7 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -117,8 +118,8 @@ class TripManagerTest {
         coEvery { tripRepository.getActiveTrip() } returns activeTrip
 
         tripManager.startMonitoring()
-        // Allow coroutines to complete
-        testScheduler.advanceUntilIdle()
+        // Allow time for any async state updates to complete
+        delay(100)
 
         assertEquals(activeTrip, tripManager.activeTrip.value)
         assertEquals(TripState.ACTIVE, tripManager.currentTripState.value)
