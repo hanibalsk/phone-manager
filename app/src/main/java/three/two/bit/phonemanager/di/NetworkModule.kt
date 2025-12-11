@@ -1,10 +1,8 @@
 package three.two.bit.phonemanager.di
 
-import android.content.Context
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
@@ -19,29 +17,28 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.BuildConfig
 import three.two.bit.phonemanager.network.ApiConfiguration
+import three.two.bit.phonemanager.network.ConfigApiService
+import three.two.bit.phonemanager.network.ConfigApiServiceImpl
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.network.DeviceApiServiceImpl
+import three.two.bit.phonemanager.network.EnrollmentApiService
+import three.two.bit.phonemanager.network.EnrollmentApiServiceImpl
 import three.two.bit.phonemanager.network.GeofenceApiService
 import three.two.bit.phonemanager.network.GeofenceApiServiceImpl
 import three.two.bit.phonemanager.network.GeofenceEventApiService
 import three.two.bit.phonemanager.network.GeofenceEventApiServiceImpl
+import three.two.bit.phonemanager.network.GroupApiService
+import three.two.bit.phonemanager.network.GroupApiServiceImpl
 import three.two.bit.phonemanager.network.LocationApiService
 import three.two.bit.phonemanager.network.LocationApiServiceImpl
-import three.two.bit.phonemanager.network.ProximityAlertApiService
-import three.two.bit.phonemanager.network.ProximityAlertApiServiceImpl
 import three.two.bit.phonemanager.network.MovementEventApiService
 import three.two.bit.phonemanager.network.MovementEventApiServiceImpl
+import three.two.bit.phonemanager.network.ProximityAlertApiService
+import three.two.bit.phonemanager.network.ProximityAlertApiServiceImpl
 import three.two.bit.phonemanager.network.TripApiService
 import three.two.bit.phonemanager.network.TripApiServiceImpl
 import three.two.bit.phonemanager.network.WebhookApiService
 import three.two.bit.phonemanager.network.WebhookApiServiceImpl
-import three.two.bit.phonemanager.network.GroupApiService
-import three.two.bit.phonemanager.network.GroupApiServiceImpl
-import three.two.bit.phonemanager.network.EnrollmentApiService
-import three.two.bit.phonemanager.network.EnrollmentApiServiceImpl
-import three.two.bit.phonemanager.network.ConfigApiService
-import three.two.bit.phonemanager.network.ConfigApiServiceImpl
-import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Singleton
@@ -96,36 +93,6 @@ object NetworkModule {
             connectTimeout = 30_000
             socketTimeout = 30_000
         }
-    }
-
-    @Provides
-    @Singleton
-    fun provideApiConfiguration(@ApplicationContext context: Context, secureStorage: SecureStorage): ApiConfiguration {
-        // Get base URL from secure storage - require HTTPS in production
-        val baseUrl = secureStorage.getApiBaseUrl()
-            ?: BuildConfig.API_BASE_URL.takeIf { it.isNotBlank() }
-            ?: throw IllegalStateException(
-                "API base URL not configured. Set API_BASE_URL in build config or configure via SecureStorage.",
-            )
-
-        // Validate URL uses HTTPS in release builds
-        if (!BuildConfig.DEBUG && !baseUrl.startsWith("https://")) {
-            throw IllegalStateException(
-                "API base URL must use HTTPS in production builds: $baseUrl",
-            )
-        }
-
-        // Get API key from secure storage - require proper configuration
-        val apiKey = secureStorage.getApiKey()
-            ?: BuildConfig.API_KEY.takeIf { it.isNotBlank() && it != "default-api-key-change-me" }
-            ?: throw IllegalStateException(
-                "API key not configured. Set API_KEY in build config or configure via SecureStorage.",
-            )
-
-        return ApiConfiguration(
-            baseUrl = baseUrl,
-            apiKey = apiKey,
-        )
     }
 
     @Provides
