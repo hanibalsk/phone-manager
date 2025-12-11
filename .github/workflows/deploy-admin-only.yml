@@ -110,17 +110,18 @@ jobs:
 
       - name: Debug SSH
         run: |
+          echo "Checking ssh-agent keys..."
+          ssh-add -l
           echo "Testing SSH connection..."
-          ssh -vvv -p 332 -o BatchMode=yes "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" "echo 'SSH works'" || true
+          ssh -vvv -p 332 -o BatchMode=yes -o IdentitiesOnly=no "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" "echo 'SSH works'" || true
 
       - name: Deploy to staging
         run: |
           echo "Deploying to staging..."
           SSH_TARGET="${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}"
 
-          # Upload tar
-          cat ./out.tar | ssh -p 332 "$SSH_TARGET" \
-            "cat > /volume1/docker/phone-manager/web/out.tar"
+          # Upload tar using scp instead (more reliable with ssh-agent)
+          scp -P 332 ./out.tar "$SSH_TARGET:/volume1/docker/phone-manager/web/out.tar"
 
           # Clear old files and extract
           ssh -p 332 "$SSH_TARGET" "
