@@ -1,11 +1,12 @@
 #!/bin/bash
-# update-version.sh - Validate VERSION file for Android app
-# The actual version reading is done in build.gradle.kts
+# update-version.sh - Validate VERSION file and sync across projects
+# The actual version reading for Android is done in build.gradle.kts
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
 VERSION_FILE="$PROJECT_ROOT/VERSION"
+ADMIN_PACKAGE_JSON="$PROJECT_ROOT/admin-portal/package.json"
 
 # Read version from VERSION file
 if [[ ! -f "$VERSION_FILE" ]]; then
@@ -27,9 +28,30 @@ IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
 # Calculate versionCode: MAJOR*10000 + MINOR*100 + PATCH
 VERSION_CODE=$((MAJOR * 10000 + MINOR * 100 + PATCH))
 
-echo "Android version validated:"
+echo "=== Version Sync ==="
+echo ""
+echo "Android app:"
 echo "  VERSION file:  $VERSION"
 echo "  versionName:   $VERSION"
 echo "  versionCode:   $VERSION_CODE"
+echo "  Note: build.gradle.kts reads VERSION file directly at build time."
 echo ""
-echo "Note: build.gradle.kts reads VERSION file directly at build time."
+
+# Update admin-portal package.json version
+if [[ -f "$ADMIN_PACKAGE_JSON" ]]; then
+    # Use sed to update the version field in package.json
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS sed requires empty string for -i
+        sed -i '' "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" "$ADMIN_PACKAGE_JSON"
+    else
+        # Linux sed
+        sed -i "s/\"version\": \"[^\"]*\"/\"version\": \"$VERSION\"/" "$ADMIN_PACKAGE_JSON"
+    fi
+    echo "Admin Portal:"
+    echo "  package.json:  $VERSION (updated)"
+else
+    echo "WARNING: Admin portal package.json not found at $ADMIN_PACKAGE_JSON"
+fi
+
+echo ""
+echo "Version sync complete."
