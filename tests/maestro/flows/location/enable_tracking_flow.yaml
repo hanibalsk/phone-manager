@@ -6,7 +6,7 @@ name: Enable Location Tracking Flow
 
 ---
 # Login first
-- runFlow: "../shared/login_steps.yaml"
+- runFlow: "../../shared/login_steps.yaml"
 
 # Verify we're on home screen
 - assertVisible:

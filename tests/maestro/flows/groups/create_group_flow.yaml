@@ -6,7 +6,7 @@ name: Create Group Flow
 
 ---
 # Login first
-- runFlow: "../shared/login_steps.yaml"
+- runFlow: "../../shared/login_steps.yaml"
 
 # Navigate to groups
 - tapOn:

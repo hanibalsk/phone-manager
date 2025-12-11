@@ -6,7 +6,7 @@ name: User Logout Flow
 
 ---
 # Include login steps first
-- runFlow: "../shared/login_steps.yaml"
+- runFlow: "../../shared/login_steps.yaml"
 
 # Navigate to settings
 - tapOn:

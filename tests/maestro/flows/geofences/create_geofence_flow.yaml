@@ -6,7 +6,7 @@ name: Create Geofence Flow
 
 ---
 # Login first
-- runFlow: "../shared/login_steps.yaml"
+- runFlow: "../../shared/login_steps.yaml"
 
 # Navigate to map
 - tapOn:
