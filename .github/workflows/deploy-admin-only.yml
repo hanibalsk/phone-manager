@@ -108,6 +108,13 @@ jobs:
       - name: Add known hosts
         run: ssh-keyscan -p 332 -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Verify SSH key loaded
+        run: |
+          echo "Keys in ssh-agent:"
+          ssh-add -l || echo "No keys in agent!"
+          echo ""
+          echo "SSH_AUTH_SOCK: $SSH_AUTH_SOCK"
+
       - name: Deploy to staging
         run: |
           echo "Deploying to staging..."
