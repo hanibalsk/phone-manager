@@ -1,116 +1,16 @@
-"use client";
+import { TransferOwnershipClient } from "./transfer-client";
 
-import { useEffect, use } from "react";
-import type { AdminGroup } from "@/types";
-import { adminGroupsApi } from "@/lib/api-client";
-import { useApi } from "@/hooks/use-api";
-import { TransferOwnershipForm } from "@/components/groups/transfer-ownership-form";
-import { GroupStatusBadge } from "@/components/groups";
-import { Button } from "@/components/ui/button";
-import Link from "next/link";
-import {
-  ArrowLeft,
-  RefreshCw,
-  Users,
-} from "lucide-react";
+// Generate a placeholder path for static export
+// Actual routing happens client-side
+export function generateStaticParams() {
+  return [{ id: "_" }];
+}
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-export default function TransferOwnershipPage(props: Props) {
-  const params = use(props.params);
-  const groupId = params.id;
-
-  const { data: group, loading, error, execute } = useApi<AdminGroup>();
-
-  useEffect(() => {
-    execute(() => adminGroupsApi.get(groupId));
-  }, [execute, groupId]);
-
-  // Loading state
-  if (loading && !group) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <div className="h-8 w-8 bg-muted animate-pulse rounded" />
-          <div className="h-8 w-48 bg-muted animate-pulse rounded" />
-        </div>
-        <div className="h-64 bg-muted animate-pulse rounded" />
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Link href="/groups">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Groups
-            </Button>
-          </Link>
-        </div>
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <p className="text-destructive mb-4">{error}</p>
-          <Button variant="outline" onClick={() => execute(() => adminGroupsApi.get(groupId))}>
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  // Not found
-  if (!group) {
-    return (
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
-          <Link href="/groups">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Groups
-            </Button>
-          </Link>
-        </div>
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <Users className="h-12 w-12 text-muted-foreground mb-4" />
-          <p className="text-muted-foreground">Group not found</p>
-        </div>
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <Link href="/groups">
-            <Button variant="ghost" size="sm">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Groups
-            </Button>
-          </Link>
-        </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{group.name}</h1>
-              <GroupStatusBadge status={group.status} />
-            </div>
-            <p className="text-muted-foreground">
-              Organization: {group.organization_name}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Transfer Form */}
-      <TransferOwnershipForm groupId={groupId} group={group} />
-    </div>
-  );
+export default async function TransferOwnershipPage({ params }: Props) {
+  const { id } = await params;
+  return <TransferOwnershipClient groupId={id} />;
 }
