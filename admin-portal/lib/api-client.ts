@@ -191,6 +191,51 @@ async function request<T>(
   }
 }
 
+// Blob request helper for binary downloads (reports, exports, etc.)
+async function requestBlob(
+  endpoint: string,
+  options: RequestInit = {},
+  includeAuth = true
+): Promise<ApiResponse<Blob>> {
+  const url = `${API_BASE_URL}${endpoint}`;
+
+  const headers: Record<string, string> = {
+    ...(options.headers as Record<string, string>),
+  };
+
+  // Add auth header if we have a token and auth is requested
+  if (includeAuth) {
+    const token = getAccessToken();
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+
+  try {
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      // Try to parse error as JSON, fallback to status text
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        status: response.status,
+        error: errorData.message || `HTTP error ${response.status}`,
+      };
+    }
+
+    const data = await response.blob();
+    return { data, status: response.status };
+  } catch (error) {
+    return {
+      status: 0,
+      error: error instanceof Error ? error.message : "Network error",
+    };
+  }
+}
+
 // Auth API (no auth header required for most endpoints)
 export const authApi = {
   login: (credentials: LoginCredentials) =>
@@ -1533,7 +1578,7 @@ export const reportsApi = {
   runSaved: (id: string) =>
     request<ReportResult>(`/api/admin/reports/saved/${id}/run`, { method: "POST" }),
   export: (id: string, format: "pdf" | "csv") =>
-    request<Blob>(`/api/admin/reports/${id}/export?format=${format}`),
+    requestBlob(`/api/admin/reports/${id}/export?format=${format}`),
 };
 
 // ============================================
@@ -1552,7 +1597,7 @@ export const auditApi = {
       `/api/admin/audit/stats${filters ? `?${new URLSearchParams(filters as Record<string, string>).toString()}` : ""}`
     ),
   exportLogs: (filters?: AuditLogFilter, format: "csv" | "json" = "csv") =>
-    request<Blob>(
+    requestBlob(
       `/api/admin/audit/logs/export?format=${format}${filters ? `&${new URLSearchParams(filters as Record<string, string>).toString()}` : ""}`
     ),
 
@@ -1562,7 +1607,7 @@ export const auditApi = {
       `/api/admin/audit/users/${userId}/activity${dateFrom ? `?date_from=${dateFrom}` : ""}${dateTo ? `&date_to=${dateTo}` : ""}`
     ),
   exportUserActivity: (userId: string, format: "pdf" | "csv" = "csv") =>
-    request<Blob>(`/api/admin/audit/users/${userId}/export?format=${format}`),
+    requestBlob(`/api/admin/audit/users/${userId}/export?format=${format}`),
 
   // Organization activity reports
   getOrgActivity: (orgId: string, dateFrom?: string, dateTo?: string) =>

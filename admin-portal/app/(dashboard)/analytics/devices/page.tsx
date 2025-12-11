@@ -31,6 +31,7 @@ import type {
   LocationVolumeData,
   DeviceActivityHeatmap,
 } from "@/types";
+import { AlertCircle } from "lucide-react";
 
 type TimePeriod = "7d" | "30d" | "90d";
 
@@ -292,7 +293,7 @@ export default function DeviceAnalyticsPage() {
   const [analytics, setAnalytics] = useState<DeviceAnalytics | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { execute: fetchAnalytics, loading } = useApi<DeviceAnalytics>();
+  const { execute: fetchAnalytics, loading, error } = useApi<DeviceAnalytics>();
 
   useEffect(() => {
     loadData();
@@ -389,6 +390,19 @@ export default function DeviceAnalyticsPage() {
           </Button>
         </div>
       </div>
+
+      {error && !analytics && (
+        <div className="p-4 rounded-lg border border-red-200 bg-red-50 text-red-800 flex items-start gap-2" data-testid="device-analytics-error">
+          <AlertCircle className="h-4 w-4 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium">Failed to load device analytics</p>
+            <p className="text-sm">{error}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading || isRefreshing}>
+            Retry
+          </Button>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="device-analytics-summary-cards">

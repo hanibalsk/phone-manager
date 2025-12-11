@@ -30,6 +30,7 @@ import type {
   UserRetentionData,
   UserSegmentData,
 } from "@/types";
+import { AlertCircle } from "lucide-react";
 
 type TimePeriod = "7d" | "30d" | "90d" | "custom";
 
@@ -165,6 +166,12 @@ function RetentionTable({ data }: { data: UserRetentionData[] }) {
     );
   }
 
+  // Safely calculate percentage, returning 0 if users is 0 to avoid NaN/Infinity
+  const getRetentionPercentage = (retained: number, total: number): number => {
+    if (total === 0) return 0;
+    return (retained / total) * 100;
+  };
+
   const getCellColor = (percentage: number) => {
     if (percentage >= 70) return "bg-green-500/20 text-green-700";
     if (percentage >= 50) return "bg-yellow-500/20 text-yellow-700";
@@ -196,23 +203,23 @@ function RetentionTable({ data }: { data: UserRetentionData[] }) {
               </td>
               <td className="text-center py-2 px-3">{row.users}</td>
               <td className="py-2 px-3">
-                <div className={`text-center rounded px-2 py-1 ${getCellColor((row.day_1 / row.users) * 100)}`}>
-                  {((row.day_1 / row.users) * 100).toFixed(0)}%
+                <div className={`text-center rounded px-2 py-1 ${getCellColor(getRetentionPercentage(row.day_1, row.users))}`}>
+                  {getRetentionPercentage(row.day_1, row.users).toFixed(0)}%
                 </div>
               </td>
               <td className="py-2 px-3">
-                <div className={`text-center rounded px-2 py-1 ${getCellColor((row.day_7 / row.users) * 100)}`}>
-                  {((row.day_7 / row.users) * 100).toFixed(0)}%
+                <div className={`text-center rounded px-2 py-1 ${getCellColor(getRetentionPercentage(row.day_7, row.users))}`}>
+                  {getRetentionPercentage(row.day_7, row.users).toFixed(0)}%
                 </div>
               </td>
               <td className="py-2 px-3">
-                <div className={`text-center rounded px-2 py-1 ${getCellColor((row.day_14 / row.users) * 100)}`}>
-                  {((row.day_14 / row.users) * 100).toFixed(0)}%
+                <div className={`text-center rounded px-2 py-1 ${getCellColor(getRetentionPercentage(row.day_14, row.users))}`}>
+                  {getRetentionPercentage(row.day_14, row.users).toFixed(0)}%
                 </div>
               </td>
               <td className="py-2 px-3">
-                <div className={`text-center rounded px-2 py-1 ${getCellColor((row.day_30 / row.users) * 100)}`}>
-                  {((row.day_30 / row.users) * 100).toFixed(0)}%
+                <div className={`text-center rounded px-2 py-1 ${getCellColor(getRetentionPercentage(row.day_30, row.users))}`}>
+                  {getRetentionPercentage(row.day_30, row.users).toFixed(0)}%
                 </div>
               </td>
             </tr>
@@ -228,7 +235,7 @@ export default function UserAnalyticsPage() {
   const [analytics, setAnalytics] = useState<UserAnalytics | null>(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  const { execute: fetchAnalytics, loading } = useApi<UserAnalytics>();
+  const { execute: fetchAnalytics, loading, error } = useApi<UserAnalytics>();
 
   useEffect(() => {
     loadData();
@@ -322,6 +329,19 @@ export default function UserAnalyticsPage() {
           </Button>
         </div>
       </div>
+
+      {error && !analytics && (
+        <div className="p-4 rounded-lg border border-red-200 bg-red-50 text-red-800 flex items-start gap-2" data-testid="user-analytics-error">
+          <AlertCircle className="h-4 w-4 mt-0.5" />
+          <div className="flex-1">
+            <p className="font-medium">Failed to load user analytics</p>
+            <p className="text-sm">{error}</p>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleRefresh} disabled={loading || isRefreshing}>
+            Retry
+          </Button>
+        </div>
+      )}
 
       {/* Summary Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="user-analytics-summary-cards">

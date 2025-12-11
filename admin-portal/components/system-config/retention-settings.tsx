@@ -610,8 +610,10 @@ export function RetentionSettings() {
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {formatStorage(
-                          (stat.records_to_delete / stat.total_records) *
-                            stat.storage_used_mb || 0
+                          stat.total_records > 0
+                            ? (stat.records_to_delete / stat.total_records) *
+                                stat.storage_used_mb
+                            : 0
                         )}{" "}
                         to free
                       </div>

@@ -120,6 +120,8 @@ export function RateLimits() {
   };
 
   const handleSaveOverride = async () => {
+    let success = false;
+
     if (editingOverride) {
       const result = await saveOverride(() =>
         rateLimitsApi.updateOverride(editingOverride.id, overrideFormData)
@@ -129,6 +131,9 @@ export function RateLimits() {
           prev.map((o) => (o.id === result.id ? result : o))
         );
         setNotification({ type: "success", message: "Override updated" });
+        success = true;
+      } else {
+        setNotification({ type: "error", message: "Failed to update override" });
       }
     } else {
       const result = await saveOverride(() =>
@@ -137,10 +142,14 @@ export function RateLimits() {
       if (result) {
         setOverrides((prev) => [...prev, result]);
         setNotification({ type: "success", message: "Override created" });
+        success = true;
+      } else {
+        setNotification({ type: "error", message: "Failed to create override" });
       }
     }
 
-    if (!notification?.type || notification.type === "success") {
+    // Only close the form and reset state on success
+    if (success) {
       setShowOverrideForm(false);
       setEditingOverride(null);
       setOverrideFormData({
@@ -151,8 +160,8 @@ export function RateLimits() {
         requests_per_day: 10000,
         reason: "",
       });
-      setTimeout(() => setNotification(null), 3000);
     }
+    setTimeout(() => setNotification(null), 3000);
   };
 
   const handleDeleteOverride = async () => {

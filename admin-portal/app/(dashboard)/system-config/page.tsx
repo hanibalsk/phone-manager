@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Shield, Flag, Gauge, Key, Database, Settings } from "lucide-react";
 import { AuthSettings, FeatureFlags, RateLimits, ApiKeys, RetentionSettings } from "@/components/system-config";
@@ -52,8 +53,24 @@ const tabs: TabConfig[] = [
   },
 ];
 
+const validTabs: ConfigTab[] = ["auth", "features", "rate-limits", "api-keys", "retention"];
+
+function isValidTab(tab: string | null): tab is ConfigTab {
+  return tab !== null && validTabs.includes(tab as ConfigTab);
+}
+
 export default function SystemConfigPage() {
-  const [activeTab, setActiveTab] = useState<ConfigTab>("auth");
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const initialTab = isValidTab(tabParam) ? tabParam : "auth";
+  const [activeTab, setActiveTab] = useState<ConfigTab>(initialTab);
+
+  // Sync with URL param changes (e.g., when navigating from dashboard alerts)
+  useEffect(() => {
+    if (isValidTab(tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam, activeTab]);
 
   const renderContent = () => {
     switch (activeTab) {

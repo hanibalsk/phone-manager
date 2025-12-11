@@ -51,11 +51,12 @@ export interface ApiResponse<T> {
 
 // Public configuration types
 export interface PublicConfig {
-  auth: AuthConfig;
+  auth: PublicAuthConfig;
   features: FeaturesConfig;
 }
 
-export interface AuthConfig {
+// Public-facing auth configuration (returned by /api/v1/config/public)
+export interface PublicAuthConfig {
   registration_enabled: boolean;
   invite_only: boolean;
   oauth_only: boolean;
@@ -1008,6 +1009,8 @@ export interface OAuthProviderConfig {
   allowed_domains?: string[]; // Optional domain restrictions
 }
 
+// Admin system configuration for authentication (returned by /api/admin/system-config/auth)
+// Note: This is different from PublicAuthConfig which is for public-facing config
 export interface AuthConfig {
   registration_mode: RegistrationMode;
   oauth_providers: OAuthProviderConfig[];
