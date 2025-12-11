@@ -19,8 +19,7 @@ name: User Logout Flow
     timeout: 5000
 
 # Scroll to logout button
-- scroll:
-    direction: DOWN
+- scroll
 
 # Tap logout
 - tapOn:
