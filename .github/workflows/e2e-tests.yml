@@ -183,15 +183,22 @@ jobs:
             adb shell pm grant three.two.bit.phonemanager.dev android.permission.POST_NOTIFICATIONS || true
 
             # Verify app is installed
+            echo "=== Checking installed packages ==="
             adb shell pm list packages | grep phonemanager
 
-            # Test that app can launch manually
+            # Test that app can launch manually and take a screenshot
+            echo "=== Testing manual app launch ==="
             adb shell am start -n three.two.bit.phonemanager.dev/three.two.bit.phonemanager.MainActivity
-            sleep 3
+            sleep 5
+            adb exec-out screencap -p > manual_launch_screenshot.png
+            echo "=== Manual launch screenshot saved ==="
+
+            # Force stop before Maestro takes over
             adb shell am force-stop three.two.bit.phonemanager.dev
 
-            # Run Maestro tests from all subdirectories
-            $HOME/.maestro/bin/maestro test tests/maestro/flows/auth/ tests/maestro/flows/location/ tests/maestro/flows/groups/ tests/maestro/flows/geofences/ --format junit --output maestro-results.xml
+            # Run Maestro with debug output
+            echo "=== Running Maestro tests ==="
+            $HOME/.maestro/bin/maestro test tests/maestro/flows/auth/ tests/maestro/flows/location/ tests/maestro/flows/groups/ tests/maestro/flows/geofences/ --format junit --output maestro-results.xml --debug-output maestro-debug/
 
       - name: Upload Maestro results
         uses: actions/upload-artifact@v4
@@ -200,6 +207,8 @@ jobs:
           name: maestro-test-results
           path: |
             maestro-results.xml
+            maestro-debug/
+            manual_launch_screenshot.png
             ~/.maestro/tests/
 
   # =============================================================================

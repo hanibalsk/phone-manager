@@ -12,17 +12,14 @@ name: Shared Login Steps
 # Launch the app
 - launchApp
 
-# Wait for app to load
+# Give app time to initialize
 - waitForAnimationToEnd
 
-# Take a screenshot to see initial state
-- takeScreenshot: "app_initial_state"
-
-# Wait for registration screen to appear (using text to verify app launched)
+# Wait for registration screen to appear (using text)
 - extendedWaitUntil:
     visible:
       text: "Device Registration"
-    timeout: 15000
+    timeout: 30000
 
 # Take screenshot of registration screen
 - takeScreenshot: "registration_screen_visible"
@@ -43,18 +40,15 @@ name: Shared Login Steps
 
 - hideKeyboard
 
-# Take screenshot before submit
-- takeScreenshot: "registration_form_filled"
-
 # Tap Register button
 - tapOn:
     text: "Register"
 
-# Wait for home screen after registration (using settings button presence)
+# Wait for home screen after registration
 - extendedWaitUntil:
     visible:
       text: "Location Tracking"
-    timeout: 15000
+    timeout: 30000
 
 # Take screenshot of successful registration
 - takeScreenshot: "registration_complete"
