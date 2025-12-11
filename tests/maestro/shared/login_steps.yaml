@@ -12,8 +12,9 @@ name: Shared Login Steps
 - launchApp
 
 # Wait for login screen
-- assertVisible:
-    id: "email_input"
+- extendedWaitUntil:
+    visible:
+      id: "email_input"
     timeout: 10000
 
 # Enter credentials
@@ -32,6 +33,7 @@ name: Shared Login Steps
     id: "sign_in_button"
 
 # Wait for home screen
-- assertVisible:
-    id: "home_screen"
+- extendedWaitUntil:
+    visible:
+      id: "home_screen"
     timeout: 15000
