@@ -174,7 +174,8 @@ jobs:
           disable-animations: true
           script: |
             adb install -r app/build/outputs/apk/debug/app-debug.apk
-            $HOME/.maestro/bin/maestro test tests/maestro/flows/ --format junit --output maestro-results.xml
+            # Run Maestro tests from all subdirectories
+            $HOME/.maestro/bin/maestro test tests/maestro/flows/auth/ tests/maestro/flows/location/ tests/maestro/flows/groups/ tests/maestro/flows/geofences/ --format junit --output maestro-results.xml
 
       - name: Upload Maestro results
         uses: actions/upload-artifact@v4
