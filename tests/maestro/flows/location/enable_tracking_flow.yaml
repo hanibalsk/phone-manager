@@ -31,8 +31,9 @@ name: Enable Location Tracking Flow
     id: "location_card"
 
 # Verify last update time appears
-- assertVisible:
-    id: "last_update_time"
+- extendedWaitUntil:
+    visible:
+      id: "last_update_time"
     timeout: 15000
 
 # Take screenshot of tracking enabled state

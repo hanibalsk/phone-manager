@@ -13,8 +13,9 @@ name: Join Group Flow
     id: "groups_card"
 
 # Wait for groups screen
-- assertVisible:
-    id: "groups_screen"
+- extendedWaitUntil:
+    visible:
+      id: "groups_screen"
     timeout: 5000
 
 # Tap join group button
@@ -22,8 +23,9 @@ name: Join Group Flow
     id: "join_group_button"
 
 # Wait for join group screen
-- assertVisible:
-    id: "invite_code_input"
+- extendedWaitUntil:
+    visible:
+      id: "invite_code_input"
     timeout: 5000
 
 # Enter invite code
@@ -37,8 +39,9 @@ name: Join Group Flow
     id: "join_button"
 
 # Wait for group detail screen (successful join)
-- assertVisible:
-    id: "group_detail_screen"
+- extendedWaitUntil:
+    visible:
+      id: "group_detail_screen"
     timeout: 10000
 
 # Verify we're a member

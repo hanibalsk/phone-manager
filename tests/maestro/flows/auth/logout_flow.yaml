@@ -13,8 +13,9 @@ name: User Logout Flow
     id: "settings_button"
 
 # Wait for settings screen
-- assertVisible:
-    id: "settings_screen"
+- extendedWaitUntil:
+    visible:
+      id: "settings_screen"
     timeout: 5000
 
 # Scroll to logout button
@@ -26,8 +27,9 @@ name: User Logout Flow
     id: "logout_button"
 
 # Wait for confirmation dialog
-- assertVisible:
-    id: "confirm_dialog"
+- extendedWaitUntil:
+    visible:
+      id: "confirm_dialog"
     timeout: 3000
 
 # Confirm logout
@@ -35,8 +37,9 @@ name: User Logout Flow
     id: "confirm_button"
 
 # Verify we're back on login screen
-- assertVisible:
-    id: "email_input"
+- extendedWaitUntil:
+    visible:
+      id: "email_input"
     timeout: 10000
 
 - assertVisible:

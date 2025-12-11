@@ -12,8 +12,9 @@ name: User Registration Flow
 - launchApp
 
 # Wait for login screen
-- assertVisible:
-    id: "email_input"
+- extendedWaitUntil:
+    visible:
+      id: "email_input"
     timeout: 10000
 
 # Navigate to registration
@@ -21,8 +22,9 @@ name: User Registration Flow
     id: "create_account_link"
 
 # Wait for registration screen
-- assertVisible:
-    id: "name_input"
+- extendedWaitUntil:
+    visible:
+      id: "name_input"
     timeout: 5000
 
 # Verify registration form elements
@@ -67,8 +69,9 @@ name: User Registration Flow
     id: "register_button"
 
 # Wait for home screen (successful registration auto-logs in)
-- assertVisible:
-    id: "home_screen"
+- extendedWaitUntil:
+    visible:
+      id: "home_screen"
     timeout: 15000
 
 # Take screenshot of successful registration

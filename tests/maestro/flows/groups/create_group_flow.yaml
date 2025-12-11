@@ -13,8 +13,9 @@ name: Create Group Flow
     id: "groups_card"
 
 # Wait for groups screen
-- assertVisible:
-    id: "groups_screen"
+- extendedWaitUntil:
+    visible:
+      id: "groups_screen"
     timeout: 5000
 
 # Tap create group button
@@ -22,8 +23,9 @@ name: Create Group Flow
     id: "create_group_button"
 
 # Wait for create group form
-- assertVisible:
-    id: "group_name_input"
+- extendedWaitUntil:
+    visible:
+      id: "group_name_input"
     timeout: 5000
 
 # Enter group name
@@ -43,8 +45,9 @@ name: Create Group Flow
     id: "create_button"
 
 # Wait for group detail screen
-- assertVisible:
-    id: "group_detail_screen"
+- extendedWaitUntil:
+    visible:
+      id: "group_detail_screen"
     timeout: 10000
 
 # Verify invite code is displayed
