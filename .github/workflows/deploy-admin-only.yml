@@ -108,6 +108,11 @@ jobs:
       - name: Add known hosts
         run: ssh-keyscan -p 332 -H ${{ secrets.STAGING_HOST }} >> ~/.ssh/known_hosts
 
+      - name: Debug SSH
+        run: |
+          echo "Testing SSH connection..."
+          ssh -vvv -p 332 -o BatchMode=yes "${{ secrets.STAGING_USER }}@${{ secrets.STAGING_HOST }}" "echo 'SSH works'" || true
+
       - name: Deploy to staging
         run: |
           echo "Deploying to staging..."
