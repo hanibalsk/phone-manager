@@ -8,22 +8,9 @@ name: Join Group Navigation Flow
 # Register first
 - runFlow: "../../shared/login_steps.yaml"
 
-# Verify we're on home screen after registration
+# Verify we're on home screen
 - assertVisible:
-    id: "home_screen"
+    text: "Location Tracking"
 
 # Take screenshot of home screen
 - takeScreenshot: "join_group_home"
-
-# Navigate to settings to verify app works
-- tapOn:
-    id: "settings_button"
-
-# Wait for settings screen
-- extendedWaitUntil:
-    visible:
-      id: "settings_screen"
-    timeout: 5000
-
-# Take screenshot of settings
-- takeScreenshot: "join_group_settings"

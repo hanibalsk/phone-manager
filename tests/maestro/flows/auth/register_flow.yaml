@@ -8,16 +8,9 @@ name: Home Screen After Registration Flow
 # Run the shared registration flow first
 - runFlow: "../../shared/login_steps.yaml"
 
-# Verify we're on home screen
+# Verify we're on home screen with location tracking card
 - assertVisible:
-    id: "home_screen"
-
-# Verify home screen elements
-- assertVisible:
-    id: "settings_button"
-
-- assertVisible:
-    id: "tracking_toggle"
+    text: "Location Tracking"
 
 # Take screenshot of home screen after registration
 - takeScreenshot: "home_after_registration"

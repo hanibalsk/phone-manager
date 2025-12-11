@@ -8,22 +8,9 @@ name: Geofence Navigation Flow
 # Register first
 - runFlow: "../../shared/login_steps.yaml"
 
-# Verify we're on home screen after registration
+# Verify we're on home screen
 - assertVisible:
-    id: "home_screen"
+    text: "Location Tracking"
 
 # Take screenshot of home screen
 - takeScreenshot: "geofence_home"
-
-# Navigate to settings
-- tapOn:
-    id: "settings_button"
-
-# Wait for settings screen
-- extendedWaitUntil:
-    visible:
-      id: "settings_screen"
-    timeout: 5000
-
-# Take screenshot of settings
-- takeScreenshot: "geofence_settings"

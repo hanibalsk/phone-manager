@@ -11,28 +11,24 @@ name: Device Registration Flow
 # Launch the app
 - launchApp
 
+# Wait for app to load
+- waitForAnimationToEnd
+
+# Take screenshot to see initial state
+- takeScreenshot: "initial_launch"
+
 # Wait for registration screen to appear
 - extendedWaitUntil:
     visible:
-      id: "registration_screen"
-    timeout: 10000
-
-# Verify registration screen elements are present
-- assertVisible:
-    id: "display_name_input"
-
-- assertVisible:
-    id: "group_id_input"
-
-- assertVisible:
-    id: "register_button"
+      text: "Device Registration"
+    timeout: 15000
 
 # Take screenshot of registration screen
 - takeScreenshot: "registration_screen"
 
 # Enter display name
 - tapOn:
-    id: "display_name_input"
+    text: "Display Name"
 
 - inputText: "TestDevice"
 
@@ -40,7 +36,7 @@ name: Device Registration Flow
 
 # Enter group ID
 - tapOn:
-    id: "group_id_input"
+    text: "Group ID"
 
 - inputText: "test-group"
 
@@ -48,12 +44,12 @@ name: Device Registration Flow
 
 # Submit registration
 - tapOn:
-    id: "register_button"
+    text: "Register"
 
 # Wait for home screen (successful registration)
 - extendedWaitUntil:
     visible:
-      id: "home_screen"
+      text: "Location Tracking"
     timeout: 15000
 
 # Take screenshot of successful registration

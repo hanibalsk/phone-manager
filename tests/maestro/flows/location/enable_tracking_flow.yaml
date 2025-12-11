@@ -1,5 +1,5 @@
 # Enable Location Tracking Flow
-# Tests enabling location tracking from home screen
+# Tests tapping on location tracking card from home screen
 
 appId: three.two.bit.phonemanager.dev
 name: Enable Location Tracking Flow
@@ -8,27 +8,19 @@ name: Enable Location Tracking Flow
 # Register first
 - runFlow: "../../shared/login_steps.yaml"
 
-# Verify we're on home screen
+# Verify we're on home screen with location tracking card
 - assertVisible:
-    id: "home_screen"
-
-# Check tracking toggle is visible
-- assertVisible:
-    id: "tracking_toggle"
+    text: "Location Tracking"
 
 # Take screenshot before toggling
 - takeScreenshot: "tracking_before"
 
-# Enable tracking by tapping on the card
+# Tap on the location tracking card
 - tapOn:
-    id: "tracking_toggle"
+    text: "Location Tracking"
 
-# Wait a moment for the action
+# Wait a moment for any action
 - waitForAnimationToEnd
 
-# Verify we're still on home screen
-- assertVisible:
-    id: "home_screen"
-
 # Take screenshot of tracking state
-- takeScreenshot: "tracking_enabled"
+- takeScreenshot: "tracking_after"

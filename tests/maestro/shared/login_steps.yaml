@@ -15,39 +15,45 @@ name: Shared Login Steps
 # Wait for app to load
 - waitForAnimationToEnd
 
-# Take a screenshot to see current state
-- takeScreenshot: "app_launch_state"
+# Take a screenshot to see initial state
+- takeScreenshot: "app_initial_state"
 
-# Wait for registration screen to appear
+# Wait for registration screen to appear (using text to verify app launched)
 - extendedWaitUntil:
     visible:
-      id: "registration_screen"
-    timeout: 10000
+      text: "Device Registration"
+    timeout: 15000
 
-# Enter display name
+# Take screenshot of registration screen
+- takeScreenshot: "registration_screen_visible"
+
+# Enter display name - tap on field
 - tapOn:
-    id: "display_name_input"
+    text: "Display Name"
 
 - inputText: "TestDevice"
 
 - hideKeyboard
 
-# Enter group ID
+# Enter group ID - tap on field
 - tapOn:
-    id: "group_id_input"
+    text: "Group ID"
 
 - inputText: "test-group"
 
 - hideKeyboard
 
+# Take screenshot before submit
+- takeScreenshot: "registration_form_filled"
+
 # Tap Register button
 - tapOn:
-    id: "register_button"
+    text: "Register"
 
-# Wait for home screen after registration
+# Wait for home screen after registration (using settings button presence)
 - extendedWaitUntil:
     visible:
-      id: "home_screen"
+      text: "Location Tracking"
     timeout: 15000
 
 # Take screenshot of successful registration

@@ -70,7 +70,9 @@ fun RegistrationScreen(
 
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
-        modifier = modifier.testTag("registration_screen"),
+        modifier = modifier
+            .fillMaxSize()
+            .testTag("registration_screen"),
     ) { paddingValues ->
         Column(
             modifier = Modifier
