@@ -5,7 +5,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -76,6 +75,8 @@ class TripManagerTest {
             tripRepository = tripRepository,
             preferencesRepository = preferencesRepository,
         )
+        // Allow time for init block coroutines to complete on Dispatchers.Default
+        Thread.sleep(50)
     }
 
     // region Initial State Tests
@@ -117,10 +118,17 @@ class TripManagerTest {
         val activeTrip = createTestTrip(state = TripState.ACTIVE)
         coEvery { tripRepository.getActiveTrip() } returns activeTrip
 
-        tripManager.startMonitoring()
-        // Allow time for any async state updates to complete
-        delay(100)
+        // Set transportation to moving state so the restored trip stays ACTIVE
+        transportationStateFlow.value = TransportationState(
+            mode = TransportationMode.IN_VEHICLE,
+            isInVehicle = true,
+            source = DetectionSource.ACTIVITY_RECOGNITION,
+        )
 
+        tripManager.startMonitoring()
+
+        // Verify the mock was called and trip was restored
+        coVerify { tripRepository.getActiveTrip() }
         assertEquals(activeTrip, tripManager.activeTrip.value)
         assertEquals(TripState.ACTIVE, tripManager.currentTripState.value)
     }
