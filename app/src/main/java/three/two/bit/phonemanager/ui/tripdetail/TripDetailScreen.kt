@@ -155,10 +155,12 @@ private fun TripDetailContent(
             .fillMaxSize()
             .verticalScroll(rememberScrollState()),
     ) {
-        // Map section (AC E8.10.2)
+        // Map section (AC E8.10.2, E8.10.3)
         TripMap(
             locations = uiState.locations,
             showCorrectedPath = uiState.showCorrectedPath,
+            correctedPath = uiState.correctedPath,
+            hasCorrectedPath = uiState.hasCorrectedPath,
             selectedLocationIndex = uiState.selectedLocationIndex,
             onTogglePathView = onTogglePathView,
             onLocationSelected = onLocationSelected,

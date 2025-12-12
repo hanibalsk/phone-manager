@@ -20,6 +20,7 @@ import three.two.bit.phonemanager.data.model.LocationEntity
 import three.two.bit.phonemanager.data.repository.LocationRepository
 import three.two.bit.phonemanager.data.repository.MovementEventRepository
 import three.two.bit.phonemanager.data.repository.TripRepository
+import three.two.bit.phonemanager.domain.model.LatLng
 import three.two.bit.phonemanager.domain.model.MovementEvent
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.movement.TransportationMode
@@ -83,8 +84,11 @@ class TripDetailViewModel @Inject constructor(
                 // Calculate mode breakdown
                 val modeBreakdown = calculateModeBreakdown(movementEvents, trip)
 
-                // Calculate statistics
-                val statistics = calculateStatistics(trip, locations, movementEvents)
+                // Fetch corrected path from API for synced trips
+                val (correctedPath, hasCorrectedPath) = fetchCorrectedPath(trip)
+
+                // Calculate statistics (uses corrected path info)
+                val statistics = calculateStatistics(trip, locations, movementEvents, hasCorrectedPath)
 
                 _uiState.update {
                     it.copy(
@@ -93,11 +97,13 @@ class TripDetailViewModel @Inject constructor(
                         movementEvents = movementEvents,
                         modeBreakdown = modeBreakdown,
                         statistics = statistics,
+                        correctedPath = correctedPath,
+                        hasCorrectedPath = hasCorrectedPath,
                         isLoading = false,
                     )
                 }
 
-                Timber.d("Loaded trip details: ${locations.size} locations, ${movementEvents.size} events")
+                Timber.d("Loaded trip details: ${locations.size} locations, ${movementEvents.size} events, corrected=$hasCorrectedPath")
             } catch (e: Exception) {
                 Timber.e(e, "Failed to load trip details")
                 _uiState.update {
@@ -297,27 +303,53 @@ class TripDetailViewModel @Inject constructor(
     }
 
     /**
+     * Fetch corrected path from API for synced trips
+     *
+     * @return Pair of (corrected path coordinates, whether path is corrected)
+     */
+    private suspend fun fetchCorrectedPath(trip: Trip): Pair<List<LatLng>, Boolean> {
+        if (!trip.isSynced || trip.serverId == null) {
+            return Pair(emptyList(), false)
+        }
+
+        return tripRepository.getTripPath(trip.serverId).fold(
+            onSuccess = { response ->
+                if (response.corrected && response.path.isNotEmpty()) {
+                    // Convert [[lon, lat], ...] to List<LatLng>
+                    val coordinates = response.path.mapNotNull { coord ->
+                        if (coord.size >= 2) {
+                            LatLng(latitude = coord[1], longitude = coord[0])
+                        } else {
+                            null
+                        }
+                    }
+                    Timber.d("Fetched corrected path: ${coordinates.size} points")
+                    Pair(coordinates, true)
+                } else {
+                    Pair(emptyList(), false)
+                }
+            },
+            onFailure = { error ->
+                Timber.w(error, "Failed to fetch corrected path")
+                Pair(emptyList(), false)
+            },
+        )
+    }
+
+    /**
      * Calculate trip statistics
      */
-    private suspend fun calculateStatistics(
+    private fun calculateStatistics(
         trip: Trip,
         locations: List<LocationEntity>,
         events: List<MovementEvent>,
+        isPathCorrected: Boolean,
     ): TripStatistics {
         val avgSpeed = if (locations.isNotEmpty()) {
             val speeds = locations.mapNotNull { it.speed }
             if (speeds.isNotEmpty()) speeds.average().toFloat() else null
         } else {
             null
-        }
-
-        // Check if path is corrected via API (only for synced trips)
-        val isPathCorrected = if (trip.isSynced && trip.serverId != null) {
-            tripRepository.getTripPath(trip.serverId)
-                .map { it.corrected }
-                .getOrDefault(false)
-        } else {
-            false
         }
 
         return TripStatistics(
@@ -390,6 +422,8 @@ data class TripDetailUiState(
     val error: String? = null,
     // Map state
     val showCorrectedPath: Boolean = false,
+    val correctedPath: List<LatLng> = emptyList(),
+    val hasCorrectedPath: Boolean = false,
     val selectedLocationIndex: Int? = null,
     // Dialogs
     val showEditNameDialog: Boolean = false,

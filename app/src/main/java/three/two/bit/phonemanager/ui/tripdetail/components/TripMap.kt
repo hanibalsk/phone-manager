@@ -25,6 +25,7 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.rememberCameraPositionState
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.model.LocationEntity
+import three.two.bit.phonemanager.domain.model.LatLng as DomainLatLng
 
 /**
  * Story E8.10: TripMap Component
@@ -37,6 +38,8 @@ import three.two.bit.phonemanager.data.model.LocationEntity
 fun TripMap(
     locations: List<LocationEntity>,
     showCorrectedPath: Boolean,
+    correctedPath: List<DomainLatLng>,
+    hasCorrectedPath: Boolean,
     selectedLocationIndex: Int?,
     onTogglePathView: () -> Unit,
     onLocationSelected: (Int?) -> Unit,
@@ -70,13 +73,18 @@ fun TripMap(
             ),
         ) {
             if (locations.isNotEmpty()) {
-                val points = locations.map { LatLng(it.latitude, it.longitude) }
+                val rawPoints = locations.map { LatLng(it.latitude, it.longitude) }
+                val correctedPoints = correctedPath.map { LatLng(it.latitude, it.longitude) }
 
-                // Route polyline (AC E8.10.2)
+                // Determine which path to display
+                val displayCorrected = showCorrectedPath && hasCorrectedPath && correctedPoints.isNotEmpty()
+                val displayPoints = if (displayCorrected) correctedPoints else rawPoints
+
+                // Route polyline (AC E8.10.2, E8.10.3)
                 Polyline(
-                    points = points,
-                    color = if (showCorrectedPath) {
-                        Color(0xFF1976D2) // Blue for corrected
+                    points = displayPoints,
+                    color = if (displayCorrected) {
+                        Color(0xFF1976D2) // Blue for corrected (solid appearance)
                     } else {
                         Color(0xFF4CAF50) // Green for raw
                     },
@@ -145,12 +153,14 @@ fun TripMap(
         }
 
         // Path toggle chip (AC E8.10.3) - positioned at bottom
+        // Only enabled when corrected path is available
         FilterChip(
-            selected = showCorrectedPath,
+            selected = showCorrectedPath && hasCorrectedPath,
             onClick = onTogglePathView,
+            enabled = hasCorrectedPath,
             label = {
                 Text(
-                    if (showCorrectedPath) {
+                    if (showCorrectedPath && hasCorrectedPath) {
                         stringResource(R.string.trip_map_corrected)
                     } else {
                         stringResource(R.string.trip_map_raw)
