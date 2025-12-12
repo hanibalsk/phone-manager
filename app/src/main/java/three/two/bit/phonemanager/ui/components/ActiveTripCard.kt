@@ -208,18 +208,19 @@ private fun getModeIcon(mode: TransportationMode): ImageVector = when (mode) {
     TransportationMode.UNKNOWN -> Icons.Rounded.QuestionMark
 }
 
+@Composable
 private fun formatDuration(seconds: Long): String = when {
     seconds >= 3600 -> {
         val hours = seconds / 3600
         val minutes = (seconds % 3600) / 60
-        "${hours}h ${minutes}m"
+        stringResource(R.string.duration_hours_minutes, hours, minutes)
     }
     seconds >= 60 -> {
         val minutes = seconds / 60
         val secs = seconds % 60
-        "${minutes}m ${secs}s"
+        stringResource(R.string.duration_minutes_seconds, minutes, secs)
     }
-    else -> "${seconds}s"
+    else -> stringResource(R.string.duration_seconds, seconds)
 }
 
 // formatStartTime removed - now using Android's DateUtils.getRelativeTimeSpanString()

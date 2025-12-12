@@ -39,9 +39,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
+import java.text.DateFormat
+import java.util.Date
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.movement.TransportationMode
 
@@ -214,57 +214,33 @@ fun getModeIconAndColor(mode: TransportationMode): Pair<ImageVector, Color> = wh
 /**
  * Get trip name (auto-generated from start/end or user-named)
  */
+@Composable
 private fun getTripName(trip: Trip): String {
     // For now, just show the mode name
     // TODO: Could be enhanced with geocoded location names
-    val modeName = when (trip.dominantMode) {
-        TransportationMode.WALKING -> "Walk"
-        TransportationMode.RUNNING -> "Run"
-        TransportationMode.CYCLING -> "Bike Ride"
-        TransportationMode.IN_VEHICLE -> "Drive"
-        TransportationMode.STATIONARY -> "Stationary"
-        TransportationMode.UNKNOWN -> "Trip"
+    return when (trip.dominantMode) {
+        TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
+        TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
+        TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
+        TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
+        TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
+        TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
     }
-
-    return modeName
 }
 
 /**
- * Format trip start and end times
+ * Format trip start and end times using locale-aware formatting
  */
+@Composable
 private fun formatTripTimes(trip: Trip): String {
-    val timeZone = TimeZone.currentSystemDefault()
-    val startTime = trip.startTime.toLocalDateTime(timeZone)
-
-    val startFormatted = String.format(
-        "%d:%02d %s",
-        if (startTime.hour > 12) {
-            startTime.hour - 12
-        } else if (startTime.hour == 0) {
-            12
-        } else {
-            startTime.hour
-        },
-        startTime.minute,
-        if (startTime.hour >= 12) "PM" else "AM",
-    )
+    val timeFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+    val startFormatted = timeFormat.format(Date(trip.startTime.toEpochMilliseconds()))
+    val inProgress = stringResource(R.string.in_progress)
 
     return trip.endTime?.let { endInstant ->
-        val endTime = endInstant.toLocalDateTime(timeZone)
-        val endFormatted = String.format(
-            "%d:%02d %s",
-            if (endTime.hour > 12) {
-                endTime.hour - 12
-            } else if (endTime.hour == 0) {
-                12
-            } else {
-                endTime.hour
-            },
-            endTime.minute,
-            if (endTime.hour >= 12) "PM" else "AM",
-        )
+        val endFormatted = timeFormat.format(Date(endInstant.toEpochMilliseconds()))
         "$startFormatted - $endFormatted"
-    } ?: "$startFormatted - In Progress"
+    } ?: "$startFormatted - $inProgress"
 }
 
 /**
