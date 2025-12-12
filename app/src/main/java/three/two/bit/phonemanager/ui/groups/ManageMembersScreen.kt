@@ -44,10 +44,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.GroupRole
 
@@ -112,10 +115,10 @@ fun ManageMembersScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Manage Members") },
+                title = { Text(stringResource(R.string.group_manage_members)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )
@@ -124,7 +127,7 @@ fun ManageMembersScreen(
             // Invite member FAB (for admins/owners) - links to E11.9
             if (canManageMembers) {
                 FloatingActionButton(onClick = onInviteMember) {
-                    Icon(Icons.Default.PersonAdd, "Invite Member")
+                    Icon(Icons.Default.PersonAdd, stringResource(R.string.group_invite_members))
                 }
             }
         },
@@ -191,7 +194,7 @@ fun ManageMembersScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(onClick = onNavigateBack) {
-                                Text("Go Back")
+                                Text(stringResource(R.string.group_go_back))
                             }
                         }
                     }
@@ -350,7 +353,11 @@ private fun MemberCard(
 
                 // Device count
                 Text(
-                    text = "${member.deviceCount} ${if (member.deviceCount == 1) "device" else "devices"}",
+                    text = pluralStringResource(
+                        R.plurals.group_member_device_count,
+                        member.deviceCount,
+                        member.deviceCount,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -360,7 +367,7 @@ private fun MemberCard(
             if (canManage) {
                 Box {
                     IconButton(onClick = { showMenu = true }) {
-                        Icon(Icons.Default.MoreVert, "Member options")
+                        Icon(Icons.Default.MoreVert, stringResource(R.string.group_member_options_content_desc))
                     }
 
                     DropdownMenu(
@@ -371,8 +378,8 @@ private fun MemberCard(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    if (member.role == GroupRole.ADMIN) "Demote to Member"
-                                    else "Promote to Admin"
+                                    if (member.role == GroupRole.ADMIN) stringResource(R.string.group_demote_to_member)
+                                    else stringResource(R.string.group_promote_to_admin)
                                 )
                             },
                             onClick = {
@@ -384,7 +391,7 @@ private fun MemberCard(
                         // Transfer ownership (owners only, for non-owners)
                         if (isOwner && member.role != GroupRole.OWNER) {
                             DropdownMenuItem(
-                                text = { Text("Transfer Ownership") },
+                                text = { Text(stringResource(R.string.group_transfer_ownership)) },
                                 onClick = {
                                     showMenu = false
                                     onTransferOwnership()
@@ -396,7 +403,7 @@ private fun MemberCard(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    "Remove from Group",
+                                    stringResource(R.string.group_remove_from_group),
                                     color = MaterialTheme.colorScheme.error,
                                 )
                             },
@@ -418,9 +425,9 @@ private fun MemberCard(
 @Composable
 private fun MemberRoleBadge(role: GroupRole) {
     val (text, containerColor) = when (role) {
-        GroupRole.OWNER -> "Owner" to MaterialTheme.colorScheme.primary
-        GroupRole.ADMIN -> "Admin" to MaterialTheme.colorScheme.secondary
-        GroupRole.MEMBER -> "Member" to MaterialTheme.colorScheme.surfaceVariant
+        GroupRole.OWNER -> stringResource(R.string.group_role_owner) to MaterialTheme.colorScheme.primary
+        GroupRole.ADMIN -> stringResource(R.string.group_role_admin) to MaterialTheme.colorScheme.secondary
+        GroupRole.MEMBER -> stringResource(R.string.group_role_member) to MaterialTheme.colorScheme.surfaceVariant
     }
 
     val contentColor = when (role) {
@@ -465,12 +472,12 @@ private fun EmptyMembersState() {
             )
 
             Text(
-                text = "No Members",
+                text = stringResource(R.string.group_no_members_title),
                 style = MaterialTheme.typography.titleLarge,
             )
 
             Text(
-                text = "Invite people to join this group.",
+                text = stringResource(R.string.group_invite_people_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

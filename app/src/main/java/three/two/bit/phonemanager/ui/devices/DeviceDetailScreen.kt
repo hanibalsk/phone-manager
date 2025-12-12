@@ -46,6 +46,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -53,6 +54,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.UserDevice
 
 /**
@@ -109,10 +111,10 @@ fun DeviceDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Device Details") },
+                title = { Text(stringResource(R.string.device_details)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )
@@ -158,7 +160,7 @@ fun DeviceDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = onNavigateBack) {
-                            Text("Go Back")
+                            Text(stringResource(R.string.group_go_back))
                         }
                     }
                 }
@@ -238,7 +240,7 @@ private fun DeviceDetailContent(
         ) {
             Icon(Icons.Default.Delete, null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(if (isCurrentDevice) "Unlink This Device" else "Unlink Device")
+            Text(if (isCurrentDevice) stringResource(R.string.device_unlink_this) else stringResource(R.string.device_unlink))
         }
 
         // Transfer button (only for owners)
@@ -249,7 +251,7 @@ private fun DeviceDetailContent(
             ) {
                 Icon(Icons.Default.SwapHoriz, null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Transfer Ownership")
+                Text(stringResource(R.string.device_transfer_title))
             }
         }
 
@@ -262,7 +264,7 @@ private fun DeviceDetailContent(
                 ),
             ) {
                 Text(
-                    text = "Warning: Unlinking this device will sign you out and remove it from your account.",
+                    text = stringResource(R.string.device_unlink_current_device_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.padding(12.dp),
@@ -309,7 +311,7 @@ private fun DeviceHeader(
                     Spacer(modifier = Modifier.width(8.dp))
                     Icon(
                         imageVector = Icons.Default.Star,
-                        contentDescription = "Primary device",
+                        contentDescription = stringResource(R.string.device_primary_content_desc),
                         modifier = Modifier.size(20.dp),
                         tint = MaterialTheme.colorScheme.primary,
                     )
@@ -318,7 +320,7 @@ private fun DeviceHeader(
 
             if (isCurrentDevice) {
                 Text(
-                    text = "This device",
+                    text = stringResource(R.string.device_this_device_label),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.primary,
                 )
@@ -327,7 +329,7 @@ private fun DeviceHeader(
 
         // Edit button (placeholder for future editable name)
         IconButton(onClick = { /* TODO: Implement name editing */ }) {
-            Icon(Icons.Default.Edit, "Edit name")
+            Icon(Icons.Default.Edit, stringResource(R.string.device_edit_name_content_desc))
         }
     }
 }
@@ -347,21 +349,27 @@ private fun DeviceInfoCard(device: UserDevice) {
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                text = "Device Information",
+                text = stringResource(R.string.device_info_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
 
-            InfoRow(label = "Device ID", value = device.deviceUuid)
-            InfoRow(label = "Platform", value = device.platform.replaceFirstChar { it.uppercase() })
-            InfoRow(label = "Status", value = if (device.active) "Active" else "Inactive")
+            InfoRow(label = stringResource(R.string.device_info_device_id_label), value = device.deviceUuid)
+            InfoRow(
+                label = stringResource(R.string.device_info_platform_label),
+                value = device.platform.replaceFirstChar { it.uppercase() },
+            )
+            InfoRow(
+                label = stringResource(R.string.device_info_status_label),
+                value = if (device.active) stringResource(R.string.device_status_active) else stringResource(R.string.device_status_inactive),
+            )
 
             device.linkedAt?.let { linkedAt ->
-                InfoRow(label = "Linked", value = formatFullTimestamp(linkedAt))
+                InfoRow(label = stringResource(R.string.device_info_linked_label), value = formatFullTimestamp(linkedAt))
             }
 
             device.lastSeenAt?.let { lastSeen ->
-                InfoRow(label = "Last Seen", value = formatFullTimestamp(lastSeen))
+                InfoRow(label = stringResource(R.string.device_info_last_seen_label), value = formatFullTimestamp(lastSeen))
             }
         }
     }
@@ -401,18 +409,18 @@ private fun UnlinkDeviceDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Unlink Device?")
+            Text(stringResource(R.string.device_unlink_title))
         },
         text = {
             Column {
                 Text(
-                    text = "Are you sure you want to unlink \"$deviceName\" from your account?",
+                    text = stringResource(R.string.device_unlink_message, deviceName),
                 )
 
                 if (isCurrentDevice) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
-                        text = "Warning: This will sign you out of this device.",
+                        text = stringResource(R.string.device_unlink_warning),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.error,
                         fontWeight = FontWeight.Bold,
@@ -427,12 +435,12 @@ private fun UnlinkDeviceDialog(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
             ) {
-                Text("Unlink")
+                Text(stringResource(R.string.device_unlink))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -453,14 +461,14 @@ private fun TransferOwnershipDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Transfer Ownership")
+            Text(stringResource(R.string.device_transfer_title))
         },
         text = {
             Column(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
                 Text(
-                    text = "Transfer \"$deviceName\" to another user. You will lose ownership of this device.",
+                    text = stringResource(R.string.device_transfer_description, deviceName),
                 )
 
                 OutlinedTextField(
@@ -469,12 +477,12 @@ private fun TransferOwnershipDialog(
                         newOwnerId = it
                         showError = false
                     },
-                    label = { Text("New Owner User ID") },
-                    placeholder = { Text("Enter user UUID") },
+                    label = { Text(stringResource(R.string.device_new_owner_label)) },
+                    placeholder = { Text(stringResource(R.string.device_new_owner_hint)) },
                     singleLine = true,
                     isError = showError,
                     supportingText = if (showError) {
-                        { Text("Please enter a valid user ID") }
+                        { Text(stringResource(R.string.device_invalid_user_id)) }
                     } else {
                         null
                     },
@@ -482,7 +490,7 @@ private fun TransferOwnershipDialog(
                 )
 
                 Text(
-                    text = "The new owner must have an account. You can find their user ID in their profile.",
+                    text = stringResource(R.string.device_transfer_help),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -498,12 +506,12 @@ private fun TransferOwnershipDialog(
                     }
                 },
             ) {
-                Text("Transfer")
+                Text(stringResource(R.string.device_transfer_title))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

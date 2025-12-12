@@ -479,7 +479,7 @@ private fun GroupInfoCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Group Information",
+                    text = stringResource(R.string.group_detail_info_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
@@ -488,7 +488,7 @@ private fun GroupInfoCard(
                     IconButton(onClick = onEditDescription, modifier = Modifier.size(24.dp)) {
                         Icon(
                             Icons.Default.Edit,
-                            "Edit description",
+                            stringResource(R.string.group_detail_edit_description),
                             modifier = Modifier.size(18.dp),
                         )
                     }
@@ -504,7 +504,7 @@ private fun GroupInfoCard(
                 )
             } else if (canEdit) {
                 Text(
-                    text = "Tap to add a description",
+                    text = stringResource(R.string.group_detail_add_description),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 )
@@ -512,10 +512,10 @@ private fun GroupInfoCard(
 
             // Created date
             group.createdAt?.let { createdAt ->
-                InfoRow(label = "Created", value = formatFullTimestamp(createdAt))
+                InfoRow(label = stringResource(R.string.group_detail_created), value = formatFullTimestamp(createdAt))
             }
 
-            InfoRow(label = "Your Role", value = group.userRole.name.lowercase().replaceFirstChar { it.uppercase() })
+            InfoRow(label = stringResource(R.string.group_detail_your_role), value = group.userRole.name.lowercase().replaceFirstChar { it.uppercase() })
         }
     }
 }
@@ -542,7 +542,7 @@ private fun MembersPreviewCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Members ($totalCount)",
+                    text = stringResource(R.string.group_detail_members_title, totalCount),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
                 )
@@ -559,7 +559,7 @@ private fun MembersPreviewCard(
 
             if (members.isEmpty()) {
                 Text(
-                    text = "No members yet",
+                    text = stringResource(R.string.group_detail_no_members),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

@@ -149,7 +149,7 @@ fun RegisterScreen(
         ) {
             // Title
             Text(
-                text = "Create Account",
+                text = stringResource(R.string.auth_create_account),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -157,7 +157,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Join Phone Manager today",
+                text = stringResource(R.string.auth_join_today),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -253,7 +253,7 @@ fun RegisterScreen(
                         passwordError?.let { Text(it) }
                         if (password.isNotEmpty() && passwordError == null) {
                             Text(
-                                text = "Strength: ${passwordStrength.label}",
+                                text = stringResource(R.string.auth_password_strength, passwordStrength.label),
                                 color = passwordStrength.color,
                                 style = MaterialTheme.typography.bodySmall
                             )
@@ -341,7 +341,7 @@ fun RegisterScreen(
                     enabled = uiState !is AuthUiState.Loading
                 )
                 Text(
-                    text = "I agree to the Terms of Service and Privacy Policy",
+                    text = stringResource(R.string.auth_agree_terms),
                     style = MaterialTheme.typography.bodySmall,
                     modifier = Modifier.padding(start = 8.dp)
                 )
@@ -385,7 +385,7 @@ fun RegisterScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Already have an account?",
+                    text = stringResource(R.string.auth_already_have_account_question),
                     style = MaterialTheme.typography.bodyMedium
                 )
                 TextButton(

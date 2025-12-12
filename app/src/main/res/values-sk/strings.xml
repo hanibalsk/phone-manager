@@ -6,10 +6,15 @@
     <!-- Common -->
     <string name="back">Späť</string>
     <string name="delete">Zmazať</string>
+    <string name="edit">Upraviť</string>
     <string name="refresh">Obnoviť</string>
     <string name="save">Uložiť</string>
     <string name="cancel">Zrušiť</string>
     <string name="ok">OK</string>
+    <string name="retry">Skúsiť znova</string>
+    <string name="apply">Použiť</string>
+    <string name="common_or">ALEBO</string>
+    <string name="app_version">v%1$s</string>
     <string name="error">Chyba</string>
     <string name="loading">Načítava sa…</string>
     <string name="last_seen">Naposledy videné: %1$s</string>
@@ -439,10 +444,31 @@
     <!-- Auth Screens -->
     <string name="auth_email">E-mail</string>
     <string name="auth_password">Heslo</string>
+    <string name="auth_welcome_back">Vitajte späť</string>
+    <string name="auth_sign_in_to_continue">Prihláste sa pre pokračovanie</string>
+    <string name="auth_unable_to_load_server_settings">Nepodarilo sa načítať nastavenia servera.</string>
+    <string name="auth_hide_password">Skryť heslo</string>
+    <string name="auth_show_password">Zobraziť heslo</string>
+    <string name="auth_no_account_question">Nemáte účet?</string>
+    <string name="auth_google">Google</string>
+    <string name="auth_apple">Apple</string>
+    <string name="auth_invalid_email_address">Zadajte platnú e-mailovú adresu</string>
+    <string name="auth_failed_send_reset_email">Nepodarilo sa odoslať e-mail na obnovenie. Skúste to znova.</string>
+    <string name="auth_reset_link_sent_title">Odkaz na obnovenie odoslaný!</string>
+    <string name="auth_reset_link_sent_to">Odoslali sme odkaz na obnovenie hesla na:</string>
+    <string name="auth_reset_link_sent_instructions">Skontrolujte si e-mail a postupujte podľa pokynov na obnovenie hesla.</string>
+    <string name="auth_forgot_password_title">Zabudli ste heslo?</string>
+    <string name="auth_forgot_password_instructions">Zadajte svoju e-mailovú adresu a pošleme vám odkaz na obnovenie hesla.</string>
+    <string name="auth_remember_password_question">Pamätáte si heslo?</string>
+    <string name="content_desc_success">Úspech</string>
     <string name="auth_forgot_password">Zabudli ste heslo?</string>
     <string name="auth_sign_in">Prihlásiť sa</string>
     <string name="auth_sign_out">Odhlásiť sa</string>
     <string name="auth_create_account">Vytvoriť účet</string>
+    <string name="auth_join_today">Pridajte sa k Phone Manager ešte dnes</string>
+    <string name="auth_password_strength">Sila: %1$s</string>
+    <string name="auth_agree_terms">Súhlasím s Podmienkami služby a Zásadami ochrany osobných údajov</string>
+    <string name="auth_already_have_account_question">Už máte účet?</string>
     <string name="auth_continue_google">Pokračovať s Google</string>
     <string name="auth_continue_apple">Pokračovať s Apple</string>
     <string name="auth_display_name">Zobrazované meno</string>
@@ -468,6 +494,9 @@
     <string name="admin_lock">Zamknúť</string>
     <string name="admin_unlock">Odomknúť</string>
     <string name="admin_settings_history">História nastavení</string>
+    <string name="admin_no_history_yet">Zatiaľ žiadna história</string>
+    <string name="admin_history_will_appear_here">Zmeny nastavení sa zobrazia tu</string>
+    <string name="admin_changed_by">od %1$s</string>
     <string name="admin_settings_templates">Šablóny nastavení</string>
     <string name="admin_template_name">Názov šablóny</string>
     <string name="admin_template_description">Popis (voliteľné)</string>
@@ -478,6 +507,68 @@
     <string name="admin_applying_settings">Aplikujem nastavenia na %1$d zariadení…</string>
     <string name="admin_apply_settings">Aplikovať nastavenia</string>
     <string name="admin_done">Hotovo</string>
+    <string name="admin_create_template">Vytvoriť šablónu</string>
+    <string name="admin_no_templates_yet">Zatiaľ žiadne šablóny</string>
+    <string name="admin_create_template_hint">Vytvorte šablónu pre rýchle aplikovanie nastavení na zariadenia</string>
+    <string name="admin_shared">Zdieľané</string>
+    <string name="admin_new_template">Nová šablóna</string>
+    <string name="admin_edit_template">Upraviť šablónu</string>
+    <string name="admin_share_admins_hint">Ostatní admini skupiny môžu použiť túto šablónu</string>
+    <string name="admin_settings_section_title">Nastavenia</string>
+    <string name="admin_notifications_enabled">Notifikácie povolené</string>
+    <string name="admin_notifications_disabled">Notifikácie zakázané</string>
+    <string name="admin_will_lock">Zamkne sa</string>
+    <string name="admin_wont_lock">Nezamkne sa</string>
+    <string name="admin_all_settings_applied_success">Všetky nastavenia úspešne aplikované!</string>
+    <string name="admin_settings_applied_some_failures">Nastavenia aplikované s niektorými chybami</string>
+    <string name="admin_bulk_result_summary">%1$d úspešných, %2$d neúspešných</string>
+    <string name="admin_failed_devices">Neúspešné zariadenia:</string>
+    <string name="admin_device_settings_title">Nastavenia zariadenia</string>
+    <string name="admin_view_history">Zobraziť históriu</string>
+    <string name="admin_online">Online</string>
+    <string name="admin_offline">Offline</string>
+    <string name="admin_expand">Rozbaliť</string>
+    <string name="admin_collapse">Zbaliť</string>
+    <string name="admin_locked_by">Zamknuté používateľom %1$s</string>
+    <string name="admin_lock_setting_confirm">Naozaj chcete zamknúť toto nastavenie? Používateľ ho nebude môcť zmeniť.</string>
+    <string name="admin_unlock_setting_confirm">Naozaj chcete odomknúť toto nastavenie? Používateľ ho bude môcť zmeniť.</string>
+    <string name="admin_cancel_selection">Zrušiť výber</string>
+    <string name="admin_bulk_edit">Hromadná úprava</string>
+    <string name="admin_bulk_edit_mode">Režim hromadnej úpravy</string>
+    <string name="admin_clear_search">Vymazať vyhľadávanie</string>
+    <string name="admin_no_devices_match_search">Žiadne zariadenia nezodpovedajú vyhľadávaniu</string>
+    <string name="admin_no_devices_in_group">Žiadne zariadenia v tejto skupine</string>
+    <string name="admin_locked_settings">Zamknuté nastavenia</string>
+
+    <plurals name="admin_devices_selected">
+        <item quantity="one">%1$d zariadenie vybrané</item>
+        <item quantity="few">%1$d zariadenia vybrané</item>
+        <item quantity="other">%1$d zariadení vybraných</item>
+    </plurals>
+
+    <plurals name="admin_settings_selected">
+        <item quantity="one">%1$d nastavenie vybrané</item>
+        <item quantity="few">%1$d nastavenia vybrané</item>
+        <item quantity="other">%1$d nastavení vybraných</item>
+    </plurals>
+
+    <plurals name="admin_template_settings_count">
+        <item quantity="one">%1$d nastavenie</item>
+        <item quantity="few">%1$d nastavenia</item>
+        <item quantity="other">%1$d nastavení</item>
+    </plurals>
+
+    <plurals name="admin_template_locked_count">
+        <item quantity="one">%1$d zamknuté</item>
+        <item quantity="few">%1$d zamknuté</item>
+        <item quantity="other">%1$d zamknutých</item>
+    </plurals>
+
+    <plurals name="admin_locked_count">
+        <item quantity="one">%1$d zamknuté</item>
+        <item quantity="few">%1$d zamknuté</item>
+        <item quantity="other">%1$d zamknutých</item>
+    </plurals>
 
     <!-- Group Dialogs -->
     <string name="group_dialog_delete_title">Zmazať skupinu?</string>
@@ -497,6 +588,23 @@
     <string name="group_dialog_transfer_title">Previesť vlastníctvo?</string>
     <string name="group_dialog_transfer_message">Stanete sa bežným členom tejto skupiny.</string>
     <string name="group_dialog_transfer">Previesť</string>
+    <string name="group_dialog_delete_confirm">Naozaj chcete zmazať \"%1$s\"?</string>
+    <string name="group_dialog_leave_confirm">Naozaj chcete opustiť \"%1$s\"?</string>
+    <string name="group_dialog_description_optional">Popis (voliteľné)</string>
+    <string name="group_dialog_name_required">Názov skupiny je povinný</string>
+    <string name="group_dialog_name_too_long">Názov skupiny musí mať najviac 50 znakov</string>
+    <string name="group_dialog_name_unchanged">Názov sa nezmenil</string>
+    <string name="group_dialog_name_counter">%1$d/50</string>
+    <string name="group_dialog_select_new_role_for">Vyberte novú rolu pre %1$s:</string>
+    <string name="group_role_owner">Vlastník</string>
+    <string name="group_role_admin">Admin</string>
+    <string name="group_role_member">Člen</string>
+    <string name="group_role_admin_desc">Môže spravovať členov a nastavenia skupiny</string>
+    <string name="group_role_member_desc">Môže zobraziť zdieľané polohy zariadení</string>
+    <string name="group_dialog_remove_member_confirm">Naozaj chcete odstrániť \"%1$s\" zo skupiny?</string>
+    <string name="group_dialog_remove_member_warning">Stratí prístup k zdieľaným polohám zariadení a bude musieť byť opätovne pozvaný.</string>
+    <string name="group_dialog_transfer_confirm">Naozaj chcete previesť vlastníctvo tejto skupiny na \"%1$s\"?</string>
+    <string name="group_dialog_transfer_warning">Stanete sa adminom a oni sa stanú vlastníkom. Len oni budú môcť zmazať skupinu.</string>
 
     <!-- Group Screens -->
     <string name="group_go_back">Späť</string>
@@ -508,10 +616,34 @@
     <string name="group_copy_code">Kopírovať kód</string>
     <string name="group_generate_code">Vygenerovať nový kód</string>
     <string name="group_retry">Skúsiť znova</string>
+    <string name="group_code_copied">Kód skopírovaný do schránky</string>
+    <string name="group_creating_invite_code">Vytváram pozývací kód…</string>
+    <string name="group_invite_code_label">Pozývací kód</string>
+    <string name="group_scan_to_join">Naskenujte pre pripojenie</string>
+    <string name="group_qr_unavailable">QR kód\nnedostupný</string>
+    <string name="group_create_new_invite">Vytvoriť novú pozvánku</string>
+    <string name="group_no_pending_invites">Žiadne čakajúce pozvánky</string>
+    <string name="group_create_invite_hint">Vytvorte pozvánku pre pridanie nových členov</string>
+    <string name="group_created_on">Vytvorené %1$s</string>
+    <string name="group_invite_code_prefix">Kód: %1$s</string>
+    <string name="group_invite_revoke_warning">Ktokoľvek s týmto kódom sa už nebude môcť pripojiť ku skupine.</string>
+    <string name="group_invite_qr_content_desc">QR kód pre pozvánku</string>
     <string name="group_revoke_invite_title">Zrušiť pozvánku?</string>
     <string name="group_revoke_invite_message">Naozaj chcete zrušiť túto pozvánku?</string>
     <string name="group_revoke">Zrušiť</string>
     <string name="group_transfer_ownership">Previesť vlastníctvo</string>
+    <string name="group_member_options_content_desc">Možnosti člena</string>
+    <string name="group_promote_to_admin">Povýšiť na admina</string>
+    <string name="group_demote_to_member">Degradovať na člena</string>
+    <string name="group_remove_from_group">Odstrániť zo skupiny</string>
+    <string name="group_no_members_title">Žiadni členovia</string>
+    <string name="group_invite_people_hint">Pozvite ľudí do tejto skupiny.</string>
+
+    <plurals name="group_member_device_count">
+        <item quantity="one">%1$d zariadenie</item>
+        <item quantity="few">%1$d zariadenia</item>
+        <item quantity="other">%1$d zariadení</item>
+    </plurals>
 
     <!-- Enrollment Screens -->
     <string name="enrollment_company_title">Firemná registrácia</string>
@@ -525,6 +657,41 @@
     <string name="enrollment_grant_permission">Udeliť povolenie</string>
     <string name="enrollment_enter_manually">Zadať kód manuálne</string>
     <string name="enrollment_scan_title">Naskenovať registračný QR</string>
+    <string name="enrollment_enroll_your_device">Zaregistrujte svoje zariadenie</string>
+    <string name="enrollment_help_text">Zadajte registračný kód od vášho IT administrátora alebo naskenujte QR kód z registračného e-mailu.</string>
+    <string name="enrollment_contact_it_admin">Kontaktujte IT administrátora, ak nemáte registračný kód.</string>
+    <string name="enrollment_scan_instructions_title">Naskenujte váš registračný QR kód</string>
+    <string name="enrollment_scan_instructions_subtitle">Nasmerujte kameru na QR kód od IT administrátora</string>
+    <string name="setup_how_use_device">Ako budete používať toto zariadenie?</string>
+    <string name="setup_choose_setup">Vyberte si, ako chcete nastaviť zariadenie</string>
+    <string name="setup_personal_use_title">Osobné použitie</string>
+    <string name="setup_personal_use_description">Nastavte pre osobné sledovanie polohy. Máte kontrolu nad všetkými nastaveniami a údajmi.</string>
+    <string name="setup_company_enrollment_description">Zaregistrujte vo firme. Nastavenia môže spravovať váš IT administrátor.</string>
+    <string name="setup_scan_enrollment_qr_code">Naskenovať registračný QR kód</string>
+    <string name="setup_change_later_hint">Nastavenie môžete zmeniť neskôr v Nastaveniach</string>
+    <string name="enrollment_success_content_desc">Registrácia úspešná</string>
+    <string name="enrollment_success_title">Registrácia dokončená!</string>
+    <string name="enrollment_success_subtitle">Vaše zariadenie bolo úspešne zaregistrované</string>
+    <string name="enrollment_success_info">Detaily registrácie a kontakt na IT podporu nájdete v Nastaveniach</string>
+    <string name="enrollment_organization_label">Organizácia</string>
+    <string name="enrollment_it_support_contact_label">Kontakt na IT podporu</string>
+    <string name="enrollment_device_policy_applied_title">Aplikovaná politika zariadenia</string>
+    <string name="enrollment_managed_device">Podnikové riadené</string>
+    <string name="enrollment_locked_settings">%1$d nastavení spravovaných vašou organizáciou</string>
+    <string name="enrollment_it_support">IT podpora</string>
+    <string name="enrollment_unenroll">Zrušiť registráciu zariadenia</string>
+    <string name="enrollment_unenrolling">Ruším registráciu…</string>
+    <string name="enrollment_unenroll_title">Zrušiť registráciu zariadenia?</string>
+    <string name="enrollment_unenroll_message">Toto odstráni vaše zariadenie z %1$s a vymaže všetky podnikové politiky.</string>
+    <string name="enrollment_unenroll_warning">Možno budete musieť znova zaregistrovať zariadenie pre prístup k firemným zdrojom.</string>
+    <string name="enrollment_unenroll_confirm">Zrušiť registráciu</string>
+    <string name="enrollment_camera_permission_message">Potrebujeme prístup ku kamere pre skenovanie registračných QR kódov. Môžete tiež zadať registračný kód manuálne.</string>
+
+    <plurals name="enrollment_locked_settings_managed">
+        <item quantity="one">%1$d nastavenie spravované vašou organizáciou</item>
+        <item quantity="few">%1$d nastavenia spravované vašou organizáciou</item>
+        <item quantity="other">%1$d nastavení spravovaných vašou organizáciou</item>
+    </plurals>
 
     <!-- Device Management -->
     <string name="device_details">Detaily zariadenia</string>
@@ -537,11 +704,145 @@
     <string name="device_new_owner_label">ID nového vlastníka</string>
     <string name="device_new_owner_hint">Zadajte UUID používateľa</string>
     <string name="device_invalid_user_id">Zadajte platné ID používateľa</string>
+    <string name="device_unlink_current_device_warning">Upozornenie: Odpojením tohto zariadenia budete odhlásení a zariadenie bude odstránené z vášho účtu.</string>
+    <string name="device_primary_content_desc">Primárne zariadenie</string>
+    <string name="device_this_device_label">Toto zariadenie</string>
+    <string name="device_edit_name_content_desc">Upraviť názov</string>
+    <string name="device_info_title">Informácie o zariadení</string>
+    <string name="device_info_device_id_label">ID zariadenia</string>
+    <string name="device_info_platform_label">Platforma</string>
+    <string name="device_info_status_label">Stav</string>
+    <string name="device_info_linked_label">Prepojené</string>
+    <string name="device_info_last_seen_label">Naposledy videné</string>
+    <string name="device_status_active">Aktívne</string>
+    <string name="device_status_inactive">Neaktívne</string>
+    <string name="device_transfer_description">Previesť \"%1$s\" na iného používateľa. Stratíte vlastníctvo tohto zariadenia.</string>
+    <string name="device_transfer_help">Nový vlastník musí mať účet. Jeho ID používateľa nájdete v jeho profile.</string>
+
+    <!-- Device Management - Link Device Dialog -->
+    <string name="link_device_title">Prepojiť toto zariadenie</string>
+    <string name="link_device_intro">Prepojte toto zariadenie so svojím účtom, aby ste mohli:</string>
+    <string name="link_device_benefit_manage">Spravovať ho z iných zariadení</string>
+    <string name="link_device_benefit_view">Zobraziť ho v zozname zariadení</string>
+    <string name="link_device_benefit_transfer">Previesť vlastníctvo na iných</string>
+    <string name="link_device_name_label">Názov zariadenia (voliteľné)</string>
+    <string name="link_device_name_placeholder">napr. Môj telefón</string>
+    <string name="link_device_set_primary">Nastaviť ako primárne zariadenie</string>
+    <string name="link_device_primary_hint">Primárne zariadenie sa používa pre notifikácie</string>
+    <string name="link_device_privacy_notice">Poloha tohto zariadenia bude viditeľná pre vás z vašich ostatných zariadení.</string>
+    <string name="link_device_button">Prepojiť zariadenie</string>
+
+    <!-- Device Management - Device List Screen -->
+    <string name="devices_title">Moje zariadenia</string>
+    <string name="devices_empty_title">Žiadne prepojené zariadenia</string>
+    <string name="devices_empty_subtitle">Prepojte toto zariadenie so svojím účtom pre správu odkiaľkoľvek.</string>
+    <string name="devices_this_device">(Toto zariadenie)</string>
+    <string name="devices_primary_device">Primárne zariadenie</string>
+
+    <!-- Device Management - Device Detail Screen -->
+    <string name="device_detail_title">Detaily zariadenia</string>
+    <string name="device_detail_info_title">Informácie o zariadení</string>
+    <string name="device_detail_device_id">ID zariadenia</string>
+    <string name="device_detail_platform">Platforma</string>
+    <string name="device_detail_status">Stav</string>
+    <string name="device_detail_active">Aktívne</string>
+    <string name="device_detail_inactive">Neaktívne</string>
+    <string name="device_detail_linked">Prepojené</string>
+    <string name="device_detail_this_device">Toto zariadenie</string>
+    <string name="device_detail_edit_name">Upraviť názov</string>
+    <string name="device_detail_unlink_this">Odpojiť toto zariadenie</string>
+    <string name="device_detail_unlink">Odpojiť zariadenie</string>
+    <string name="device_detail_transfer">Previesť vlastníctvo</string>
+    <string name="device_detail_unlink_warning">Upozornenie: Odpojením tohto zariadenia budete odhlásení a zariadenie bude odstránené z vášho účtu.</string>
+    <string name="device_detail_go_back">Späť</string>
+
+    <!-- Device Management - Unlink Dialog -->
+    <string name="unlink_dialog_title">Odpojiť zariadenie?</string>
+    <string name="unlink_dialog_message">Naozaj chcete odpojiť \"%1$s\" z vášho účtu?</string>
+    <string name="unlink_dialog_warning">Upozornenie: Budete odhlásení z tohto zariadenia.</string>
+    <string name="unlink_dialog_confirm">Odpojiť</string>
+
+    <!-- Device Management - Transfer Dialog -->
+    <string name="transfer_dialog_title">Previesť vlastníctvo</string>
+    <string name="transfer_dialog_message">Previesť \"%1$s\" na iného používateľa. Stratíte vlastníctvo tohto zariadenia.</string>
+    <string name="transfer_dialog_owner_label">ID nového vlastníka</string>
+    <string name="transfer_dialog_owner_placeholder">Zadajte UUID používateľa</string>
+    <string name="transfer_dialog_owner_error">Zadajte platné ID používateľa</string>
+    <string name="transfer_dialog_hint">Nový vlastník musí mať účet. Jeho ID používateľa nájdete v jeho profile.</string>
+    <string name="transfer_dialog_confirm">Previesť</string>
+
+    <!-- Group Management - Group List Screen -->
+    <string name="groups_title">Moje skupiny</string>
+    <string name="groups_join">Pripojiť sa ku skupine</string>
+    <string name="groups_create">Vytvoriť skupinu</string>
+    <string name="groups_empty_title">Zatiaľ žiadne skupiny</string>
+    <string name="groups_empty_subtitle">Vytvorte skupinu pre zdieľanie polohy zariadení s rodinou a priateľmi.</string>
+    <string name="groups_create_first">Vytvoriť svoju prvú skupinu</string>
+    <string name="groups_member_count_one">%1$d člen</string>
+    <string name="groups_member_count">%1$d členov</string>
+    <string name="groups_role_owner">Vlastník</string>
+    <string name="groups_role_admin">Admin</string>
+    <string name="groups_role_member">Člen</string>
+
+    <!-- Group Management - Create Group Dialog -->
+    <string name="create_group_title">Vytvoriť skupinu</string>
+    <string name="create_group_subtitle">Vytvorte skupinu pre zdieľanie polohy zariadení s rodinou a priateľmi.</string>
+    <string name="create_group_name_label">Názov skupiny *</string>
+    <string name="create_group_name_placeholder">napr. Rodina</string>
+    <string name="create_group_name_required">Názov skupiny je povinný</string>
+    <string name="create_group_name_too_long">Názov skupiny musí mať najviac 50 znakov</string>
+    <string name="create_group_description_label">Popis (voliteľné)</string>
+    <string name="create_group_description_placeholder">Na čo slúži táto skupina?</string>
+    <string name="create_group_confirm">Vytvoriť</string>
+    <string name="create_group_success">Skupina \"%1$s\" vytvorená</string>
+
+    <!-- Group Management - Join Group Screen -->
+    <string name="join_group_title">Pripojiť sa ku skupine</string>
+    <string name="join_group_success">Úspešne ste sa pripojili ku skupine!</string>
+    <string name="join_group_sign_in_required">Pre pripojenie ku skupine sa prihláste</string>
+    <string name="join_group_enter_code_title">Zadajte pozývací kód</string>
+    <string name="join_group_enter_code_subtitle">Zadajte 8-znakový kód, ktorý ste dostali, alebo naskenujte QR kód</string>
+    <string name="join_group_code_label">Pozývací kód</string>
+    <string name="join_group_code_placeholder">ABCD1234</string>
+    <string name="join_group_code_counter">%1$d/8 znakov</string>
+    <string name="join_group_scan_qr">Skenovať QR</string>
+    <string name="join_group_validate">Overiť</string>
+    <string name="join_group_joining">Pripájam sa…</string>
+    <string name="join_group_button">Pripojiť sa ku skupine</string>
+    <string name="join_group_sign_in_hint">Prihláste sa pre pripojenie k tejto skupine</string>
+    <string name="join_group_sign_in">Prihlásiť sa</string>
+    <string name="join_group_confirm_title">Pripojiť sa k %1$s?</string>
+    <string name="join_group_confirm_message">Chystáte sa pripojiť k tejto skupine s %1$d členmi.</string>
+    <string name="join_group_confirm_hint">Ako člen budete môcť zdieľať svoju polohu s ostatnými členmi skupiny.</string>
+    <string name="join_group_confirm_button">Pripojiť sa</string>
+
+    <!-- Group Management - Group Detail Screen -->
+    <string name="group_detail_title">Detaily skupiny</string>
+    <string name="group_detail_manage_members">Spravovať členov</string>
+    <string name="group_detail_deleted">Skupina zmazaná</string>
+    <string name="group_detail_left">Opustili ste skupinu</string>
+    <string name="group_detail_info_title">Informácie o skupine</string>
+    <string name="group_detail_add_description">Kliknite pre pridanie popisu</string>
+    <string name="group_detail_created">Vytvorené</string>
+    <string name="group_detail_your_role">Vaša rola</string>
+    <string name="group_detail_members_title">Členovia (%1$d)</string>
+    <string name="group_detail_view_all">Zobraziť všetko</string>
+    <string name="group_detail_no_members">Zatiaľ žiadni členovia</string>
+    <string name="group_detail_invite_members">Pozvať členov</string>
+    <string name="group_detail_manage_devices">Spravovať zariadenia členov</string>
+    <string name="group_detail_leave">Opustiť skupinu</string>
+    <string name="group_detail_delete">Zmazať skupinu</string>
+    <string name="group_detail_delete_warning">Upozornenie: Zmazaním tejto skupiny odstránite všetkých členov a akciu nemožno vrátiť späť.</string>
+    <string name="group_detail_edit_description">Upraviť popis</string>
 
     <!-- QR Scanner -->
     <string name="qr_scan_title">Naskenovať QR kód</string>
     <string name="qr_grant_permission">Udeliť povolenie</string>
     <string name="qr_enter_manually">Zadať kód manuálne</string>
+    <string name="qr_scan_instructions_title">Naskenujte QR kód</string>
+    <string name="qr_scan_instructions_subtitle">Nasmerujte kameru na QR kód pre naskenovanie</string>
+    <string name="qr_camera_permission_message">Potrebujeme prístup ku kamere pre skenovanie QR kódov</string>
+    <string name="camera_permission_required_title">Vyžaduje sa povolenie kamery</string>
 
     <!-- Unlock Requests -->
     <string name="unlock_requests_title">Žiadosti o odomknutie</string>
@@ -551,6 +852,33 @@
     <string name="unlock_submit">Odoslať žiadosť</string>
     <string name="unlock_withdraw">Stiahnuť</string>
     <string name="unlock_close">Zavrieť</string>
+    <string name="unlock_request_title">Žiadosť o odomknutie</string>
+    <string name="unlock_request_for_setting">Žiadosť o odomknutie pre %1$s</string>
+    <string name="unlock_request_instructions">Zadajte dôvod pre žiadosť o odomknutie. Admin posúdi vašu žiadosť.</string>
+    <string name="unlock_requested_label">Požiadané</string>
+    <string name="unlock_response_by">Odpoveď od</string>
+    <string name="unlock_response_from">Odpoveď od %1$s</string>
+    <string name="unlock_response_message_label">Správa od admina</string>
+    <string name="unlock_response_responded">Odpoveď</string>
+    <string name="unlock_status_label">Stav</string>
+    <string name="unlock_status_pending">Čakajúca</string>
+    <string name="unlock_status_pending_detail">Vaša žiadosť čaká na posúdenie</string>
+    <string name="unlock_status_approved">Schválená</string>
+    <string name="unlock_status_approved_detail">Vaša žiadosť bola schválená</string>
+    <string name="unlock_status_denied">Zamietnutá</string>
+    <string name="unlock_status_denied_detail">Vaša žiadosť bola zamietnutá</string>
+    <string name="unlock_status_withdrawn">Stiahnutá</string>
+    <string name="unlock_status_withdrawn_detail">Túto žiadosť ste stiahli</string>
+    <string name="unlock_filter_all">Všetky</string>
+    <string name="unlock_empty_all">Žiadne žiadosti o odomknutie</string>
+    <string name="unlock_empty_pending">Žiadne čakajúce žiadosti</string>
+    <string name="unlock_empty_approved">Žiadne schválené žiadosti</string>
+    <string name="unlock_empty_denied">Žiadne zamietnuté žiadosti</string>
+    <string name="unlock_empty_withdrawn">Žiadne stiahnuté žiadosti</string>
+    <string name="unlock_empty_hint">Žiadosti o odomknutie sa zobrazia tu</string>
+    <string name="unlock_characters_remaining">Zostáva %1$d znakov</string>
+    <string name="unlock_admin_fallback">Kontaktujte svojho IT administrátora</string>
+    <string name="button_request_unlock">Požiadať o odomknutie</string>
 
     <!-- History Screen -->
     <string name="history_date_range">%1$s - %2$s</string>
@@ -565,4 +893,64 @@
     <string name="settings_navigate_to_devices">Prejsť na zariadenia</string>
     <string name="settings_navigate_to_groups">Prejsť na skupiny</string>
     <string name="settings_sign_in_prompt">Prihláste sa pre prístup k pokročilým funkciám</string>
+    <string name="settings_view_unlock_requests">Zobraziť žiadosti o odomknutie</string>
+    <string name="settings_updated_by">Aktualizované používateľom %1$s</string>
+
+    <!-- Settings - Locked Settings -->
+    <string name="setting_locked">Zamknuté</string>
+    <string name="setting_locked_explanation">Toto nastavenie je zamknuté vašou organizáciou</string>
+    <string name="setting_secret_mode">Tajný režim</string>
+    <string name="setting_tracking_enabled">Sledovanie povolené</string>
+    <string name="setting_tracking_interval">Interval sledovania</string>
+    <string name="setting_trip_detection">Detekcia ciest</string>
+    <string name="setting_weather_notification">Notifikácia o počasí</string>
+    <string name="locked_by_label">Zamknuté používateľom %1$s</string>
+    <string name="managed_by">Spravované používateľom %1$s</string>
+    <string name="managed_by_group">Spravované skupinou %1$s</string>
+    <string name="managed_device_title">Spravované zariadenie</string>
+
+    <plurals name="locked_settings_count">
+        <item quantity="one">%1$d zamknuté nastavenie</item>
+        <item quantity="few">%1$d zamknuté nastavenia</item>
+        <item quantity="other">%1$d zamknutých nastavení</item>
+    </plurals>
+
+    <!-- Setting Locked Dialog -->
+    <string name="dialog_setting_locked_title">Nastavenie je zamknuté</string>
+    <string name="dialog_setting_locked_message">Toto nastavenie je zamknuté vašou organizáciou. Ak potrebujete zmeniť toto nastavenie, kontaktujte svojho IT administrátora.</string>
+    <string name="dialog_setting_locked_contact">Kontaktovať IT podporu</string>
+
+    <!-- Sync & Offline -->
+    <string name="sync_now">Synchronizovať teraz</string>
+    <string name="syncing">Synchronizujem…</string>
+    <string name="last_synced">Naposledy synchronizované: %1$s</string>
+    <string name="offline_indicator">Offline</string>
+    <string name="sign_in_to_sync_settings">Prihláste sa pre synchronizáciu nastavení</string>
+
+    <!-- Notifications -->
+    <string name="notification_channel_settings_description">Notifikácie o zmene nastavení</string>
+    <string name="notification_confidence">Spoľahlivosť: %1$d%%</string>
+    <string name="notification_distance_m">%1$d m</string>
+    <string name="notification_distance_km">%1$.1f km</string>
+    <string name="notification_duration_less_than_minute">Menej ako minútu</string>
+    <string name="notification_duration_minutes">%1$d min</string>
+    <string name="notification_duration_hours_minutes">%1$d hod %2$d min</string>
+    <string name="notification_last_update_just_now">Práve teraz</string>
+    <string name="notification_last_update_minutes">Pred %1$d min</string>
+    <string name="notification_last_update_hours">Pred %1$d hod</string>
+    <string name="notification_last_update_never">Nikdy</string>
+    <string name="notification_locations_interval">Interval: %1$s</string>
+    <string name="notification_trip_in_progress">Cesta prebieha</string>
+    <string name="notification_setting_locked_title">Nastavenie zamknuté</string>
+    <string name="notification_setting_locked_by_admin">Nastavenie %1$s bolo zamknuté vašou organizáciou</string>
+    <string name="notification_setting_unlocked_title">Nastavenie odomknuté</string>
+    <string name="notification_setting_unlocked">Nastavenie %1$s bolo odomknuté</string>
+    <string name="notification_settings_updated_title">Nastavenia aktualizované</string>
+    <string name="notification_settings_updated_by_admin">Vaše nastavenia boli aktualizované administrátorom</string>
+    <string name="notification_settings_updated_by_admin_group">Vaše nastavenia boli aktualizované adminom skupiny %1$s</string>
+    <string name="notification_unlock_request_approved_title">Žiadosť schválená</string>
+    <string name="notification_unlock_request_approved">Vaša žiadosť o odomknutie pre %1$s bola schválená</string>
+    <string name="notification_unlock_request_denied_title">Žiadosť zamietnutá</string>
+    <string name="notification_unlock_request_denied">Vaša žiadosť o odomknutie pre %1$s bola zamietnutá</string>
+    <string name="notification_unlock_request_denied_with_reason">Vaša žiadosť o odomknutie pre %1$s bola zamietnutá: %2$s</string>
 </resources>

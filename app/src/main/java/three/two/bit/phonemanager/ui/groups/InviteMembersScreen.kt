@@ -213,6 +213,9 @@ private fun InviteContent(
     snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
+    // Pre-load string for use in callback
+    val codeCopiedMessage = stringResource(R.string.group_code_copied)
+
     Column(
         modifier = modifier
             .verticalScroll(rememberScrollState())
@@ -226,7 +229,7 @@ private fun InviteContent(
                 invite = invite,
                 onCopyCode = {
                     onCopyCode(invite.code)
-                    onShowSnackbar(stringResource(R.string.group_code_copied))
+                    onShowSnackbar(codeCopiedMessage)
                 },
             )
 
@@ -384,7 +387,7 @@ private fun QRCodeCard(invite: GroupInvite) {
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Scan to Join",
+                text = stringResource(R.string.group_scan_to_join),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -417,7 +420,7 @@ private fun QRCodeCard(invite: GroupInvite) {
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
-                        text = "QR Code\nunavailable",
+                        text = stringResource(R.string.group_qr_unavailable),
                         textAlign = TextAlign.Center,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

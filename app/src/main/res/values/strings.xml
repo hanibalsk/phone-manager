@@ -14,6 +14,7 @@
     <string name="retry">Retry</string>
     <string name="apply">Apply</string>
     <string name="common_or">OR</string>
+    <string name="app_version">v%1$s</string>
     <string name="error">Error</string>
     <string name="loading">Loading…</string>
     <string name="last_seen">Last seen: %1$s</string>
@@ -647,6 +648,10 @@
     <string name="auth_sign_in">Sign In</string>
     <string name="auth_sign_out">Sign Out</string>
     <string name="auth_create_account">Create Account</string>
+    <string name="auth_join_today">Join Phone Manager today</string>
+    <string name="auth_password_strength">Strength: %1$s</string>
+    <string name="auth_agree_terms">I agree to the Terms of Service and Privacy Policy</string>
+    <string name="auth_already_have_account_question">Already have an account?</string>
     <string name="auth_continue_google">Continue with Google</string>
     <string name="auth_continue_apple">Continue with Apple</string>
     <string name="auth_display_name">Display Name</string>
@@ -685,6 +690,63 @@
     <string name="admin_applying_settings">Applying settings to %1$d devices…</string>
     <string name="admin_apply_settings">Apply Settings</string>
     <string name="admin_done">Done</string>
+    <string name="admin_create_template">Create Template</string>
+    <string name="admin_no_templates_yet">No templates yet</string>
+    <string name="admin_create_template_hint">Create a template to quickly apply settings to devices</string>
+    <string name="admin_shared">Shared</string>
+    <string name="admin_new_template">New Template</string>
+    <string name="admin_edit_template">Edit Template</string>
+    <string name="admin_share_admins_hint">Other group admins can use this template</string>
+    <string name="admin_settings_section_title">Settings</string>
+    <string name="admin_notifications_enabled">Notifications enabled</string>
+    <string name="admin_notifications_disabled">Notifications disabled</string>
+    <string name="admin_will_lock">Will lock</string>
+    <string name="admin_wont_lock">Won\'t lock</string>
+    <string name="admin_all_settings_applied_success">All settings applied successfully!</string>
+    <string name="admin_settings_applied_some_failures">Settings applied with some failures</string>
+    <string name="admin_bulk_result_summary">%1$d successful, %2$d failed</string>
+    <string name="admin_failed_devices">Failed Devices:</string>
+    <string name="admin_device_settings_title">Device Settings</string>
+    <string name="admin_view_history">View History</string>
+    <string name="admin_online">Online</string>
+    <string name="admin_offline">Offline</string>
+    <string name="admin_expand">Expand</string>
+    <string name="admin_collapse">Collapse</string>
+    <string name="admin_locked_by">Locked by %1$s</string>
+    <string name="admin_lock_setting_confirm">Are you sure you want to lock this setting? The user will not be able to change it.</string>
+    <string name="admin_unlock_setting_confirm">Are you sure you want to unlock this setting? The user will be able to change it.</string>
+    <string name="admin_cancel_selection">Cancel selection</string>
+    <string name="admin_bulk_edit">Bulk Edit</string>
+    <string name="admin_bulk_edit_mode">Bulk Edit Mode</string>
+    <string name="admin_clear_search">Clear search</string>
+    <string name="admin_no_devices_match_search">No devices match your search</string>
+    <string name="admin_no_devices_in_group">No devices in this group</string>
+    <string name="admin_locked_settings">Locked settings</string>
+
+    <plurals name="admin_devices_selected">
+        <item quantity="one">%1$d device selected</item>
+        <item quantity="other">%1$d devices selected</item>
+    </plurals>
+
+    <plurals name="admin_settings_selected">
+        <item quantity="one">%1$d setting selected</item>
+        <item quantity="other">%1$d settings selected</item>
+    </plurals>
+
+    <plurals name="admin_template_settings_count">
+        <item quantity="one">%1$d setting</item>
+        <item quantity="other">%1$d settings</item>
+    </plurals>
+
+    <plurals name="admin_template_locked_count">
+        <item quantity="one">%1$d locked</item>
+        <item quantity="other">%1$d locked</item>
+    </plurals>
+
+    <plurals name="admin_locked_count">
+        <item quantity="one">%1$d locked</item>
+        <item quantity="other">%1$d locked</item>
+    </plurals>
 
     <!-- Group Dialogs -->
     <string name="group_dialog_delete_title">Delete Group?</string>
@@ -704,6 +766,23 @@
     <string name="group_dialog_transfer_title">Transfer Ownership?</string>
     <string name="group_dialog_transfer_message">You will become a regular member of this group.</string>
     <string name="group_dialog_transfer">Transfer</string>
+    <string name="group_dialog_delete_confirm">Are you sure you want to delete \"%1$s\"?</string>
+    <string name="group_dialog_leave_confirm">Are you sure you want to leave \"%1$s\"?</string>
+    <string name="group_dialog_description_optional">Description (optional)</string>
+    <string name="group_dialog_name_required">Group name is required</string>
+    <string name="group_dialog_name_too_long">Group name must be 50 characters or less</string>
+    <string name="group_dialog_name_unchanged">Name hasn\'t changed</string>
+    <string name="group_dialog_name_counter">%1$d/50</string>
+    <string name="group_dialog_select_new_role_for">Select a new role for %1$s:</string>
+    <string name="group_role_owner">Owner</string>
+    <string name="group_role_admin">Admin</string>
+    <string name="group_role_member">Member</string>
+    <string name="group_role_admin_desc">Can manage members and group settings</string>
+    <string name="group_role_member_desc">Can view shared device locations</string>
+    <string name="group_dialog_remove_member_confirm">Are you sure you want to remove \"%1$s\" from the group?</string>
+    <string name="group_dialog_remove_member_warning">They will lose access to shared device locations and will need to be re-invited to rejoin.</string>
+    <string name="group_dialog_transfer_confirm">Are you sure you want to transfer ownership of this group to \"%1$s\"?</string>
+    <string name="group_dialog_transfer_warning">You will become an admin and they will become the owner. Only they will be able to delete the group.</string>
 
     <!-- Group Screens -->
     <string name="group_go_back">Go Back</string>
@@ -731,6 +810,17 @@
     <string name="group_revoke_invite_message">Are you sure you want to revoke this invite?</string>
     <string name="group_revoke">Revoke</string>
     <string name="group_transfer_ownership">Transfer Ownership</string>
+    <string name="group_member_options_content_desc">Member options</string>
+    <string name="group_promote_to_admin">Promote to Admin</string>
+    <string name="group_demote_to_member">Demote to Member</string>
+    <string name="group_remove_from_group">Remove from Group</string>
+    <string name="group_no_members_title">No Members</string>
+    <string name="group_invite_people_hint">Invite people to join this group.</string>
+
+    <plurals name="group_member_device_count">
+        <item quantity="one">%1$d device</item>
+        <item quantity="other">%1$d devices</item>
+    </plurals>
 
     <!-- Enrollment Screens -->
     <string name="enrollment_company_title">Company Enrollment</string>
@@ -780,6 +870,20 @@
     <string name="device_new_owner_label">New Owner User ID</string>
     <string name="device_new_owner_hint">Enter user UUID</string>
     <string name="device_invalid_user_id">Please enter a valid user ID</string>
+    <string name="device_unlink_current_device_warning">Warning: Unlinking this device will sign you out and remove it from your account.</string>
+    <string name="device_primary_content_desc">Primary device</string>
+    <string name="device_this_device_label">This device</string>
+    <string name="device_edit_name_content_desc">Edit name</string>
+    <string name="device_info_title">Device Information</string>
+    <string name="device_info_device_id_label">Device ID</string>
+    <string name="device_info_platform_label">Platform</string>
+    <string name="device_info_status_label">Status</string>
+    <string name="device_info_linked_label">Linked</string>
+    <string name="device_info_last_seen_label">Last Seen</string>
+    <string name="device_status_active">Active</string>
+    <string name="device_status_inactive">Inactive</string>
+    <string name="device_transfer_description">Transfer \"%1$s\" to another user. You will lose ownership of this device.</string>
+    <string name="device_transfer_help">The new owner must have an account. You can find their user ID in their profile.</string>
 
     <!-- QR Scanner -->
     <string name="qr_scan_title">Scan QR Code</string>

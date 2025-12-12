@@ -93,11 +93,15 @@ fun JoinGroupScreen(
 
     var showJoinConfirmation by remember { mutableStateOf(false) }
 
+    // Pre-load strings for use in LaunchedEffect
+    val joinSuccessMessage = stringResource(R.string.join_group_success)
+    val signInRequiredMessage = stringResource(R.string.join_group_sign_in_required)
+
     // Handle join result
     LaunchedEffect(joinResult) {
         when (val result = joinResult) {
             is JoinResult.Success -> {
-                snackbarHostState.showSnackbar("Successfully joined the group!")
+                snackbarHostState.showSnackbar(joinSuccessMessage)
                 viewModel.clearJoinResult()
                 onJoinSuccess(result.groupId)
             }
@@ -106,7 +110,7 @@ fun JoinGroupScreen(
                 viewModel.clearJoinResult()
             }
             is JoinResult.AuthenticationRequired -> {
-                snackbarHostState.showSnackbar(stringResource(R.string.join_group_sign_in_required))
+                snackbarHostState.showSnackbar(signInRequiredMessage)
                 viewModel.clearJoinResult()
                 onNavigateToLogin()
             }

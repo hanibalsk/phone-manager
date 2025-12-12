@@ -52,9 +52,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.DeviceStatusFilter
 import three.two.bit.phonemanager.domain.model.MemberDeviceSettings
 
@@ -93,9 +95,9 @@ fun MemberDevicesScreen(
             TopAppBar(
                 title = {
                     if (uiState.isInBulkEditMode) {
-                        Text("${uiState.selectedCount} selected")
+                        Text(stringResource(R.string.admin_selected_count, uiState.selectedCount))
                     } else {
-                        Text("Member Devices")
+                        Text(stringResource(R.string.admin_member_devices))
                     }
                 },
                 navigationIcon = {
@@ -113,9 +115,9 @@ fun MemberDevicesScreen(
                                 Icons.AutoMirrored.Filled.ArrowBack
                             },
                             contentDescription = if (uiState.isInBulkEditMode) {
-                                "Cancel selection"
+                                stringResource(R.string.admin_cancel_selection)
                             } else {
-                                "Back"
+                                stringResource(R.string.back)
                             },
                         )
                     }
@@ -126,11 +128,11 @@ fun MemberDevicesScreen(
                             onClick = { viewModel.selectAllDevices() },
                             enabled = uiState.selectedCount < uiState.filteredDevices.size,
                         ) {
-                            Text("Select All")
+                            Text(stringResource(R.string.admin_select_all))
                         }
                     } else {
                         IconButton(onClick = { viewModel.refresh() }) {
-                            Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                            Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
                         }
                     }
                 },
@@ -150,13 +152,13 @@ fun MemberDevicesScreen(
                         onBulkEditClick(uiState.selectedDevices.toList())
                     },
                 ) {
-                    Icon(Icons.Default.Edit, contentDescription = "Bulk Edit")
+                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.admin_bulk_edit))
                 }
             } else if (!uiState.isInBulkEditMode && uiState.devices.isNotEmpty()) {
                 FloatingActionButton(
                     onClick = { viewModel.enterBulkEditMode() },
                 ) {
-                    Icon(Icons.Default.Edit, contentDescription = "Bulk Edit Mode")
+                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.admin_bulk_edit_mode))
                 }
             }
         },
@@ -174,14 +176,14 @@ fun MemberDevicesScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Search devices or owners...") },
+                placeholder = { Text(stringResource(R.string.admin_search_placeholder)) },
                 leadingIcon = {
                     Icon(Icons.Default.Search, contentDescription = null)
                 },
                 trailingIcon = {
                     if (uiState.searchQuery.isNotEmpty()) {
                         IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
-                            Icon(Icons.Default.Clear, contentDescription = "Clear search")
+                            Icon(Icons.Default.Clear, contentDescription = stringResource(R.string.admin_clear_search))
                         }
                     }
                 },
@@ -198,17 +200,17 @@ fun MemberDevicesScreen(
                 FilterChip(
                     selected = uiState.statusFilter == DeviceStatusFilter.ALL,
                     onClick = { viewModel.onStatusFilterChanged(DeviceStatusFilter.ALL) },
-                    label = { Text("All (${uiState.devices.size})") },
+                    label = { Text(stringResource(R.string.admin_filter_all, uiState.devices.size)) },
                 )
                 FilterChip(
                     selected = uiState.statusFilter == DeviceStatusFilter.ONLINE,
                     onClick = { viewModel.onStatusFilterChanged(DeviceStatusFilter.ONLINE) },
-                    label = { Text("Online (${uiState.onlineCount})") },
+                    label = { Text(stringResource(R.string.admin_filter_online, uiState.onlineCount)) },
                 )
                 FilterChip(
                     selected = uiState.statusFilter == DeviceStatusFilter.OFFLINE,
                     onClick = { viewModel.onStatusFilterChanged(DeviceStatusFilter.OFFLINE) },
-                    label = { Text("Offline (${uiState.offlineCount})") },
+                    label = { Text(stringResource(R.string.admin_filter_offline, uiState.offlineCount)) },
                 )
             }
 
@@ -221,9 +223,9 @@ fun MemberDevicesScreen(
                 if (uiState.filteredDevices.isEmpty() && !uiState.isLoading) {
                     EmptyDeviceList(
                         message = if (uiState.searchQuery.isNotEmpty()) {
-                            "No devices match your search"
+                            stringResource(R.string.admin_no_devices_match_search)
                         } else {
-                            "No devices in this group"
+                            stringResource(R.string.admin_no_devices_in_group)
                         },
                     )
                 } else {
@@ -349,7 +351,7 @@ private fun MemberDeviceCard(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Lock,
-                        contentDescription = "Locked settings",
+                        contentDescription = stringResource(R.string.admin_locked_settings),
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.primary,
                     )

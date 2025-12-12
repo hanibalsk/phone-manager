@@ -22,9 +22,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.GroupRole
 
@@ -53,16 +55,16 @@ fun DeleteGroupDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Delete Group?")
+            Text(stringResource(R.string.group_dialog_delete_title))
         },
         text = {
             Column {
                 Text(
-                    text = "Are you sure you want to delete \"$groupName\"?",
+                    text = stringResource(R.string.group_dialog_delete_confirm, groupName),
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "This action cannot be undone. All members will be removed from the group.",
+                    text = stringResource(R.string.group_dialog_delete_message),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold,
@@ -76,12 +78,12 @@ fun DeleteGroupDialog(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
             ) {
-                Text("Delete")
+                Text(stringResource(R.string.delete))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -99,16 +101,16 @@ fun LeaveGroupDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Leave Group?")
+            Text(stringResource(R.string.group_dialog_leave_title))
         },
         text = {
             Column {
                 Text(
-                    text = "Are you sure you want to leave \"$groupName\"?",
+                    text = stringResource(R.string.group_dialog_leave_confirm, groupName),
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "You will lose access to shared device locations and will need to be re-invited to rejoin.",
+                    text = stringResource(R.string.group_dialog_leave_message),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -121,12 +123,12 @@ fun LeaveGroupDialog(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
             ) {
-                Text("Leave")
+                Text(stringResource(R.string.group_dialog_leave))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -144,18 +146,23 @@ fun EditGroupNameDialog(
     var newName by remember { mutableStateOf(currentName) }
     var nameError by remember { mutableStateOf<String?>(null) }
 
+    // Pre-load error strings at composable level
+    val errorNameRequired = stringResource(R.string.group_dialog_name_required)
+    val errorNameTooLong = stringResource(R.string.group_dialog_name_too_long)
+    val errorNameUnchanged = stringResource(R.string.group_dialog_name_unchanged)
+
     fun validateName(): Boolean {
         return when {
             newName.isBlank() -> {
-                nameError = "Group name is required"
+                nameError = errorNameRequired
                 false
             }
             newName.length > 50 -> {
-                nameError = "Group name must be 50 characters or less"
+                nameError = errorNameTooLong
                 false
             }
             newName.trim() == currentName -> {
-                nameError = "Name hasn't changed"
+                nameError = errorNameUnchanged
                 false
             }
             else -> {
@@ -168,7 +175,7 @@ fun EditGroupNameDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Edit Group Name")
+            Text(stringResource(R.string.group_dialog_edit_name_title))
         },
         text = {
             OutlinedTextField(
@@ -179,7 +186,7 @@ fun EditGroupNameDialog(
                         nameError = null
                     }
                 },
-                label = { Text("Group Name") },
+                label = { Text(stringResource(R.string.group_dialog_group_name)) },
                 singleLine = true,
                 isError = nameError != null,
                 supportingText = {
@@ -190,7 +197,7 @@ fun EditGroupNameDialog(
                         )
                     } else {
                         Text(
-                            text = "${newName.length}/50",
+                            text = stringResource(R.string.group_dialog_name_counter, newName.length),
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
@@ -207,12 +214,12 @@ fun EditGroupNameDialog(
                 },
                 enabled = newName.isNotBlank() && newName.trim() != currentName,
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -232,14 +239,14 @@ fun EditGroupDescriptionDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Edit Description")
+            Text(stringResource(R.string.group_dialog_edit_description_title))
         },
         text = {
             OutlinedTextField(
                 value = newDescription,
                 onValueChange = { newDescription = it },
-                label = { Text("Description (optional)") },
-                placeholder = { Text("What's this group for?") },
+                label = { Text(stringResource(R.string.group_dialog_description_optional)) },
+                placeholder = { Text(stringResource(R.string.group_dialog_description_hint)) },
                 minLines = 2,
                 maxLines = 4,
                 modifier = Modifier.fillMaxWidth(),
@@ -252,12 +259,12 @@ fun EditGroupDescriptionDialog(
                     onConfirm(trimmed.ifBlank { null })
                 },
             ) {
-                Text("Save")
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -282,7 +289,7 @@ fun ChangeRoleDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Change Role")
+            Text(stringResource(R.string.group_dialog_change_role_title))
         },
         text = {
             Column(
@@ -290,7 +297,7 @@ fun ChangeRoleDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Text(
-                    text = "Select a new role for ${member.displayName}:",
+                    text = stringResource(R.string.group_dialog_select_new_role_for, member.displayName),
                     style = MaterialTheme.typography.bodyMedium,
                 )
 
@@ -298,8 +305,8 @@ fun ChangeRoleDialog(
 
                 // Admin option
                 RoleOption(
-                    title = "Admin",
-                    description = "Can manage members and group settings",
+                    title = stringResource(R.string.group_role_admin),
+                    description = stringResource(R.string.group_role_admin_desc),
                     selected = selectedRole == GroupRole.ADMIN,
                     enabled = currentRole != GroupRole.ADMIN,
                     onClick = { selectedRole = GroupRole.ADMIN },
@@ -307,8 +314,8 @@ fun ChangeRoleDialog(
 
                 // Member option
                 RoleOption(
-                    title = "Member",
-                    description = "Can view shared device locations",
+                    title = stringResource(R.string.group_role_member),
+                    description = stringResource(R.string.group_role_member_desc),
                     selected = selectedRole == GroupRole.MEMBER,
                     enabled = currentRole != GroupRole.MEMBER,
                     onClick = { selectedRole = GroupRole.MEMBER },
@@ -320,12 +327,12 @@ fun ChangeRoleDialog(
                 onClick = { onChangeRole(selectedRole) },
                 enabled = selectedRole != currentRole,
             ) {
-                Text("Change Role")
+                Text(stringResource(R.string.group_dialog_change_role))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -397,16 +404,16 @@ fun RemoveMemberDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Remove Member?")
+            Text(stringResource(R.string.group_dialog_remove_member_title))
         },
         text = {
             Column {
                 Text(
-                    text = "Are you sure you want to remove \"$memberName\" from the group?",
+                    text = stringResource(R.string.group_dialog_remove_member_confirm, memberName),
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "They will lose access to shared device locations and will need to be re-invited to rejoin.",
+                    text = stringResource(R.string.group_dialog_remove_member_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -419,12 +426,12 @@ fun RemoveMemberDialog(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
             ) {
-                Text("Remove")
+                Text(stringResource(R.string.group_dialog_remove))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )
@@ -442,16 +449,16 @@ fun TransferGroupOwnershipDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text("Transfer Ownership?")
+            Text(stringResource(R.string.group_dialog_transfer_title))
         },
         text = {
             Column {
                 Text(
-                    text = "Are you sure you want to transfer ownership of this group to \"$memberName\"?",
+                    text = stringResource(R.string.group_dialog_transfer_confirm, memberName),
                 )
                 Spacer(modifier = Modifier.height(12.dp))
                 Text(
-                    text = "You will become an admin and they will become the owner. Only they will be able to delete the group.",
+                    text = stringResource(R.string.group_dialog_transfer_warning),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.error,
                     fontWeight = FontWeight.Bold,
@@ -465,12 +472,12 @@ fun TransferGroupOwnershipDialog(
                     contentColor = MaterialTheme.colorScheme.error,
                 ),
             ) {
-                Text("Transfer")
+                Text(stringResource(R.string.group_dialog_transfer))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

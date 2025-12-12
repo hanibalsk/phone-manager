@@ -55,10 +55,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.text.NumberFormat
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.SettingDefinition
 import three.two.bit.phonemanager.domain.model.SettingType
 import three.two.bit.phonemanager.domain.model.SettingValidation
@@ -98,12 +102,12 @@ fun SettingsTemplateScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Settings Templates") },
+                title = { Text(stringResource(R.string.admin_settings_templates)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -111,7 +115,7 @@ fun SettingsTemplateScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.startCreateTemplate() }) {
-                Icon(Icons.Default.Add, contentDescription = "Create Template")
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.admin_create_template))
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -141,13 +145,13 @@ fun SettingsTemplateScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No templates yet",
+                        text = stringResource(R.string.admin_no_templates_yet),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Create a template to quickly apply settings to devices",
+                        text = stringResource(R.string.admin_create_template_hint),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -231,7 +235,7 @@ private fun TemplateCard(
                             Spacer(modifier = Modifier.width(8.dp))
                             Icon(
                                 imageVector = Icons.Default.People,
-                                contentDescription = "Shared",
+                                contentDescription = stringResource(R.string.admin_shared),
                                 modifier = Modifier.size(16.dp),
                                 tint = MaterialTheme.colorScheme.primary,
                             )
@@ -257,7 +261,11 @@ private fun TemplateCard(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "${template.settings.size} settings",
+                    text = pluralStringResource(
+                        R.plurals.admin_template_settings_count,
+                        template.settings.size,
+                        template.settings.size,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -271,7 +279,11 @@ private fun TemplateCard(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "${template.lockedSettings.size} locked",
+                        text = pluralStringResource(
+                            R.plurals.admin_template_locked_count,
+                            template.lockedSettings.size,
+                            template.lockedSettings.size,
+                        ),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -288,17 +300,17 @@ private fun TemplateCard(
                 IconButton(onClick = onDelete) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Delete",
+                        contentDescription = stringResource(R.string.delete),
                         tint = MaterialTheme.colorScheme.error,
                     )
                 }
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    Icon(Icons.Default.Edit, contentDescription = stringResource(R.string.edit))
                 }
                 IconButton(onClick = onApply) {
                     Icon(
                         Icons.Default.PlayArrow,
-                        contentDescription = "Apply",
+                        contentDescription = stringResource(R.string.apply),
                         tint = MaterialTheme.colorScheme.primary,
                     )
                 }
@@ -334,7 +346,9 @@ private fun TemplateEditorSheet(
                 .padding(16.dp),
         ) {
             Text(
-                text = if (template.name.isEmpty()) "New Template" else "Edit Template",
+                text = stringResource(
+                    if (template.name.isEmpty()) R.string.admin_new_template else R.string.admin_edit_template,
+                ),
                 style = MaterialTheme.typography.titleLarge,
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -342,7 +356,7 @@ private fun TemplateEditorSheet(
             OutlinedTextField(
                 value = template.name,
                 onValueChange = onNameChange,
-                label = { Text("Template Name") },
+                label = { Text(stringResource(R.string.admin_template_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isSaving,
                 singleLine = true,
@@ -352,7 +366,7 @@ private fun TemplateEditorSheet(
             OutlinedTextField(
                 value = template.description ?: "",
                 onValueChange = onDescriptionChange,
-                label = { Text("Description (optional)") },
+                label = { Text(stringResource(R.string.admin_template_description)) },
                 modifier = Modifier.fillMaxWidth(),
                 enabled = !isSaving,
                 maxLines = 2,
@@ -368,9 +382,9 @@ private fun TemplateEditorSheet(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
-                    Text("Share with other admins")
+                    Text(stringResource(R.string.admin_share_admins))
                     Text(
-                        text = "Other group admins can use this template",
+                        text = stringResource(R.string.admin_share_admins_hint),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -384,7 +398,7 @@ private fun TemplateEditorSheet(
 
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = "Settings",
+                text = stringResource(R.string.admin_settings_section_title),
                 style = MaterialTheme.typography.titleMedium,
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -426,7 +440,7 @@ private fun TemplateEditorSheet(
                 horizontalArrangement = Arrangement.End,
             ) {
                 TextButton(onClick = onDismiss, enabled = !isSaving) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
                 Spacer(modifier = Modifier.width(8.dp))
                 TextButton(
@@ -440,7 +454,7 @@ private fun TemplateEditorSheet(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
-                    Text("Save")
+                    Text(stringResource(R.string.save))
                 }
             }
         }
@@ -526,13 +540,13 @@ private fun TemplateSettingItem(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("$min", style = MaterialTheme.typography.labelSmall)
+                                Text(min.toString(), style = MaterialTheme.typography.labelSmall)
                                 Text(
-                                    "$intValue",
+                                    intValue.toString(),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                 )
-                                Text("$max", style = MaterialTheme.typography.labelSmall)
+                                Text(max.toString(), style = MaterialTheme.typography.labelSmall)
                             }
                             Slider(
                                 value = intValue.toFloat(),
@@ -547,19 +561,25 @@ private fun TemplateSettingItem(
                         val min = validation?.min ?: 0f
                         val max = validation?.max ?: 100f
                         val floatValue = (value as? Number)?.toFloat() ?: min
+                        val numberFormat = remember {
+                            NumberFormat.getNumberInstance().apply {
+                                maximumFractionDigits = 1
+                                minimumFractionDigits = 0
+                            }
+                        }
 
                         Column {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
                             ) {
-                                Text("$min", style = MaterialTheme.typography.labelSmall)
+                                Text(numberFormat.format(min), style = MaterialTheme.typography.labelSmall)
                                 Text(
-                                    "%.1f".format(floatValue),
+                                    numberFormat.format(floatValue),
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = FontWeight.Bold,
                                 )
-                                Text("$max", style = MaterialTheme.typography.labelSmall)
+                                Text(numberFormat.format(max), style = MaterialTheme.typography.labelSmall)
                             }
                             Slider(
                                 value = floatValue,
@@ -593,9 +613,9 @@ private fun DeleteTemplateDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete Template") },
+        title = { Text(stringResource(R.string.admin_delete_template)) },
         text = {
-            Text("Are you sure you want to delete \"$templateName\"? This action cannot be undone.")
+            Text(stringResource(R.string.admin_delete_template_confirm, templateName))
         },
         confirmButton = {
             TextButton(
@@ -609,12 +629,12 @@ private fun DeleteTemplateDialog(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text("Delete", color = MaterialTheme.colorScheme.error)
+                Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !isDeleting) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

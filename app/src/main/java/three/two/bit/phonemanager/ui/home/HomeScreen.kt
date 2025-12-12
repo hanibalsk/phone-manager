@@ -56,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import three.two.bit.phonemanager.BuildConfig
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.permission.PermissionState
 import three.two.bit.phonemanager.ui.components.ActiveTripCard
@@ -354,7 +355,7 @@ fun HomeScreen(
 
             // Story E2.1: Version text with tap gesture to toggle secret mode (AC E2.1.3)
             Text(
-                text = "v1.0.0",
+                text = stringResource(R.string.app_version, BuildConfig.VERSION_NAME),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier =

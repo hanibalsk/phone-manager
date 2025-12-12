@@ -58,9 +58,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.text.NumberFormat
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.SettingCategory
 import three.two.bit.phonemanager.domain.model.SettingType
 import three.two.bit.phonemanager.domain.model.SettingValidation
@@ -105,7 +109,7 @@ fun DeviceSettingsScreen(
                 title = {
                     Column {
                         Text(
-                            text = uiState.deviceName.ifEmpty { "Device Settings" },
+                            text = uiState.deviceName.ifEmpty { stringResource(R.string.admin_device_settings_title) },
                             style = MaterialTheme.typography.titleMedium,
                         )
                         if (uiState.ownerName.isNotEmpty()) {
@@ -121,7 +125,7 @@ fun DeviceSettingsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -138,9 +142,9 @@ fun DeviceSettingsScreen(
                                 Icons.Default.NotificationsOff
                             },
                             contentDescription = if (uiState.notifyUserOnChange) {
-                                "Notifications enabled"
+                                stringResource(R.string.admin_notifications_enabled)
                             } else {
-                                "Notifications disabled"
+                                stringResource(R.string.admin_notifications_disabled)
                             },
                         )
                     }
@@ -148,7 +152,7 @@ fun DeviceSettingsScreen(
                     IconButton(onClick = {
                         uiState.deviceSettings?.let { onViewHistory(it.deviceId) }
                     }) {
-                        Icon(Icons.Default.History, contentDescription = "View History")
+                        Icon(Icons.Default.History, contentDescription = stringResource(R.string.admin_view_history))
                     }
                 },
             )
@@ -258,7 +262,7 @@ private fun DeviceStatusHeader(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isOnline) "Online" else "Offline",
+                    text = if (isOnline) stringResource(R.string.admin_online) else stringResource(R.string.admin_offline),
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -272,7 +276,11 @@ private fun DeviceStatusHeader(
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
-                        text = "$lockedCount locked",
+                        text = pluralStringResource(
+                            R.plurals.admin_locked_count,
+                            lockedCount,
+                            lockedCount,
+                        ),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -317,7 +325,11 @@ private fun SettingsCategorySection(
                     } else {
                         Icons.Default.KeyboardArrowDown
                     },
-                    contentDescription = if (isExpanded) "Collapse" else "Expand",
+                    contentDescription = if (isExpanded) {
+                        stringResource(R.string.admin_collapse)
+                    } else {
+                        stringResource(R.string.admin_expand)
+                    },
                 )
             }
 
@@ -376,7 +388,7 @@ private fun SettingItem(
                 )
                 if (setting.isLocked && setting.lockedBy != null) {
                     Text(
-                        text = "Locked by ${setting.lockedBy}",
+                        text = stringResource(R.string.admin_locked_by, setting.lockedBy),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -391,7 +403,7 @@ private fun SettingItem(
                     } else {
                         Icons.Default.LockOpen
                     },
-                    contentDescription = if (setting.isLocked) "Unlock" else "Lock",
+                    contentDescription = if (setting.isLocked) stringResource(R.string.admin_unlock) else stringResource(R.string.admin_lock),
                     tint = if (setting.isLocked) {
                         MaterialTheme.colorScheme.primary
                     } else {
@@ -461,9 +473,9 @@ private fun IntegerSettingControl(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text("$min")
-            Text("$value", fontWeight = FontWeight.Bold)
-            Text("$max")
+            Text(min.toString())
+            Text(value.toString(), fontWeight = FontWeight.Bold)
+            Text(max.toString())
         }
         Slider(
             value = value.toFloat(),
@@ -484,15 +496,21 @@ private fun FloatSettingControl(
 ) {
     val min = validation?.min ?: 0f
     val max = validation?.max ?: 100f
+    val numberFormat = remember {
+        NumberFormat.getNumberInstance().apply {
+            maximumFractionDigits = 1
+            minimumFractionDigits = 0
+        }
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
-            Text("$min")
-            Text("%.1f".format(value), fontWeight = FontWeight.Bold)
-            Text("$max")
+            Text(numberFormat.format(min))
+            Text(numberFormat.format(value), fontWeight = FontWeight.Bold)
+            Text(numberFormat.format(max))
         }
         Slider(
             value = value,
@@ -513,25 +531,25 @@ private fun LockConfirmationDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(if (isLocking) "Lock Setting" else "Unlock Setting")
+            Text(stringResource(if (isLocking) R.string.admin_lock_setting else R.string.admin_unlock_setting))
         },
         text = {
             Text(
                 if (isLocking) {
-                    "Are you sure you want to lock this setting? The user will not be able to change it."
+                    stringResource(R.string.admin_lock_setting_confirm)
                 } else {
-                    "Are you sure you want to unlock this setting? The user will be able to change it."
+                    stringResource(R.string.admin_unlock_setting_confirm)
                 },
             )
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
-                Text(if (isLocking) "Lock" else "Unlock")
+                Text(stringResource(if (isLocking) R.string.admin_lock else R.string.admin_unlock))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

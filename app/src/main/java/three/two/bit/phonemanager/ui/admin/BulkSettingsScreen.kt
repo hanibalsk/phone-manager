@@ -51,8 +51,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import java.text.NumberFormat
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.BulkSettingsResult
 import three.two.bit.phonemanager.domain.model.SettingCategory
 import three.two.bit.phonemanager.domain.model.SettingDefinition
@@ -104,9 +108,13 @@ fun BulkSettingsScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Bulk Settings Update")
+                        Text(stringResource(R.string.admin_bulk_settings))
                         Text(
-                            text = "${deviceIds.size} devices selected",
+                            text = pluralStringResource(
+                                R.plurals.admin_devices_selected,
+                                deviceIds.size,
+                                deviceIds.size,
+                            ),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -116,7 +124,7 @@ fun BulkSettingsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -132,9 +140,9 @@ fun BulkSettingsScreen(
                                 Icons.Default.NotificationsOff
                             },
                             contentDescription = if (uiState.notifyUsers) {
-                                "Notifications enabled"
+                                stringResource(R.string.admin_notifications_enabled)
                             } else {
-                                "Notifications disabled"
+                                stringResource(R.string.admin_notifications_disabled)
                             },
                         )
                     }
@@ -160,7 +168,7 @@ fun BulkSettingsScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator()
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Applying settings to ${deviceIds.size} devices...")
+                    Text(stringResource(R.string.admin_applying_settings, deviceIds.size))
                 }
             }
         } else if (uiState.result != null) {
@@ -218,7 +226,11 @@ private fun BulkSettingsBottomBar(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
-                text = "$selectedSettingsCount settings selected",
+                text = pluralStringResource(
+                    R.plurals.admin_settings_selected,
+                    selectedSettingsCount,
+                    selectedSettingsCount,
+                ),
                 style = MaterialTheme.typography.bodyMedium,
             )
             Button(
@@ -232,7 +244,7 @@ private fun BulkSettingsBottomBar(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                 }
-                Text("Apply Settings")
+                Text(stringResource(R.string.admin_apply_settings))
             }
         }
     }
@@ -315,7 +327,11 @@ private fun BulkSettingItem(
                 IconButton(onClick = onToggleLock) {
                     Icon(
                         imageVector = Icons.Default.Lock,
-                        contentDescription = if (isLocked) "Will lock" else "Won't lock",
+                        contentDescription = if (isLocked) {
+                            stringResource(R.string.admin_will_lock)
+                        } else {
+                            stringResource(R.string.admin_wont_lock)
+                        },
                         tint = if (isLocked) {
                             MaterialTheme.colorScheme.primary
                         } else {
@@ -346,9 +362,9 @@ private fun BulkSettingItem(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text("$min")
-                            Text("$intValue", fontWeight = FontWeight.Bold)
-                            Text("$max")
+                            Text(min.toString())
+                            Text(intValue.toString(), fontWeight = FontWeight.Bold)
+                            Text(max.toString())
                         }
                         Slider(
                             value = intValue.toFloat(),
@@ -362,15 +378,21 @@ private fun BulkSettingItem(
                     val min = validation?.min ?: 0f
                     val max = validation?.max ?: 100f
                     val floatValue = (value as? Number)?.toFloat() ?: min
+                    val numberFormat = remember {
+                        NumberFormat.getNumberInstance().apply {
+                            maximumFractionDigits = 1
+                            minimumFractionDigits = 0
+                        }
+                    }
 
                     Column {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                         ) {
-                            Text("$min")
-                            Text("%.1f".format(floatValue), fontWeight = FontWeight.Bold)
-                            Text("$max")
+                            Text(numberFormat.format(min))
+                            Text(numberFormat.format(floatValue), fontWeight = FontWeight.Bold)
+                            Text(numberFormat.format(max))
                         }
                         Slider(
                             value = floatValue,
@@ -414,15 +436,19 @@ private fun BulkResultsView(
         Spacer(modifier = Modifier.height(16.dp))
         Text(
             text = if (result.isAllSuccessful) {
-                "All settings applied successfully!"
+                stringResource(R.string.admin_all_settings_applied_success)
             } else {
-                "Settings applied with some failures"
+                stringResource(R.string.admin_settings_applied_some_failures)
             },
             style = MaterialTheme.typography.headlineSmall,
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "${result.successCount} successful, ${result.failureCount} failed",
+            text = stringResource(
+                R.string.admin_bulk_result_summary,
+                result.successCount,
+                result.failureCount,
+            ),
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
@@ -430,7 +456,7 @@ private fun BulkResultsView(
         if (result.failed.isNotEmpty()) {
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Failed Devices:",
+                text = stringResource(R.string.admin_failed_devices),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
             )
@@ -472,7 +498,7 @@ private fun BulkResultsView(
 
         Spacer(modifier = Modifier.height(24.dp))
         Button(onClick = onDone) {
-            Text("Done")
+            Text(stringResource(R.string.admin_done))
         }
     }
 }
