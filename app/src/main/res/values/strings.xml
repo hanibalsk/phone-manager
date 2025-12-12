@@ -874,6 +874,10 @@
     <string name="device_primary_content_desc">Primary device</string>
     <string name="device_this_device_label">This device</string>
     <string name="device_edit_name_content_desc">Edit name</string>
+    <string name="device_edit_name_title">Edit Device Name</string>
+    <string name="device_edit_name_description">Enter a new display name for this device.</string>
+    <string name="device_display_name_label">Display Name</string>
+    <string name="device_name_required">Device name is required</string>
     <string name="device_info_title">Device Information</string>
     <string name="device_info_device_id_label">Device ID</string>
     <string name="device_info_platform_label">Platform</string>

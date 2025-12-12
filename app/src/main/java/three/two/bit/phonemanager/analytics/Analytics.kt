@@ -120,3 +120,33 @@ class DebugAnalytics : Analytics {
         timber.log.Timber.d("Analytics User Property: $name = $value")
     }
 }
+
+/**
+ * Firebase Analytics implementation for production use
+ *
+ * Story 1.2, AC 1.2.12: Analytics tracking with Firebase
+ */
+class FirebaseAnalyticsImpl(
+    private val firebaseAnalytics: com.google.firebase.analytics.FirebaseAnalytics,
+) : Analytics {
+    override fun logEvent(eventName: String, params: Map<String, Any>) {
+        val bundle = android.os.Bundle().apply {
+            params.forEach { (key, value) ->
+                when (value) {
+                    is String -> putString(key, value)
+                    is Int -> putInt(key, value)
+                    is Long -> putLong(key, value)
+                    is Double -> putDouble(key, value)
+                    is Float -> putFloat(key, value)
+                    is Boolean -> putBoolean(key, value)
+                    else -> putString(key, value.toString())
+                }
+            }
+        }
+        firebaseAnalytics.logEvent(eventName, bundle)
+    }
+
+    override fun setUserProperty(name: String, value: String) {
+        firebaseAnalytics.setUserProperty(name, value)
+    }
+}

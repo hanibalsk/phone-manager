@@ -26,28 +26,26 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import androidx.hilt.navigation.compose.hiltViewModel
 import three.two.bit.phonemanager.R
-import three.two.bit.phonemanager.auth.MockAuthHelper
 
 /**
  * Story E9.11, Task 11: Forgot Password Screen
@@ -60,67 +58,25 @@ import three.two.bit.phonemanager.auth.MockAuthHelper
  * - Success confirmation
  * - Error handling
  *
- * Note: Backend integration pending (depends on E9.1-E9.10)
+ * Uses ForgotPasswordViewModel for API calls (mock/real based on BuildConfig.USE_MOCK_AUTH)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ForgotPasswordScreen(
-    onNavigateBack: () -> Unit
+    viewModel: ForgotPasswordViewModel = hiltViewModel(),
+    onNavigateBack: () -> Unit,
 ) {
-    val context = LocalContext.current
+    val uiState by viewModel.uiState.collectAsState()
     var email by rememberSaveable { mutableStateOf("") }
-    var emailError by remember { mutableStateOf<String?>(null) }
-    var isLoading by remember { mutableStateOf(false) }
-    var isSuccess by remember { mutableStateOf(false) }
 
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
 
-    /**
-     * Validate email format
-     */
-    fun validateEmail(email: String): Boolean {
-        return if (email.matches(Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"))) {
-            emailError = null
-            true
-        } else {
-            emailError = context.getString(R.string.auth_invalid_email_address)
-            false
-        }
-    }
-
-    /**
-     * Send password reset email
-     * Uses mock implementation for development
-     */
-    fun sendResetEmail() {
-        if (!validateEmail(email)) {
-            return
-        }
-
-        isLoading = true
-
-        coroutineScope.launch {
-            try {
-                // Use mock for development (replace with real API when backend is ready)
-                if (MockAuthHelper.USE_MOCK_AUTH) {
-                    MockAuthHelper.mockRequestPasswordReset(email)
-                } else {
-                    // TODO: Call real password reset API endpoint
-                    // authApiService.requestPasswordReset(email)
-                    delay(1500)
-                }
-
-                // Show success state
-                isSuccess = true
-                isLoading = false
-            } catch (e: Exception) {
-                isLoading = false
-                snackbarHostState.showSnackbar(
-                    e.message ?: context.getString(R.string.auth_failed_send_reset_email)
-                )
-            }
+    // Show error message in snackbar
+    LaunchedEffect(uiState.errorMessage) {
+        uiState.errorMessage?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearError()
         }
     }
 
@@ -132,13 +88,13 @@ fun ForgotPasswordScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
-                }
+                },
             )
         },
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -147,148 +103,168 @@ fun ForgotPasswordScreen(
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
-            if (isSuccess) {
+            if (uiState.isSuccess) {
                 // Success State
-                Icon(
-                    imageVector = Icons.Default.CheckCircle,
-                    contentDescription = stringResource(R.string.content_desc_success),
-                    modifier = Modifier.size(80.dp),
-                    tint = MaterialTheme.colorScheme.primary
+                SuccessContent(
+                    email = uiState.submittedEmail,
+                    onNavigateBack = onNavigateBack,
                 )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                Text(
-                    text = stringResource(R.string.auth_reset_link_sent_title),
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(R.string.auth_reset_link_sent_to),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = email,
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(R.string.auth_reset_link_sent_instructions),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                Button(
-                    onClick = onNavigateBack,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(R.string.auth_back_to_login))
-                }
             } else {
                 // Input State
-                Text(
-                    text = stringResource(R.string.auth_forgot_password_title),
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(R.string.auth_forgot_password_instructions),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                // Email TextField
-                OutlinedTextField(
-                    value = email,
-                    onValueChange = {
+                InputContent(
+                    email = email,
+                    onEmailChange = {
                         email = it
-                        emailError = null
+                        viewModel.clearEmailError()
                     },
-                    label = { Text(stringResource(R.string.auth_email)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-                            focusManager.clearFocus()
-                            sendResetEmail()
-                        }
-                    ),
-                    singleLine = true,
-                    isError = emailError != null,
-                    supportingText = emailError?.let { { Text(it) } },
-                    enabled = !isLoading
+                    emailError = uiState.emailError,
+                    isLoading = uiState.isLoading,
+                    onSubmit = {
+                        focusManager.clearFocus()
+                        viewModel.requestPasswordReset(email)
+                    },
+                    onNavigateBack = onNavigateBack,
                 )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // Send Reset Link Button
-                Button(
-                    onClick = { sendResetEmail() },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-                    enabled = !isLoading && email.isNotBlank()
-                ) {
-                    if (isLoading) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
-                        )
-                    } else {
-                        Text(stringResource(R.string.auth_send_reset_link))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(
-                    text = stringResource(R.string.auth_remember_password_question),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                androidx.compose.material3.TextButton(
-                    onClick = onNavigateBack,
-                    enabled = !isLoading
-                ) {
-                    Text(stringResource(R.string.auth_back_to_login))
-                }
             }
         }
     }
 }
 
-@Preview(showBackground = true)
 @Composable
-fun ForgotPasswordScreenPreview() {
-    MaterialTheme {
-        ForgotPasswordScreen(
-            onNavigateBack = {}
-        )
+private fun SuccessContent(
+    email: String,
+    onNavigateBack: () -> Unit,
+) {
+    Icon(
+        imageVector = Icons.Default.CheckCircle,
+        contentDescription = stringResource(R.string.content_desc_success),
+        modifier = Modifier.size(80.dp),
+        tint = MaterialTheme.colorScheme.primary,
+    )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    Text(
+        text = stringResource(R.string.auth_reset_link_sent_title),
+        style = MaterialTheme.typography.headlineSmall,
+        color = MaterialTheme.colorScheme.primary,
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        text = stringResource(R.string.auth_reset_link_sent_to),
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(modifier = Modifier.height(8.dp))
+
+    Text(
+        text = email,
+        style = MaterialTheme.typography.bodyLarge,
+        color = MaterialTheme.colorScheme.primary,
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        text = stringResource(R.string.auth_reset_link_sent_instructions),
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    Spacer(modifier = Modifier.height(32.dp))
+
+    Button(
+        onClick = onNavigateBack,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(stringResource(R.string.auth_back_to_login))
+    }
+}
+
+@Composable
+private fun InputContent(
+    email: String,
+    onEmailChange: (String) -> Unit,
+    emailError: String?,
+    isLoading: Boolean,
+    onSubmit: () -> Unit,
+    onNavigateBack: () -> Unit,
+) {
+    Text(
+        text = stringResource(R.string.auth_forgot_password_title),
+        style = MaterialTheme.typography.headlineMedium,
+        color = MaterialTheme.colorScheme.primary,
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        text = stringResource(R.string.auth_forgot_password_instructions),
+        style = MaterialTheme.typography.bodyMedium,
+        textAlign = TextAlign.Center,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    Spacer(modifier = Modifier.height(32.dp))
+
+    // Email TextField
+    OutlinedTextField(
+        value = email,
+        onValueChange = onEmailChange,
+        label = { Text(stringResource(R.string.auth_email)) },
+        modifier = Modifier.fillMaxWidth(),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Done,
+        ),
+        keyboardActions = KeyboardActions(
+            onDone = { onSubmit() },
+        ),
+        singleLine = true,
+        isError = emailError != null,
+        supportingText = emailError?.let { { Text(it) } },
+        enabled = !isLoading,
+    )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    // Send Reset Link Button
+    Button(
+        onClick = onSubmit,
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(48.dp),
+        enabled = !isLoading && email.isNotBlank(),
+    ) {
+        if (isLoading) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                color = MaterialTheme.colorScheme.onPrimary,
+            )
+        } else {
+            Text(stringResource(R.string.auth_send_reset_link))
+        }
+    }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    Text(
+        text = stringResource(R.string.auth_remember_password_question),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    TextButton(
+        onClick = onNavigateBack,
+        enabled = !isLoading,
+    ) {
+        Text(stringResource(R.string.auth_back_to_login))
     }
 }

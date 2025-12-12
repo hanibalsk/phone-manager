@@ -332,16 +332,37 @@ class SettingsSyncRepositoryImpl @Inject constructor(
         Timber.d("Registering FCM token with server")
 
         val deviceId = deviceRepository.getDeviceId()
-        val accessToken = authRepository.getAccessToken()
+        val groupId = deviceRepository.getGroupId()
 
-        if (accessToken == null) {
-            Timber.w("Cannot register FCM token: not authenticated")
+        // Only register FCM token if device has been properly set up with a group
+        if (groupId == null) {
+            Timber.w("Cannot register FCM token: device has no group ID yet")
             return
         }
 
-        // TODO: Implement server endpoint for FCM token registration
-        // deviceApiService.registerFcmToken(deviceId, token, accessToken)
-        Timber.i("FCM token registration queued (endpoint not yet implemented)")
+        // Use device registration endpoint which already supports fcm_token
+        // This will upsert the device and update the FCM token
+        try {
+            val request = three.two.bit.phonemanager.network.models.DeviceRegistrationRequest(
+                deviceId = deviceId,
+                displayName = android.os.Build.MODEL,
+                groupId = groupId,
+                platform = "android",
+                fcmToken = token,
+            )
+
+            val result = deviceApiService.registerDevice(request)
+            result.fold(
+                onSuccess = {
+                    Timber.i("FCM token registered successfully")
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to register FCM token")
+                },
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Exception registering FCM token")
+        }
     }
 
     override suspend fun clearCache() {

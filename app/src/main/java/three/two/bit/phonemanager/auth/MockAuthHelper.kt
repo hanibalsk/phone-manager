@@ -1,6 +1,7 @@
 package three.two.bit.phonemanager.auth
 
 import kotlinx.coroutines.delay
+import three.two.bit.phonemanager.BuildConfig
 import three.two.bit.phonemanager.network.auth.AuthResponse
 import three.two.bit.phonemanager.network.auth.UserInfo
 import timber.log.Timber
@@ -10,18 +11,25 @@ import java.util.UUID
  * Story E9.11: Mock Authentication Helper for Development
  *
  * Simulates backend authentication responses for development and testing.
- * Remove or disable in production builds.
+ * Automatically disabled in release builds via BuildConfig.USE_MOCK_AUTH.
  *
  * Usage:
- * - Set USE_MOCK_AUTH = true during development
+ * - Mock mode controlled by BuildConfig.USE_MOCK_AUTH
+ * - Debug builds: true by default, override with USE_MOCK_AUTH_DEBUG in local.properties
+ * - Release builds: always false
  * - Simulates network delay (500ms)
  * - Generates realistic mock responses
  * - Validates input format
  */
 object MockAuthHelper {
 
-    // Toggle for mock authentication (disable in production)
-    const val USE_MOCK_AUTH = true // TODO: Set to false for production
+    /**
+     * Toggle for mock authentication.
+     * - Debug builds: true by default, can be overridden in local.properties
+     * - Release builds: always false
+     */
+    val USE_MOCK_AUTH: Boolean
+        get() = BuildConfig.USE_MOCK_AUTH
 
     /**
      * Mock user registration

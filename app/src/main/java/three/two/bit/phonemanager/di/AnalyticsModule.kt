@@ -1,13 +1,16 @@
 package three.two.bit.phonemanager.di
 
+import android.content.Context
+import com.google.firebase.analytics.FirebaseAnalytics
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import three.two.bit.phonemanager.BuildConfig
 import three.two.bit.phonemanager.analytics.Analytics
 import three.two.bit.phonemanager.analytics.DebugAnalytics
-import three.two.bit.phonemanager.analytics.NoOpAnalytics
+import three.two.bit.phonemanager.analytics.FirebaseAnalyticsImpl
 import javax.inject.Singleton
 
 /**
@@ -21,12 +24,17 @@ object AnalyticsModule {
 
     @Provides
     @Singleton
-    fun provideAnalytics(): Analytics = if (BuildConfig.DEBUG) {
+    fun provideFirebaseAnalytics(@ApplicationContext context: Context): FirebaseAnalytics {
+        return FirebaseAnalytics.getInstance(context)
+    }
+
+    @Provides
+    @Singleton
+    fun provideAnalytics(firebaseAnalytics: FirebaseAnalytics): Analytics = if (BuildConfig.DEBUG) {
         // Use DebugAnalytics in debug builds for Timber logging
         DebugAnalytics()
     } else {
-        // Use NoOpAnalytics in release builds until real analytics is configured
-        // TODO: Replace with FirebaseAnalytics or other provider
-        NoOpAnalytics()
+        // Use FirebaseAnalytics in release builds
+        FirebaseAnalyticsImpl(firebaseAnalytics)
     }
 }

@@ -77,6 +77,9 @@ android {
         buildConfigField("String", "API_BASE_URL", "\"${getLocalProperty("API_BASE_URL")}\"")
         buildConfigField("String", "API_KEY", "\"${getLocalProperty("API_KEY")}\"")
 
+        // Story E9.11: Google OAuth client ID (web client for Android)
+        buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"${getLocalProperty("GOOGLE_OAUTH_CLIENT_ID")}\"")
+
         // Story E3.1: Google Maps API key
         manifestPlaceholders["MAPS_API_KEY"] = getLocalProperty("MAPS_API_KEY")
     }
@@ -84,6 +87,9 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".dev"
+
+            // Story E9.11: Enable mock auth in debug builds (set to false to test real OAuth)
+            buildConfigField("boolean", "USE_MOCK_AUTH", getLocalProperty("USE_MOCK_AUTH_DEBUG", "true"))
 
             // Debug builds can use test endpoints
             val debugBaseUrl =
@@ -111,6 +117,9 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
+            // Story E9.11: Always use real auth in release builds
+            buildConfigField("boolean", "USE_MOCK_AUTH", "false")
+
             // Release builds require proper configuration
             buildConfigField("String", "API_BASE_URL", "\"${getLocalProperty("API_BASE_URL")}\"")
             buildConfigField("String", "API_KEY", "\"${getLocalProperty("API_KEY")}\"")
@@ -204,6 +213,12 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.maps.compose)
 
+    // Google Play Services Auth (Story E9.11: OAuth Sign-In)
+    implementation(libs.play.services.auth)
+    implementation(libs.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.browser)
+
     // Ktor for networking
     implementation(libs.ktor.client.android)
     implementation(libs.ktor.client.content.negotiation)
@@ -234,9 +249,10 @@ dependencies {
     implementation(libs.androidx.hilt.work)
     ksp(libs.androidx.hilt.compiler)
 
-    // Firebase (Story E12.6: FCM Push Notifications)
+    // Firebase (Story E12.6: FCM Push Notifications, Story 1.2: Analytics)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.messaging)
+    implementation(libs.firebase.analytics)
 
     // Testing - Unit Tests
     testImplementation(libs.junit)

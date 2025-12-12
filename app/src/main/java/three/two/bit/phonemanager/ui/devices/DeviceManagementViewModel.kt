@@ -334,6 +334,75 @@ class DeviceManagementViewModel @Inject constructor(
     }
 
     /**
+     * Update device display name
+     *
+     * Uses the device registration endpoint (upsert) to update the display name.
+     *
+     * @param deviceUuid UUID of the device to rename
+     * @param newDisplayName New display name for the device
+     */
+    fun updateDeviceName(deviceUuid: String, newDisplayName: String) {
+        if (newDisplayName.isBlank()) {
+            _operationResult.value = DeviceOperationResult.Error(
+                message = "Display name cannot be empty",
+                errorCode = "invalid_name"
+            )
+            return
+        }
+
+        viewModelScope.launch {
+            _operationResult.value = DeviceOperationResult.Loading
+
+            // Get group ID - required for device registration
+            val groupId = secureStorage.getGroupId()
+            if (groupId == null) {
+                _operationResult.value = DeviceOperationResult.Error(
+                    message = "Device not properly configured - missing group ID",
+                    errorCode = "missing_group_id"
+                )
+                return@launch
+            }
+
+            val request = three.two.bit.phonemanager.network.models.DeviceRegistrationRequest(
+                deviceId = deviceUuid,
+                displayName = newDisplayName.trim(),
+                groupId = groupId,
+                platform = "android"
+            )
+
+            val result = deviceApiService.registerDevice(request)
+
+            result.fold(
+                onSuccess = {
+                    Timber.i("Device name updated successfully: $deviceUuid -> $newDisplayName")
+                    _operationResult.value = DeviceOperationResult.Success(
+                        message = "Device name updated"
+                    )
+                    // Refresh devices and update selected device
+                    refreshDevices()
+                    // Update the detail state with new name
+                    _selectedDevice.value?.let { device ->
+                        val updatedDevice = device.copy(displayName = newDisplayName.trim())
+                        _selectedDevice.value = updatedDevice
+                        _detailUiState.value = DeviceDetailUiState.Success(
+                            device = updatedDevice,
+                            isCurrentDevice = updatedDevice.deviceUuid == currentDeviceId,
+                            isOwner = true
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to update device name")
+                    _operationResult.value = DeviceOperationResult.Error(
+                        message = getErrorMessage(error),
+                        errorCode = getErrorCode(error)
+                    )
+                }
+            )
+        }
+    }
+
+    /**
      * Convert exception to user-friendly error message
      */
     private fun getErrorMessage(exception: Throwable): String {

@@ -87,6 +87,7 @@ fun DeviceDetailScreen(
 
     var showUnlinkDialog by remember { mutableStateOf(false) }
     var showTransferDialog by remember { mutableStateOf(false) }
+    var showEditNameDialog by remember { mutableStateOf(false) }
 
     // Handle operation results
     LaunchedEffect(operationResult) {
@@ -139,6 +140,7 @@ fun DeviceDetailScreen(
                     isOwner = state.isOwner,
                     onUnlinkClick = { showUnlinkDialog = true },
                     onTransferClick = { showTransferDialog = true },
+                    onEditNameClick = { showEditNameDialog = true },
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(paddingValues),
@@ -201,6 +203,20 @@ fun DeviceDetailScreen(
             },
         )
     }
+
+    // Edit name dialog
+    if (showEditNameDialog && detailUiState is DeviceDetailUiState.Success) {
+        val device = (detailUiState as DeviceDetailUiState.Success).device
+
+        EditDeviceNameDialog(
+            currentName = device.displayName,
+            onDismiss = { showEditNameDialog = false },
+            onConfirm = { newName ->
+                showEditNameDialog = false
+                viewModel.updateDeviceName(device.deviceUuid, newName)
+            },
+        )
+    }
 }
 
 /**
@@ -213,6 +229,7 @@ private fun DeviceDetailContent(
     isOwner: Boolean,
     onUnlinkClick: () -> Unit,
     onTransferClick: () -> Unit,
+    onEditNameClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -222,7 +239,11 @@ private fun DeviceDetailContent(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         // Device header
-        DeviceHeader(device = device, isCurrentDevice = isCurrentDevice)
+        DeviceHeader(
+            device = device,
+            isCurrentDevice = isCurrentDevice,
+            onEditNameClick = onEditNameClick,
+        )
 
         // Device information card
         DeviceInfoCard(device = device)
@@ -281,6 +302,7 @@ private fun DeviceDetailContent(
 private fun DeviceHeader(
     device: UserDevice,
     isCurrentDevice: Boolean,
+    onEditNameClick: () -> Unit,
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -327,8 +349,8 @@ private fun DeviceHeader(
             }
         }
 
-        // Edit button (placeholder for future editable name)
-        IconButton(onClick = { /* TODO: Implement name editing */ }) {
+        // Edit name button
+        IconButton(onClick = onEditNameClick) {
             Icon(Icons.Default.Edit, stringResource(R.string.device_edit_name_content_desc))
         }
     }
@@ -507,6 +529,70 @@ private fun TransferOwnershipDialog(
                 },
             ) {
                 Text(stringResource(R.string.device_transfer_title))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+    )
+}
+
+/**
+ * Edit device name dialog
+ */
+@Composable
+private fun EditDeviceNameDialog(
+    currentName: String,
+    onDismiss: () -> Unit,
+    onConfirm: (newName: String) -> Unit,
+) {
+    var newName by remember { mutableStateOf(currentName) }
+    var showError by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(stringResource(R.string.device_edit_name_title))
+        },
+        text = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.device_edit_name_description),
+                )
+
+                OutlinedTextField(
+                    value = newName,
+                    onValueChange = {
+                        newName = it
+                        showError = false
+                    },
+                    label = { Text(stringResource(R.string.device_display_name_label)) },
+                    singleLine = true,
+                    isError = showError,
+                    supportingText = if (showError) {
+                        { Text(stringResource(R.string.device_name_required)) }
+                    } else {
+                        null
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (newName.isBlank()) {
+                        showError = true
+                    } else {
+                        onConfirm(newName.trim())
+                    }
+                },
+            ) {
+                Text(stringResource(R.string.save))
             }
         },
         dismissButton = {

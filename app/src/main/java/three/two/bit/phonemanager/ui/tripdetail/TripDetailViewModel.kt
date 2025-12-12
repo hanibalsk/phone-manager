@@ -299,7 +299,7 @@ class TripDetailViewModel @Inject constructor(
     /**
      * Calculate trip statistics
      */
-    private fun calculateStatistics(
+    private suspend fun calculateStatistics(
         trip: Trip,
         locations: List<LocationEntity>,
         events: List<MovementEvent>,
@@ -311,11 +311,20 @@ class TripDetailViewModel @Inject constructor(
             null
         }
 
+        // Check if path is corrected via API (only for synced trips)
+        val isPathCorrected = if (trip.isSynced && trip.serverId != null) {
+            tripRepository.getTripPath(trip.serverId)
+                .map { it.corrected }
+                .getOrDefault(false)
+        } else {
+            false
+        }
+
         return TripStatistics(
             averageSpeedKmh = avgSpeed?.let { it * 3.6f }, // m/s to km/h
             locationPointCount = locations.size,
             movementEventCount = events.size,
-            isPathCorrected = false, // TODO: Implement when path correction is available
+            isPathCorrected = isPathCorrected,
         )
     }
 

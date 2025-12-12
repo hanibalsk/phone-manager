@@ -40,6 +40,14 @@ kotlinxDatetime = "0.6.1"
 # Google Play Services
 playServicesLocation = "21.3.0"
 playServicesMaps = "19.0.0"
+playServicesAuth = "21.3.0"
+
+# Credential Manager (Story E9.11: OAuth)
+credentialsPlayServicesAuth = "1.3.0"
+googleid = "1.1.1"
+
+# Browser (Story E9.11: Apple OAuth)
+browser = "1.8.0"
 
 # Google Maps
 mapsCompose = "4.4.1"
@@ -138,6 +146,14 @@ kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime",
 # Google Play Services
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
 play-services-maps = { group = "com.google.android.gms", name = "play-services-maps", version.ref = "playServicesMaps" }
+play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "playServicesAuth" }
+
+# Credential Manager (Story E9.11: OAuth)
+credentials-play-services-auth = { group = "androidx.credentials", name = "credentials-play-services-auth", version.ref = "credentialsPlayServicesAuth" }
+googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleid" }
+
+# Browser (Story E9.11: Apple OAuth)
+browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
 
 # Google Maps
 maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "mapsCompose" }
@@ -160,9 +176,10 @@ mlkit-barcode-scanning = { group = "com.google.mlkit", name = "barcode-scanning"
 # ZXing (Story E11.9: QR Code Generation)
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing" }
 
-# Firebase (Story E12.6: FCM Push Notifications)
+# Firebase (Story E12.6: FCM Push Notifications, Story 1.2: Analytics)
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-messaging = { group = "com.google.firebase", name = "firebase-messaging" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 
 # Testing
 junit = { group = "junit", name = "junit", version.ref = "junit" }

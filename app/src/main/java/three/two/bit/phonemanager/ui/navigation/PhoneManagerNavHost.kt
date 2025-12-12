@@ -257,7 +257,7 @@ fun PhoneManagerNavHost(
             ForgotPasswordScreen(
                 onNavigateBack = {
                     navController.popBackStack()
-                }
+                },
             )
         }
 
