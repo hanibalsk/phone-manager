@@ -180,8 +180,10 @@ fun TripHistoryScreen(
 
                     else -> {
                         // Trip list with day grouping (AC E8.9.2)
+                        // Trip Geocoding Enhancement: Pass geocoded names to display
                         TripList(
                             groupedTrips = uiState.groupedTrips,
+                            geocodedNames = uiState.geocodedNames,
                             isLoadingMore = uiState.isLoadingMore,
                             listState = listState,
                             onTripClick = onTripClick,
@@ -217,9 +219,14 @@ fun TripHistoryScreen(
     }
 }
 
+/**
+ * Trip list with day grouping
+ * Trip Geocoding Enhancement: Accepts geocodedNames to display geocoded location names
+ */
 @Composable
 private fun TripList(
     groupedTrips: Map<TripDayGroup, List<three.two.bit.phonemanager.domain.model.Trip>>,
+    geocodedNames: Map<String, String>,
     isLoadingMore: Boolean,
     listState: androidx.compose.foundation.lazy.LazyListState,
     onTripClick: (String) -> Unit,
@@ -239,6 +246,7 @@ private fun TripList(
             }
 
             // Trip cards for this day (AC E8.9.3)
+            // Trip Geocoding Enhancement: Pass custom or geocoded name to each card
             items(
                 items = trips,
                 key = { trip -> trip.id },
@@ -247,6 +255,7 @@ private fun TripList(
                     trip = trip,
                     onClick = { onTripClick(trip.id) },
                     onSwipeToDelete = { onSwipeToDelete(trip.id) },
+                    displayName = trip.name ?: geocodedNames[trip.id],
                     modifier = Modifier.padding(horizontal = 16.dp),
                 )
             }

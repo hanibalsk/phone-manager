@@ -762,6 +762,42 @@ export interface TripExportRequest {
   include_path: boolean;
 }
 
+// Story AP-7.5.4: Async Export for Large Datasets
+export type ExportJobStatus = "pending" | "processing" | "completed" | "failed";
+
+export interface ExportJob {
+  id: string;
+  status: ExportJobStatus;
+  type: "trips" | "locations" | "app_usage";
+  format: "csv" | "json";
+  filters: {
+    device_id?: string;
+    organization_id?: string;
+    from?: string;
+    to?: string;
+    include_path?: boolean;
+  };
+  total_records: number;
+  processed_records: number;
+  download_url?: string;
+  error_message?: string;
+  created_at: string;
+  completed_at?: string;
+  expires_at?: string;
+}
+
+export interface CreateExportJobRequest {
+  type: "trips" | "locations" | "app_usage";
+  format: "csv" | "json";
+  filters: {
+    device_id?: string;
+    organization_id?: string;
+    from?: string;
+    to?: string;
+    include_path?: boolean;
+  };
+}
+
 // Epic AP-8: App Usage & Unlock Requests
 
 // Story AP-8.1: App Usage Statistics

@@ -2,6 +2,7 @@ package three.two.bit.phonemanager.domain.model
 
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
+import three.two.bit.phonemanager.util.InviteCodeUtils
 
 /**
  * Story E11.9: Represents an invite to join a group.
@@ -65,7 +66,7 @@ data class GroupInvite(
      *
      * @return Deep link URL in format phonemanager://join/{code}
      */
-    fun getDeepLink(): String = "phonemanager://join/$code"
+    fun getDeepLink(): String = InviteCodeUtils.generateDeepLink(code)
 
     /**
      * Get the shareable web URL for this invite.

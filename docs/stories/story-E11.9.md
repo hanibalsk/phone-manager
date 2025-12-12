@@ -209,9 +209,9 @@ so that I can easily onboard new members with secure invite codes.
 
 ### Review Follow-ups (AI)
 
-- [ ] [AI-Review][Med] Extract `extractInviteCode()` to shared utility to eliminate duplication (AC E11.9.5)
-- [ ] [AI-Review][Low] Add explicit CAMERA permission to AndroidManifest.xml
-- [ ] [AI-Review][Low] Extract deep link domain to BuildConfig constant
+- [x] [AI-Review][Med] Extract `extractInviteCode()` to shared utility to eliminate duplication (AC E11.9.5)
+- [x] [AI-Review][Low] Add explicit CAMERA permission to AndroidManifest.xml
+- [x] [AI-Review][Low] Extract deep link domain to BuildConfig constant
 
 ## Dev Notes
 
@@ -488,9 +488,9 @@ Story E11.9 implementation is well-executed with all acceptance criteria met. Th
 
 ### Action Items
 
-- [ ] [AI-Review][Med] Extract `extractInviteCode()` to shared utility to eliminate duplication (AC E11.9.5)
-- [ ] [AI-Review][Low] Add explicit CAMERA permission to AndroidManifest.xml
-- [ ] [AI-Review][Low] Extract deep link domain to BuildConfig constant
+- [x] [AI-Review][Med] Extract `extractInviteCode()` to shared utility to eliminate duplication (AC E11.9.5)
+- [x] [AI-Review][Low] Add explicit CAMERA permission to AndroidManifest.xml
+- [x] [AI-Review][Low] Extract deep link domain to BuildConfig constant
 
 ---
 

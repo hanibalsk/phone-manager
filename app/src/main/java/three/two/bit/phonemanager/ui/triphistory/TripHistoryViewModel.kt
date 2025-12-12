@@ -18,6 +18,7 @@ import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.data.repository.TripRepository
 import three.two.bit.phonemanager.domain.model.Trip
+import three.two.bit.phonemanager.location.GeocodingService
 import three.two.bit.phonemanager.movement.TransportationMode
 import timber.log.Timber
 import javax.inject.Inject
@@ -27,9 +28,13 @@ import javax.inject.Inject
  *
  * Manages trip history display with day grouping, filtering, and pagination.
  * ACs: E8.9.1, E8.9.2, E8.9.4, E8.9.5, E8.9.6, E8.9.7, E8.9.8
+ * Trip Geocoding Enhancement: Provides geocoded location names for trips
  */
 @HiltViewModel
-class TripHistoryViewModel @Inject constructor(private val tripRepository: TripRepository) : ViewModel() {
+class TripHistoryViewModel @Inject constructor(
+    private val tripRepository: TripRepository,
+    private val geocodingService: GeocodingService,
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TripHistoryUiState())
     val uiState: StateFlow<TripHistoryUiState> = _uiState.asStateFlow()
@@ -64,6 +69,9 @@ class TripHistoryViewModel @Inject constructor(private val tripRepository: TripR
                 }
 
                 Timber.d("Loaded ${trips.size} trips")
+
+                // Load geocoded names for trips
+                loadGeocodedNames(trips)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to load trips")
                 _uiState.update {
@@ -104,6 +112,9 @@ class TripHistoryViewModel @Inject constructor(private val tripRepository: TripR
                 }
 
                 Timber.d("Loaded ${newTrips.size} more trips, total: ${allTrips.size}")
+
+                // Load geocoded names for new trips
+                loadGeocodedNames(newTrips)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to load more trips")
                 _uiState.update { it.copy(isLoadingMore = false) }
@@ -129,10 +140,14 @@ class TripHistoryViewModel @Inject constructor(private val tripRepository: TripR
                         isRefreshing = false,
                         hasMoreData = trips.size >= PAGE_SIZE,
                         currentPage = 0,
+                        geocodedNames = emptyMap(), // Clear geocoded names on refresh
                     )
                 }
 
                 Timber.d("Refreshed trips, loaded ${trips.size}")
+
+                // Load geocoded names for trips
+                loadGeocodedNames(trips)
             } catch (e: Exception) {
                 Timber.e(e, "Failed to refresh trips")
                 _uiState.update {
@@ -144,6 +159,47 @@ class TripHistoryViewModel @Inject constructor(private val tripRepository: TripR
             }
         }
     }
+
+    /**
+     * Load geocoded names for trips asynchronously
+     * Trip Geocoding Enhancement
+     */
+    private fun loadGeocodedNames(trips: List<Trip>) {
+        viewModelScope.launch {
+            for (trip in trips) {
+                // Skip if already has custom name or already geocoded
+                if (trip.name != null || _uiState.value.geocodedNames.containsKey(trip.id)) {
+                    continue
+                }
+
+                try {
+                    val geocodedName = geocodingService.getTripTitle(
+                        startLat = trip.startLocation.latitude,
+                        startLng = trip.startLocation.longitude,
+                        endLat = trip.endLocation?.latitude,
+                        endLng = trip.endLocation?.longitude,
+                    )
+
+                    if (geocodedName != null) {
+                        _uiState.update {
+                            it.copy(
+                                geocodedNames = it.geocodedNames + (trip.id to geocodedName),
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.w(e, "Failed to geocode trip ${trip.id}")
+                }
+            }
+        }
+    }
+
+    /**
+     * Get display name for a trip.
+     * Priority: custom name > geocoded name > mode name
+     * Trip Geocoding Enhancement
+     */
+    fun getTripDisplayName(trip: Trip): String? = trip.name ?: _uiState.value.geocodedNames[trip.id]
 
     /**
      * Delete a trip (AC E8.9.8)
@@ -384,6 +440,8 @@ data class TripHistoryUiState(
     val tripIdToDelete: String? = null,
     val lastDeletedTrip: Trip? = null,
     val showUndoSnackbar: Boolean = false,
+    // Trip Geocoding Enhancement: Map of trip ID to geocoded location names
+    val geocodedNames: Map<String, String> = emptyMap(),
 )
 
 /**

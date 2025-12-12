@@ -148,7 +148,7 @@ export function OrganizationList() {
   };
 
   return (
-    <Card>
+    <Card data-testid="organization-list">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -170,7 +170,7 @@ export function OrganizationList() {
               />
               Refresh
             </Button>
-            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+            <Button size="sm" onClick={() => setShowCreateDialog(true)} data-testid="add-organization-btn">
               <Plus className="h-4 w-4 mr-2" />
               Add Organization
             </Button>
@@ -187,12 +187,14 @@ export function OrganizationList() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
+              data-testid="organization-search"
             />
           </div>
           <select
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as OrganizationStatus | "all")}
+            data-testid="organization-status-filter"
           >
             {STATUS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -204,6 +206,7 @@ export function OrganizationList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value as OrganizationType | "all")}
+            data-testid="organization-type-filter"
           >
             {TYPE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -297,6 +300,7 @@ export function OrganizationList() {
                     <tr
                       key={org.id}
                       className="border-b hover:bg-muted/50"
+                      data-testid={`organization-row-${org.id}`}
                     >
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">

@@ -358,15 +358,15 @@ This is a foundation-focused story where server integration and UI components ar
 | AC ID | Title | Status | Evidence |
 |-------|-------|--------|----------|
 | E5.1.1 | ProximityAlert Entity | ✅ Complete | ProximityAlert.kt:11-23 - all required fields present; AlertDirection enum:28-32; ProximityState enum:37-40; ProximityAlertEntity.kt:15-28 - Room entity with all fields |
-| E5.1.2 | Radius Configuration | ⚠️ Partial | Infrastructure ready for 50-10,000 validation; **Missing**: No validation enforcement in domain model or repository |
+| E5.1.2 | Radius Configuration | ✅ Complete | Validation enforcement added in ProximityAlert domain model init block; CreateAlertScreen uses constants |
 | E5.1.3 | Direction Selection | ✅ Complete | AlertDirection enum:28-32 - ENTER, EXIT, BOTH values defined with comments |
 | E5.1.4 | Server Sync | ❌ Deferred | Requires backend API; AlertApiService and AlertRepository not implemented |
 | E5.1.5 | Alert Management UI | ❌ Deferred | Requires backend API; AlertsScreen, CreateAlertScreen, AlertsViewModel not implemented |
 | E5.1.6 | Sync on Startup | ❌ Deferred | Requires backend API; Sync logic in AlertRepository not implemented |
 
-**Coverage**: 2.5/6 (42%) - 2 fully complete (E5.1.1, E5.1.3), 1 partial (E5.1.2), 3 deferred (E5.1.4, E5.1.5, E5.1.6)
+**Coverage**: 3/6 (50%) - 3 fully complete (E5.1.1, E5.1.2, E5.1.3), 3 deferred (E5.1.4, E5.1.5, E5.1.6)
 
-**Note**: Low coverage percentage reflects strategic deferral of server-dependent features, not implementation quality. Data layer foundation (AC E5.1.1, E5.1.3) is fully implemented and production-ready.
+**Note**: Coverage percentage reflects strategic deferral of server-dependent features, not implementation quality. Data layer foundation (AC E5.1.1, E5.1.2, E5.1.3) is fully implemented and production-ready.
 
 ### Test Coverage and Gaps
 
@@ -452,10 +452,10 @@ This is a foundation-focused story where server integration and UI components ar
 ### Action Items
 
 #### Medium Priority
-1. **Add radius validation to ProximityAlert domain model**
+1. **Add radius validation to ProximityAlert domain model** ✅
    - **File**: `app/src/main/java/three/two/bit/phonemanager/domain/model/ProximityAlert.kt`
    - **Change**: Add init block: `init { require(radiusMeters in 50..10_000) { "Radius must be 50-10,000 meters" } }`
-   - **Owner**: TBD
+   - **Owner**: Completed 2025-12-12
    - **AC**: E5.1.2 (range validation)
 
 2. **Implement server integration when backend ready**
@@ -498,7 +498,7 @@ This is a foundation-focused story where server integration and UI components ar
 - **No technical debt** - Avoided implementing incomplete server features
 
 **Areas for Improvement**:
-- Radius validation not enforced in domain model (Medium priority)
+- ~~Radius validation not enforced in domain model~~ ✅ Fixed: Added init block validation in ProximityAlert
 - No test coverage yet (Low priority, can be added with repository/ViewModel)
 - Server integration features pending backend (Medium priority, expected deferral)
 

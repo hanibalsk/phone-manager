@@ -183,7 +183,7 @@ The Group Membership Management implementation provides comprehensive member lis
 | AP-5.2.3 | ✅ Pass | Role dropdown with immediate API call on change |
 | AP-5.2.4 | ✅ Pass | Remove button with confirmation dialog |
 | AP-5.2.5 | ✅ Pass | AddMemberDialog with user search and role selection |
-| AP-5.2.6 | ⚠️ Partial | Error handling for role change exists, but remove member always shows success |
+| AP-5.2.6 | ✅ Pass | Error handling properly implemented using ref pattern with onError callback |
 
 ### Test Coverage and Gaps
 
@@ -211,5 +211,6 @@ The Group Membership Management implementation provides comprehensive member lis
 
 ### Action Items
 
-- [ ] [AI-Review][Medium] Fix handleRemoveMember to check for actual API errors before showing success
-- [ ] [AI-Review][Low] Ensure role values in dropdown match expected API values
+- [x] [AI-Review][Medium] Fix handleRemoveMember to check for actual API errors before showing success - Fixed using ref pattern with onError callback
+- [x] [AI-Review][Low] Ensure role values in dropdown match expected API values - Verified: uses lowercase "admin" | "member" matching GroupMemberRole type
+- [x] [AI-Review][Low] Fix useState to useEffect in AddMemberDialog for debounced search trigger

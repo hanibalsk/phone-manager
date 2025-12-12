@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { GroupMemberRole, GroupMember, AdminUser, PaginatedResponse } from "@/types";
 import { adminGroupsApi, usersApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
@@ -48,11 +48,11 @@ export function AddMemberDialog({
   };
 
   // Effect to trigger search on debounced query change
-  useState(() => {
+  useEffect(() => {
     if (debouncedSearch.length >= 2) {
-      handleSearch();
+      searchUsers(() => usersApi.list({ search: debouncedSearch, limit: 10 }));
     }
-  });
+  }, [debouncedSearch, searchUsers]);
 
   const handleAddMember = async () => {
     if (!selectedUser) return;

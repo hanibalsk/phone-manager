@@ -59,6 +59,7 @@ import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import three.two.bit.phonemanager.R
+import three.two.bit.phonemanager.util.InviteCodeUtils
 import timber.log.Timber
 import java.util.concurrent.Executors
 
@@ -198,7 +199,7 @@ private fun CameraPreviewContent(
                                                         barcode.valueType == Barcode.TYPE_TEXT
                                                     ) {
                                                         barcode.rawValue?.let { value ->
-                                                            val code = extractInviteCode(value)
+                                                            val code = InviteCodeUtils.extractInviteCode(value)
                                                             if (code != null && !hasScanned) {
                                                                 hasScanned = true
                                                                 onCodeScanned(value)
@@ -418,28 +419,3 @@ private fun PermissionDeniedContent(
     }
 }
 
-/**
- * Extract invite code from scanned content
- */
-private fun extractInviteCode(content: String): String? {
-    val trimmed = content.trim()
-
-    // Check for deep link format: phonemanager://join/{code}
-    val deepLinkRegex = Regex("""phonemanager://join/([A-Za-z0-9]{8})""", RegexOption.IGNORE_CASE)
-    deepLinkRegex.find(trimmed)?.let { match ->
-        return match.groupValues[1].uppercase()
-    }
-
-    // Check for plain 8-character alphanumeric code
-    if (trimmed.length == 8 && trimmed.all { it.isLetterOrDigit() }) {
-        return trimmed.uppercase()
-    }
-
-    // Check for HTTPS URL format
-    val urlRegex = Regex("""https?://[^/]+/join/([A-Za-z0-9]{8})""", RegexOption.IGNORE_CASE)
-    urlRegex.find(trimmed)?.let { match ->
-        return match.groupValues[1].uppercase()
-    }
-
-    return null
-}

@@ -12,6 +12,7 @@ import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.GroupRepository
 import three.two.bit.phonemanager.domain.model.GroupPreview
 import three.two.bit.phonemanager.domain.model.GroupRole
+import three.two.bit.phonemanager.util.InviteCodeUtils
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -67,11 +68,8 @@ class JoinGroupViewModel @Inject constructor(
      * @param code The new invite code
      */
     fun setInviteCode(code: String) {
-        // Normalize: uppercase, alphanumeric only, max 8 characters
-        val normalizedCode = code
-            .uppercase()
-            .filter { it.isLetterOrDigit() }
-            .take(8)
+        // Use shared utility for normalization
+        val normalizedCode = InviteCodeUtils.normalizeCode(code)
 
         _inviteCode.value = normalizedCode
 
@@ -173,7 +171,7 @@ class JoinGroupViewModel @Inject constructor(
      * @param scannedContent The raw content from QR scan (could be deep link or plain code)
      */
     fun handleQrCodeScan(scannedContent: String) {
-        val code = extractCodeFromContent(scannedContent)
+        val code = InviteCodeUtils.extractInviteCode(scannedContent)
         if (code != null) {
             setInviteCode(code)
             validateCode()
@@ -189,42 +187,11 @@ class JoinGroupViewModel @Inject constructor(
      * @param deepLink The deep link URL
      */
     fun handleDeepLink(deepLink: String) {
-        val code = extractCodeFromContent(deepLink)
+        val code = InviteCodeUtils.extractInviteCode(deepLink)
         if (code != null) {
             setInviteCode(code)
             validateCode()
         }
-    }
-
-    /**
-     * Extract invite code from various content formats
-     *
-     * Supports:
-     * - phonemanager://join/{code}
-     * - Plain 8-character code
-     * - URL with code as path segment
-     */
-    private fun extractCodeFromContent(content: String): String? {
-        val trimmed = content.trim()
-
-        // Check for deep link format: phonemanager://join/{code}
-        val deepLinkRegex = Regex("""phonemanager://join/([A-Za-z0-9]{8})""", RegexOption.IGNORE_CASE)
-        deepLinkRegex.find(trimmed)?.let { match ->
-            return match.groupValues[1].uppercase()
-        }
-
-        // Check for plain 8-character alphanumeric code
-        if (trimmed.length == 8 && trimmed.all { it.isLetterOrDigit() }) {
-            return trimmed.uppercase()
-        }
-
-        // Check for HTTPS URL format: https://phonemanager.app/join/{code}
-        val urlRegex = Regex("""https?://[^/]+/join/([A-Za-z0-9]{8})""", RegexOption.IGNORE_CASE)
-        urlRegex.find(trimmed)?.let { match ->
-            return match.groupValues[1].uppercase()
-        }
-
-        return null
     }
 
     /**

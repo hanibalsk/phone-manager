@@ -54,10 +54,13 @@ so that I can monitor activity.
   - [x] Add geofence filter
   - [x] Add device filter
   - [x] Add date range filter
-- [ ] Task 4: Timeline Visualization (AC: AP-6.4.3) - Deferred
-  - [ ] Create components/geofences/event-timeline.tsx
-  - [ ] Display events on timeline
-  - [ ] Color code by event type
+- [x] Task 4: Timeline Visualization (AC: AP-6.4.3)
+  - [x] Create components/geofences/event-timeline.tsx
+  - [x] Display events on timeline with visual bar
+  - [x] Color code by event type (ENTER=green, EXIT=red, DWELL=blue)
+  - [x] Group by time/geofence/device with toggle buttons
+  - [x] Expandable event details with legend
+  - [x] Add Table/Timeline toggle to events list
 - [x] Task 5: Export Functionality (AC: AP-6.4.4)
   - [x] Custom CSV export for events
   - [x] JSON export using export-utils
@@ -159,7 +162,7 @@ Story AP-6.4 implements geofence event monitoring with filtering by event type, 
 |----|--------|-------|
 | AP-6.4.1 Event List | ✅ Pass | Events with device, geofence, type, time displayed |
 | AP-6.4.2 Event Type Filter | ✅ Pass | Filter by ENTER, EXIT, DWELL |
-| AP-6.4.3 Timeline Visualization | ❌ Deferred | Requires charting library - explicitly deferred |
+| AP-6.4.3 Timeline Visualization | ✅ Pass | CSS-based timeline with grouping and color coding |
 | AP-6.4.4 Export Events | ✅ Pass | CSV and JSON export implemented |
 
 ### Test Coverage and Gaps

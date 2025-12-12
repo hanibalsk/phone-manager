@@ -7,6 +7,7 @@ import kotlinx.datetime.Instant
  *
  * Represents a proximity alert between two devices
  * AC E5.1.1: Complete alert entity definition
+ * AC E5.1.2: Radius validation (50-10,000 meters)
  */
 data class ProximityAlert(
     val id: String,
@@ -20,7 +21,21 @@ data class ProximityAlert(
     val createdAt: Instant,
     val updatedAt: Instant,
     val lastTriggeredAt: Instant? = null,
-)
+) {
+    init {
+        require(radiusMeters in MIN_RADIUS_METERS..MAX_RADIUS_METERS) {
+            "Radius must be between $MIN_RADIUS_METERS and $MAX_RADIUS_METERS meters, got: $radiusMeters"
+        }
+    }
+
+    companion object {
+        /** Minimum radius for proximity alerts (AC E5.1.2) */
+        const val MIN_RADIUS_METERS = 50
+
+        /** Maximum radius for proximity alerts (AC E5.1.2) */
+        const val MAX_RADIUS_METERS = 10_000
+    }
+}
 
 /**
  * Alert direction type (AC E5.1.3)

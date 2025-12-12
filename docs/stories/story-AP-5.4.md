@@ -174,7 +174,7 @@ The Group Invite Management implementation provides comprehensive invite viewing
 | AP-5.4.3 | ✅ Pass | Status filter dropdown with pending/accepted/expired/revoked options |
 | AP-5.4.4 | ✅ Pass | Revoke button with confirmation dialog for pending invites |
 | AP-5.4.5 | ✅ Pass | Bulk revoke with count, shows revoked_count in notification |
-| AP-5.4.6 | ⚠️ Partial | Error handling exists for bulk revoke, but not for single revoke |
+| AP-5.4.6 | ✅ Pass | Error handling properly implemented using ref pattern with onError callback |
 
 ### Test Coverage and Gaps
 
@@ -203,4 +203,4 @@ The Group Invite Management implementation provides comprehensive invite viewing
 
 ### Action Items
 
-- [ ] [AI-Review][Low] Fix handleRevokeInvite to check for API errors before showing success
+- [x] [AI-Review][Low] Fix handleRevokeInvite to check for API errors before showing success - Fixed using ref pattern with onError callback

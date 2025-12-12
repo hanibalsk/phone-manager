@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import type { Organization, AdminDevice, Trip, TripPoint, TripExportRequest } from "@/types";
-import { organizationsApi, adminDevicesApi, tripsApi } from "@/lib/api-client";
+import { useState, useEffect, useCallback } from "react";
+import type { Organization, AdminDevice, Trip, TripPoint, ExportJob } from "@/types";
+import { organizationsApi, adminDevicesApi, tripsApi, exportJobsApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { RefreshCw, Download, FileJson, FileSpreadsheet, X } from "lucide-react";
+import { RefreshCw, Download, FileJson, FileSpreadsheet, X, Clock, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
+
+const SYNC_EXPORT_LIMIT = 1000;
 
 interface TripExportModalProps {
   /** Pre-selected filters from trip list */
@@ -31,13 +33,61 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
 
+  // Async export states
+  const [tripCount, setTripCount] = useState<number | null>(null);
+  const [countLoading, setCountLoading] = useState(false);
+  const [pendingJobs, setPendingJobs] = useState<ExportJob[]>([]);
+  const [showPendingJobs, setShowPendingJobs] = useState(false);
+  const [asyncJobCreated, setAsyncJobCreated] = useState(false);
+
   const { data: orgsData, execute: fetchOrgs } = useApi<{ items: Organization[] }>();
   const { data: devicesData, execute: fetchDevices } = useApi<{ items: AdminDevice[] }>();
+
+  // Fetch trip count when filters change
+  const fetchTripCount = useCallback(async () => {
+    setCountLoading(true);
+    try {
+      const response = await tripsApi.count({
+        device_id: deviceId || undefined,
+        organization_id: organizationId || undefined,
+        from: fromDate || undefined,
+        to: toDate || undefined,
+      });
+      setTripCount(response.data?.count ?? null);
+    } catch {
+      setTripCount(null);
+    } finally {
+      setCountLoading(false);
+    }
+  }, [deviceId, organizationId, fromDate, toDate]);
+
+  // Fetch pending export jobs
+  const fetchPendingJobs = useCallback(async () => {
+    try {
+      const response = await exportJobsApi.list({ type: "trips", limit: 10 });
+      if (response.data) {
+        setPendingJobs(response.data.items.filter(j => j.status === "pending" || j.status === "processing" || j.status === "completed"));
+      }
+    } catch {
+      // Ignore errors for pending jobs
+    }
+  }, []);
 
   useEffect(() => {
     fetchOrgs(() => organizationsApi.list({ limit: 100 }));
     fetchDevices(() => adminDevicesApi.list({ limit: 100 }));
-  }, [fetchOrgs, fetchDevices]);
+    fetchPendingJobs();
+  }, [fetchOrgs, fetchDevices, fetchPendingJobs]);
+
+  // Debounce trip count fetch
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchTripCount();
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [fetchTripCount]);
+
+  const requiresAsyncExport = tripCount !== null && tripCount > SYNC_EXPORT_LIMIT;
 
   // Filter devices by organization
   const filteredDevices = organizationId
@@ -148,6 +198,12 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
   };
 
   const handleExport = async () => {
+    // Use async export for large datasets
+    if (requiresAsyncExport) {
+      await handleAsyncExport();
+      return;
+    }
+
     setExporting(true);
     setProgress("Fetching trips...");
 
@@ -212,6 +268,59 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
     } finally {
       setExporting(false);
     }
+  };
+
+  const handleAsyncExport = async () => {
+    setExporting(true);
+    setProgress("Creating export job...");
+
+    try {
+      const response = await exportJobsApi.create({
+        type: "trips",
+        format,
+        filters: {
+          device_id: deviceId || undefined,
+          organization_id: organizationId || undefined,
+          from: fromDate || undefined,
+          to: toDate || undefined,
+          include_path: includePath,
+        },
+      });
+
+      if (!response.data) {
+        throw new Error(response.error || "Failed to create export job");
+      }
+
+      setAsyncJobCreated(true);
+      setProgress(null);
+      fetchPendingJobs();
+    } catch (error) {
+      setProgress(`Error: ${error instanceof Error ? error.message : "Failed to create export job"}`);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  const getJobStatusIcon = (status: ExportJob["status"]) => {
+    switch (status) {
+      case "pending":
+        return <Clock className="h-4 w-4 text-muted-foreground" />;
+      case "processing":
+        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+      case "completed":
+        return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+      case "failed":
+        return <AlertCircle className="h-4 w-4 text-destructive" />;
+    }
+  };
+
+  const formatJobDate = (dateString: string) => {
+    return new Date(dateString).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   return (
@@ -343,6 +452,115 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
             </Label>
           </div>
 
+          {/* Trip Count & Async Export Notice */}
+          {tripCount !== null && (
+            <div className={`text-sm p-3 rounded-md ${requiresAsyncExport ? "bg-amber-50 border border-amber-200 dark:bg-amber-950/20 dark:border-amber-800" : "bg-muted"}`}>
+              <div className="flex items-center gap-2">
+                {countLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : requiresAsyncExport ? (
+                  <Clock className="h-4 w-4 text-amber-600" />
+                ) : (
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                )}
+                <span className="font-medium">
+                  {tripCount.toLocaleString()} trips match your filters
+                </span>
+              </div>
+              {requiresAsyncExport && (
+                <p className="text-xs text-muted-foreground mt-1 ml-6">
+                  Large exports are processed in the background. You&apos;ll be able to download the file when ready.
+                </p>
+              )}
+            </div>
+          )}
+
+          {/* Async Job Created Success */}
+          {asyncJobCreated && (
+            <div className="text-sm p-3 rounded-md bg-green-50 border border-green-200 dark:bg-green-950/20 dark:border-green-800">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <span className="font-medium text-green-800 dark:text-green-200">
+                  Export job created successfully!
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1 ml-6">
+                Your export is being processed. Check the pending jobs below for status.
+              </p>
+            </div>
+          )}
+
+          {/* Pending Export Jobs */}
+          {pendingJobs.length > 0 && (
+            <div className="border rounded-md">
+              <button
+                type="button"
+                className="w-full flex items-center justify-between p-3 text-sm font-medium hover:bg-muted/50"
+                onClick={() => setShowPendingJobs(!showPendingJobs)}
+              >
+                <span className="flex items-center gap-2">
+                  <Clock className="h-4 w-4" />
+                  Pending Export Jobs ({pendingJobs.length})
+                </span>
+                <RefreshCw
+                  className={`h-4 w-4 transition-transform ${showPendingJobs ? "rotate-180" : ""}`}
+                />
+              </button>
+              {showPendingJobs && (
+                <div className="border-t divide-y">
+                  {pendingJobs.map((job) => (
+                    <div key={job.id} className="p-3 text-sm">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {getJobStatusIcon(job.status)}
+                          <span className="capitalize">{job.status}</span>
+                          <span className="text-muted-foreground">•</span>
+                          <span className="text-muted-foreground">{job.format.toUpperCase()}</span>
+                        </div>
+                        <span className="text-xs text-muted-foreground">
+                          {formatJobDate(job.created_at)}
+                        </span>
+                      </div>
+                      {job.status === "processing" && job.total_records > 0 && (
+                        <div className="mt-2">
+                          <div className="h-1.5 bg-muted rounded-full overflow-hidden">
+                            <div
+                              className="h-full bg-blue-500 transition-all"
+                              style={{ width: `${(job.processed_records / job.total_records) * 100}%` }}
+                            />
+                          </div>
+                          <span className="text-xs text-muted-foreground">
+                            {job.processed_records.toLocaleString()} / {job.total_records.toLocaleString()} records
+                          </span>
+                        </div>
+                      )}
+                      {job.status === "completed" && job.download_url && (
+                        <div className="mt-2">
+                          <a
+                            href={job.download_url}
+                            className="inline-flex items-center gap-1 text-xs text-blue-600 hover:underline"
+                            download
+                          >
+                            <Download className="h-3 w-3" />
+                            Download ({job.total_records.toLocaleString()} records)
+                          </a>
+                          {job.expires_at && (
+                            <span className="text-xs text-muted-foreground ml-2">
+                              Expires {formatJobDate(job.expires_at)}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      {job.status === "failed" && job.error_message && (
+                        <p className="mt-1 text-xs text-destructive">{job.error_message}</p>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Progress */}
           {progress && (
             <div className="text-sm text-muted-foreground flex items-center gap-2">
@@ -356,11 +574,25 @@ export function TripExportModal({ initialFilters, onClose }: TripExportModalProp
             <Button variant="outline" onClick={onClose} disabled={exporting} data-testid="export-cancel">
               Cancel
             </Button>
-            <Button onClick={handleExport} disabled={exporting} data-testid="export-button">
+            <Button
+              onClick={handleExport}
+              disabled={exporting || asyncJobCreated}
+              data-testid="export-button"
+            >
               {exporting ? (
                 <>
                   <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                  Exporting...
+                  {requiresAsyncExport ? "Creating Job..." : "Exporting..."}
+                </>
+              ) : asyncJobCreated ? (
+                <>
+                  <CheckCircle2 className="h-4 w-4 mr-2" />
+                  Job Created
+                </>
+              ) : requiresAsyncExport ? (
+                <>
+                  <Clock className="h-4 w-4 mr-2" />
+                  Start Background Export
                 </>
               ) : (
                 <>

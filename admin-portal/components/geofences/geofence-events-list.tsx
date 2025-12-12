@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import type { GeofenceEvent, GeofenceEventType, Geofence, AdminDevice } from "@/types";
 import { EventTypeBadge } from "./event-type-badge";
+import { EventTimeline } from "./event-timeline";
 import { geofencesApi, adminDevicesApi } from "@/lib/api-client";
 import { useApi } from "@/hooks/use-api";
 import {
@@ -19,12 +20,17 @@ import {
   RefreshCw,
   Download,
   MapPin,
+  Table,
+  Clock,
 } from "lucide-react";
 import { exportToCSV, exportToJSON } from "@/lib/export-utils";
 
 const ITEMS_PER_PAGE = 25;
 
+type ViewMode = "table" | "timeline";
+
 export function GeofenceEventsList() {
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
   const [geofenceId, setGeofenceId] = useState("");
   const [deviceId, setDeviceId] = useState("");
   const [eventType, setEventType] = useState<GeofenceEventType | "">("");
@@ -160,6 +166,27 @@ export function GeofenceEventsList() {
             </CardDescription>
           </div>
           <div className="flex gap-2">
+            {/* View Mode Toggle */}
+            <div className="flex gap-1 border rounded-md p-0.5">
+              <Button
+                variant={viewMode === "table" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("table")}
+                className="h-7 px-2"
+              >
+                <Table className="h-4 w-4 mr-1" />
+                Table
+              </Button>
+              <Button
+                variant={viewMode === "timeline" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("timeline")}
+                className="h-7 px-2"
+              >
+                <Clock className="h-4 w-4 mr-1" />
+                Timeline
+              </Button>
+            </div>
             <Button
               variant="outline"
               size="sm"
@@ -294,50 +321,54 @@ export function GeofenceEventsList() {
           </div>
         )}
 
-        {/* Events Table */}
+        {/* Events Display */}
         {!error && events.length > 0 && (
           <>
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left py-3 px-4 font-medium">Time</th>
-                    <th className="text-left py-3 px-4 font-medium">Device</th>
-                    <th className="text-left py-3 px-4 font-medium">Geofence</th>
-                    <th className="text-left py-3 px-4 font-medium">Event</th>
-                    <th className="text-left py-3 px-4 font-medium">Location</th>
-                    <th className="text-left py-3 px-4 font-medium">Dwell Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {events.map((event) => (
-                    <tr key={event.id} className="border-b hover:bg-muted/50">
-                      <td className="py-3 px-4 text-sm">
-                        {formatDateTime(event.triggered_at)}
-                      </td>
-                      <td className="py-3 px-4 text-sm font-medium">
-                        {event.device_name}
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        {event.geofence_name}
-                      </td>
-                      <td className="py-3 px-4">
-                        <EventTypeBadge type={event.event_type} />
-                      </td>
-                      <td className="py-3 px-4 text-sm font-mono">
-                        {event.latitude.toFixed(6)}, {event.longitude.toFixed(6)}
-                      </td>
-                      <td className="py-3 px-4 text-sm">
-                        {formatDwellTime(event.dwell_time_seconds)}
-                      </td>
+            {viewMode === "timeline" ? (
+              <EventTimeline events={events} />
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="text-left py-3 px-4 font-medium">Time</th>
+                      <th className="text-left py-3 px-4 font-medium">Device</th>
+                      <th className="text-left py-3 px-4 font-medium">Geofence</th>
+                      <th className="text-left py-3 px-4 font-medium">Event</th>
+                      <th className="text-left py-3 px-4 font-medium">Location</th>
+                      <th className="text-left py-3 px-4 font-medium">Dwell Time</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {events.map((event) => (
+                      <tr key={event.id} className="border-b hover:bg-muted/50">
+                        <td className="py-3 px-4 text-sm">
+                          {formatDateTime(event.triggered_at)}
+                        </td>
+                        <td className="py-3 px-4 text-sm font-medium">
+                          {event.device_name}
+                        </td>
+                        <td className="py-3 px-4 text-sm">
+                          {event.geofence_name}
+                        </td>
+                        <td className="py-3 px-4">
+                          <EventTypeBadge type={event.event_type} />
+                        </td>
+                        <td className="py-3 px-4 text-sm font-mono">
+                          {event.latitude.toFixed(6)}, {event.longitude.toFixed(6)}
+                        </td>
+                        <td className="py-3 px-4 text-sm">
+                          {formatDwellTime(event.dwell_time_seconds)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
 
-            {/* Pagination */}
-            {totalPages > 1 && (
+            {/* Pagination - only show for table view */}
+            {viewMode === "table" && totalPages > 1 && (
               <div className="flex items-center justify-between mt-4">
                 <p className="text-sm text-muted-foreground">
                   Page {page} of {totalPages}

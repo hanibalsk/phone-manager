@@ -92,7 +92,7 @@ export function TokenList() {
 
   return (
     <>
-      <Card>
+      <Card data-testid="token-list">
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
@@ -114,7 +114,7 @@ export function TokenList() {
                 />
                 Refresh
               </Button>
-              <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+              <Button size="sm" onClick={() => setShowCreateDialog(true)} data-testid="create-token-btn">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Token
               </Button>
@@ -165,7 +165,7 @@ export function TokenList() {
           {!error && tokens.length > 0 && (
             <>
               <div className="overflow-x-auto">
-                <table className="w-full">
+                <table className="w-full" data-testid="token-table">
                   <thead>
                     <tr className="border-b">
                       <th className="text-left py-3 px-4 font-medium">Name</th>
@@ -182,6 +182,7 @@ export function TokenList() {
                       <tr
                         key={token.id}
                         className="border-b hover:bg-muted/50"
+                        data-testid={`token-row-${token.id}`}
                       >
                         <td className="py-3 px-4">
                           <div className="flex items-center gap-2">

@@ -55,6 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.AlertDirection
 import three.two.bit.phonemanager.domain.model.Device
+import three.two.bit.phonemanager.domain.model.ProximityAlert
 import kotlin.math.roundToInt
 
 /**
@@ -285,18 +286,18 @@ private fun RadiusSection(sliderValue: Float, radiusMeters: Int, onSliderChange:
             modifier = Modifier.fillMaxWidth(),
         )
 
-        // Range labels
+        // Range labels (AC E5.1.2)
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text(
-                text = "50m",
+                text = formatRadius(ProximityAlert.MIN_RADIUS_METERS),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "10km",
+                text = formatRadius(ProximityAlert.MAX_RADIUS_METERS),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -387,14 +388,16 @@ private fun DirectionOption(
 }
 
 /**
- * Convert slider value (0-1) to radius meters (50-10,000) using logarithmic scale
+ * Convert slider value (0-1) to radius meters using logarithmic scale
+ * Uses ProximityAlert.MIN_RADIUS_METERS and MAX_RADIUS_METERS constants (AC E5.1.2)
  */
 private fun sliderToRadius(sliderValue: Float): Int {
-    // Logarithmic scale: 50m to 10,000m
-    val minLog = kotlin.math.ln(50f)
-    val maxLog = kotlin.math.ln(10000f)
+    // Logarithmic scale for natural feel (small values more precise)
+    val minLog = kotlin.math.ln(ProximityAlert.MIN_RADIUS_METERS.toFloat())
+    val maxLog = kotlin.math.ln(ProximityAlert.MAX_RADIUS_METERS.toFloat())
     val logValue = minLog + (maxLog - minLog) * sliderValue
-    return kotlin.math.exp(logValue).roundToInt().coerceIn(50, 10000)
+    return kotlin.math.exp(logValue).roundToInt()
+        .coerceIn(ProximityAlert.MIN_RADIUS_METERS, ProximityAlert.MAX_RADIUS_METERS)
 }
 
 /**

@@ -8,6 +8,8 @@ import {
   LocationHistoryList,
   LocationHistoryMap,
   ExportDropdown,
+  BoundsSelector,
+  type GeoBounds,
 } from "@/components/locations";
 import {
   Card,
@@ -38,6 +40,7 @@ export default function LocationHistoryPage() {
   const [organizationId, setOrganizationId] = useState<string>("");
   const [fromDate, setFromDate] = useState<string>("");
   const [toDate, setToDate] = useState<string>("");
+  const [bounds, setBounds] = useState<GeoBounds | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [hasQueried, setHasQueried] = useState(false);
 
@@ -67,10 +70,11 @@ export default function LocationHistoryPage() {
         organization_id: organizationId || undefined,
         from: fromDate || undefined,
         to: toDate || undefined,
+        bbox: bounds || undefined,
         limit: MAX_RESULTS,
       })
     );
-  }, [executeQuery, deviceId, organizationId, fromDate, toDate]);
+  }, [executeQuery, deviceId, organizationId, fromDate, toDate, bounds]);
 
   // Filter devices by selected organization
   const filteredDevices =
@@ -169,6 +173,14 @@ export default function LocationHistoryPage() {
                 onChange={(e) => setToDate(e.target.value)}
               />
             </div>
+          </div>
+
+          {/* Geographic Bounds Selector */}
+          <div className="mb-4">
+            <BoundsSelector
+              value={bounds}
+              onChange={setBounds}
+            />
           </div>
 
           <div className="flex justify-between items-center">

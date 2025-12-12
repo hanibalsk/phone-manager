@@ -23,6 +23,7 @@ import three.two.bit.phonemanager.domain.model.LatLng
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.domain.model.TripState
 import three.two.bit.phonemanager.domain.model.TripTrigger
+import three.two.bit.phonemanager.location.GeocodingService
 import three.two.bit.phonemanager.movement.TransportationMode
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -48,6 +49,7 @@ import kotlin.test.assertTrue
 class TripHistoryViewModelTest {
 
     private lateinit var tripRepository: TripRepository
+    private lateinit var geocodingService: GeocodingService
     private lateinit var viewModel: TripHistoryViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -56,6 +58,7 @@ class TripHistoryViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         tripRepository = mockk(relaxed = true)
+        geocodingService = mockk(relaxed = true)
     }
 
     // region Initial State Tests
@@ -67,7 +70,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -103,7 +106,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -122,7 +125,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -140,7 +143,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } throws Exception("Database error")
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -159,7 +162,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -176,7 +179,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -198,7 +201,7 @@ class TripHistoryViewModelTest {
 
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns firstPageTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -221,7 +224,7 @@ class TripHistoryViewModelTest {
         val testTrips = createTestTrips(count = 40)
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Verify initial state: 20 trips displayed, hasMoreData = true
@@ -244,7 +247,7 @@ class TripHistoryViewModelTest {
         val testTrips = createTestTrips(count = 10)
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -263,7 +266,7 @@ class TripHistoryViewModelTest {
         val testTrips = createTestTrips(count = 40)
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Verify initial state
@@ -288,7 +291,7 @@ class TripHistoryViewModelTest {
         val testTrips = createTestTrips(count = 20)
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - simulate error on next page
@@ -316,7 +319,7 @@ class TripHistoryViewModelTest {
 
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns allTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -338,7 +341,7 @@ class TripHistoryViewModelTest {
     fun `setQuickDateFilter TODAY sets correct date range`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -359,7 +362,7 @@ class TripHistoryViewModelTest {
     fun `setQuickDateFilter THIS_WEEK sets correct date range`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -381,7 +384,7 @@ class TripHistoryViewModelTest {
     fun `setQuickDateFilter THIS_MONTH sets correct date range`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -403,7 +406,7 @@ class TripHistoryViewModelTest {
     fun `setQuickDateFilter ALL clears date range`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Set a filter first
@@ -434,7 +437,7 @@ class TripHistoryViewModelTest {
         val walkingTrips = allTrips.take(5)
 
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns allTrips
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -453,7 +456,7 @@ class TripHistoryViewModelTest {
     fun `toggleModeFilter removes mode from filter when already selected`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Add filter
@@ -484,7 +487,7 @@ class TripHistoryViewModelTest {
         val allTrips = walkingTrips + drivingTrips
 
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns allTrips
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - filter by WALKING
@@ -510,7 +513,7 @@ class TripHistoryViewModelTest {
         )
 
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - filter by WALKING and CYCLING
@@ -541,7 +544,7 @@ class TripHistoryViewModelTest {
         val testTrips = createTestTrips(count = 20)
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Set various filters
@@ -575,7 +578,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
         coEvery { tripRepository.deleteTrip(any()) } returns Unit
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -598,7 +601,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
         coEvery { tripRepository.deleteTrip(any()) } returns Unit
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -621,7 +624,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
         coEvery { tripRepository.deleteTrip(any()) } throws Exception("Delete failed")
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -648,7 +651,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.deleteTrip(any()) } returns Unit
         coEvery { tripRepository.insert(any()) } returns Result.success("restored-id")
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.deleteTrip(testTrips[0].id)
@@ -675,7 +678,7 @@ class TripHistoryViewModelTest {
         val testTrips = createTestTrips(count = 5)
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - call undoDelete without deleting
@@ -694,7 +697,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.deleteTrip(any()) } returns Unit
         coEvery { tripRepository.insert(any()) } throws Exception("Restore failed")
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.deleteTrip(testTrips[0].id)
@@ -722,7 +725,7 @@ class TripHistoryViewModelTest {
         val refreshedTrips = createTestTrips(count = 25, startId = 100)
 
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns initialTrips
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -744,7 +747,7 @@ class TripHistoryViewModelTest {
     fun `refreshTrips sets isRefreshing during load`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - advance scheduler fully
@@ -766,7 +769,7 @@ class TripHistoryViewModelTest {
         val testTrips = createTestTrips(count = 10)
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When - simulate error on refresh
@@ -790,7 +793,7 @@ class TripHistoryViewModelTest {
     fun `showDateRangePicker updates state`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -816,7 +819,7 @@ class TripHistoryViewModelTest {
     fun `showDeleteConfirmation updates state`() = runTest {
         // Given
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns emptyList()
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -836,7 +839,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
         coEvery { tripRepository.deleteTrip(any()) } returns Unit
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.showDeleteConfirmation(testTrips[0].id)
@@ -861,7 +864,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
         coEvery { tripRepository.deleteTrip(any()) } returns Unit
 
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.deleteTrip(testTrips[0].id)
@@ -911,7 +914,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then - groups should be ordered: Today, Yesterday, then by date descending
@@ -946,7 +949,7 @@ class TripHistoryViewModelTest {
         coEvery { tripRepository.getTripsBetween(any(), any()) } returns testTrips
 
         // When
-        viewModel = TripHistoryViewModel(tripRepository)
+        viewModel = TripHistoryViewModel(tripRepository, geocodingService)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then

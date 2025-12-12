@@ -64,6 +64,9 @@ import type {
   TripPoint,
   TripEvent,
   TripListParams,
+  ExportJob,
+  ExportJobStatus,
+  CreateExportJobRequest,
   // Epic AP-8: App Usage & Unlock Requests
   AdminAppUsage,
   AppUsageByCategory,
@@ -1056,6 +1059,52 @@ export const tripsApi = {
 
   // Get trip events
   getEvents: (id: string) => request<{ events: TripEvent[] }>(`/api/admin/trips/${id}/events`),
+
+  // Count trips for export (to determine if async is needed)
+  count: (params?: { device_id?: string; organization_id?: string; from?: string; to?: string }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.device_id) searchParams.set("device_id", params.device_id);
+      if (params.organization_id) searchParams.set("organization_id", params.organization_id);
+      if (params.from) searchParams.set("from", params.from);
+      if (params.to) searchParams.set("to", params.to);
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/trips/count${queryString ? `?${queryString}` : ""}`;
+    return request<{ count: number }>(endpoint);
+  },
+};
+
+// Story AP-7.5.4: Async Export Jobs API
+export const exportJobsApi = {
+  // Create a new async export job
+  create: (data: CreateExportJobRequest) =>
+    request<ExportJob>("/api/admin/export-jobs", { method: "POST", body: JSON.stringify(data) }),
+
+  // List export jobs for the current user
+  list: (params?: { status?: ExportJobStatus; type?: string; page?: number; limit?: number }) => {
+    const searchParams = new URLSearchParams();
+    if (params) {
+      if (params.status) searchParams.set("status", params.status);
+      if (params.type) searchParams.set("type", params.type);
+      if (params.page) searchParams.set("page", String(params.page));
+      if (params.limit) searchParams.set("limit", String(params.limit));
+    }
+    const queryString = searchParams.toString();
+    const endpoint = `/api/admin/export-jobs${queryString ? `?${queryString}` : ""}`;
+    return request<PaginatedResponse<ExportJob>>(endpoint);
+  },
+
+  // Get export job status
+  get: (id: string) => request<ExportJob>(`/api/admin/export-jobs/${id}`),
+
+  // Cancel an export job
+  cancel: (id: string) =>
+    request<ExportJob>(`/api/admin/export-jobs/${id}/cancel`, { method: "POST" }),
+
+  // Delete an export job (and its file)
+  delete: (id: string) =>
+    request<void>(`/api/admin/export-jobs/${id}`, { method: "DELETE" }),
 };
 
 // Epic AP-8: App Usage & Unlock Requests API

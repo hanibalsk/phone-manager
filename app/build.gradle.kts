@@ -85,6 +85,9 @@ android {
 
         // Story E3.1: Google Maps API key
         manifestPlaceholders["MAPS_API_KEY"] = getLocalProperty("MAPS_API_KEY")
+
+        // Story E11.9: Deep link scheme for invite codes
+        buildConfigField("String", "DEEP_LINK_SCHEME", "\"phonemanager\"")
     }
 
     buildTypes {

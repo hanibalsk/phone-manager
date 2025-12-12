@@ -163,7 +163,7 @@ export function UserList() {
   };
 
   return (
-    <Card>
+    <Card data-testid="user-list">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -185,7 +185,7 @@ export function UserList() {
               />
               Refresh
             </Button>
-            <Button size="sm" onClick={() => setShowCreateDialog(true)}>
+            <Button size="sm" onClick={() => setShowCreateDialog(true)} data-testid="add-user-btn">
               <UserPlus className="h-4 w-4 mr-2" />
               Add User
             </Button>
@@ -202,12 +202,14 @@ export function UserList() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9"
+              data-testid="user-search"
             />
           </div>
           <select
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value as UserStatus | "all")}
+            data-testid="user-status-filter"
           >
             {STATUS_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -219,6 +221,7 @@ export function UserList() {
             className="rounded-md border border-input bg-background px-3 py-2 text-sm min-w-[150px]"
             value={roleFilter}
             onChange={(e) => setRoleFilter(e.target.value as UserRole | "all")}
+            data-testid="user-role-filter"
           >
             {ROLE_OPTIONS.map((option) => (
               <option key={option.value} value={option.value}>
@@ -330,6 +333,7 @@ export function UserList() {
                     <tr
                       key={user.id}
                       className="border-b hover:bg-muted/50"
+                      data-testid={`user-row-${user.id}`}
                     >
                       <td className="py-3 px-4">
                         <span className="font-medium">{user.email}</span>

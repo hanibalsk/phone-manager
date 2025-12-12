@@ -47,9 +47,11 @@ so that I can investigate activity.
   - [x] Create components/locations/location-history-list.tsx
   - [x] Display results in table format
   - [x] Show results on map with path visualization
-- [ ] Task 3: Implement Geographic Bounds (AC: AP-6.2.1) - Deferred
-  - [ ] Add map-based bounds selection
-  - [ ] Draw rectangle for area selection
+- [x] Task 3: Implement Geographic Bounds (AC: AP-6.2.1)
+  - [x] Add SVG-based bounds selection component
+  - [x] Draw rectangle for area selection
+  - [x] Support manual coordinate input
+  - [x] Integrate with location history query
 - [x] Task 4: Implement Export (AC: AP-6.2.3)
   - [x] Add export dropdown with format options
   - [x] Implement CSV export
@@ -107,12 +109,15 @@ Claude Opus 4.5 (claude-opus-4-5-20251101)
 - Export functionality: CSV, JSON, and GPX (with waypoints and tracks)
 - Result limit warning when 10,000 max reached
 - View toggle between list and map modes
+- Geographic bounds selector with SVG-based rectangle drawing
+- Manual coordinate input for precise bounds specification
 
 ### File List
-- `admin-portal/app/(dashboard)/locations/history/page.tsx` (NEW)
+- `admin-portal/app/(dashboard)/locations/history/page.tsx` (NEW, MODIFIED)
 - `admin-portal/components/locations/location-history-list.tsx` (NEW)
 - `admin-portal/components/locations/location-history-map.tsx` (NEW)
 - `admin-portal/components/locations/export-dropdown.tsx` (NEW)
+- `admin-portal/components/locations/bounds-selector.tsx` (NEW)
 - `admin-portal/lib/export-utils.ts` (NEW)
 - `admin-portal/components/locations/index.tsx` (MODIFIED)
 
@@ -146,7 +151,6 @@ Story AP-6.2 implements location history querying with export functionality. The
 
 | Severity | Finding | Location |
 |----------|---------|----------|
-| Low | Geographic bounds selection deferred (Task 3) | `app/(dashboard)/locations/history/page.tsx` |
 | Low | Missing data-testid attributes | Multiple components |
 | Info | Query requires org or device selection - good UX safeguard | `page.tsx:59-61` |
 
@@ -154,7 +158,7 @@ Story AP-6.2 implements location history querying with export functionality. The
 
 | AC | Status | Notes |
 |----|--------|-------|
-| AP-6.2.1 Query Interface | ✅ Pass | Device, date range filters implemented; geographic bounds deferred |
+| AP-6.2.1 Query Interface | ✅ Pass | Device, date range, and geographic bounds filters implemented |
 | AP-6.2.2 Results Display | ✅ Pass | Map and list views with toggle button |
 | AP-6.2.3 Export Functionality | ✅ Pass | CSV, JSON, GPX formats all implemented |
 | AP-6.2.4 Result Limits | ✅ Pass | 10,000 limit with warning when truncated |
@@ -180,4 +184,3 @@ Story AP-6.2 implements location history querying with export functionality. The
 
 ### Action Items
 - [Low] Add data-testid attributes for E2E testing
-- [Low] Consider implementing geographic bounds selection in future iteration

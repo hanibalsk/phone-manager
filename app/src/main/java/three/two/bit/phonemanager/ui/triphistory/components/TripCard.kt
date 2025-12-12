@@ -51,10 +51,23 @@ import three.two.bit.phonemanager.movement.TransportationMode
  * Displays a single trip with mode icon, duration, distance, and times.
  * AC E8.9.3: Trip card information
  * AC E8.9.8: Swipe to delete
+ * Trip Geocoding Enhancement: Display geocoded location names
+ *
+ * @param trip The trip to display
+ * @param onClick Callback when the card is clicked
+ * @param onSwipeToDelete Callback when the card is swiped to delete
+ * @param displayName Optional geocoded/custom name to display instead of mode name
+ * @param modifier Modifier for styling
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TripCard(trip: Trip, onClick: () -> Unit, onSwipeToDelete: () -> Unit, modifier: Modifier = Modifier) {
+fun TripCard(
+    trip: Trip,
+    onClick: () -> Unit,
+    onSwipeToDelete: () -> Unit,
+    displayName: String? = null,
+    modifier: Modifier = Modifier,
+) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             if (value == SwipeToDismissBoxValue.EndToStart) {
@@ -92,6 +105,7 @@ fun TripCard(trip: Trip, onClick: () -> Unit, onSwipeToDelete: () -> Unit, modif
             TripCardContent(
                 trip = trip,
                 onClick = onClick,
+                displayName = displayName,
                 modifier = modifier,
             )
         },
@@ -101,7 +115,12 @@ fun TripCard(trip: Trip, onClick: () -> Unit, onSwipeToDelete: () -> Unit, modif
 }
 
 @Composable
-private fun TripCardContent(trip: Trip, onClick: () -> Unit, modifier: Modifier = Modifier) {
+private fun TripCardContent(
+    trip: Trip,
+    onClick: () -> Unit,
+    displayName: String? = null,
+    modifier: Modifier = Modifier,
+) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -129,9 +148,9 @@ private fun TripCardContent(trip: Trip, onClick: () -> Unit, modifier: Modifier 
             Column(
                 modifier = Modifier.weight(1f),
             ) {
-                // Trip name
+                // Trip name (geocoded name if available, otherwise mode name)
                 Text(
-                    text = getTripName(trip),
+                    text = displayName ?: getTripName(trip),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
@@ -212,20 +231,18 @@ fun getModeIconAndColor(mode: TransportationMode): Pair<ImageVector, Color> = wh
 }
 
 /**
- * Get trip name (auto-generated from start/end or user-named)
+ * Get fallback trip name based on transportation mode.
+ * Used when no custom name or geocoded name is available.
+ * Trip Geocoding Enhancement: This is the fallback when geocoding fails or is unavailable.
  */
 @Composable
-private fun getTripName(trip: Trip): String {
-    // For now, just show the mode name
-    // TODO: Could be enhanced with geocoded location names
-    return when (trip.dominantMode) {
-        TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
-        TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
-        TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
-        TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
-        TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
-        TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
-    }
+private fun getTripName(trip: Trip): String = when (trip.dominantMode) {
+    TransportationMode.WALKING -> stringResource(R.string.trip_mode_walking)
+    TransportationMode.RUNNING -> stringResource(R.string.trip_mode_running)
+    TransportationMode.CYCLING -> stringResource(R.string.trip_mode_cycling)
+    TransportationMode.IN_VEHICLE -> stringResource(R.string.trip_mode_driving)
+    TransportationMode.STATIONARY -> stringResource(R.string.trip_mode_stationary)
+    TransportationMode.UNKNOWN -> stringResource(R.string.trip_mode_unknown)
 }
 
 /**
@@ -245,12 +262,19 @@ private fun formatTripTimes(trip: Trip): String {
 
 /**
  * Simple TripCard without swipe (for previews/simple displays)
+ * Trip Geocoding Enhancement: Supports displayName parameter
  */
 @Composable
-fun SimpleTripCard(trip: Trip, onClick: () -> Unit, modifier: Modifier = Modifier) {
+fun SimpleTripCard(
+    trip: Trip,
+    onClick: () -> Unit,
+    displayName: String? = null,
+    modifier: Modifier = Modifier,
+) {
     TripCardContent(
         trip = trip,
         onClick = onClick,
+        displayName = displayName,
         modifier = modifier,
     )
 }
