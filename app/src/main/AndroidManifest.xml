@@ -82,6 +82,17 @@
                     android:scheme="phonemanager"
                     android:host="enroll" />
             </intent-filter>
+
+            <!-- Story E9.11: Deep link handling for OAuth callbacks -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <!-- Custom scheme: phonemanager://auth/{provider}?id_token=xxx&state=yyy -->
+                <data
+                    android:scheme="phonemanager"
+                    android:host="auth" />
+            </intent-filter>
         </activity>
 
         <!-- LocationTrackingService -->

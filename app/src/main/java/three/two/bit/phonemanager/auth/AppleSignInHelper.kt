@@ -228,13 +228,11 @@ class AppleSignInHelper @Inject constructor() {
     /**
      * Get Apple Client ID from configuration
      *
-     * Note: Apple Sign-In requires a Services ID configured in Apple Developer Portal
+     * Note: Apple Sign-In requires a Services ID configured in Apple Developer Portal.
+     * Set APPLE_OAUTH_CLIENT_ID in local.properties.
      */
     private fun getAppleClientId(): String {
-        // Apple Client ID should be configured server-side or via backend config
-        // For now, return empty to indicate not configured
-        // In production, this would come from a server config endpoint
-        return ""
+        return BuildConfig.APPLE_OAUTH_CLIENT_ID
     }
 
     /**

@@ -80,6 +80,9 @@ android {
         // Story E9.11: Google OAuth client ID (web client for Android)
         buildConfigField("String", "GOOGLE_OAUTH_CLIENT_ID", "\"${getLocalProperty("GOOGLE_OAUTH_CLIENT_ID")}\"")
 
+        // Story E9.11: Apple OAuth client ID (Services ID from Apple Developer Portal)
+        buildConfigField("String", "APPLE_OAUTH_CLIENT_ID", "\"${getLocalProperty("APPLE_OAUTH_CLIENT_ID")}\"")
+
         // Story E3.1: Google Maps API key
         manifestPlaceholders["MAPS_API_KEY"] = getLocalProperty("MAPS_API_KEY")
     }

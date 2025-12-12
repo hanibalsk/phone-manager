@@ -20,6 +20,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.core.app.ActivityCompat
 import dagger.hilt.android.AndroidEntryPoint
+import three.two.bit.phonemanager.auth.AppleSignInHelper
 import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.ui.navigation.PhoneManagerNavHost
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
@@ -38,6 +39,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var secureStorage: SecureStorage
+
+    @Inject
+    lateinit var appleSignInHelper: AppleSignInHelper
 
     private val permissionViewModel: PermissionViewModel by viewModels()
 
@@ -142,10 +146,13 @@ class MainActivity : ComponentActivity() {
     /**
      * Story E11.9: Extract invite code from deep link URI (AC E11.9.8)
      * Story E13.10: Extract enrollment token from deep link URI (AC E13.10.3)
+     * Story E9.11: Handle Apple OAuth callback deep link
      *
      * Handles deep links in the format:
      * - phonemanager://join/{code}
      * - phonemanager://enroll/{token}
+     * - phonemanager://auth/apple?id_token=xxx&state=yyy (success)
+     * - phonemanager://auth/apple?error=xxx (error)
      */
     private fun handleDeepLinkIntent(intent: Intent?) {
         val uri = intent?.data
@@ -171,6 +178,19 @@ class MainActivity : ComponentActivity() {
                         Timber.w("Invalid enrollment token in deep link: $token")
                     }
                 }
+                DEEP_LINK_HOST_AUTH -> {
+                    // Story E9.11: Handle Apple OAuth callback
+                    val provider = uri.pathSegments.firstOrNull()
+                    if (provider == "apple") {
+                        val idToken = uri.getQueryParameter("id_token")
+                        val state = uri.getQueryParameter("state")
+                        val error = uri.getQueryParameter("error")
+                        Timber.i("Apple OAuth callback received, hasToken=${idToken != null}, hasError=${error != null}")
+                        appleSignInHelper.handleCallback(idToken, state, error)
+                    } else {
+                        Timber.w("Unknown auth provider in deep link: $provider")
+                    }
+                }
                 else -> {
                     Timber.w("Unknown deep link host: ${uri.host}")
                 }
@@ -189,6 +209,9 @@ class MainActivity : ComponentActivity() {
 
         // Story E13.10: Deep link constants for enterprise enrollment (AC E13.10.3)
         const val DEEP_LINK_HOST_ENROLL = "enroll"
+
+        // Story E9.11: Deep link constants for OAuth callbacks
+        const val DEEP_LINK_HOST_AUTH = "auth"
     }
 
     override fun onResume() {
