@@ -11,7 +11,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { X, BarChart3, Users, Smartphone, FolderTree, HardDrive, RefreshCw, AlertCircle } from "lucide-react";
+import { X, BarChart3, Users, Smartphone, FolderTree, HardDrive, RefreshCw, AlertCircle, Download } from "lucide-react";
 import { useFocusTrap } from "@/hooks/use-focus-trap";
 
 interface OrganizationStatsDialogProps {
@@ -60,6 +60,46 @@ export function OrganizationStatsDialog({ organization, onClose }: OrganizationS
     }
     return `${mb} MB`;
   };
+
+  const exportToCSV = useCallback(() => {
+    if (!stats) return;
+
+    const rows: string[] = [];
+
+    // Header section
+    rows.push(`Organization Statistics: ${organization.name}`);
+    rows.push(`Export Date: ${new Date().toISOString()}`);
+    rows.push("");
+
+    // Summary section
+    rows.push("Summary Statistics");
+    rows.push("Metric,Current,Limit");
+    rows.push(`Users,${stats.users_count},${organization.max_users}`);
+    rows.push(`Devices,${stats.devices_count},${organization.max_devices}`);
+    rows.push(`Groups,${stats.groups_count},${organization.max_groups || "Unlimited"}`);
+    rows.push(`Storage Used (MB),${stats.storage_used_mb},`);
+    rows.push("");
+
+    // Usage trends section
+    if (stats.usage_trends && stats.usage_trends.length > 0) {
+      rows.push("Usage Trends");
+      rows.push("Period,Users,Devices");
+      stats.usage_trends.forEach(trend => {
+        rows.push(`${trend.period},${trend.users},${trend.devices}`);
+      });
+    }
+
+    const csvContent = rows.join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `${organization.name.toLowerCase().replace(/\s+/g, "-")}-stats-${new Date().toISOString().split("T")[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, [stats, organization.name, organization.max_users, organization.max_devices, organization.max_groups]);
 
   return (
     <div
@@ -188,8 +228,12 @@ export function OrganizationStatsDialog({ organization, onClose }: OrganizationS
                 </div>
               )}
 
-              {/* Refresh Button */}
-              <div className="flex justify-end">
+              {/* Action Buttons */}
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" size="sm" onClick={exportToCSV}>
+                  <Download className="h-4 w-4 mr-2" />
+                  Export CSV
+                </Button>
                 <Button variant="outline" size="sm" onClick={fetchStats}>
                   <RefreshCw className="h-4 w-4 mr-2" />
                   Refresh

@@ -69,7 +69,7 @@ The organization statistics dialog is well-implemented with a clean, informative
 
 **Medium**
 - No unit tests for `OrganizationStatsDialog` component
-- Missing CSV export functionality (PRD AC mentions: "Export statistics as CSV")
+- ~~Missing CSV export functionality (PRD AC mentions: "Export statistics as CSV")~~ ✅ Implemented 2025-12-12
 
 **Low**
 - Usage trends table could benefit from sorting/filtering
@@ -116,7 +116,7 @@ The organization statistics dialog is well-implemented with a clean, informative
 | Priority | Action | Type | Related |
 |----------|--------|------|---------|
 | Medium | Add unit tests for OrganizationStatsDialog | TechDebt | AC1-5 |
-| Medium | Add CSV export for statistics | Enhancement | PRD FR-2.5 |
+| ~~Medium~~ | ~~Add CSV export for statistics~~ ✅ Done | ~~Enhancement~~ | PRD FR-2.5 |
 | Low | Add progress bars for limit utilization | Enhancement | UX |
 | Low | Add charts for usage trends visualization | Enhancement | UX |
 | Low | Add storage limit comparison | Enhancement | AC2 |
@@ -127,3 +127,4 @@ The organization statistics dialog is well-implemented with a clean, informative
 | Date | Change | Author |
 |------|--------|--------|
 | 2025-12-09 | Senior Developer Review notes appended | AI |
+| 2025-12-12 | CSV export functionality implemented | Dev |

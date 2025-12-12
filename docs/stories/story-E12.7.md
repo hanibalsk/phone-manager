@@ -4,8 +4,9 @@
 **Epic**: 12 - Settings Control
 **Priority**: High
 **Estimate**: 6 story points (2-3 days)
-**Status**: Planned
+**Status**: Implemented
 **Created**: 2025-12-01
+**Implemented**: 2025-12-10
 **PRD Reference**: PRD-user-management.md, SETTINGS_CONTROL_SPEC.md
 **Dependencies**: E11.8 (Group Management), E12.6 (Settings with Locks), Backend E12.2-E12.3
 
@@ -104,116 +105,116 @@ so that I can ensure compliance and configure devices remotely.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create Admin Settings Models (AC: E12.7.2, E12.7.7)
-  - [ ] Create MemberDeviceSettings data class
-  - [ ] Create SettingChange data class (key, oldValue, newValue, changedBy, timestamp)
-  - [ ] Create SettingsTemplate data class (id, name, settings, locks)
-  - [ ] Add validation methods for setting values
+- [x] Task 1: Create Admin Settings Models (AC: E12.7.2, E12.7.7)
+  - [x] Create MemberDeviceSettings data class
+  - [x] Create SettingChange data class (key, oldValue, newValue, changedBy, timestamp)
+  - [x] Create SettingsTemplate data class (id, name, settings, locks)
+  - [x] Add validation methods for setting values
 
-- [ ] Task 2: Extend DeviceApiService (AC: E12.7.3-E12.7.5)
-  - [ ] Add `GET /devices/{id}/settings` - Fetch device settings (admin endpoint)
-  - [ ] Add `PUT /devices/{id}/settings` - Update settings with changes map
-  - [ ] Add `PUT /devices/{id}/settings/locks` - Bulk lock/unlock settings
-  - [ ] Add `GET /devices/{id}/settings/history` - Fetch audit trail
-  - [ ] Add `POST /settings/templates` - Save template
-  - [ ] Add `GET /settings/templates` - List templates
-  - [ ] Add `POST /devices/bulk-update` - Apply settings to multiple devices
+- [x] Task 2: Extend DeviceApiService (AC: E12.7.3-E12.7.5)
+  - [x] Add `GET /devices/{id}/settings` - Fetch device settings (admin endpoint)
+  - [x] Add `PUT /devices/{id}/settings` - Update settings with changes map
+  - [x] Add `PUT /devices/{id}/settings/locks` - Bulk lock/unlock settings
+  - [x] Add `GET /devices/{id}/settings/history` - Fetch audit trail
+  - [x] Add `POST /settings/templates` - Save template
+  - [x] Add `GET /settings/templates` - List templates
+  - [x] Add `POST /devices/bulk-update` - Apply settings to multiple devices
 
-- [ ] Task 3: Create AdminSettingsRepository (AC: All)
-  - [ ] Implement getDeviceSettings(deviceId) function
-  - [ ] Implement updateDeviceSettings(deviceId, changes) function
-  - [ ] Implement lockSettings(deviceId, settingKeys) function
-  - [ ] Implement unlockSettings(deviceId, settingKeys) function
-  - [ ] Implement getSettingsHistory(deviceId) function
-  - [ ] Implement saveTemplate(template) function
-  - [ ] Implement getTemplates() function
-  - [ ] Implement bulkUpdateDevices(deviceIds, settings) function
+- [x] Task 3: Create AdminSettingsRepository (AC: All)
+  - [x] Implement getDeviceSettings(deviceId) function
+  - [x] Implement updateDeviceSettings(deviceId, changes) function
+  - [x] Implement lockSettings(deviceId, settingKeys) function
+  - [x] Implement unlockSettings(deviceId, settingKeys) function
+  - [x] Implement getSettingsHistory(deviceId) function
+  - [x] Implement saveTemplate(template) function
+  - [x] Implement getTemplates() function
+  - [x] Implement bulkUpdateDevices(deviceIds, settings) function
 
-- [ ] Task 4: Create MemberDevicesViewModel (AC: E12.7.1)
-  - [ ] Create MemberDevicesViewModel with Hilt
-  - [ ] Inject GroupRepository, AdminSettingsRepository
-  - [ ] Add StateFlow<List<MemberDevice>> devices
-  - [ ] Add filterByStatus(online/offline) function
-  - [ ] Add searchDevices(query) function
-  - [ ] Load devices for current group
+- [x] Task 4: Create MemberDevicesViewModel (AC: E12.7.1)
+  - [x] Create MemberDevicesViewModel with Hilt
+  - [x] Inject GroupRepository, AdminSettingsRepository
+  - [x] Add StateFlow<List<MemberDevice>> devices
+  - [x] Add filterByStatus(online/offline) function
+  - [x] Add searchDevices(query) function
+  - [x] Load devices for current group
 
-- [ ] Task 5: Create DeviceSettingsViewModel (AC: E12.7.2-E12.7.5, E12.7.8)
-  - [ ] Create DeviceSettingsViewModel with Hilt
-  - [ ] Add StateFlow<MemberDeviceSettings> settings
-  - [ ] Add StateFlow<List<SettingChange>> history
-  - [ ] Add loadDeviceSettings(deviceId) function
-  - [ ] Add updateSetting(key, value) function
-  - [ ] Add lockSetting(key) function
-  - [ ] Add unlockSetting(key) function
-  - [ ] Add applyChanges() function
-  - [ ] Add loadHistory() function
+- [x] Task 5: Create DeviceSettingsViewModel (AC: E12.7.2-E12.7.5, E12.7.8)
+  - [x] Create DeviceSettingsViewModel with Hilt
+  - [x] Add StateFlow<MemberDeviceSettings> settings
+  - [x] Add StateFlow<List<SettingChange>> history
+  - [x] Add loadDeviceSettings(deviceId) function
+  - [x] Add updateSetting(key, value) function
+  - [x] Add lockSetting(key) function
+  - [x] Add unlockSetting(key) function
+  - [x] Add applyChanges() function
+  - [x] Add loadHistory() function
 
-- [ ] Task 6: Create SettingsTemplateViewModel (AC: E12.7.7)
-  - [ ] Create SettingsTemplateViewModel with Hilt
-  - [ ] Add StateFlow<List<SettingsTemplate>> templates
-  - [ ] Add saveTemplate(name, settings) function
-  - [ ] Add loadTemplate(templateId) function
-  - [ ] Add deleteTemplate(templateId) function
-  - [ ] Apply template to device
+- [x] Task 6: Create SettingsTemplateViewModel (AC: E12.7.7)
+  - [x] Create SettingsTemplateViewModel with Hilt
+  - [x] Add StateFlow<List<SettingsTemplate>> templates
+  - [x] Add saveTemplate(name, settings) function
+  - [x] Add loadTemplate(templateId) function
+  - [x] Add deleteTemplate(templateId) function
+  - [x] Apply template to device
 
-- [ ] Task 7: Create MemberDevicesScreen (AC: E12.7.1)
-  - [ ] Create MemberDevicesScreen composable
-  - [ ] Display LazyColumn of device cards
-  - [ ] Show device name, owner, online status indicator
-  - [ ] Add "Configure" button per device
-  - [ ] Add filter chips (All, Online, Offline)
-  - [ ] Add search bar
-  - [ ] Navigate to DeviceSettingsScreen on configure
+- [x] Task 7: Create MemberDevicesScreen (AC: E12.7.1)
+  - [x] Create MemberDevicesScreen composable
+  - [x] Display LazyColumn of device cards
+  - [x] Show device name, owner, online status indicator
+  - [x] Add "Configure" button per device
+  - [x] Add filter chips (All, Online, Offline)
+  - [x] Add search bar
+  - [x] Navigate to DeviceSettingsScreen on configure
 
-- [ ] Task 8: Create DeviceSettingsScreen (AC: E12.7.2-E12.7.5)
-  - [ ] Create DeviceSettingsScreen composable
-  - [ ] Group settings by category (collapsible sections)
-  - [ ] Show setting name, current value, lock toggle
-  - [ ] Add setting editors (Switch, TextField, Slider)
-  - [ ] Add "Apply Changes" button (enabled when dirty)
-  - [ ] Add "Reset to Defaults" button
-  - [ ] Show last synced timestamp
-  - [ ] Add "View History" button
+- [x] Task 8: Create DeviceSettingsScreen (AC: E12.7.2-E12.7.5)
+  - [x] Create DeviceSettingsScreen composable
+  - [x] Group settings by category (collapsible sections)
+  - [x] Show setting name, current value, lock toggle
+  - [x] Add setting editors (Switch, TextField, Slider)
+  - [x] Add "Apply Changes" button (enabled when dirty)
+  - [x] Add "Reset to Defaults" button
+  - [x] Show last synced timestamp
+  - [x] Add "View History" button
 
-- [ ] Task 9: Create BulkSettingsScreen (AC: E12.7.6)
-  - [ ] Create BulkSettingsScreen composable
-  - [ ] Show device multi-select with checkboxes
-  - [ ] Add setting selection (which settings to apply)
-  - [ ] Show preview of changes per device
-  - [ ] Add progress indicator during bulk update
-  - [ ] Show summary card with successes/failures
+- [x] Task 9: Create BulkSettingsScreen (AC: E12.7.6)
+  - [x] Create BulkSettingsScreen composable
+  - [x] Show device multi-select with checkboxes
+  - [x] Add setting selection (which settings to apply)
+  - [x] Show preview of changes per device
+  - [x] Add progress indicator during bulk update
+  - [x] Show summary card with successes/failures
 
-- [ ] Task 10: Create SettingsTemplateDialog (AC: E12.7.7)
-  - [ ] Create SaveTemplateDialog composable
-  - [ ] Add template name input
-  - [ ] Add setting multi-select checklist
-  - [ ] Show preview of template
-  - [ ] Create LoadTemplateDialog for applying templates
+- [x] Task 10: Create SettingsTemplateDialog (AC: E12.7.7)
+  - [x] Create SaveTemplateDialog composable
+  - [x] Add template name input
+  - [x] Add setting multi-select checklist
+  - [x] Show preview of template
+  - [x] Create LoadTemplateDialog for applying templates
 
-- [ ] Task 11: Create SettingsHistoryScreen (AC: E12.7.8)
-  - [ ] Create SettingsHistoryScreen composable
-  - [ ] Display timeline of changes
-  - [ ] Show change details (who, when, old/new values)
-  - [ ] Add filter by setting or user
-  - [ ] Add date range filter
-  - [ ] Show lock/unlock actions with different styling
+- [x] Task 11: Create SettingsHistoryScreen (AC: E12.7.8)
+  - [x] Create SettingsHistoryScreen composable
+  - [x] Display timeline of changes
+  - [x] Show change details (who, when, old/new values)
+  - [x] Add filter by setting or user
+  - [x] Add date range filter
+  - [x] Show lock/unlock actions with different styling
 
-- [ ] Task 12: Create Confirmation Dialogs (AC: E12.7.4, E12.7.5)
-  - [ ] Create ApplyChangesDialog with change summary
-  - [ ] Create LockSettingDialog with warning
-  - [ ] Create BulkUpdateConfirmDialog
-  - [ ] Handle confirmations/cancellations
+- [x] Task 12: Create Confirmation Dialogs (AC: E12.7.4, E12.7.5)
+  - [x] Create ApplyChangesDialog with change summary
+  - [x] Create LockSettingDialog with warning
+  - [x] Create BulkUpdateConfirmDialog
+  - [x] Handle confirmations/cancellations
 
-- [ ] Task 13: Update Navigation (AC: E12.7.1, E12.7.2)
-  - [ ] Add Screen.MemberDevices(groupId) to sealed class
-  - [ ] Add Screen.DeviceSettings(deviceId) to sealed class
-  - [ ] Add Screen.BulkSettings(groupId) to sealed class
-  - [ ] Add Screen.SettingsHistory(deviceId) to sealed class
-  - [ ] Add composable routes in NavHost
+- [x] Task 13: Update Navigation (AC: E12.7.1, E12.7.2)
+  - [x] Add Screen.MemberDevices(groupId) to sealed class
+  - [x] Add Screen.DeviceSettings(deviceId) to sealed class
+  - [x] Add Screen.BulkSettings(groupId) to sealed class
+  - [x] Add Screen.SettingsHistory(deviceId) to sealed class
+  - [x] Add composable routes in NavHost
 
 - [ ] Task 14: Testing (All ACs)
-  - [ ] Write unit tests for AdminSettingsRepository
-  - [ ] Write unit tests for DeviceSettingsViewModel
+  - [x] Write unit tests for AdminSettingsRepository
+  - [x] Write unit tests for DeviceSettingsViewModel
   - [ ] Write unit tests for bulk update logic
   - [ ] Write UI tests for DeviceSettingsScreen
   - [ ] Test setting validation
@@ -367,11 +368,23 @@ _To be filled after implementation_
 
 ### Created Files
 
-_To be filled during implementation_
+- `app/src/main/java/three/two/bit/phonemanager/data/repository/AdminSettingsRepository.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/MemberDevicesScreen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/MemberDevicesViewModel.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/DeviceSettingsScreen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/DeviceSettingsViewModel.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/BulkSettingsScreen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/BulkSettingsViewModel.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/SettingsTemplateScreen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/SettingsTemplateViewModel.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/admin/SettingsHistoryScreen.kt`
 
 ### Modified Files
 
-_To be filled during implementation_
+- `app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/navigation/NavGraph.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/navigation/Screen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/groups/GroupDetailScreen.kt`
 
 ---
 
@@ -380,10 +393,11 @@ _To be filled during implementation_
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-01 | Martin (PM) | Story created from Epic 12 specification |
+| 2025-12-10 | Dev | Implementation completed - admin settings management UI |
 
 ---
 
-**Last Updated**: 2025-12-01
-**Status**: Planned
+**Last Updated**: 2025-12-10
+**Status**: Implemented
 **Dependencies**: E11.8 (Group Management), E12.6 (Settings with Locks), Backend E12.2-E12.3
 **Blocking**: None (admin-only feature)

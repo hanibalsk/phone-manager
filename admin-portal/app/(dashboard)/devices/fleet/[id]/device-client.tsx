@@ -10,6 +10,7 @@ import { AdminDeviceStatus } from "@/components/devices/admin-device-status";
 import { AdminDeviceMetrics } from "@/components/devices/admin-device-metrics";
 import { AdminDeviceActions } from "@/components/devices/admin-device-actions";
 import { Button } from "@/components/ui/button";
+import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { ChevronLeft, RefreshCw, Smartphone } from "lucide-react";
 import Link from "next/link";
 
@@ -102,13 +103,13 @@ export function DeviceDetailsClient({ deviceId }: Props) {
   return (
     <div className="p-6">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
-        <Link href="/devices/fleet" className="hover:text-foreground">
-          Devices
-        </Link>
-        <span>/</span>
-        <span className="text-foreground">{device.display_name}</span>
-      </nav>
+      <Breadcrumb
+        className="mb-6"
+        items={[
+          { label: "Devices", href: "/devices/fleet" },
+          { label: device.display_name }
+        ]}
+      />
 
       {/* Header */}
       <div className="flex items-center justify-between mb-6">

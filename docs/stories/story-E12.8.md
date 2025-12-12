@@ -4,8 +4,9 @@
 **Epic**: 12 - Settings Control
 **Priority**: High
 **Estimate**: 4 story points (1-2 days)
-**Status**: Planned
+**Status**: Implemented
 **Created**: 2025-12-01
+**Implemented**: 2025-12-10
 **PRD Reference**: PRD-user-management.md, SETTINGS_CONTROL_SPEC.md
 **Dependencies**: E12.6 (Settings with Locks), Backend E12.4
 
@@ -100,84 +101,84 @@ so that I can regain control of my device configuration when needed.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Create Unlock Request Models (AC: E12.8.1-E12.8.3)
-  - [ ] Create UnlockRequest data class (id, deviceId, settingKey, reason, status, requestedBy, respondedBy, response, createdAt, respondedAt)
-  - [ ] Create UnlockRequestStatus enum (PENDING, APPROVED, DENIED, WITHDRAWN)
-  - [ ] Add helper methods: isPending(), canWithdraw()
+- [x] Task 1: Create Unlock Request Models (AC: E12.8.1-E12.8.3)
+  - [x] Create UnlockRequest data class (id, deviceId, settingKey, reason, status, requestedBy, respondedBy, response, createdAt, respondedAt)
+  - [x] Create UnlockRequestStatus enum (PENDING, APPROVED, DENIED, WITHDRAWN)
+  - [x] Add helper methods: isPending(), canWithdraw()
 
-- [ ] Task 2: Extend DeviceApiService (AC: E12.8.2, E12.8.4)
-  - [ ] Add `POST /devices/{id}/settings/unlock-requests` - Create request
-  - [ ] Add `GET /devices/{id}/settings/unlock-requests` - List user's requests
-  - [ ] Add `DELETE /unlock-requests/{id}` - Withdraw request
-  - [ ] Handle validation errors (empty reason)
+- [x] Task 2: Extend DeviceApiService (AC: E12.8.2, E12.8.4)
+  - [x] Add `POST /devices/{id}/settings/unlock-requests` - Create request
+  - [x] Add `GET /devices/{id}/settings/unlock-requests` - List user's requests
+  - [x] Add `DELETE /unlock-requests/{id}` - Withdraw request
+  - [x] Handle validation errors (empty reason)
 
-- [ ] Task 3: Create UnlockRequestRepository (AC: All)
-  - [ ] Implement createUnlockRequest(settingKey, reason) function
-  - [ ] Implement getUserUnlockRequests() function
-  - [ ] Implement withdrawRequest(requestId) function
-  - [ ] Implement getRequestStatus(requestId) function
-  - [ ] Cache requests locally (Room database)
+- [x] Task 3: Create UnlockRequestRepository (AC: All)
+  - [x] Implement createUnlockRequest(settingKey, reason) function
+  - [x] Implement getUserUnlockRequests() function
+  - [x] Implement withdrawRequest(requestId) function
+  - [x] Implement getRequestStatus(requestId) function
+  - [x] Cache requests locally (Room database)
 
-- [ ] Task 4: Create UnlockRequestViewModel (AC: E12.8.3-E12.8.7)
-  - [ ] Create UnlockRequestViewModel with Hilt
-  - [ ] Create UnlockRequestUiState sealed class
-  - [ ] Add StateFlow<List<UnlockRequest>> requests
-  - [ ] Add createRequest(settingKey, reason) function
-  - [ ] Add withdrawRequest(requestId) function
-  - [ ] Add filterByStatus(status) function
-  - [ ] Add sortByDate() function
-  - [ ] Load user's requests on init
+- [x] Task 4: Create UnlockRequestViewModel (AC: E12.8.3-E12.8.7)
+  - [x] Create UnlockRequestViewModel with Hilt
+  - [x] Create UnlockRequestUiState sealed class
+  - [x] Add StateFlow<List<UnlockRequest>> requests
+  - [x] Add createRequest(settingKey, reason) function
+  - [x] Add withdrawRequest(requestId) function
+  - [x] Add filterByStatus(status) function
+  - [x] Add sortByDate() function
+  - [x] Load user's requests on init
 
-- [ ] Task 5: Create RequestUnlockDialog (AC: E12.8.1, E12.8.2)
-  - [ ] Create RequestUnlockDialog composable
-  - [ ] Show setting name prominently
-  - [ ] Show current setting value
-  - [ ] Add multiline TextField for reason
-  - [ ] Show character count (200 max)
-  - [ ] Add "Send Request" button (disabled if empty)
-  - [ ] Add "Cancel" button
-  - [ ] Call viewModel.createRequest()
+- [x] Task 5: Create RequestUnlockDialog (AC: E12.8.1, E12.8.2)
+  - [x] Create RequestUnlockDialog composable
+  - [x] Show setting name prominently
+  - [x] Show current setting value
+  - [x] Add multiline TextField for reason
+  - [x] Show character count (200 max)
+  - [x] Add "Send Request" button (disabled if empty)
+  - [x] Add "Cancel" button
+  - [x] Call viewModel.createRequest()
 
-- [ ] Task 6: Create UnlockRequestsScreen (AC: E12.8.3, E12.8.4)
-  - [ ] Create UnlockRequestsScreen composable
-  - [ ] Display LazyColumn of request cards
-  - [ ] Show setting name, status badge, timestamp
-  - [ ] Add expandable detail with reason/response
-  - [ ] Add "Withdraw" button for pending requests
-  - [ ] Add filter chips (All, Pending, Approved, Denied)
-  - [ ] Show empty state if no requests
+- [x] Task 6: Create UnlockRequestsScreen (AC: E12.8.3, E12.8.4)
+  - [x] Create UnlockRequestsScreen composable
+  - [x] Display LazyColumn of request cards
+  - [x] Show setting name, status badge, timestamp
+  - [x] Add expandable detail with reason/response
+  - [x] Add "Withdraw" button for pending requests
+  - [x] Add filter chips (All, Pending, Approved, Denied)
+  - [x] Show empty state if no requests
 
-- [ ] Task 7: Create RequestDetailCard (AC: E12.8.6)
-  - [ ] Create RequestDetailCard composable
-  - [ ] Show request info (setting, reason, timestamp)
-  - [ ] Show admin response section if decided
-  - [ ] Show decision (approved/denied) with color coding
-  - [ ] Show admin name and response message
-  - [ ] Show decision timestamp
+- [x] Task 7: Create RequestDetailCard (AC: E12.8.6)
+  - [x] Create RequestDetailCard composable
+  - [x] Show request info (setting, reason, timestamp)
+  - [x] Show admin response section if decided
+  - [x] Show decision (approved/denied) with color coding
+  - [x] Show admin name and response message
+  - [x] Show decision timestamp
 
-- [ ] Task 8: Implement FCM Handler for Responses (AC: E12.8.5, E12.8.8)
-  - [ ] Extend FirebaseMessagingService
-  - [ ] Parse "unlock_request_response" message type
-  - [ ] Extract request ID, status, admin response
-  - [ ] Update UnlockRequestRepository
-  - [ ] If approved, call SettingsSyncRepository to unlock
-  - [ ] Show notification with status
-  - [ ] Update UI if UnlockRequestsScreen is open
+- [x] Task 8: Implement FCM Handler for Responses (AC: E12.8.5, E12.8.8)
+  - [x] Extend FirebaseMessagingService
+  - [x] Parse "unlock_request_response" message type
+  - [x] Extract request ID, status, admin response
+  - [x] Update UnlockRequestRepository
+  - [x] If approved, call SettingsSyncRepository to unlock
+  - [x] Show notification with status
+  - [x] Update UI if UnlockRequestsScreen is open
 
-- [ ] Task 9: Integrate with SettingLockedDialog (AC: E12.8.1)
-  - [ ] Update SettingLockedDialog from E12.6
-  - [ ] Add "Request Unlock" button
-  - [ ] Navigate to RequestUnlockDialog on tap
-  - [ ] Pass setting key and current value
+- [x] Task 9: Integrate with SettingLockedDialog (AC: E12.8.1)
+  - [x] Update SettingLockedDialog from E12.6
+  - [x] Add "Request Unlock" button
+  - [x] Navigate to RequestUnlockDialog on tap
+  - [x] Pass setting key and current value
 
-- [ ] Task 10: Update SettingsScreen Navigation (AC: E12.8.3)
-  - [ ] Add "Unlock Requests" menu item in Settings
-  - [ ] Show badge with pending request count
-  - [ ] Navigate to UnlockRequestsScreen
+- [x] Task 10: Update SettingsScreen Navigation (AC: E12.8.3)
+  - [x] Add "Unlock Requests" menu item in Settings
+  - [x] Show badge with pending request count
+  - [x] Navigate to UnlockRequestsScreen
 
 - [ ] Task 11: Testing (All ACs)
-  - [ ] Write unit tests for UnlockRequestRepository
-  - [ ] Write unit tests for UnlockRequestViewModel
+  - [x] Write unit tests for UnlockRequestRepository
+  - [x] Write unit tests for UnlockRequestViewModel
   - [ ] Write UI tests for RequestUnlockDialog
   - [ ] Write UI tests for UnlockRequestsScreen
   - [ ] Test request creation flow
@@ -315,11 +316,24 @@ _To be filled after implementation_
 
 ### Created Files
 
-_To be filled during implementation_
+- `app/src/main/java/three/two/bit/phonemanager/domain/model/UnlockRequestModels.kt`
+- `app/src/main/java/three/two/bit/phonemanager/network/models/UnlockRequestApiModels.kt`
+- `app/src/main/java/three/two/bit/phonemanager/data/repository/UnlockRequestRepository.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/unlock/UnlockRequestViewModel.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/unlock/UnlockRequestsScreen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/unlock/RequestUnlockDialog.kt`
+- `app/src/test/java/three/two/bit/phonemanager/data/repository/UnlockRequestRepositoryTest.kt`
+- `app/src/test/java/three/two/bit/phonemanager/ui/unlock/UnlockRequestViewModelTest.kt`
 
 ### Modified Files
 
-_To be filled during implementation_
+- `app/src/main/java/three/two/bit/phonemanager/network/DeviceApiService.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/settings/SettingsScreen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/settings/SettingLockedDialog.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/navigation/NavGraph.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/navigation/Screen.kt`
+- `app/src/main/java/three/two/bit/phonemanager/data/repository/SettingsSyncRepository.kt`
+- `app/src/main/java/three/two/bit/phonemanager/service/SettingsMessagingService.kt`
 
 ---
 
@@ -328,10 +342,11 @@ _To be filled during implementation_
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-01 | Martin (PM) | Story created from Epic 12 specification |
+| 2025-12-10 | Dev | Implementation completed - unlock request UI and FCM handler |
 
 ---
 
-**Last Updated**: 2025-12-01
-**Status**: Planned
+**Last Updated**: 2025-12-10
+**Status**: Implemented
 **Dependencies**: E12.6 (Settings with Locks), Backend E12.4
 **Blocking**: None (user feature, complements admin settings)
