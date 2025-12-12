@@ -28,11 +28,11 @@ export interface Tokens {
 
 export interface LoginResponse {
   user: User;
-  tokens: Tokens;
+  tokens?: Tokens; // Optional for httpOnly cookie mode (tokens set via cookies)
 }
 
 export interface RefreshResponse {
-  tokens: Tokens;
+  tokens?: Tokens; // Optional for httpOnly cookie mode (tokens set via cookies)
 }
 
 export interface LoginCredentials {

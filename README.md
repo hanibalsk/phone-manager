@@ -115,6 +115,8 @@ app/src/main/java/three/two/bit/phonemanager/
 | [Developer Guide](docs/DEVELOPER_GUIDE.md) | Setup and contribution guide |
 | [PRD](docs/PRD.md) | Product requirements |
 | [Epics](docs/epics.md) | Development roadmap |
+| [Admin Portal PRD](docs/PRD-admin-portal.md) | Admin portal requirements |
+| [Admin API Spec](docs/ADMIN_API_SPEC.md) | Admin API documentation |
 
 ## Features Status
 
@@ -207,6 +209,7 @@ Format code:
 ## Related Projects
 
 - **Backend Server**: [phone-manager-backend](https://github.com/hanibalsk/phone-manager-backend) - The companion backend server for Phone Manager
+- **Admin Portal**: [admin-portal/](admin-portal/) - Web-based administration interface (Next.js)
 
 ## License
 

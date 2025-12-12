@@ -17,6 +17,7 @@ import type {
   AuthState,
 } from "@/types/auth";
 import { authApi } from "@/lib/api-client";
+import { isLocalStorageMode, isHttpOnlyMode } from "@/lib/auth-mode";
 
 const TOKEN_STORAGE_KEY = "auth_tokens";
 
@@ -29,7 +30,13 @@ interface AuthContextValue extends AuthState {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
+/**
+ * Get tokens from localStorage (only in localStorage mode).
+ * In httpOnly mode, returns null since tokens are managed via cookies.
+ */
 function getStoredTokens(): Tokens | null {
+  // In httpOnly mode, tokens are in cookies - not accessible from JS
+  if (isHttpOnlyMode()) return null;
   if (typeof window === "undefined") return null;
   try {
     const stored = localStorage.getItem(TOKEN_STORAGE_KEY);
@@ -39,7 +46,13 @@ function getStoredTokens(): Tokens | null {
   }
 }
 
+/**
+ * Store tokens in localStorage (only in localStorage mode).
+ * In httpOnly mode, this is a no-op since backend sets cookies.
+ */
 function setStoredTokens(tokens: Tokens | null): void {
+  // In httpOnly mode, backend handles cookie storage
+  if (isHttpOnlyMode()) return;
   if (typeof window === "undefined") return;
   if (tokens) {
     localStorage.setItem(TOKEN_STORAGE_KEY, JSON.stringify(tokens));
@@ -48,7 +61,13 @@ function setStoredTokens(tokens: Tokens | null): void {
   }
 }
 
+/**
+ * Get the current access token (only available in localStorage mode).
+ * In httpOnly mode, returns null since tokens are in httpOnly cookies.
+ */
 export function getAccessToken(): string | null {
+  // In httpOnly mode, tokens are in cookies - not accessible from JS
+  if (isHttpOnlyMode()) return null;
   const tokens = getStoredTokens();
   return tokens?.access_token ?? null;
 }
@@ -59,20 +78,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const [tokens, setTokens] = useState<Tokens | null>(null);
 
-  const isAuthenticated = !!user && !!tokens;
+  // In httpOnly mode, tokens are in cookies (not in state), so just check user
+  // In localStorage mode, require both user and tokens
+  const isAuthenticated = isHttpOnlyMode() ? !!user : (!!user && !!tokens);
 
-  // Initialize auth state from stored tokens
+  // Initialize auth state from stored tokens or cookies
   useEffect(() => {
     const initAuth = async () => {
-      const storedTokens = getStoredTokens();
-      if (storedTokens) {
-        setTokens(storedTokens);
-        // Attempt to refresh token to validate and get user info
-        const success = await refreshTokenInternal(storedTokens.refresh_token);
-        if (!success) {
-          // Token refresh failed, clear stored tokens
-          setStoredTokens(null);
-          setTokens(null);
+      if (isHttpOnlyMode()) {
+        // In httpOnly mode, validate session by calling /api/v1/auth/me
+        // The cookies are sent automatically with the request
+        const userResponse = await authApi.getCurrentUser();
+        if (userResponse.data) {
+          setUser(userResponse.data);
+        }
+        // If no user data, user is not authenticated (no redirect here, let route guards handle it)
+      } else {
+        // In localStorage mode, try to restore from stored tokens
+        const storedTokens = getStoredTokens();
+        if (storedTokens) {
+          setTokens(storedTokens);
+          // Attempt to refresh token to validate and get user info
+          const success = await refreshTokenInternal(storedTokens.refresh_token);
+          if (!success) {
+            // Token refresh failed, clear stored tokens
+            setStoredTokens(null);
+            setTokens(null);
+          }
         }
       }
       setIsLoading(false);
@@ -80,12 +112,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     initAuth();
   }, []);
 
-  const refreshTokenInternal = async (refreshTokenValue: string): Promise<boolean> => {
+  const refreshTokenInternal = async (refreshTokenValue?: string): Promise<boolean> => {
+    // In httpOnly mode, no token value needed (backend reads from cookie)
+    // In localStorage mode, refresh token is required
     const response = await authApi.refresh(refreshTokenValue);
     if (response.data) {
-      const newTokens = response.data.tokens;
-      setTokens(newTokens);
-      setStoredTokens(newTokens);
+      // In localStorage mode, store the new tokens
+      // In httpOnly mode, tokens are set via cookies by backend
+      if (isLocalStorageMode() && response.data.tokens) {
+        const newTokens = response.data.tokens;
+        setTokens(newTokens);
+        setStoredTokens(newTokens);
+      }
 
       // Fetch user data after successful token refresh
       const userResponse = await authApi.getCurrentUser();
@@ -98,6 +136,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const refreshToken = useCallback(async (): Promise<boolean> => {
+    // In httpOnly mode, no token value needed (backend reads from cookie)
+    if (isHttpOnlyMode()) {
+      return refreshTokenInternal();
+    }
+    // In localStorage mode, need refresh token from state
     if (!tokens?.refresh_token) return false;
     return refreshTokenInternal(tokens.refresh_token);
   }, [tokens]);
@@ -107,8 +150,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (response.data) {
       const { user: userData, tokens: newTokens } = response.data;
       setUser(userData);
-      setTokens(newTokens);
-      setStoredTokens(newTokens);
+      // In localStorage mode, store tokens in localStorage
+      // In httpOnly mode, tokens are set via cookies by backend
+      if (isLocalStorageMode() && newTokens) {
+        setTokens(newTokens);
+        setStoredTokens(newTokens);
+      }
       return { success: true };
     }
     return { success: false, error: response.error || "Login failed" };
@@ -119,20 +166,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (response.data) {
       const { user: userData, tokens: newTokens } = response.data;
       setUser(userData);
-      setTokens(newTokens);
-      setStoredTokens(newTokens);
+      // In localStorage mode, store tokens in localStorage
+      // In httpOnly mode, tokens are set via cookies by backend
+      if (isLocalStorageMode() && newTokens) {
+        setTokens(newTokens);
+        setStoredTokens(newTokens);
+      }
       return { success: true };
     }
     return { success: false, error: response.error || "Registration failed" };
   }, []);
 
   const logout = useCallback(async (): Promise<void> => {
-    if (tokens?.access_token) {
+    // Always call logout API to clear cookies/session on backend
+    // In httpOnly mode, this clears the httpOnly cookies
+    // In localStorage mode, this invalidates the session
+    if (isHttpOnlyMode() || tokens?.access_token) {
       await authApi.logout();
     }
     setUser(null);
     setTokens(null);
-    setStoredTokens(null);
+    // In localStorage mode, clear stored tokens
+    if (isLocalStorageMode()) {
+      setStoredTokens(null);
+    }
     router.push("/login");
   }, [tokens, router]);
 

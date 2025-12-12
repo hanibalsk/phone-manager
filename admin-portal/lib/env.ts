@@ -3,6 +3,7 @@ import { envSchema } from "./schemas";
 function validateEnv() {
   const env = {
     NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_AUTH_MODE: process.env.NEXT_PUBLIC_AUTH_MODE,
   };
 
   const result = envSchema.safeParse(env);

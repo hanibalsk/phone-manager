@@ -123,6 +123,10 @@ export const envSchema = z.object({
     .string()
     .optional()
     .default(""),  // Empty string means same-origin (production default)
+  NEXT_PUBLIC_AUTH_MODE: z
+    .enum(["localStorage", "httpOnly"])
+    .optional()
+    .default("localStorage"),  // Default to localStorage for backward compatibility
 });
 
 export type EnvConfig = z.infer<typeof envSchema>;

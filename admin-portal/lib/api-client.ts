@@ -147,6 +147,7 @@ import type {
 } from "@/types/auth";
 import { env } from "./env";
 import { getAccessToken } from "@/contexts/auth-context";
+import { isLocalStorageMode } from "./auth-mode";
 
 const API_BASE_URL = env.NEXT_PUBLIC_API_URL;
 
@@ -163,7 +164,8 @@ async function request<T>(
   };
 
   // Add auth header if we have a token and auth is requested
-  if (includeAuth) {
+  // Only add header in localStorage mode; httpOnly mode uses cookies automatically
+  if (includeAuth && isLocalStorageMode()) {
     const token = getAccessToken();
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -174,6 +176,7 @@ async function request<T>(
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: "include", // Always include cookies for httpOnly mode support
     });
 
     if (!response.ok) {
@@ -207,7 +210,8 @@ async function requestBlob(
   };
 
   // Add auth header if we have a token and auth is requested
-  if (includeAuth) {
+  // Only add header in localStorage mode; httpOnly mode uses cookies automatically
+  if (includeAuth && isLocalStorageMode()) {
     const token = getAccessToken();
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -218,6 +222,7 @@ async function requestBlob(
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: "include", // Always include cookies for httpOnly mode support
     });
 
     if (!response.ok) {
@@ -253,10 +258,14 @@ export const authApi = {
       body: JSON.stringify(credentials),
     }, false),
 
-  refresh: (refreshToken: string) =>
+  refresh: (refreshToken?: string) =>
     request<RefreshResponse>("/api/v1/auth/refresh", {
       method: "POST",
-      body: JSON.stringify({ refresh_token: refreshToken }),
+      // In localStorage mode, pass refresh token in body
+      // In httpOnly mode, backend reads from cookie (no body needed)
+      body: isLocalStorageMode() && refreshToken
+        ? JSON.stringify({ refresh_token: refreshToken })
+        : undefined,
     }, false),
 
   getCurrentUser: () =>

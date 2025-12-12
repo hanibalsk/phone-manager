@@ -72,7 +72,7 @@
 | 2025-12-09 | AP-2.4 | AP-2 | Enhancement | Low | Claude | Done | Move FEATURE_CONFIGS to shared constants - Currently hardcoded in component. File: admin-portal/lib/constants.ts |
 | 2025-12-09 | AP-2.4 | AP-2 | Enhancement | Low | TBD | Open | Backend: Enforce feature checks in API middleware. File: Backend API |
 | 2025-12-09 | AP-2.5 | AP-2 | TechDebt | Medium | Claude | Done | Add unit tests for OrganizationStatsDialog - Test loading, error, data rendering. File: admin-portal/components/organizations/__tests__/organization-stats-dialog.test.tsx |
-| 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Medium | TBD | Open | Add CSV export for statistics - Missing from current implementation. File: admin-portal/components/organizations/organization-stats-dialog.tsx, PRD FR-2.5 |
+| 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Medium | Claude | Done | Add CSV export for statistics - Missing from current implementation. File: admin-portal/components/organizations/organization-stats-dialog.tsx, PRD FR-2.5 |
 | 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Low | TBD | Open | Add progress bars for limit utilization - Improve UX. File: admin-portal/components/organizations/organization-stats-dialog.tsx |
 | 2025-12-09 | AP-2.5 | AP-2 | Enhancement | Low | TBD | Open | Add charts for usage trends visualization - Use Recharts. File: admin-portal/components/organizations/organization-stats-dialog.tsx |
 | 2025-12-10 | AP-4.1 | AP-4 | TechDebt | Low | TBD | Open | Remove unused formatDate function. File: admin-portal/components/devices/admin-device-list.tsx:195-202 |
