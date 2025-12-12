@@ -186,12 +186,33 @@ jobs:
             echo "=== Checking installed packages ==="
             adb shell pm list packages | grep phonemanager
 
+            # Clear logcat and start capturing
+            echo "=== Starting logcat capture ==="
+            adb logcat -c
+            adb logcat -d > logcat_before_launch.txt
+
             # Test that app can launch manually and take a screenshot
             echo "=== Testing manual app launch ==="
-            adb shell am start -n three.two.bit.phonemanager.dev/three.two.bit.phonemanager.MainActivity
-            sleep 5
+            adb shell am start -W -n three.two.bit.phonemanager.dev/three.two.bit.phonemanager.MainActivity
+            sleep 10
+
+            # Capture logcat after launch
+            echo "=== Capturing logcat after launch ==="
+            adb logcat -d > logcat_after_launch.txt
+
+            # Get app-specific logs
+            adb logcat -d | grep -i "phonemanager\|ActivityManager\|AndroidRuntime\|crash\|exception\|error" > logcat_app_filtered.txt || true
+
             adb exec-out screencap -p > manual_launch_screenshot.png
             echo "=== Manual launch screenshot saved ==="
+
+            # Check if app is running
+            echo "=== Checking running processes ==="
+            adb shell ps | grep phonemanager || echo "App not running!"
+
+            # Check for ANR or crash
+            echo "=== Checking for crashes ==="
+            adb shell dumpsys activity activities | grep -A 5 phonemanager || true
 
             # Force stop before Maestro takes over
             adb shell am force-stop three.two.bit.phonemanager.dev
@@ -209,6 +230,7 @@ jobs:
             maestro-results.xml
             maestro-debug/
             manual_launch_screenshot.png
+            logcat_*.txt
             ~/.maestro/tests/
 
   # =============================================================================
