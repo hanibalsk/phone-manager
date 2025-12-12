@@ -155,11 +155,11 @@ jobs:
       - name: Configure test API settings
         run: |
           # Create local.properties with test API configuration for E2E tests
-          # These are mock/test values that allow the app to start for UI testing
+          # Use 10.0.2.2 which is the Android emulator's way to access host localhost
           cat >> local.properties << EOF
-          API_BASE_URL=https://api-test.phonemanager.example.com
+          API_BASE_URL=http://10.0.2.2:8080
           API_KEY=e2e-test-api-key-for-ci
-          API_BASE_URL_DEBUG=https://api-test.phonemanager.example.com
+          API_BASE_URL_DEBUG=http://10.0.2.2:8080
           API_KEY_DEBUG=e2e-test-api-key-for-ci
           MAPS_API_KEY=test-maps-key
           MAPS_API_KEY_DEBUG=test-maps-key
@@ -167,6 +167,18 @@ jobs:
 
       - name: Build APK
         run: ./gradlew assembleDebug --no-daemon
+
+      - name: Start mock API server
+        run: |
+          echo "Starting mock API server on port 8080..."
+          python3 tests/maestro/mock-api-server.py 8080 &
+          MOCK_PID=$!
+          echo "MOCK_API_PID=$MOCK_PID" >> $GITHUB_ENV
+          # Wait for server to start
+          sleep 2
+          # Verify server is running
+          curl -s http://localhost:8080/health || echo "Warning: Mock server health check failed"
+          echo "Mock API server started with PID $MOCK_PID"
 
       - name: AVD cache
         uses: actions/cache@v4
@@ -186,6 +198,10 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
+            # Verify mock API server is accessible from host
+            echo "=== Verifying mock API server on host ==="
+            curl -s http://localhost:8080/health || echo "Warning: Mock server not accessible on host"
+
             # Install the app
             adb install -r app/build/outputs/apk/debug/app-debug.apk
 
@@ -199,10 +215,13 @@ jobs:
             echo "=== Checking installed packages ==="
             adb shell pm list packages | grep phonemanager
 
+            # Test mock API connectivity from emulator (10.0.2.2 = host localhost)
+            echo "=== Testing mock API from emulator ==="
+            adb shell "curl -s http://10.0.2.2:8080/health" || echo "Note: curl may not be available in emulator"
+
             # Clear logcat and start capturing
             echo "=== Starting logcat capture ==="
             adb logcat -c
-            adb logcat -d > logcat_before_launch.txt
 
             # Test that app can launch manually and take a screenshot
             echo "=== Testing manual app launch ==="
@@ -214,7 +233,7 @@ jobs:
             adb logcat -d > logcat_after_launch.txt
 
             # Get app-specific logs
-            adb logcat -d | grep -i "phonemanager\|ActivityManager\|AndroidRuntime\|crash\|exception\|error" > logcat_app_filtered.txt || true
+            adb logcat -d | grep -i "phonemanager\|ActivityManager\|AndroidRuntime\|crash\|exception\|error\|API\|http\|network" > logcat_app_filtered.txt || true
 
             adb exec-out screencap -p > manual_launch_screenshot.png
             echo "=== Manual launch screenshot saved ==="
@@ -245,6 +264,14 @@ jobs:
             manual_launch_screenshot.png
             logcat_*.txt
             ~/.maestro/tests/
+
+      - name: Stop mock API server
+        if: always()
+        run: |
+          if [ -n "$MOCK_API_PID" ]; then
+            echo "Stopping mock API server (PID: $MOCK_API_PID)"
+            kill $MOCK_API_PID 2>/dev/null || true
+          fi
 
   # =============================================================================
   # Multi-Device Tests (Nightly only)
