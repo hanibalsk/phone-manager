@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useCallback, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { LimitList } from "@/components/limits";
 import { limitsApi, deviceApi } from "@/lib/api-client";
@@ -8,7 +9,9 @@ import { useApi } from "@/hooks/use-api";
 import type { DailyLimit, Device } from "@/types";
 
 export default function LimitsPage() {
-  const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const searchParams = useSearchParams();
+  const deviceParam = searchParams.get("device");
+  const [selectedDeviceId, setSelectedDeviceId] = useState<string>(deviceParam || "");
   const { data: devices, execute: fetchDevices } = useApi<Device[]>();
   const { data: limits, loading, execute: fetchLimits } = useApi<DailyLimit[]>();
 
@@ -18,9 +21,11 @@ export default function LimitsPage() {
 
   useEffect(() => {
     if (devices && devices.length > 0 && !selectedDeviceId) {
-      setSelectedDeviceId(devices[0].id);
+      // Use device from URL param if provided and valid, otherwise use first device
+      const validDeviceFromUrl = deviceParam && devices.some(d => d.id === deviceParam);
+      setSelectedDeviceId(validDeviceFromUrl ? deviceParam : devices[0].id);
     }
-  }, [devices, selectedDeviceId]);
+  }, [devices, selectedDeviceId, deviceParam]);
 
   const refreshLimits = useCallback(() => {
     if (selectedDeviceId) {

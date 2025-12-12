@@ -89,13 +89,17 @@ export function DeviceDetails({ device, onClose }: DeviceDetailsProps) {
               View Usage
             </Link>
           </Button>
-          <Button variant="outline" disabled>
-            <Clock className="h-4 w-4 mr-2" />
-            Set Limits
+          <Button variant="outline" asChild>
+            <Link href={`/limits?device=${device.id}`}>
+              <Clock className="h-4 w-4 mr-2" />
+              Set Limits
+            </Link>
           </Button>
-          <Button variant="outline" disabled>
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
+          <Button variant="outline" asChild>
+            <Link href={`/devices/fleet/${device.id}`}>
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Link>
           </Button>
         </CardFooter>
       </Card>

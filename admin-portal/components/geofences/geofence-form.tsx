@@ -8,6 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RefreshCw, Circle, Pentagon } from "lucide-react";
+import { PolygonEditor } from "./polygon-editor";
+
+interface Coordinate {
+  latitude: number;
+  longitude: number;
+}
 
 interface GeofenceFormProps {
   geofence?: Geofence;
@@ -22,6 +28,9 @@ export function GeofenceForm({ geofence, onSubmit, loading }: GeofenceFormProps)
   const [centerLat, setCenterLat] = useState(geofence?.center_latitude?.toString() || "");
   const [centerLng, setCenterLng] = useState(geofence?.center_longitude?.toString() || "");
   const [radius, setRadius] = useState(geofence?.radius_meters?.toString() || "100");
+  const [polygonCoordinates, setPolygonCoordinates] = useState<Coordinate[]>(
+    geofence?.polygon_coordinates || []
+  );
   const [triggerEnter, setTriggerEnter] = useState(geofence?.trigger_on_enter ?? true);
   const [triggerExit, setTriggerExit] = useState(geofence?.trigger_on_exit ?? true);
   const [triggerDwell, setTriggerDwell] = useState(geofence?.trigger_on_dwell ?? false);
@@ -69,6 +78,25 @@ export function GeofenceForm({ geofence, onSubmit, loading }: GeofenceFormProps)
       }
     }
 
+    if (shape === "polygon") {
+      if (polygonCoordinates.length < 3) {
+        newErrors.polygon = "A polygon requires at least 3 coordinate points";
+      } else {
+        // Validate each coordinate
+        for (let i = 0; i < polygonCoordinates.length; i++) {
+          const coord = polygonCoordinates[i];
+          if (coord.latitude < -90 || coord.latitude > 90) {
+            newErrors.polygon = `Point ${i + 1}: Latitude must be between -90 and 90`;
+            break;
+          }
+          if (coord.longitude < -180 || coord.longitude > 180) {
+            newErrors.polygon = `Point ${i + 1}: Longitude must be between -180 and 180`;
+            break;
+          }
+        }
+      }
+    }
+
     if (triggerDwell) {
       if (!dwellTime || isNaN(parseInt(dwellTime)) || parseInt(dwellTime) <= 0) {
         newErrors.dwellTime = "Valid dwell time is required (> 0)";
@@ -98,6 +126,10 @@ export function GeofenceForm({ geofence, onSubmit, loading }: GeofenceFormProps)
       data.center_latitude = parseFloat(centerLat);
       data.center_longitude = parseFloat(centerLng);
       data.radius_meters = parseFloat(radius);
+    }
+
+    if (shape === "polygon") {
+      data.polygon_coordinates = polygonCoordinates;
     }
 
     await onSubmit(data);
@@ -167,11 +199,10 @@ export function GeofenceForm({ geofence, onSubmit, loading }: GeofenceFormProps)
                 : "border-input hover:border-primary/50"
             }`}
             onClick={() => setShape("polygon")}
-            disabled // Polygon editing not implemented yet
           >
             <Pentagon className="h-8 w-8" />
             <span className="font-medium">Polygon</span>
-            <span className="text-xs text-muted-foreground">Coming soon</span>
+            <span className="text-xs text-muted-foreground">Custom boundary points</span>
           </button>
         </div>
       </div>
@@ -225,6 +256,21 @@ export function GeofenceForm({ geofence, onSubmit, loading }: GeofenceFormProps)
             />
             {errors.radius && <p className="text-sm text-destructive">{errors.radius}</p>}
           </div>
+        </div>
+      )}
+
+      {/* Polygon Configuration */}
+      {shape === "polygon" && (
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Polygon Configuration</h3>
+          <p className="text-sm text-muted-foreground">
+            Define the boundary points of your polygon geofence. Points are connected in order to form the shape.
+          </p>
+          <PolygonEditor
+            coordinates={polygonCoordinates}
+            onChange={setPolygonCoordinates}
+            errors={errors.polygon}
+          />
         </div>
       )}
 
