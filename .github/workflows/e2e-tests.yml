@@ -152,6 +152,19 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
 
+      - name: Configure test API settings
+        run: |
+          # Create local.properties with test API configuration for E2E tests
+          # These are mock/test values that allow the app to start for UI testing
+          cat >> local.properties << EOF
+          API_BASE_URL=https://api-test.phonemanager.example.com
+          API_KEY=e2e-test-api-key-for-ci
+          API_BASE_URL_DEBUG=https://api-test.phonemanager.example.com
+          API_KEY_DEBUG=e2e-test-api-key-for-ci
+          MAPS_API_KEY=test-maps-key
+          MAPS_API_KEY_DEBUG=test-maps-key
+          EOF
+
       - name: Build APK
         run: ./gradlew assembleDebug --no-daemon
 
