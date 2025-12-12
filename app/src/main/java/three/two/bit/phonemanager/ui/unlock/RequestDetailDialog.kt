@@ -26,10 +26,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.UnlockRequest
 import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
 
@@ -69,7 +71,7 @@ fun RequestDetailDialog(
             Column {
                 // Status
                 DetailRow(
-                    label = "Status",
+                    label = stringResource(R.string.unlock_status_label),
                     content = {
                         StatusDisplay(status = request.status)
                     },
@@ -79,7 +81,7 @@ fun RequestDetailDialog(
 
                 // Reason
                 DetailRow(
-                    label = "Reason",
+                    label = stringResource(R.string.unlock_reason_label),
                     value = request.reason,
                 )
 
@@ -87,7 +89,7 @@ fun RequestDetailDialog(
 
                 // Requested at
                 DetailRow(
-                    label = "Requested",
+                    label = stringResource(R.string.unlock_requested_label),
                     value = formatInstant(request.createdAt),
                 )
 
@@ -110,13 +112,13 @@ fun RequestDetailDialog(
                         modifier = Modifier.size(16.dp),
                     )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Withdraw")
+                    Text(stringResource(R.string.unlock_withdraw))
                 }
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.unlock_close))
             }
         },
     )
@@ -168,22 +170,22 @@ private fun StatusDisplay(
         UnlockRequestStatus.PENDING -> Triple(
             Icons.Default.Pending,
             MaterialTheme.colorScheme.tertiary,
-            "Pending - Waiting for admin response",
+            stringResource(R.string.unlock_status_pending_detail),
         )
         UnlockRequestStatus.APPROVED -> Triple(
             Icons.Default.Check,
             MaterialTheme.colorScheme.primary,
-            "Approved - Setting unlocked",
+            stringResource(R.string.unlock_status_approved_detail),
         )
         UnlockRequestStatus.DENIED -> Triple(
             Icons.Default.Clear,
             MaterialTheme.colorScheme.error,
-            "Denied - Request rejected",
+            stringResource(R.string.unlock_status_denied_detail),
         )
         UnlockRequestStatus.WITHDRAWN -> Triple(
             Icons.Default.Undo,
             MaterialTheme.colorScheme.outline,
-            "Withdrawn - Cancelled by you",
+            stringResource(R.string.unlock_status_withdrawn_detail),
         )
     }
 
@@ -230,7 +232,9 @@ private fun AdminResponseDetails(
                 .padding(16.dp),
         ) {
             Text(
-                text = if (request.isApproved()) "Approved" else "Denied",
+                text = stringResource(
+                    if (request.isApproved()) R.string.unlock_status_approved else R.string.unlock_status_denied,
+                ),
                 style = MaterialTheme.typography.titleMedium,
                 color = if (request.isApproved()) {
                     MaterialTheme.colorScheme.primary
@@ -243,7 +247,10 @@ private fun AdminResponseDetails(
 
             // Responded by
             Text(
-                text = "By: ${request.respondedByName ?: "Admin"}",
+                text = stringResource(
+                    R.string.unlock_response_by,
+                    request.respondedByName ?: stringResource(R.string.unlock_admin_fallback),
+                ),
                 style = MaterialTheme.typography.bodyMedium,
             )
 
@@ -251,7 +258,7 @@ private fun AdminResponseDetails(
             if (!request.response.isNullOrBlank()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Message:",
+                    text = stringResource(R.string.unlock_response_message_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -265,7 +272,10 @@ private fun AdminResponseDetails(
             request.respondedAt?.let { respondedAt ->
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Responded: ${formatInstant(respondedAt)}",
+                    text = stringResource(
+                        R.string.unlock_response_responded,
+                        formatInstant(respondedAt),
+                    ),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

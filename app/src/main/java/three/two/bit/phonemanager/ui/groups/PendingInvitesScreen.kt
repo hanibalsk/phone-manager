@@ -43,6 +43,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -51,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.ExpiryUrgency
 import three.two.bit.phonemanager.domain.model.GroupInvite
 
@@ -110,10 +112,10 @@ fun PendingInvitesScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Pending Invites") },
+                title = { Text(stringResource(R.string.group_pending_invites)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )
@@ -122,7 +124,7 @@ fun PendingInvitesScreen(
             FloatingActionButton(
                 onClick = { viewModel.createInvite() },
             ) {
-                Icon(Icons.Default.Add, "Create New Invite")
+                Icon(Icons.Default.Add, stringResource(R.string.group_create_new_invite))
             }
         },
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -176,7 +178,7 @@ fun PendingInvitesScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = { viewModel.loadInvites() }) {
-                            Text("Retry")
+                            Text(stringResource(R.string.group_retry))
                         }
                     }
                 }
@@ -217,12 +219,12 @@ private fun EmptyInvitesState() {
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
             )
             Text(
-                text = "No Pending Invites",
+                text = stringResource(R.string.group_no_pending_invites),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Text(
-                text = "Create an invite to add new members",
+                text = stringResource(R.string.group_create_invite_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
             )
@@ -301,7 +303,7 @@ private fun InviteCard(
 
                 // Created date
                 Text(
-                    text = "Created ${formatDate(invite.createdAt)}",
+                    text = stringResource(R.string.group_created_on, formatDate(invite.createdAt)),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -356,13 +358,13 @@ private fun RevokeInviteDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Revoke Invite?") },
+        title = { Text(stringResource(R.string.group_revoke_invite_title)) },
         text = {
             Column {
-                Text("Are you sure you want to revoke this invite?")
+                Text(stringResource(R.string.group_revoke_invite_message))
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Code: ${invite.code}",
+                    text = stringResource(R.string.group_invite_code_prefix, invite.code),
                     style = MaterialTheme.typography.bodyMedium.copy(
                         fontFamily = FontFamily.Monospace,
                     ),
@@ -370,7 +372,7 @@ private fun RevokeInviteDialog(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Anyone with this code will no longer be able to join the group.",
+                    text = stringResource(R.string.group_invite_revoke_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -378,12 +380,12 @@ private fun RevokeInviteDialog(
         },
         confirmButton = {
             Button(onClick = onConfirm) {
-                Text("Revoke")
+                Text(stringResource(R.string.group_revoke))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

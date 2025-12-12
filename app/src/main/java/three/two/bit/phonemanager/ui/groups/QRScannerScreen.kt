@@ -42,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -57,6 +58,7 @@ import androidx.core.view.doOnLayout
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
+import three.two.bit.phonemanager.R
 import timber.log.Timber
 import java.util.concurrent.Executors
 
@@ -101,10 +103,10 @@ fun QRScannerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Scan QR Code") },
+                title = { Text(stringResource(R.string.qr_scan_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )
@@ -254,13 +256,13 @@ private fun CameraPreviewContent(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Point camera at QR code",
+                text = stringResource(R.string.qr_scan_instructions_title),
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White,
                 textAlign = TextAlign.Center,
             )
             Text(
-                text = "The code will be scanned automatically",
+                text = stringResource(R.string.qr_scan_instructions_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center,
@@ -391,13 +393,13 @@ private fun PermissionDeniedContent(
             )
 
             Text(
-                text = "Camera Permission Required",
+                text = stringResource(R.string.camera_permission_required_title),
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
 
             Text(
-                text = "We need camera access to scan QR codes. You can also enter the invite code manually.",
+                text = stringResource(R.string.qr_camera_permission_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
@@ -406,11 +408,11 @@ private fun PermissionDeniedContent(
             Spacer(modifier = Modifier.height(16.dp))
 
             Button(onClick = onRequestPermission) {
-                Text("Grant Permission")
+                Text(stringResource(R.string.qr_grant_permission))
             }
 
             Button(onClick = onNavigateBack) {
-                Text("Enter Code Manually")
+                Text(stringResource(R.string.qr_enter_manually))
             }
         }
     }

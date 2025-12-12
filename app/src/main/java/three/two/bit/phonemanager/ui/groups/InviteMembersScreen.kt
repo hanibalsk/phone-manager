@@ -49,6 +49,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.ExpiryUrgency
 import three.two.bit.phonemanager.domain.model.GroupInvite
 import three.two.bit.phonemanager.util.QRCodeGenerator
@@ -120,16 +122,16 @@ fun InviteMembersScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Invite Members") },
+                title = { Text(stringResource(R.string.group_invite_members)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 actions = {
                     if (invites.isNotEmpty()) {
                         TextButton(onClick = onNavigateToPendingInvites) {
-                            Text("View All (${invites.size})")
+                            Text(stringResource(R.string.group_view_all, invites.size))
                         }
                     }
                 },
@@ -187,7 +189,7 @@ fun InviteMembersScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = onNavigateBack) {
-                            Text("Go Back")
+                            Text(stringResource(R.string.group_go_back))
                         }
                     }
                 }
@@ -224,7 +226,7 @@ private fun InviteContent(
                 invite = invite,
                 onCopyCode = {
                     onCopyCode(invite.code)
-                    onShowSnackbar("Code copied to clipboard")
+                    onShowSnackbar(stringResource(R.string.group_code_copied))
                 },
             )
 
@@ -241,7 +243,7 @@ private fun InviteContent(
             ) {
                 Icon(Icons.Default.Share, null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Share Invite")
+                Text(stringResource(R.string.group_share_invite))
             }
 
             // Copy code button
@@ -253,7 +255,7 @@ private fun InviteContent(
             ) {
                 Icon(Icons.Default.ContentCopy, null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Copy Code")
+                Text(stringResource(R.string.group_copy_code))
             }
 
             // Generate new code button
@@ -263,7 +265,7 @@ private fun InviteContent(
             ) {
                 Icon(Icons.Default.Refresh, null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Generate New Code")
+                Text(stringResource(R.string.group_generate_code))
             }
         } else {
             // Creating state
@@ -279,7 +281,7 @@ private fun InviteContent(
                 ) {
                     CircularProgressIndicator()
                     Text(
-                        text = "Creating invite code...",
+                        text = stringResource(R.string.group_creating_invite_code),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -310,7 +312,7 @@ private fun InviteCodeCard(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
-                text = "Invite Code",
+                text = stringResource(R.string.group_invite_code_label),
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
             )
@@ -403,7 +405,7 @@ private fun QRCodeCard(invite: GroupInvite) {
                 ) {
                     Image(
                         bitmap = qrBitmap.asImageBitmap(),
-                        contentDescription = "QR Code for invite",
+                        contentDescription = stringResource(R.string.group_invite_qr_content_desc),
                         modifier = Modifier.fillMaxSize(),
                     )
                 }

@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -55,6 +56,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Group
 import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.GroupRole
@@ -139,10 +141,10 @@ fun GroupDetailScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Group Details") },
+                title = { Text(stringResource(R.string.group_detail_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
                 actions = {
@@ -154,7 +156,7 @@ fun GroupDetailScreen(
                             val group = (uiState as GroupDetailUiState.Success).group
                             onNavigateToMembers(group.id)
                         }) {
-                            Icon(Icons.Default.Settings, "Manage Members")
+                            Icon(Icons.Default.Settings, stringResource(R.string.group_detail_manage_members))
                         }
                     }
                 },
@@ -208,7 +210,7 @@ fun GroupDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(onClick = onNavigateBack) {
-                            Text("Go Back")
+                            Text(stringResource(R.string.group_go_back))
                         }
                     }
                 }
@@ -327,7 +329,7 @@ private fun GroupDetailContent(
             ) {
                 Icon(Icons.Default.PersonAdd, null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Invite Members")
+                Text(stringResource(R.string.group_detail_invite_members))
             }
 
             // Story E12.7: Manage member devices button (for admins/owners)
@@ -337,7 +339,7 @@ private fun GroupDetailContent(
             ) {
                 Icon(Icons.Default.PhoneAndroid, null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Manage Member Devices")
+                Text(stringResource(R.string.group_detail_manage_devices))
             }
         }
 
@@ -354,7 +356,7 @@ private fun GroupDetailContent(
             ) {
                 Icon(Icons.AutoMirrored.Filled.ExitToApp, null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Leave Group")
+                Text(stringResource(R.string.group_detail_leave))
             }
         }
 
@@ -369,7 +371,7 @@ private fun GroupDetailContent(
             ) {
                 Icon(Icons.Default.Delete, null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Delete Group")
+                Text(stringResource(R.string.group_detail_delete))
             }
 
             // Warning for owners
@@ -380,7 +382,7 @@ private fun GroupDetailContent(
                 ),
             ) {
                 Text(
-                    text = "Warning: Deleting this group will remove all members and cannot be undone.",
+                    text = stringResource(R.string.group_detail_delete_warning),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onErrorContainer,
                     modifier = Modifier.padding(12.dp),
@@ -546,7 +548,7 @@ private fun MembersPreviewCard(
                 )
 
                 Button(onClick = onViewAll) {
-                    Text("View All")
+                    Text(stringResource(R.string.group_detail_view_all))
                 }
             }
 

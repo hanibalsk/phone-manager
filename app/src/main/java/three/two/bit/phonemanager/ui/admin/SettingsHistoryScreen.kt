@@ -44,12 +44,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.SettingChange
 import three.two.bit.phonemanager.domain.model.SettingChangeType
 import three.two.bit.phonemanager.domain.model.SettingDefinition
@@ -86,7 +88,7 @@ fun SettingsHistoryScreen(
             TopAppBar(
                 title = {
                     Column {
-                        Text("Settings History")
+                        Text(stringResource(R.string.admin_settings_history))
                         if (uiState.deviceName.isNotEmpty()) {
                             Text(
                                 text = uiState.deviceName,
@@ -100,13 +102,13 @@ fun SettingsHistoryScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
                 actions = {
                     IconButton(onClick = { viewModel.loadHistory() }) {
-                        Icon(Icons.Default.Refresh, contentDescription = "Refresh")
+                        Icon(Icons.Default.Refresh, contentDescription = stringResource(R.string.refresh))
                     }
                 },
             )
@@ -141,13 +143,13 @@ fun SettingsHistoryScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No history yet",
+                            text = stringResource(R.string.admin_no_history_yet),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = "Settings changes will appear here",
+                            text = stringResource(R.string.admin_history_will_appear_here),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
@@ -249,7 +251,7 @@ private fun HistoryCard(
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = "by ${change.changedByName}",
+                        text = stringResource(R.string.admin_changed_by, change.changedByName),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )

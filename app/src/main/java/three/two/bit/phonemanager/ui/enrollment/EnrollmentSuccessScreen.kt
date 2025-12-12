@@ -33,10 +33,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 
 /**
  * Story E13.10: Android Enrollment Flow - Success Screen
@@ -71,21 +74,21 @@ fun EnrollmentSuccessScreen(
             // Success checkmark icon (AC E13.10.6)
             Icon(
                 imageVector = Icons.Default.CheckCircle,
-                contentDescription = "Enrollment successful",
+                contentDescription = stringResource(R.string.enrollment_success_content_desc),
                 modifier = Modifier.size(96.dp),
                 tint = Color(0xFF4CAF50), // Green success color
             )
 
             // Success message (AC E13.10.6)
             Text(
-                text = "Enrollment Complete!",
+                text = stringResource(R.string.enrollment_success_title),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             )
 
             Text(
-                text = "Your device has been successfully enrolled",
+                text = stringResource(R.string.enrollment_success_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -120,12 +123,12 @@ fun EnrollmentSuccessScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Get Started")
+                Text(stringResource(R.string.enrollment_get_started))
             }
 
             // Info text
             Text(
-                text = "You can view enrollment details and contact IT support in Settings",
+                text = stringResource(R.string.enrollment_success_info),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -170,7 +173,7 @@ private fun OrganizationCard(
                 Spacer(modifier = Modifier.width(12.dp))
                 Column {
                     Text(
-                        text = "Organization",
+                        text = stringResource(R.string.enrollment_organization_label),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                     )
@@ -190,7 +193,7 @@ private fun OrganizationCard(
                 )
 
                 Text(
-                    text = "IT Support Contact",
+                    text = stringResource(R.string.enrollment_it_support_contact_label),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                 )
@@ -266,12 +269,16 @@ private fun PolicySummaryCard(lockedSettingsCount: Int) {
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = "Device Policy Applied",
+                    text = stringResource(R.string.enrollment_device_policy_applied_title),
                     style = MaterialTheme.typography.titleSmall,
                     fontWeight = FontWeight.Medium,
                 )
                 Text(
-                    text = "$lockedSettingsCount setting${if (lockedSettingsCount != 1) "s" else ""} managed by your organization",
+                    text = pluralStringResource(
+                        R.plurals.enrollment_locked_settings_managed,
+                        lockedSettingsCount,
+                        lockedSettingsCount,
+                    ),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

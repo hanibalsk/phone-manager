@@ -21,9 +21,12 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 
 /**
  * Story E12.8: Request Unlock Dialog
@@ -58,14 +61,14 @@ fun RequestUnlockDialog(
         },
         title = {
             Text(
-                text = "Request Unlock",
+                text = stringResource(R.string.unlock_request_title),
                 style = MaterialTheme.typography.headlineSmall,
             )
         },
         text = {
             Column {
                 Text(
-                    text = "Request to unlock \"$settingName\"",
+                    text = stringResource(R.string.unlock_request_for_setting, settingName),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -73,7 +76,7 @@ fun RequestUnlockDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Please provide a reason for this request. The admin will review your request and respond.",
+                    text = stringResource(R.string.unlock_request_instructions),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -84,8 +87,8 @@ fun RequestUnlockDialog(
                     value = reason,
                     onValueChange = onReasonChange,
                     modifier = Modifier.fillMaxWidth(),
-                    label = { Text("Reason") },
-                    placeholder = { Text("Why do you need to change this setting?") },
+                    label = { Text(stringResource(R.string.unlock_reason_label)) },
+                    placeholder = { Text(stringResource(R.string.unlock_reason_hint)) },
                     supportingText = {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -100,7 +103,11 @@ fun RequestUnlockDialog(
                                 Spacer(modifier = Modifier.width(1.dp))
                             }
                             Text(
-                                text = "$remainingCharacters characters remaining",
+                                text = pluralStringResource(
+                                    R.plurals.unlock_characters_remaining,
+                                    remainingCharacters,
+                                    remainingCharacters,
+                                ),
                                 textAlign = TextAlign.End,
                             )
                         }
@@ -129,7 +136,11 @@ fun RequestUnlockDialog(
                         strokeWidth = 2.dp,
                     )
                 }
-                Text(if (isSubmitting) "Submitting..." else "Submit Request")
+                Text(
+                    stringResource(
+                        if (isSubmitting) R.string.unlock_submitting else R.string.unlock_submit,
+                    ),
+                )
             }
         },
         dismissButton = {
@@ -137,7 +148,7 @@ fun RequestUnlockDialog(
                 onClick = onDismiss,
                 enabled = !isSubmitting,
             ) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

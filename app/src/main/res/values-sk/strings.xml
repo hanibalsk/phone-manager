@@ -302,9 +302,9 @@
     <string name="time_days_ago">pred %1$dd</string>
 
     <!-- Duration Formats -->
-    <string name="duration_hours_minutes">%1$dh %2$dm</string>
-    <string name="duration_minutes_seconds">%1$dm %2$ds</string>
-    <string name="duration_seconds">%1$ds</string>
+    <string name="duration_hours_minutes">%1$d hod %2$d min</string>
+    <string name="duration_minutes_seconds">%1$d min %2$d s</string>
+    <string name="duration_seconds">%1$d s</string>
 
     <!-- Movement Detection Settings -->
     <string name="settings_movement_detection">Detekcia pohybu</string>

@@ -39,12 +39,14 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import three.two.bit.phonemanager.R
 
 /**
  * Story E13.10: Android Enrollment Flow - Enrollment Screen
@@ -97,12 +99,12 @@ fun EnrollmentScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Company Enrollment") },
+                title = { Text(stringResource(R.string.enrollment_company_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -129,7 +131,7 @@ fun EnrollmentScreen(
 
             // Title
             Text(
-                text = "Enroll Your Device",
+                text = stringResource(R.string.enrollment_enroll_your_device),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
             )
@@ -142,8 +144,7 @@ fun EnrollmentScreen(
                 ),
             ) {
                 Text(
-                    text = "Enter the enrollment code provided by your IT administrator, " +
-                        "or scan the QR code from your enrollment email.",
+                    text = stringResource(R.string.enrollment_help_text),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(16.dp),
                     textAlign = TextAlign.Center,
@@ -156,8 +157,8 @@ fun EnrollmentScreen(
             OutlinedTextField(
                 value = enrollmentCode,
                 onValueChange = { viewModel.updateEnrollmentCode(it) },
-                label = { Text("Enrollment Code") },
-                placeholder = { Text("Enter 16-20 character code") },
+                label = { Text(stringResource(R.string.enrollment_code_label)) },
+                placeholder = { Text(stringResource(R.string.enrollment_code_hint)) },
                 isError = codeError != null,
                 supportingText = codeError?.let { { Text(it) } },
                 singleLine = true,
@@ -189,7 +190,7 @@ fun EnrollmentScreen(
                     contentDescription = null,
                     modifier = Modifier.padding(end = 8.dp),
                 )
-                Text("Scan QR Code")
+                Text(stringResource(R.string.enrollment_scan_qr))
             }
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -207,7 +208,7 @@ fun EnrollmentScreen(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
-                    Text("Enroll Device")
+                    Text(stringResource(R.string.enrollment_enroll))
                 }
             }
 
@@ -233,7 +234,7 @@ fun EnrollmentScreen(
                         OutlinedButton(
                             onClick = { viewModel.clearError() },
                         ) {
-                            Text("Try Again")
+                            Text(stringResource(R.string.enrollment_try_again))
                         }
                     }
                 }
@@ -243,7 +244,7 @@ fun EnrollmentScreen(
 
             // Footer help text
             Text(
-                text = "Contact your IT administrator if you don't have an enrollment code.",
+                text = stringResource(R.string.enrollment_contact_it_admin),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,

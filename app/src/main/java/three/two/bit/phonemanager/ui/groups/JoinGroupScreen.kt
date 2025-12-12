@@ -47,6 +47,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -57,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.GroupPreview
 
 /**
@@ -104,7 +106,7 @@ fun JoinGroupScreen(
                 viewModel.clearJoinResult()
             }
             is JoinResult.AuthenticationRequired -> {
-                snackbarHostState.showSnackbar("Please sign in to join the group")
+                snackbarHostState.showSnackbar(stringResource(R.string.join_group_sign_in_required))
                 viewModel.clearJoinResult()
                 onNavigateToLogin()
             }
@@ -115,10 +117,10 @@ fun JoinGroupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Join Group") },
+                title = { Text(stringResource(R.string.join_group_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, stringResource(R.string.back))
                     }
                 },
             )
@@ -190,13 +192,13 @@ private fun JoinGroupContent(
         )
 
         Text(
-            text = "Enter Invite Code",
+            text = stringResource(R.string.join_group_enter_code_title),
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.Bold,
         )
 
         Text(
-            text = "Enter the 8-character code you received or scan a QR code",
+            text = stringResource(R.string.join_group_enter_code_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -206,8 +208,8 @@ private fun JoinGroupContent(
         OutlinedTextField(
             value = inviteCode,
             onValueChange = onCodeChange,
-            label = { Text("Invite Code") },
-            placeholder = { Text("ABCD1234") },
+            label = { Text(stringResource(R.string.join_group_code_label)) },
+            placeholder = { Text(stringResource(R.string.join_group_code_placeholder)) },
             modifier = Modifier
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
@@ -229,7 +231,7 @@ private fun JoinGroupContent(
             supportingText = {
                 when (uiState) {
                     is JoinGroupUiState.Error -> Text(uiState.message)
-                    else -> Text("${inviteCode.length}/8 characters")
+                    else -> Text(stringResource(R.string.join_group_code_counter, inviteCode.length))
                 }
             },
         )
@@ -245,7 +247,7 @@ private fun JoinGroupContent(
             ) {
                 Icon(Icons.Default.QrCodeScanner, null, modifier = Modifier.size(20.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Scan QR")
+                Text(stringResource(R.string.join_group_scan_qr))
             }
 
             Button(
@@ -260,7 +262,7 @@ private fun JoinGroupContent(
                         color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
-                    Text("Validate")
+                    Text(stringResource(R.string.join_group_validate))
                 }
             }
         }
@@ -347,14 +349,14 @@ private fun GroupPreviewCard(
                             color = MaterialTheme.colorScheme.onPrimary,
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Joining...")
+                        Text(stringResource(R.string.join_group_joining))
                     } else {
-                        Text("Join Group")
+                        Text(stringResource(R.string.join_group_button))
                     }
                 }
             } else {
                 Text(
-                    text = "Sign in to join this group",
+                    text = stringResource(R.string.join_group_sign_in_hint),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
                     textAlign = TextAlign.Center,
@@ -364,7 +366,7 @@ private fun GroupPreviewCard(
                     onClick = onSignIn,
                     modifier = Modifier.fillMaxWidth(),
                 ) {
-                    Text("Sign In")
+                    Text(stringResource(R.string.join_group_sign_in))
                 }
             }
         }
@@ -385,26 +387,24 @@ private fun JoinConfirmationDialog(
         icon = {
             Icon(Icons.Default.Group, null, modifier = Modifier.size(32.dp))
         },
-        title = { Text("Join ${group.name}?") },
+        title = { Text(stringResource(R.string.join_group_confirm_title, group.name)) },
         text = {
             Column {
-                Text("You're about to join this group with ${group.memberCount} members.")
+                Text(stringResource(R.string.join_group_confirm_message, group.memberCount))
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "As a member, you'll be able to share your location with other group members.",
+                    text = stringResource(R.string.join_group_confirm_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         },
         confirmButton = {
-            Button(onClick = onConfirm) {
-                Text("Join")
-            }
+            Button(onClick = onConfirm) { Text(stringResource(R.string.join_group_confirm_button)) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(R.string.cancel))
             }
         },
     )

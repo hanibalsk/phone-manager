@@ -136,7 +136,7 @@ fun LoginScreen(
         ) {
             // Title
             Text(
-                text = "Welcome Back",
+                text = stringResource(R.string.auth_welcome_back),
                 style = MaterialTheme.typography.headlineLarge,
                 color = MaterialTheme.colorScheme.primary
             )
@@ -144,7 +144,7 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Sign in to continue",
+                text = stringResource(R.string.auth_sign_in_to_continue),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -160,14 +160,14 @@ fun LoginScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Unable to load server settings.",
+                        text = stringResource(R.string.auth_unable_to_load_server_settings),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     TextButton(
                         onClick = { viewModel.refreshConfig() }
                     ) {
-                        Text("Retry")
+                        Text(stringResource(R.string.retry))
                     }
                 }
             }
@@ -231,9 +231,9 @@ fun LoginScreen(
                                     Icons.Filled.VisibilityOff
                                 },
                                 contentDescription = if (passwordVisible) {
-                                    "Hide password"
+                                    stringResource(R.string.auth_hide_password)
                                 } else {
-                                    "Show password"
+                                    stringResource(R.string.auth_show_password)
                                 }
                             )
                         }
@@ -287,7 +287,7 @@ fun LoginScreen(
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f))
                     Text(
-                        text = "OR",
+                        text = stringResource(R.string.common_or),
                         modifier = Modifier.padding(horizontal = 16.dp),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -311,7 +311,7 @@ fun LoginScreen(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_google),
-                            contentDescription = "Google",
+                            contentDescription = stringResource(R.string.auth_google),
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -332,7 +332,7 @@ fun LoginScreen(
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_apple),
-                            contentDescription = "Apple",
+                            contentDescription = stringResource(R.string.auth_apple),
                             modifier = Modifier.size(20.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
@@ -350,7 +350,7 @@ fun LoginScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Don't have an account?",
+                        text = stringResource(R.string.auth_no_account_question),
                         style = MaterialTheme.typography.bodyMedium
                     )
                     TextButton(

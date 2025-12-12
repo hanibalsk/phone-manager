@@ -36,6 +36,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -66,6 +67,7 @@ import three.two.bit.phonemanager.auth.MockAuthHelper
 fun ForgotPasswordScreen(
     onNavigateBack: () -> Unit
 ) {
+    val context = LocalContext.current
     var email by rememberSaveable { mutableStateOf("") }
     var emailError by remember { mutableStateOf<String?>(null) }
     var isLoading by remember { mutableStateOf(false) }
@@ -83,7 +85,7 @@ fun ForgotPasswordScreen(
             emailError = null
             true
         } else {
-            emailError = "Please enter a valid email address"
+            emailError = context.getString(R.string.auth_invalid_email_address)
             false
         }
     }
@@ -116,7 +118,7 @@ fun ForgotPasswordScreen(
             } catch (e: Exception) {
                 isLoading = false
                 snackbarHostState.showSnackbar(
-                    e.message ?: "Failed to send reset email. Please try again."
+                    e.message ?: context.getString(R.string.auth_failed_send_reset_email)
                 )
             }
         }
@@ -130,7 +132,7 @@ fun ForgotPasswordScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(R.string.back)
                         )
                     }
                 }
@@ -151,7 +153,7 @@ fun ForgotPasswordScreen(
                 // Success State
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
-                    contentDescription = "Success",
+                    contentDescription = stringResource(R.string.content_desc_success),
                     modifier = Modifier.size(80.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
@@ -159,7 +161,7 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(
-                    text = "Reset Link Sent!",
+                    text = stringResource(R.string.auth_reset_link_sent_title),
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -167,7 +169,7 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "We've sent a password reset link to:",
+                    text = stringResource(R.string.auth_reset_link_sent_to),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
@@ -184,7 +186,7 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Please check your email and follow the instructions to reset your password.",
+                    text = stringResource(R.string.auth_reset_link_sent_instructions),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -201,7 +203,7 @@ fun ForgotPasswordScreen(
             } else {
                 // Input State
                 Text(
-                    text = "Forgot Your Password?",
+                    text = stringResource(R.string.auth_forgot_password_title),
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary
                 )
@@ -209,7 +211,7 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Enter your email address and we'll send you a link to reset your password.",
+                    text = stringResource(R.string.auth_forgot_password_instructions),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -265,7 +267,7 @@ fun ForgotPasswordScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Text(
-                    text = "Remember your password?",
+                    text = stringResource(R.string.auth_remember_password_question),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

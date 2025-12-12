@@ -118,7 +118,7 @@ fun LocationTrackingTogglePreview() {
         ) {
             // Note: Preview won't work with hiltViewModel()
             // This is just for layout preview
-            Text("Location Tracking Toggle Preview")
+            Text(stringResource(R.string.location_tracking_preview))
         }
     }
 }

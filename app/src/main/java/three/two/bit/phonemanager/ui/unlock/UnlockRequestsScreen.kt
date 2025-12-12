@@ -52,12 +52,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.UnlockRequest
 import three.two.bit.phonemanager.domain.model.UnlockRequestFilter
 import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
@@ -110,12 +112,12 @@ fun UnlockRequestsScreen(
         modifier = modifier,
         topBar = {
             TopAppBar(
-                title = { Text("Unlock Requests") },
+                title = { Text(stringResource(R.string.unlock_requests_title)) },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Navigate back",
+                            contentDescription = stringResource(R.string.back),
                         )
                     }
                 },
@@ -123,7 +125,7 @@ fun UnlockRequestsScreen(
                     IconButton(onClick = { viewModel.refresh() }) {
                         Icon(
                             imageVector = Icons.Default.Refresh,
-                            contentDescription = "Refresh",
+                            contentDescription = stringResource(R.string.refresh),
                         )
                     }
                 },
@@ -216,19 +218,19 @@ private fun RequestSummaryRow(
     ) {
         SummaryBadge(
             count = summary.pendingCount,
-            label = "Pending",
+            label = stringResource(R.string.unlock_status_pending),
             color = MaterialTheme.colorScheme.tertiary,
             modifier = Modifier.weight(1f),
         )
         SummaryBadge(
             count = summary.approvedCount,
-            label = "Approved",
+            label = stringResource(R.string.unlock_status_approved),
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.weight(1f),
         )
         SummaryBadge(
             count = summary.deniedCount,
-            label = "Denied",
+            label = stringResource(R.string.unlock_status_denied),
             color = MaterialTheme.colorScheme.error,
             modifier = Modifier.weight(1f),
         )
@@ -289,11 +291,11 @@ private fun FilterChipsRow(
                 label = {
                     Text(
                         text = when (filter) {
-                            UnlockRequestFilter.ALL -> "All"
-                            UnlockRequestFilter.PENDING -> "Pending"
-                            UnlockRequestFilter.APPROVED -> "Approved"
-                            UnlockRequestFilter.DENIED -> "Denied"
-                            UnlockRequestFilter.WITHDRAWN -> "Withdrawn"
+                            UnlockRequestFilter.ALL -> stringResource(R.string.unlock_filter_all)
+                            UnlockRequestFilter.PENDING -> stringResource(R.string.unlock_status_pending)
+                            UnlockRequestFilter.APPROVED -> stringResource(R.string.unlock_status_approved)
+                            UnlockRequestFilter.DENIED -> stringResource(R.string.unlock_status_denied)
+                            UnlockRequestFilter.WITHDRAWN -> stringResource(R.string.unlock_status_withdrawn)
                         },
                     )
                 },
@@ -390,7 +392,7 @@ private fun RequestCard(
                             modifier = Modifier.size(16.dp),
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Withdraw")
+                        Text(stringResource(R.string.unlock_withdraw))
                     }
                 }
             }
@@ -417,22 +419,22 @@ private fun StatusChip(
         UnlockRequestStatus.PENDING -> Triple(
             Icons.Default.Pending,
             MaterialTheme.colorScheme.tertiary,
-            "Pending",
+            stringResource(R.string.unlock_status_pending),
         )
         UnlockRequestStatus.APPROVED -> Triple(
             Icons.Default.Check,
             MaterialTheme.colorScheme.primary,
-            "Approved",
+            stringResource(R.string.unlock_status_approved),
         )
         UnlockRequestStatus.DENIED -> Triple(
             Icons.Default.Clear,
             MaterialTheme.colorScheme.error,
-            "Denied",
+            stringResource(R.string.unlock_status_denied),
         )
         UnlockRequestStatus.WITHDRAWN -> Triple(
             Icons.Default.Undo,
             MaterialTheme.colorScheme.outline,
-            "Withdrawn",
+            stringResource(R.string.unlock_status_withdrawn),
         )
     }
 
@@ -489,12 +491,12 @@ private fun AdminResponseSection(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
-                    text = "Response from ",
+                    text = stringResource(R.string.unlock_response_from),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = request.respondedByName ?: "Admin",
+                    text = request.respondedByName ?: stringResource(R.string.unlock_admin_fallback),
                     style = MaterialTheme.typography.labelMedium,
                 )
             }
@@ -544,18 +546,18 @@ private fun EmptyRequestsState(
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = when (filter) {
-                    UnlockRequestFilter.ALL -> "No unlock requests"
-                    UnlockRequestFilter.PENDING -> "No pending requests"
-                    UnlockRequestFilter.APPROVED -> "No approved requests"
-                    UnlockRequestFilter.DENIED -> "No denied requests"
-                    UnlockRequestFilter.WITHDRAWN -> "No withdrawn requests"
+                    UnlockRequestFilter.ALL -> stringResource(R.string.unlock_empty_all)
+                    UnlockRequestFilter.PENDING -> stringResource(R.string.unlock_empty_pending)
+                    UnlockRequestFilter.APPROVED -> stringResource(R.string.unlock_empty_approved)
+                    UnlockRequestFilter.DENIED -> stringResource(R.string.unlock_empty_denied)
+                    UnlockRequestFilter.WITHDRAWN -> stringResource(R.string.unlock_empty_withdrawn)
                 },
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Unlock requests you create will appear here",
+                text = stringResource(R.string.unlock_empty_hint),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.outline,
             )

@@ -405,7 +405,13 @@ private fun DateFilterRow(
             onClick = onCustomRangeClicked,
             label = {
                 if (selectedFilter is DateFilter.Custom) {
-                    Text("${selectedFilter.startDate} - ${selectedFilter.endDate}")
+                    Text(
+                        stringResource(
+                            R.string.history_date_range,
+                            selectedFilter.startDate,
+                            selectedFilter.endDate,
+                        ),
+                    )
                 } else {
                     Text(stringResource(R.string.history_custom))
                 }

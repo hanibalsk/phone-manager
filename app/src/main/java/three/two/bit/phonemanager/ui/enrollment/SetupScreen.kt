@@ -31,8 +31,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import three.two.bit.phonemanager.R
 
 /**
  * Story E13.10: Android Enrollment Flow - Setup Screen
@@ -51,7 +53,7 @@ fun SetupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Welcome") },
+                title = { Text(stringResource(R.string.enrollment_welcome)) },
             )
         },
     ) { paddingValues ->
@@ -74,13 +76,13 @@ fun SetupScreen(
 
             // Title
             Text(
-                text = "How will you use this device?",
+                text = stringResource(R.string.setup_how_use_device),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
             )
 
             Text(
-                text = "Choose how you'd like to set up your device",
+                text = stringResource(R.string.setup_choose_setup),
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -91,16 +93,16 @@ fun SetupScreen(
             // Personal Use option (AC E13.10.1)
             SetupOptionCard(
                 icon = Icons.Default.Person,
-                title = "Personal Use",
-                description = "Set up for personal location tracking. You control all settings and data.",
+                title = stringResource(R.string.setup_personal_use_title),
+                description = stringResource(R.string.setup_personal_use_description),
                 onClick = onPersonalSetup,
             )
 
             // Company Enrollment option (AC E13.10.1)
             SetupOptionCard(
                 icon = Icons.Default.Business,
-                title = "Company Enrollment",
-                description = "Enroll with your company. Settings may be managed by your IT administrator.",
+                title = stringResource(R.string.enrollment_company_title),
+                description = stringResource(R.string.setup_company_enrollment_description),
                 onClick = onEnterpriseSetup,
             )
 
@@ -125,7 +127,7 @@ fun SetupScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        text = "Scan Enrollment QR Code",
+                        text = stringResource(R.string.setup_scan_enrollment_qr_code),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.primary,
                     )
@@ -136,7 +138,7 @@ fun SetupScreen(
 
             // Footer
             Text(
-                text = "You can change your setup later in Settings",
+                text = stringResource(R.string.setup_change_later_hint),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
