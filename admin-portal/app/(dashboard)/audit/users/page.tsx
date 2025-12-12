@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -134,22 +134,22 @@ export default function UserActivityPage() {
   const { execute: fetchReport, loading: reportLoading } = useApi<UserActivityReport>();
   const { execute: exportReport, loading: exporting } = useApi<Blob>();
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     const result = await fetchUsers(() => usersApi.list({ page: 1, limit: 100, search: userSearch }));
     if (result) {
       setUsers(result.items);
     }
-  };
+  }, [fetchUsers, userSearch]);
 
   useEffect(() => {
     loadUsers();
-  }, []);
+  }, [loadUsers]);
 
   const handleUserSearch = () => {
     loadUsers();
   };
 
-  const loadReport = async () => {
+  const loadReport = useCallback(async () => {
     if (!selectedUserId) return;
     const result = await fetchReport(() =>
       auditApi.getUserActivity(selectedUserId, dateFrom, dateTo)
@@ -157,13 +157,13 @@ export default function UserActivityPage() {
     if (result) {
       setReport(result);
     }
-  };
+  }, [fetchReport, selectedUserId, dateFrom, dateTo]);
 
   useEffect(() => {
     if (selectedUserId) {
       loadReport();
     }
-  }, [selectedUserId, dateFrom, dateTo]);
+  }, [selectedUserId, loadReport]);
 
   const handleExport = async (format: "pdf" | "csv") => {
     if (!selectedUserId) return;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -288,7 +288,7 @@ export default function AuditLogsPage() {
   const { execute: fetchStats, loading: statsLoading } = useApi<AuditLogStats>();
   const { execute: exportLogs, loading: exporting } = useApi<Blob>();
 
-  const buildFilters = (): AuditLogFilter | undefined => {
+  const buildFilters = useCallback((): AuditLogFilter | undefined => {
     const filters: AuditLogFilter = {};
     if (search) filters.search = search;
     if (actionFilter) filters.action = actionFilter;
@@ -296,9 +296,9 @@ export default function AuditLogsPage() {
     if (dateFrom) filters.date_from = dateFrom;
     if (dateTo) filters.date_to = dateTo;
     return Object.keys(filters).length > 0 ? filters : undefined;
-  };
+  }, [search, actionFilter, resourceFilter, dateFrom, dateTo]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const filters = buildFilters();
     const [logsResult, statsResult] = await Promise.all([
       fetchLogs(() => auditApi.getLogs(filters, page, 20)),
@@ -311,11 +311,11 @@ export default function AuditLogsPage() {
     if (statsResult) {
       setStats(statsResult);
     }
-  };
+  }, [fetchLogs, fetchStats, buildFilters, page]);
 
   useEffect(() => {
     loadData();
-  }, [page]);
+  }, [loadData]);
 
   const handleSearch = () => {
     setPage(1);

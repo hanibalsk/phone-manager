@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -101,17 +101,17 @@ export default function NotificationSettingsPage() {
   const { execute: fetchPreferences, loading } = useApi<NotificationPreferences>();
   const { execute: savePreferences, loading: saving } = useApi<NotificationPreferences>();
 
-  const loadPreferences = async () => {
+  const loadPreferences = useCallback(async () => {
     const result = await fetchPreferences(() => notificationsApi.getPreferences());
     if (result) {
       setPreferences(result);
       setHasChanges(false);
     }
-  };
+  }, [fetchPreferences]);
 
   useEffect(() => {
     loadPreferences();
-  }, []);
+  }, [loadPreferences]);
 
   const handleSave = async () => {
     const result = await savePreferences(() =>

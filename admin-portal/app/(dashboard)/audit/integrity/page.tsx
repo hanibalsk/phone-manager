@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -138,16 +138,16 @@ export default function IntegrityPage() {
   }>();
   const { execute: resolveAlert, loading: resolvingAlert } = useApi<void>();
 
-  const loadStatus = async () => {
+  const loadStatus = useCallback(async () => {
     const result = await fetchStatus(() => auditApi.getIntegrityStatus());
     if (result) {
       setStatus(result);
     }
-  };
+  }, [fetchStatus]);
 
   useEffect(() => {
     loadStatus();
-  }, []);
+  }, [loadStatus]);
 
   const handleVerify = async () => {
     setVerifying(true);

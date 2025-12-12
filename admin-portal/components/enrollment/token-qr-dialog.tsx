@@ -91,6 +91,7 @@ export function TokenQrDialog({ token, onClose }: TokenQrDialogProps) {
                 </Button>
               </div>
             )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={qrCodeUrl}
               alt="Enrollment QR Code"

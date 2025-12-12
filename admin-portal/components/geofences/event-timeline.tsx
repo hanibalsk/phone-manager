@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useId } from "react";
 import type { GeofenceEvent, GeofenceEventType } from "@/types";
 import { EventTypeBadge } from "./event-type-badge";
 import { Button } from "@/components/ui/button";
@@ -105,6 +105,14 @@ export function EventTimeline({ events, className = "" }: EventTimelineProps) {
     return `${hours}h ${mins}m`;
   };
 
+  // Calculate time range for visualization - must be called before any early returns
+  const timeRange = useMemo(() => {
+    if (sortedEvents.length === 0) return { min: 0, max: 0, span: 0 };
+    const min = new Date(sortedEvents[0].triggered_at).getTime();
+    const max = new Date(sortedEvents[sortedEvents.length - 1].triggered_at).getTime();
+    return { min, max, span: max - min || 1 };
+  }, [sortedEvents]);
+
   if (events.length === 0) {
     return (
       <div className={`flex flex-col items-center justify-center py-8 text-center ${className}`}>
@@ -116,14 +124,6 @@ export function EventTimeline({ events, className = "" }: EventTimelineProps) {
       </div>
     );
   }
-
-  // Calculate time range for visualization
-  const timeRange = useMemo(() => {
-    if (sortedEvents.length === 0) return { min: 0, max: 0, span: 0 };
-    const min = new Date(sortedEvents[0].triggered_at).getTime();
-    const max = new Date(sortedEvents[sortedEvents.length - 1].triggered_at).getTime();
-    return { min, max, span: max - min || 1 };
-  }, [sortedEvents]);
 
   return (
     <div className={className}>

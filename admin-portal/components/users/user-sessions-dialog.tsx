@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useId } from "react";
+import { useState, useEffect, useId, useCallback } from "react";
 import type { AdminUser, UserSession } from "@/types";
 import { usersApi } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -30,7 +30,7 @@ export function UserSessionsDialog({ user, onClose }: UserSessionsDialogProps) {
   const titleId = useId();
   const descriptionId = useId();
 
-  const fetchSessions = async () => {
+  const fetchSessions = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -45,11 +45,11 @@ export function UserSessionsDialog({ user, onClose }: UserSessionsDialogProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.id]);
 
   useEffect(() => {
     fetchSessions();
-  }, [user.id]);
+  }, [fetchSessions]);
 
   const handleRevokeSession = async (sessionId: string) => {
     setRevoking(sessionId);

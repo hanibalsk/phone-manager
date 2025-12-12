@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -144,24 +144,24 @@ export default function OrganizationActivityPage() {
   const { execute: fetchReport, loading: reportLoading } =
     useApi<OrgActivityReport>();
 
-  const loadOrganizations = async () => {
+  const loadOrganizations = useCallback(async () => {
     const result = await fetchOrgs(() =>
       organizationsApi.list({ page: 1, limit: 100, search: orgSearch })
     );
     if (result) {
       setOrganizations(result.items);
     }
-  };
+  }, [fetchOrgs, orgSearch]);
 
   useEffect(() => {
     loadOrganizations();
-  }, []);
+  }, [loadOrganizations]);
 
   const handleOrgSearch = () => {
     loadOrganizations();
   };
 
-  const loadReport = async () => {
+  const loadReport = useCallback(async () => {
     if (!selectedOrgId) return;
     const result = await fetchReport(() =>
       auditApi.getOrgActivity(selectedOrgId, dateFrom, dateTo)
@@ -169,13 +169,13 @@ export default function OrganizationActivityPage() {
     if (result) {
       setReport(result);
     }
-  };
+  }, [fetchReport, selectedOrgId, dateFrom, dateTo]);
 
   useEffect(() => {
     if (selectedOrgId) {
       loadReport();
     }
-  }, [selectedOrgId, dateFrom, dateTo]);
+  }, [selectedOrgId, loadReport]);
 
   const setDatePreset = (days: number) => {
     const end = new Date();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -61,24 +61,24 @@ export function NotificationCenter({ onClose }: NotificationCenterProps) {
   const { execute: markAllRead } = useApi<void>();
   const { execute: deleteNotification } = useApi<void>();
 
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     const result = await fetchNotifications(() => notificationsApi.getAll(showUnreadOnly));
     if (result) {
       setNotifications(result);
     }
-  };
+  }, [fetchNotifications, showUnreadOnly]);
 
-  const loadUnreadCount = async () => {
+  const loadUnreadCount = useCallback(async () => {
     const result = await fetchUnreadCount(() => notificationsApi.getUnreadCount());
     if (result) {
       setUnreadCount(result.count);
     }
-  };
+  }, [fetchUnreadCount]);
 
   useEffect(() => {
     loadNotifications();
     loadUnreadCount();
-  }, [showUnreadOnly]);
+  }, [loadNotifications, loadUnreadCount]);
 
   const handleMarkRead = async (id: string) => {
     await markRead(() => notificationsApi.markAsRead(id));
@@ -289,19 +289,20 @@ export function NotificationBell({ onClick }: NotificationBellProps) {
   const [unreadCount, setUnreadCount] = useState(0);
   const { execute: fetchUnreadCount } = useApi<{ count: number }>();
 
+  const loadCount = useCallback(async () => {
+    const result = await fetchUnreadCount(() => notificationsApi.getUnreadCount());
+    if (result) {
+      setUnreadCount(result.count);
+    }
+  }, [fetchUnreadCount]);
+
   useEffect(() => {
-    const loadCount = async () => {
-      const result = await fetchUnreadCount(() => notificationsApi.getUnreadCount());
-      if (result) {
-        setUnreadCount(result.count);
-      }
-    };
     loadCount();
 
     // Poll for updates every 30 seconds
     const interval = setInterval(loadCount, 30000);
     return () => clearInterval(interval);
-  }, []);
+  }, [loadCount]);
 
   return (
     <Button

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useId } from "react";
+import { useState, useEffect, useId, useCallback } from "react";
 import type { AdminUser, MfaStatus } from "@/types";
 import { usersApi } from "@/lib/api-client";
 import { Button } from "@/components/ui/button";
@@ -32,7 +32,7 @@ export function UserMfaDialog({ user, onClose }: UserMfaDialogProps) {
   const titleId = useId();
   const descriptionId = useId();
 
-  const fetchMfaStatus = async () => {
+  const fetchMfaStatus = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -47,11 +47,11 @@ export function UserMfaDialog({ user, onClose }: UserMfaDialogProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user.id]);
 
   useEffect(() => {
     fetchMfaStatus();
-  }, [user.id]);
+  }, [fetchMfaStatus]);
 
   const handleForceEnrollment = async () => {
     setActionLoading("force");

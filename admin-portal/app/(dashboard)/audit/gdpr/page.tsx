@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -114,26 +114,26 @@ export default function GDPRPage() {
   const { execute: createDeletion, loading: creatingDeletion } =
     useApi<GDPRDeletionRequest>();
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     const result = await fetchUsers(() => usersApi.list({ page: 1, limit: 50, search: userSearch }));
     if (result) {
       setUsers(result.items);
     }
-  };
+  }, [fetchUsers, userSearch]);
 
-  const loadRequests = async () => {
+  const loadRequests = useCallback(async () => {
     const [exports, deletions] = await Promise.all([
       fetchExports(() => auditApi.getDataExports()),
       fetchDeletions(() => auditApi.getDeletionRequests()),
     ]);
     if (exports) setExportRequests(exports);
     if (deletions) setDeletionRequests(deletions);
-  };
+  }, [fetchExports, fetchDeletions]);
 
   useEffect(() => {
     loadUsers();
     loadRequests();
-  }, []);
+  }, [loadUsers, loadRequests]);
 
   const handleUserSearch = () => {
     loadUsers();

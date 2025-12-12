@@ -341,6 +341,7 @@ export function UserList() {
                       <td className="py-3 px-4">
                         <div className="flex items-center gap-2">
                           {user.avatar_url ? (
+                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                               src={user.avatar_url}
                               alt=""
