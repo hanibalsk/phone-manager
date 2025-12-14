@@ -281,23 +281,21 @@ class SecureStorageTest {
     }
 
     @Test
-    fun `isAuthenticated returns false when access token missing`() {
-        // Given
+    fun `isAuthenticated returns true when access token missing but refresh token exists`() {
+        // Given - no access token but refresh token exists (can be refreshed)
         every { encryptedPrefs.getString("access_token", null) } returns null
         every { encryptedPrefs.getString("refresh_token", null) } returns "refresh.token"
-        every { encryptedPrefs.getLong("token_expiry_time", -1L) } returns
-            System.currentTimeMillis() + (10 * 60 * 1000L)
 
         // When
         val result = secureStorage.isAuthenticated()
 
-        // Then
-        assertFalse(result)
+        // Then - should be true because refresh token can be used to get new access token
+        assertTrue(result, "Should be authenticated when refresh token exists")
     }
 
     @Test
-    fun `isAuthenticated returns false when refresh token missing`() {
-        // Given
+    fun `isAuthenticated returns true when refresh token missing but access token valid`() {
+        // Given - no refresh token but access token is valid (not expired)
         every { encryptedPrefs.getString("access_token", null) } returns "access.token"
         every { encryptedPrefs.getString("refresh_token", null) } returns null
         every { encryptedPrefs.getLong("token_expiry_time", -1L) } returns
@@ -306,13 +304,13 @@ class SecureStorageTest {
         // When
         val result = secureStorage.isAuthenticated()
 
-        // Then
-        assertFalse(result)
+        // Then - valid access token means authenticated
+        assertTrue(result, "Should be authenticated with valid access token even without refresh token")
     }
 
     @Test
-    fun `isAuthenticated returns false when tokens expired`() {
-        // Given
+    fun `isAuthenticated returns true when access token expired but refresh token exists`() {
+        // Given - access token expired but refresh token exists
         every { encryptedPrefs.getString("access_token", null) } returns "access.token"
         every { encryptedPrefs.getString("refresh_token", null) } returns "refresh.token"
         every { encryptedPrefs.getLong("token_expiry_time", -1L) } returns
@@ -321,13 +319,13 @@ class SecureStorageTest {
         // When
         val result = secureStorage.isAuthenticated()
 
-        // Then
-        assertFalse(result)
+        // Then - should be true because refresh token can be used to get new access token
+        assertTrue(result, "Should be authenticated when refresh token exists even if access token expired")
     }
 
     @Test
-    fun `isAuthenticated returns false when tokens present but within expiry buffer`() {
-        // Given - tokens expire in 3 minutes (within 5-minute buffer)
+    fun `isAuthenticated returns true when within expiry buffer but refresh token exists`() {
+        // Given - access token expires in 3 minutes (within 5-minute buffer) but refresh token exists
         every { encryptedPrefs.getString("access_token", null) } returns "access.token"
         every { encryptedPrefs.getString("refresh_token", null) } returns "refresh.token"
         every { encryptedPrefs.getLong("token_expiry_time", -1L) } returns
@@ -336,8 +334,23 @@ class SecureStorageTest {
         // When
         val result = secureStorage.isAuthenticated()
 
-        // Then
-        assertFalse(result, "Should not be authenticated within expiry buffer")
+        // Then - should be true because refresh token exists
+        assertTrue(result, "Should be authenticated when refresh token exists even within expiry buffer")
+    }
+
+    @Test
+    fun `isAuthenticated returns false when no refresh token and access token expired`() {
+        // Given - no refresh token and access token expired
+        every { encryptedPrefs.getString("access_token", null) } returns "access.token"
+        every { encryptedPrefs.getString("refresh_token", null) } returns null
+        every { encryptedPrefs.getLong("token_expiry_time", -1L) } returns
+            System.currentTimeMillis() - 1000L // Expired 1 second ago
+
+        // When
+        val result = secureStorage.isAuthenticated()
+
+        // Then - should be false because no refresh token and access token expired
+        assertFalse(result, "Should not be authenticated without refresh token when access token expired")
     }
 
     // Integration Tests

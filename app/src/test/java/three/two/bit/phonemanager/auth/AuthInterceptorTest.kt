@@ -63,11 +63,11 @@ class AuthInterceptorTest {
     }
 
     @Test
-    fun `configureRequest does not add Bearer token when token expired`() {
-        // Given
-        every { secureStorage.getAccessToken() } returns "expired.token"
+    fun `configureRequest adds Bearer token even when expired to trigger refresh`() {
+        // Given - token exists but is expired
+        val expiredToken = "expired.token"
+        every { secureStorage.getAccessToken() } returns expiredToken
         every { secureStorage.isTokenExpired() } returns true
-        every { secureStorage.getApiKey() } returns null
 
         val request = HttpRequestBuilder().apply {
             url.takeFrom("https://api.example.com/devices")
@@ -76,9 +76,9 @@ class AuthInterceptorTest {
         // When
         authInterceptor.configureRequest(request)
 
-        // Then
+        // Then - Bearer token should be added; server will return 401 triggering refresh
         val authHeader = request.headers["Authorization"]
-        assertTrue(authHeader == null)
+        assertTrue(authHeader == "Bearer $expiredToken", "Expired token should still be sent to trigger 401 refresh flow")
     }
 
     @Test
@@ -123,10 +123,11 @@ class AuthInterceptorTest {
     }
 
     @Test
-    fun `configureRequest adds X-API-Key header when token expired and API key exists`() {
-        // Given
+    fun `configureRequest prefers Bearer token over X-API-Key even when token expired`() {
+        // Given - expired token exists but so does API key
+        val expiredToken = "expired.token"
         val apiKey = "test-api-key-456"
-        every { secureStorage.getAccessToken() } returns "expired.token"
+        every { secureStorage.getAccessToken() } returns expiredToken
         every { secureStorage.isTokenExpired() } returns true
         every { secureStorage.getApiKey() } returns apiKey
 
@@ -137,9 +138,11 @@ class AuthInterceptorTest {
         // When
         authInterceptor.configureRequest(request)
 
-        // Then
+        // Then - Bearer token should be added (even expired), NOT API key
+        val authHeader = request.headers["Authorization"]
         val apiKeyHeader = request.headers["X-API-Key"]
-        assertTrue(apiKeyHeader == apiKey)
+        assertTrue(authHeader == "Bearer $expiredToken", "Expired Bearer token should be sent")
+        assertTrue(apiKeyHeader == null, "X-API-Key should not be added when Bearer token exists")
     }
 
     @Test

@@ -32,14 +32,22 @@ class AuthInterceptor(
      * Configure request with authentication headers
      *
      * AC E9.11.2: Add Bearer token to Authorization header if available
+     *
+     * Always adds Bearer token if available - even if expired.
+     * The server will return 401, triggering automatic refresh via handle401Response.
      */
     fun configureRequest(request: HttpRequestBuilder) {
         val accessToken = secureStorage.getAccessToken()
 
-        if (accessToken != null && !secureStorage.isTokenExpired()) {
-            // Add Bearer token (AC E9.11.2)
+        if (accessToken != null) {
+            // Always add Bearer token if we have one (AC E9.11.2)
+            // If expired, server will return 401 and we'll refresh via handle401Response
             request.header("Authorization", "Bearer $accessToken")
-            Timber.v("Added Bearer token to request: ${request.url}")
+            if (secureStorage.isTokenExpired()) {
+                Timber.d("Added expired Bearer token to request (will be refreshed on 401): ${request.url}")
+            } else {
+                Timber.v("Added Bearer token to request: ${request.url}")
+            }
         } else {
             // Fall back to API key for unauthenticated endpoints (AC E9.11.8)
             val apiKey = secureStorage.getApiKey()

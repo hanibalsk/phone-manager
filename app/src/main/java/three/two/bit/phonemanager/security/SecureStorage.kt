@@ -240,10 +240,35 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
 
     /**
      * Check if user is authenticated (has valid tokens)
+     *
+     * Returns true if:
+     * - Both access and refresh tokens exist AND access token is not expired, OR
+     * - Refresh token exists (access token can be refreshed via AuthInterceptor)
+     *
+     * The AuthInterceptor will handle automatic token refresh when access token
+     * is expired but refresh token is still valid.
      */
     fun isAuthenticated(): Boolean {
-        val hasTokens = getAccessToken() != null && getRefreshToken() != null
-        return hasTokens && !isTokenExpired()
+        val hasAccessToken = getAccessToken() != null
+        val hasRefreshToken = getRefreshToken() != null
+
+        // If we have a refresh token, consider authenticated
+        // AuthInterceptor will handle token refresh when needed
+        if (hasRefreshToken) {
+            return true
+        }
+
+        // Otherwise, need valid access token
+        return hasAccessToken && !isTokenExpired()
+    }
+
+    /**
+     * Check if access token needs refresh
+     * Returns true if access token is expired but refresh token exists
+     */
+    fun needsTokenRefresh(): Boolean {
+        val hasRefreshToken = getRefreshToken() != null
+        return hasRefreshToken && isTokenExpired()
     }
 
     // ========================================================================
