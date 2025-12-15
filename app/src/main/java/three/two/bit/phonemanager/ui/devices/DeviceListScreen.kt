@@ -147,7 +147,6 @@ fun DeviceListScreen(
                         devices = state.devices,
                         currentDeviceId = state.currentDeviceId,
                         onDeviceClick = { device ->
-                            viewModel.selectDevice(device)
                             onNavigateToDeviceDetail(device)
                         },
                     )

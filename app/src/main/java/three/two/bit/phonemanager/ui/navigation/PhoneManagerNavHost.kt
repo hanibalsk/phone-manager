@@ -82,7 +82,9 @@ sealed class Screen(val route: String) {
 
     // Story E10.6: Device Management screens
     object DeviceList : Screen("device_list")
-    object DeviceDetail : Screen("device_detail")
+    object DeviceDetail : Screen("device_detail/{deviceId}") {
+        fun createRoute(deviceId: String) = "device_detail/$deviceId"
+    }
 
     // Story E11.8: Group Management screens
     object GroupList : Screen("group_list")
@@ -424,12 +426,17 @@ fun PhoneManagerNavHost(
         composable(Screen.DeviceList.route) {
             DeviceListScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onNavigateToDeviceDetail = {
-                    navController.navigate(Screen.DeviceDetail.route)
+                onNavigateToDeviceDetail = { device ->
+                    navController.navigate(Screen.DeviceDetail.createRoute(device.deviceUuid))
                 },
             )
         }
-        composable(Screen.DeviceDetail.route) {
+        composable(
+            route = Screen.DeviceDetail.route,
+            arguments = listOf(
+                navArgument("deviceId") { type = NavType.StringType }
+            ),
+        ) {
             DeviceDetailScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onDeviceUnlinked = {

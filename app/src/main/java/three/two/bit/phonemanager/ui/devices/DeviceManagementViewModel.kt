@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.ui.devices
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,6 +34,7 @@ class DeviceManagementViewModel @Inject constructor(
     private val authRepository: AuthRepository,
     private val deviceApiService: DeviceApiService,
     private val secureStorage: SecureStorage,
+    savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<DeviceUiState>(DeviceUiState.Loading)
@@ -47,13 +49,21 @@ class DeviceManagementViewModel @Inject constructor(
     private val _detailUiState = MutableStateFlow<DeviceDetailUiState>(DeviceDetailUiState.Loading)
     val detailUiState: StateFlow<DeviceDetailUiState> = _detailUiState.asStateFlow()
 
+    // Device ID from navigation arguments (for detail screen)
+    private val deviceIdFromNav: String? = savedStateHandle.get<String>("deviceId")
+
     // Current device ID for highlighting in the list
     val currentDeviceId: String
         get() = secureStorage.getDeviceId()
 
     init {
-        // Auto-load devices when ViewModel is created
-        refreshDevices()
+        // If deviceId is provided via navigation, load device details
+        if (deviceIdFromNav != null) {
+            loadDeviceDetails(deviceIdFromNav)
+        } else {
+            // Auto-load devices when ViewModel is created (for list screen)
+            refreshDevices()
+        }
     }
 
     /**
@@ -282,6 +292,69 @@ class DeviceManagementViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to transfer device")
                     _operationResult.value = DeviceOperationResult.Error(
+                        message = getErrorMessage(error),
+                        errorCode = getErrorCode(error)
+                    )
+                }
+            )
+        }
+    }
+
+    /**
+     * Load device details by device ID (used when navigating directly to detail screen)
+     *
+     * @param deviceId UUID of the device to load
+     */
+    fun loadDeviceDetails(deviceId: String) {
+        val user = authRepository.getCurrentUser()
+        if (user == null) {
+            _detailUiState.value = DeviceDetailUiState.Error(
+                message = "You must be signed in to view device details",
+                errorCode = "not_authenticated"
+            )
+            return
+        }
+
+        val accessToken = secureStorage.getAccessToken()
+        if (accessToken == null) {
+            _detailUiState.value = DeviceDetailUiState.Error(
+                message = "Authentication required",
+                errorCode = "no_token"
+            )
+            return
+        }
+
+        viewModelScope.launch {
+            _detailUiState.value = DeviceDetailUiState.Loading
+
+            val result = deviceApiService.getUserDevices(
+                userId = user.userId,
+                includeInactive = true, // Include inactive to find the device
+                accessToken = accessToken
+            )
+
+            result.fold(
+                onSuccess = { devices ->
+                    val device = devices.find { it.deviceUuid == deviceId }
+                    if (device != null) {
+                        Timber.i("Loaded device details for $deviceId")
+                        _selectedDevice.value = device
+                        _detailUiState.value = DeviceDetailUiState.Success(
+                            device = device,
+                            isCurrentDevice = device.deviceUuid == currentDeviceId,
+                            isOwner = true
+                        )
+                    } else {
+                        Timber.w("Device not found: $deviceId")
+                        _detailUiState.value = DeviceDetailUiState.Error(
+                            message = "Device not found",
+                            errorCode = "not_found"
+                        )
+                    }
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to load device details")
+                    _detailUiState.value = DeviceDetailUiState.Error(
                         message = getErrorMessage(error),
                         errorCode = getErrorCode(error)
                     )
