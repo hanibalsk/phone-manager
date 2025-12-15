@@ -216,7 +216,7 @@ interface DeviceApiService {
     // ============================================================================
 
     /**
-     * Story E12.7 Task 2: Get member devices for a group (admin only)
+     * Story E12.7 Task 2: Get member devices for a group
      * GET /api/v1/groups/{groupId}/devices
      *
      * AC E12.7.1: Device Settings List Screen

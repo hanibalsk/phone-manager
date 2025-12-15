@@ -186,12 +186,12 @@ class AdminSettingsRepositoryImpl @Inject constructor(
                     val devices = response.devices.map { device ->
                         MemberDeviceSettings(
                             deviceId = device.deviceId,
-                            deviceName = device.deviceName,
-                            ownerUserId = device.ownerUserId,
-                            ownerName = device.ownerName,
-                            ownerEmail = device.ownerEmail,
-                            isOnline = device.isOnline,
-                            lastSeen = device.lastSeen?.let { parseInstant(it) },
+                            deviceName = device.displayName,
+                            ownerUserId = "", // Not provided by this endpoint
+                            ownerName = "", // Not provided by this endpoint
+                            ownerEmail = "", // Not provided by this endpoint
+                            isOnline = device.lastSeenAt != null, // Infer from last seen
+                            lastSeen = device.lastSeenAt?.let { parseInstant(it) },
                             settings = emptyMap(), // Basic info only, load full settings on demand
                             locks = emptyMap(),
                             lastSyncedAt = null,

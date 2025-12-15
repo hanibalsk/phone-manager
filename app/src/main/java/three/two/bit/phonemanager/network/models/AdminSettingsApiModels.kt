@@ -180,24 +180,39 @@ data class SaveTemplateResponse(
 /**
  * Member device info for list display.
  * AC E12.7.1: Device Settings List Screen
+ *
+ * Backend GET /api/v1/groups/{groupId}/devices returns DeviceSummary format.
  */
 @Serializable
 data class MemberDeviceResponse(
     @SerialName("device_id") val deviceId: String,
-    @SerialName("device_name") val deviceName: String,
-    @SerialName("owner_user_id") val ownerUserId: String,
-    @SerialName("owner_name") val ownerName: String,
-    @SerialName("owner_email") val ownerEmail: String,
-    @SerialName("is_online") val isOnline: Boolean,
-    @SerialName("last_seen") val lastSeen: String? = null,
-    @SerialName("locked_settings_count") val lockedSettingsCount: Int = 0,
+    @SerialName("display_name") val displayName: String,
+    @SerialName("last_location") val lastLocation: DeviceLastLocationResponse? = null,
+    @SerialName("last_seen_at") val lastSeenAt: String? = null,
 )
 
+/**
+ * Last location info from backend DeviceSummary.
+ */
+@Serializable
+data class DeviceLastLocationResponse(
+    val latitude: Double,
+    val longitude: Double,
+    val timestamp: String,
+    val accuracy: Double,
+)
+
+/**
+ * Response from GET /api/v1/groups/{groupId}/devices
+ *
+ * Backend returns just { devices: [...] } without total_count.
+ */
 @Serializable
 data class MemberDevicesResponse(
     val devices: List<MemberDeviceResponse>,
-    @SerialName("total_count") val totalCount: Int,
-)
+) {
+    val totalCount: Int get() = devices.size
+}
 
 /**
  * Response for setting lock information.
