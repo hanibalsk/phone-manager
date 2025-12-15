@@ -202,6 +202,9 @@ jobs:
             echo "=== Verifying mock API server on host ==="
             curl -s http://localhost:8080/health || echo "Warning: Mock server not accessible on host"
 
+            # Uninstall existing app (if any) to avoid signature mismatch
+            adb uninstall three.two.bit.phonemanager.dev || true
+
             # Install the app
             adb install -r app/build/outputs/apk/debug/app-debug.apk
 
@@ -372,6 +375,7 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           script: |
+            adb uninstall three.two.bit.phonemanager.dev || true
             adb install -r app/build/outputs/apk/debug/app-debug.apk
             chmod +x tests/e2e/edge_cases/*.sh
             # Run edge case tests
