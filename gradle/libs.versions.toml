@@ -8,11 +8,11 @@ targetSdk = "36"
 agp = "8.13.2"
 kotlin = "2.2.21"
 ksp = "2.2.21-2.0.4"
-spotless = "7.0.2"
+spotless = "8.1.0"
 
 # AndroidX Core
 coreKtx = "1.17.0"
-activityCompose = "1.12.0"
+activityCompose = "1.12.1"
 lifecycle = "2.10.0"
 navigation = "2.9.6"
 datastore = "1.2.0"
@@ -21,64 +21,64 @@ workManager = "2.11.0"
 securityCrypto = "1.1.0"
 
 # Compose
-composeBom = "2025.10.01"
+composeBom = "2025.12.00"
 
 # Dependency Injection
 hilt = "2.57.2"
 hiltAndroidx = "1.3.0"
 
 # Networking
-ktor = "3.3.2"
+ktor = "3.3.3"
 kotlinxSerializationJson = "1.9.0"
 
 # Coroutines
 coroutines = "1.10.2"
 
 # DateTime
-kotlinxDatetime = "0.6.1"
+kotlinxDatetime = "0.7.1"
 
 # Google Play Services
 playServicesLocation = "21.3.0"
-playServicesMaps = "19.0.0"
-playServicesAuth = "21.3.0"
+playServicesMaps = "19.2.0"
+playServicesAuth = "21.4.0"
 
 # Credential Manager (Story E9.11: OAuth)
-credentialsPlayServicesAuth = "1.3.0"
+credentialsPlayServicesAuth = "1.5.0"
 googleid = "1.1.1"
 
 # Browser (Story E9.11: Apple OAuth)
-browser = "1.8.0"
+browser = "1.9.0"
 
 # Google Maps
-mapsCompose = "4.4.1"
+mapsCompose = "6.12.2"
 
 # Logging
 timber = "5.0.1"
 
 # Lottie Animations
-lottie = "6.6.2"
+lottie = "6.7.1"
 
 # CameraX (Story E11.9: QR Code Scanning)
-cameraX = "1.4.1"
+cameraX = "1.5.2"
 
 # ML Kit Barcode (Story E11.9: QR Code Scanning)
 mlkitBarcode = "17.3.0"
 
 # ZXing (Story E11.9: QR Code Generation)
-zxing = "3.5.3"
+zxing = "3.5.4"
 
 # Firebase (Story E12.6: FCM Push Notifications)
-firebaseBom = "34.6.0"
+firebaseBom = "34.7.0"
 googleServices = "4.4.4"
 
 # Testing
 junit = "4.13.2"
-mockk = "1.14.6"
+mockk = "1.14.7"
 turbine = "1.2.1"
 androidxTestJunit = "1.3.0"
 espresso = "3.7.0"
-testOrchestrator = "1.5.1"
-mockwebserver = "4.12.0"
+testOrchestrator = "1.6.1"
+mockwebserver = "5.3.2"
 
 [libraries]
 # AndroidX Core
