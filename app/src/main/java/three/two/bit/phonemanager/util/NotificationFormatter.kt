@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.util
 
 import android.content.Context
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.movement.TransportationMode
 

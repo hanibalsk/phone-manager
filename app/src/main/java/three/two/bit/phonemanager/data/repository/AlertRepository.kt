@@ -2,7 +2,7 @@ package three.two.bit.phonemanager.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import three.two.bit.phonemanager.data.database.ProximityAlertDao
 import three.two.bit.phonemanager.data.model.ProximityAlertEntity

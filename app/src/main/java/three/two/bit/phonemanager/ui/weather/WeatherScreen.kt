@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -531,7 +532,7 @@ private fun formatDayName(
     sundayStr: String,
 ): String {
     val tz = TimeZone.currentSystemDefault()
-    val now = kotlinx.datetime.Clock.System.now()
+    val now = Clock.System.now()
     val today = now.toLocalDateTime(tz).date
     val tomorrow = today.plus(1, DateTimeUnit.DAY)
 

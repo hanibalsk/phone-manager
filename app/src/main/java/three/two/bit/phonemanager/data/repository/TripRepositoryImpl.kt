@@ -3,8 +3,9 @@ package three.two.bit.phonemanager.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 import three.two.bit.phonemanager.data.database.TripDao
 import three.two.bit.phonemanager.data.model.TripEntity
 import three.two.bit.phonemanager.data.model.toDomain
@@ -209,7 +210,7 @@ class TripRepositoryImpl @Inject constructor(
             // Mark as synced locally
             markAsSynced(
                 tripId = trip.id,
-                syncedAt = kotlinx.datetime.Clock.System.now(),
+                syncedAt = Clock.System.now(),
                 serverId = response.tripId,
             )
             Timber.i("Trip created on server: serverId=${response.tripId}")
@@ -247,7 +248,7 @@ class TripRepositoryImpl @Inject constructor(
             // Update sync timestamp
             markAsSynced(
                 tripId = trip.id,
-                syncedAt = kotlinx.datetime.Clock.System.now(),
+                syncedAt = Clock.System.now(),
                 serverId = serverId,
             )
             Timber.i("Trip updated on server: serverId=$serverId")

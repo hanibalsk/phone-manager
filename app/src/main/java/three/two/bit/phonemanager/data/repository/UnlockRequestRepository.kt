@@ -3,6 +3,7 @@ package three.two.bit.phonemanager.data.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import three.two.bit.phonemanager.domain.model.UnlockRequest
 import three.two.bit.phonemanager.domain.model.UnlockRequestFilter
@@ -359,7 +360,7 @@ class UnlockRequestRepositoryImpl @Inject constructor(
             Instant.parse(isoString)
         } catch (e: Exception) {
             Timber.w(e, "Failed to parse instant: $isoString")
-            kotlinx.datetime.Clock.System.now()
+            Clock.System.now()
         }
     }
 }

@@ -298,13 +298,13 @@ private fun DayHeader(dayGroup: TripDayGroup, modifier: Modifier = Modifier) {
 private fun formatDate(date: LocalDate): String {
     // Format as "Mon, Jan 15" or similar
     val dayOfWeek = when (date.dayOfWeek) {
-        java.time.DayOfWeek.MONDAY -> "Mon"
-        java.time.DayOfWeek.TUESDAY -> "Tue"
-        java.time.DayOfWeek.WEDNESDAY -> "Wed"
-        java.time.DayOfWeek.THURSDAY -> "Thu"
-        java.time.DayOfWeek.FRIDAY -> "Fri"
-        java.time.DayOfWeek.SATURDAY -> "Sat"
-        java.time.DayOfWeek.SUNDAY -> "Sun"
+        kotlinx.datetime.DayOfWeek.MONDAY -> "Mon"
+        kotlinx.datetime.DayOfWeek.TUESDAY -> "Tue"
+        kotlinx.datetime.DayOfWeek.WEDNESDAY -> "Wed"
+        kotlinx.datetime.DayOfWeek.THURSDAY -> "Thu"
+        kotlinx.datetime.DayOfWeek.FRIDAY -> "Fri"
+        kotlinx.datetime.DayOfWeek.SATURDAY -> "Sat"
+        kotlinx.datetime.DayOfWeek.SUNDAY -> "Sun"
     }
     val month = when (date.monthNumber) {
         1 -> "Jan"

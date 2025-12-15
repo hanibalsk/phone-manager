@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import three.two.bit.phonemanager.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -406,7 +407,7 @@ private fun formatPartialDeviceId(deviceId: String): String {
  */
 private fun formatTimestamp(instant: Instant): String {
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    val now = kotlinx.datetime.Clock.System.now()
+    val now = Clock.System.now()
         .toLocalDateTime(TimeZone.currentSystemDefault())
 
     return when {

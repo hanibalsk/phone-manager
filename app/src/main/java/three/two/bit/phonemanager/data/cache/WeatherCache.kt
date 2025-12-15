@@ -9,15 +9,16 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.domain.model.Weather
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 /**
  * Story E7.1: WeatherCache - Persistent storage for weather data
@@ -62,6 +63,7 @@ interface WeatherCache {
     suspend fun isCacheValid(): Boolean
 }
 
+@OptIn(ExperimentalTime::class)
 @Singleton
 class WeatherCacheImpl @Inject constructor(@ApplicationContext private val context: Context) : WeatherCache {
 

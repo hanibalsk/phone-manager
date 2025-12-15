@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.network.models
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

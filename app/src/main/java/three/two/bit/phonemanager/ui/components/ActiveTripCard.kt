@@ -41,7 +41,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.delay
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.movement.TransportationMode

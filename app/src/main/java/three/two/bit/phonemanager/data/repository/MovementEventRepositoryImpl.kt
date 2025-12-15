@@ -2,9 +2,9 @@ package three.two.bit.phonemanager.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toJavaInstant
+import kotlin.time.toJavaInstant
 import three.two.bit.phonemanager.data.database.MovementEventDao
 import three.two.bit.phonemanager.data.model.MovementEventEntity
 import three.two.bit.phonemanager.data.model.toDomain

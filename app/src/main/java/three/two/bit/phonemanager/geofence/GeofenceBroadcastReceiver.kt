@@ -15,7 +15,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import three.two.bit.phonemanager.MainActivity
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.database.GeofenceEventDao

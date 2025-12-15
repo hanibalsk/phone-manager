@@ -2,7 +2,7 @@ package three.two.bit.phonemanager.proximity
 
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.first
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import three.two.bit.phonemanager.data.repository.AlertRepository
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.ProximityAlert

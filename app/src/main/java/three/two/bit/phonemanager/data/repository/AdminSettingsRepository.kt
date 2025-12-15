@@ -4,6 +4,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import three.two.bit.phonemanager.domain.model.BulkSettingsResult
 import three.two.bit.phonemanager.domain.model.DeviceSettingsResult
@@ -329,7 +330,7 @@ class AdminSettingsRepositoryImpl @Inject constructor(
                                     settingKey = key,
                                     isLocked = true,
                                     lockedBy = "Current User", // Local cache only - actual value from server
-                                    lockedAt = kotlinx.datetime.Clock.System.now(),
+                                    lockedAt = Clock.System.now(),
                                 )
                             }
                             _currentDeviceSettings.value = current.copy(locks = updatedLocks)
@@ -432,7 +433,7 @@ class AdminSettingsRepositoryImpl @Inject constructor(
                             changedBy = change.changedBy,
                             changedByName = change.changedByName,
                             changedAt = parseInstant(change.changedAt)
-                                ?: kotlinx.datetime.Clock.System.now(),
+                                ?: Clock.System.now(),
                             changeType = parseChangeType(change.changeType),
                             deviceId = deviceId,
                         )
@@ -531,7 +532,7 @@ class AdminSettingsRepositoryImpl @Inject constructor(
                             createdBy = template.createdBy,
                             createdByName = template.createdByName,
                             createdAt = parseInstant(template.createdAt)
-                                ?: kotlinx.datetime.Clock.System.now(),
+                                ?: Clock.System.now(),
                             updatedAt = template.updatedAt?.let { parseInstant(it) },
                             isShared = template.isShared,
                         )
@@ -580,7 +581,7 @@ class AdminSettingsRepositoryImpl @Inject constructor(
                             createdBy = response.template.createdBy,
                             createdByName = response.template.createdByName,
                             createdAt = parseInstant(response.template.createdAt)
-                                ?: kotlinx.datetime.Clock.System.now(),
+                                ?: Clock.System.now(),
                             updatedAt = response.template.updatedAt?.let { parseInstant(it) },
                             isShared = response.template.isShared,
                         )

@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.preferences.PreferencesRepositoryImpl

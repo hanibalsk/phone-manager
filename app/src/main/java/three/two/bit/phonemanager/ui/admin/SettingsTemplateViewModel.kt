@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import three.two.bit.phonemanager.data.repository.AdminSettingsRepository
 import three.two.bit.phonemanager.domain.model.BulkSettingsResult
 import three.two.bit.phonemanager.domain.model.SettingDefinition

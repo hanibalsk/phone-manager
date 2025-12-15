@@ -139,6 +139,9 @@ android {
 
     kotlin {
         jvmToolchain(17)
+        compilerOptions {
+            freeCompilerArgs.add("-opt-in=kotlin.time.ExperimentalTime")
+        }
     }
 
     buildFeatures {

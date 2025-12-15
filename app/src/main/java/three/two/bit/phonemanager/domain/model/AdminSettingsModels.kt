@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.domain.model
 
 import kotlinx.datetime.Instant
-
+import kotlin.time.Clock
 /**
  * Story E12.7: Admin Settings Management Domain Models
  *
@@ -147,7 +147,7 @@ data class SettingsTemplate(
             lockedSettings = setOf(DeviceSettings.KEY_TRACKING_ENABLED),
             createdBy = createdBy,
             createdByName = createdByName,
-            createdAt = kotlinx.datetime.Clock.System.now(),
+            createdAt = Clock.System.now(),
         )
     }
 }

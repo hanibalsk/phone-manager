@@ -18,7 +18,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.data.repository.MovementEventRepository
