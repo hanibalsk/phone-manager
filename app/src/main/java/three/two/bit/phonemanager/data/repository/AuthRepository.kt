@@ -1,13 +1,16 @@
 package three.two.bit.phonemanager.data.repository
 
+import io.ktor.client.plugins.ClientRequestException
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.datetime.Instant
+import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.network.auth.AuthApiService
+import three.two.bit.phonemanager.network.auth.AuthErrorResponse
 import three.two.bit.phonemanager.network.auth.LoginRequest
 import three.two.bit.phonemanager.network.auth.OAuthRequest
 import three.two.bit.phonemanager.network.auth.RefreshRequest
@@ -131,7 +134,7 @@ class AuthRepositoryImpl @Inject constructor(
         email: String,
         password: String,
         displayName: String
-    ): Result<User> = runCatching {
+    ): Result<User> = try {
         Timber.d("Registering user: $email")
 
         val response = authApiService.register(
@@ -167,7 +170,14 @@ class AuthRepositoryImpl @Inject constructor(
         )
 
         Timber.i("User registered successfully: ${user.userId}")
-        user
+        Result.success(user)
+    } catch (e: ClientRequestException) {
+        val errorMessage = parseAuthError(e.message)
+        Timber.e("Registration failed: $errorMessage")
+        Result.failure(AuthException(errorMessage))
+    } catch (e: Exception) {
+        Timber.e(e, "Registration failed with unexpected error")
+        Result.failure(e)
     }
 
     /**
@@ -180,7 +190,7 @@ class AuthRepositoryImpl @Inject constructor(
     override suspend fun login(
         email: String,
         password: String
-    ): Result<User> = runCatching {
+    ): Result<User> = try {
         Timber.d("Logging in user: $email")
 
         val response = authApiService.login(
@@ -215,7 +225,15 @@ class AuthRepositoryImpl @Inject constructor(
         )
 
         Timber.i("User logged in successfully: ${user.userId}")
-        user
+        Result.success(user)
+    } catch (e: ClientRequestException) {
+        // Parse error response from server
+        val errorMessage = parseAuthError(e.message)
+        Timber.e("Login failed: $errorMessage")
+        Result.failure(AuthException(errorMessage))
+    } catch (e: Exception) {
+        Timber.e(e, "Login failed with unexpected error")
+        Result.failure(e)
     }
 
     /**
@@ -434,4 +452,33 @@ class AuthRepositoryImpl @Inject constructor(
 
         Timber.d("Tokens stored securely, expires in $expiresIn seconds")
     }
+
+    /**
+     * Parse error response from server to extract meaningful error code
+     */
+    private fun parseAuthError(errorBody: String?): String {
+        if (errorBody.isNullOrBlank()) {
+            return "network_error"
+        }
+
+        return try {
+            val json = Json { ignoreUnknownKeys = true }
+            val errorResponse = json.decodeFromString<AuthErrorResponse>(errorBody)
+            errorResponse.error
+        } catch (e: Exception) {
+            Timber.w("Failed to parse error response: $errorBody")
+            // Return the raw message or a generic error
+            when {
+                errorBody.contains("401") || errorBody.contains("Unauthorized") -> "invalid_credentials"
+                errorBody.contains("409") || errorBody.contains("exists") -> "email_already_exists"
+                errorBody.contains("403") || errorBody.contains("locked") -> "account_locked"
+                else -> "unknown_error"
+            }
+        }
+    }
 }
+
+/**
+ * Custom exception for authentication errors with meaningful error codes
+ */
+class AuthException(message: String) : Exception(message)

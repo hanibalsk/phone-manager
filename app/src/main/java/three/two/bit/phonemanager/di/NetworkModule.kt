@@ -5,14 +5,21 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import io.ktor.client.HttpClient
+import io.ktor.client.call.body
 import io.ktor.client.engine.android.Android
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.HttpResponseValidator
+import io.ktor.client.plugins.ResponseException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.BuildConfig
@@ -39,8 +46,13 @@ import three.two.bit.phonemanager.network.TripApiService
 import three.two.bit.phonemanager.network.TripApiServiceImpl
 import three.two.bit.phonemanager.network.WebhookApiService
 import three.two.bit.phonemanager.network.WebhookApiServiceImpl
+import three.two.bit.phonemanager.auth.AuthInterceptor
+import three.two.bit.phonemanager.auth.AuthPlugin
+import three.two.bit.phonemanager.data.repository.AuthRepository
+import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import java.util.UUID
+import javax.inject.Provider
 import javax.inject.Singleton
 
 /**
@@ -61,10 +73,40 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(json: Json): HttpClient = HttpClient(Android) {
+    fun provideAuthInterceptor(
+        secureStorage: SecureStorage,
+        authRepositoryProvider: Provider<AuthRepository>
+    ): AuthInterceptor = AuthInterceptor(secureStorage, authRepositoryProvider)
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(
+        json: Json,
+        authInterceptor: AuthInterceptor
+    ): HttpClient = HttpClient(Android) {
         // JSON serialization
         install(ContentNegotiation) {
             json(json)
+        }
+
+        // Authentication plugin for Bearer token and 401 handling
+        install(AuthPlugin) {
+            this.authInterceptor = authInterceptor
+        }
+
+        // Response validation - throw exceptions on non-2xx responses
+        HttpResponseValidator {
+            validateResponse { response ->
+                if (!response.status.isSuccess()) {
+                    val errorBody = response.bodyAsText()
+                    Timber.e("HTTP Error ${response.status.value}: $errorBody")
+                    when (response.status.value) {
+                        in 400..499 -> throw ClientRequestException(response, errorBody)
+                        in 500..599 -> throw ServerResponseException(response, errorBody)
+                        else -> throw ResponseException(response, errorBody)
+                    }
+                }
+            }
         }
 
         // Logging (only in debug builds)

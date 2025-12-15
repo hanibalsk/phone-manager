@@ -1,11 +1,18 @@
 package three.two.bit.phonemanager
 
 import android.app.Application
+import androidx.hilt.work.HiltWorkerFactory
+import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
-class PhoneManagerApp : Application() {
+class PhoneManagerApp : Application(), Configuration.Provider {
+
+    @Inject
+    lateinit var workerFactory: HiltWorkerFactory
+
     override fun onCreate() {
         super.onCreate()
 
@@ -16,4 +23,9 @@ class PhoneManagerApp : Application() {
 
         Timber.d("PhoneManagerApp initialized")
     }
+
+    override val workManagerConfiguration: Configuration
+        get() = Configuration.Builder()
+            .setWorkerFactory(workerFactory)
+            .build()
 }

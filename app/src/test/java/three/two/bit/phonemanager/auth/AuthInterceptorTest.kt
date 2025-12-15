@@ -14,6 +14,7 @@ import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.security.SecureStorage
+import javax.inject.Provider
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 
@@ -30,13 +31,15 @@ class AuthInterceptorTest {
 
     private lateinit var secureStorage: SecureStorage
     private lateinit var authRepository: AuthRepository
+    private lateinit var authRepositoryProvider: Provider<AuthRepository>
     private lateinit var authInterceptor: AuthInterceptor
 
     @Before
     fun setup() {
         secureStorage = mockk(relaxed = true)
         authRepository = mockk(relaxed = true)
-        authInterceptor = AuthInterceptor(secureStorage, authRepository)
+        authRepositoryProvider = Provider { authRepository }
+        authInterceptor = AuthInterceptor(secureStorage, authRepositoryProvider)
     }
 
     // AC E9.11.2: Bearer Token Tests

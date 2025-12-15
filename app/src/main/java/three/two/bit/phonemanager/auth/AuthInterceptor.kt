@@ -9,6 +9,8 @@ import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 
+import javax.inject.Provider
+
 /**
  * Story E9.11, Task 2: Authentication Interceptor for Ktor
  *
@@ -25,7 +27,7 @@ import timber.log.Timber
  */
 class AuthInterceptor(
     private val secureStorage: SecureStorage,
-    private val authRepository: AuthRepository
+    private val authRepositoryProvider: Provider<AuthRepository>
 ) {
 
     /**
@@ -81,6 +83,8 @@ class AuthInterceptor(
         }
 
         // Attempt to refresh token (AC E9.11.8)
+        // Use Provider to break circular dependency with HttpClient
+        val authRepository = authRepositoryProvider.get()
         val refreshResult = authRepository.refreshToken()
 
         return if (refreshResult.isSuccess) {

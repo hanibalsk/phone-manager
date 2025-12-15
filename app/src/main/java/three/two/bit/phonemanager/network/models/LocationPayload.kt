@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.network.models
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.data.model.LocationEntity
 
@@ -10,7 +11,7 @@ import three.two.bit.phonemanager.data.model.LocationEntity
  */
 @Serializable
 data class LocationPayload(
-    val deviceId: String,
+    @SerialName("device_id") val deviceId: String,
     val timestamp: Long,
     val latitude: Double,
     val longitude: Double,
@@ -19,25 +20,32 @@ data class LocationPayload(
     val bearing: Float? = null,
     val speed: Float? = null,
     val provider: String? = null,
-    val batteryLevel: Int? = null,
-    val networkType: String? = null,
+    @SerialName("battery_level") val batteryLevel: Int? = null,
+    @SerialName("network_type") val networkType: String? = null,
     // API Compatibility: New fields for movement tracking
-    val transportationMode: String? = null,
-    val detectionSource: String? = null,
-    val tripId: String? = null,
+    @SerialName("transportation_mode") val transportationMode: String? = null,
+    @SerialName("detection_source") val detectionSource: String? = null,
+    @SerialName("trip_id") val tripId: String? = null,
 )
 
 /**
  * Story 0.2.2: Batch location transmission
  */
 @Serializable
-data class LocationBatchPayload(val deviceId: String, val locations: List<LocationPayload>)
+data class LocationBatchPayload(
+    @SerialName("device_id") val deviceId: String,
+    val locations: List<LocationPayload>
+)
 
 /**
  * Story 0.2.2: API response models
  */
 @Serializable
-data class LocationUploadResponse(val success: Boolean, val message: String? = null, val processedCount: Int = 0)
+data class LocationUploadResponse(
+    val success: Boolean,
+    val message: String? = null,
+    @SerialName("processed_count") val processedCount: Int = 0
+)
 
 /**
  * Extension function to convert LocationEntity to LocationPayload

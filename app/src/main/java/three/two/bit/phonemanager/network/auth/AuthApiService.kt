@@ -7,6 +7,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import three.two.bit.phonemanager.auth.MockAuthHelper
+import three.two.bit.phonemanager.network.ApiConfiguration
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,7 +32,8 @@ import javax.inject.Singleton
  */
 @Singleton
 class AuthApiService @Inject constructor(
-    private val httpClient: HttpClient
+    private val httpClient: HttpClient,
+    private val apiConfig: ApiConfiguration
 ) {
 
     companion object {
@@ -60,7 +62,7 @@ class AuthApiService @Inject constructor(
             return mockResponse.toRegisterResponse()
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/register") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/register") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -78,7 +80,7 @@ class AuthApiService @Inject constructor(
                 request.displayName
             )
         }
-        val response: RegisterResponse = httpClient.post("$AUTH_BASE_PATH/register") {
+        val response: RegisterResponse = httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/register") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -104,7 +106,7 @@ class AuthApiService @Inject constructor(
             return mockResponse.toLoginResponse()
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/login") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/login") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -118,7 +120,7 @@ class AuthApiService @Inject constructor(
         if (MockAuthHelper.USE_MOCK_AUTH) {
             return MockAuthHelper.mockLogin(request.email, request.password)
         }
-        val response: LoginResponse = httpClient.post("$AUTH_BASE_PATH/login") {
+        val response: LoginResponse = httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/login") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -144,7 +146,7 @@ class AuthApiService @Inject constructor(
             return
         }
 
-        httpClient.post("$AUTH_BASE_PATH/logout") {
+        httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/logout") {
             contentType(ContentType.Application.Json)
             setBody(LogoutRequest(refreshToken, allDevices))
         }
@@ -176,7 +178,7 @@ class AuthApiService @Inject constructor(
             )
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/refresh") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/refresh") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -190,7 +192,7 @@ class AuthApiService @Inject constructor(
         if (MockAuthHelper.USE_MOCK_AUTH) {
             return MockAuthHelper.mockRefreshToken(request.refreshToken)
         }
-        val response: RefreshResponse = httpClient.post("$AUTH_BASE_PATH/refresh") {
+        val response: RefreshResponse = httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/refresh") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -219,7 +221,7 @@ class AuthApiService @Inject constructor(
             return mockResponse.toLoginResponse()
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/oauth") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/oauth") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -233,7 +235,7 @@ class AuthApiService @Inject constructor(
         if (MockAuthHelper.USE_MOCK_AUTH) {
             return MockAuthHelper.mockOAuthSignIn(request.provider, request.idToken)
         }
-        val response: LoginResponse = httpClient.post("$AUTH_BASE_PATH/oauth") {
+        val response: LoginResponse = httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/oauth") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body()
@@ -258,7 +260,7 @@ class AuthApiService @Inject constructor(
             )
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/forgot-password") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/forgot-password") {
             contentType(ContentType.Application.Json)
             setBody(ForgotPasswordRequest(email))
         }.body()
@@ -283,7 +285,7 @@ class AuthApiService @Inject constructor(
             )
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/reset-password") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/reset-password") {
             contentType(ContentType.Application.Json)
             setBody(ResetPasswordRequest(token, newPassword))
         }.body()
@@ -307,7 +309,7 @@ class AuthApiService @Inject constructor(
             )
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/verify-email") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/verify-email") {
             contentType(ContentType.Application.Json)
             setBody(VerifyEmailRequest(token))
         }.body()
@@ -330,7 +332,7 @@ class AuthApiService @Inject constructor(
             )
         }
 
-        return httpClient.post("$AUTH_BASE_PATH/request-verification") {
+        return httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/request-verification") {
             contentType(ContentType.Application.Json)
         }.body()
     }
