@@ -11,7 +11,7 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import org.junit.After
 import org.junit.Before
 import org.junit.Test

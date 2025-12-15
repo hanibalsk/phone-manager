@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull

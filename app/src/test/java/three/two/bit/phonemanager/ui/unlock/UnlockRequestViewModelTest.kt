@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository

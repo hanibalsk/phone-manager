@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse

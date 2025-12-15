@@ -21,6 +21,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 /**
  * Story E5.1: AlertRepository Unit Tests
@@ -250,7 +251,7 @@ class AlertRepositoryTest {
         val entity = createTestAlertEntity("alert-1")
         coEvery { proximityAlertDao.getById("alert-1") } returns entity
 
-        val triggeredAt = kotlinx.datetime.Clock.System.now()
+        val triggeredAt = Clock.System.now()
         repository.updateLastTriggered("alert-1", triggeredAt)
 
         coVerify {
@@ -266,7 +267,7 @@ class AlertRepositoryTest {
     fun `updateLastTriggered does nothing for non-existent alert`() = runTest {
         coEvery { proximityAlertDao.getById("non-existent") } returns null
 
-        repository.updateLastTriggered("non-existent", kotlinx.datetime.Clock.System.now())
+        repository.updateLastTriggered("non-existent", Clock.System.now())
 
         coVerify(exactly = 0) { proximityAlertDao.update(any()) }
     }

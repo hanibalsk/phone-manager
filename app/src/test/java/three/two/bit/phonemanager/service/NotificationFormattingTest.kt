@@ -3,7 +3,7 @@ package three.two.bit.phonemanager.service
 import android.content.Context
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test

@@ -26,6 +26,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 /**
  * Unit tests for AdminSettingsRepository
@@ -74,24 +75,15 @@ class AdminSettingsRepositoryTest {
             devices = listOf(
                 MemberDeviceResponse(
                     deviceId = "device-1",
-                    deviceName = "Phone 1",
-                    ownerUserId = "user-1",
-                    ownerName = "User One",
-                    ownerEmail = "user1@test.com",
-                    isOnline = true,
-                    lastSeen = "2025-01-15T10:00:00Z",
+                    displayName = "Phone 1",
+                    lastSeenAt = "2025-01-15T10:00:00Z",
                 ),
                 MemberDeviceResponse(
                     deviceId = "device-2",
-                    deviceName = "Phone 2",
-                    ownerUserId = "user-2",
-                    ownerName = "User Two",
-                    ownerEmail = "user2@test.com",
-                    isOnline = false,
-                    lastSeen = "2025-01-14T08:00:00Z",
+                    displayName = "Phone 2",
+                    lastSeenAt = "2025-01-14T08:00:00Z",
                 ),
             ),
-            totalCount = 2,
         )
         coEvery {
             deviceApiService.getGroupMemberDevices(testGroupId, testAccessToken)
@@ -103,7 +95,6 @@ class AdminSettingsRepositoryTest {
         assertEquals(2, result.getOrNull()?.size)
         assertEquals("device-1", result.getOrNull()?.get(0)?.deviceId)
         assertEquals("Phone 1", result.getOrNull()?.get(0)?.deviceName)
-        assertTrue(result.getOrNull()?.get(0)?.isOnline == true)
     }
 
     @Test
@@ -112,15 +103,10 @@ class AdminSettingsRepositoryTest {
             devices = listOf(
                 MemberDeviceResponse(
                     deviceId = "device-1",
-                    deviceName = "Phone 1",
-                    ownerUserId = "user-1",
-                    ownerName = "User One",
-                    ownerEmail = "user1@test.com",
-                    isOnline = true,
-                    lastSeen = null,
+                    displayName = "Phone 1",
+                    lastSeenAt = null,
                 ),
             ),
-            totalCount = 1,
         )
         coEvery {
             deviceApiService.getGroupMemberDevices(testGroupId, testAccessToken)
@@ -457,7 +443,7 @@ class AdminSettingsRepositoryTest {
             lockedSettings = emptySet(),
             createdBy = "admin@test.com",
             createdByName = "Admin",
-            createdAt = kotlinx.datetime.Clock.System.now(),
+            createdAt = Clock.System.now(),
             isShared = false,
         )
 
@@ -618,7 +604,7 @@ class AdminSettingsRepositoryTest {
     fun `isLoading state is managed correctly during operations`() = runTest {
         assertFalse(repository.isLoading.value)
 
-        val response = MemberDevicesResponse(devices = emptyList(), totalCount = 0)
+        val response = MemberDevicesResponse(devices = emptyList())
         coEvery {
             deviceApiService.getGroupMemberDevices(testGroupId, testAccessToken)
         } returns Result.success(response)
