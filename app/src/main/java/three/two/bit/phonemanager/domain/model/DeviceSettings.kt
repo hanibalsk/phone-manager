@@ -72,10 +72,19 @@ data class DeviceSettings(
     fun lockedCount(): Int = locks.values.count { it.isLocked }
 
     companion object {
-        // Setting keys that can be locked by admins
+        // Setting keys - must match backend exactly
         const val KEY_TRACKING_ENABLED = "tracking_enabled"
-        const val KEY_TRACKING_INTERVAL_SECONDS = "tracking_interval_seconds"
+        const val KEY_TRACKING_INTERVAL_MINUTES = "tracking_interval_minutes"
         const val KEY_SECRET_MODE_ENABLED = "secret_mode_enabled"
+        const val KEY_GEOFENCE_NOTIFICATIONS_ENABLED = "geofence_notifications_enabled"
+        const val KEY_BATTERY_OPTIMIZATION_ENABLED = "battery_optimization_enabled"
+        const val KEY_NOTIFICATION_SOUNDS_ENABLED = "notification_sounds_enabled"
+        const val KEY_SOS_ENABLED = "sos_enabled"
+        const val KEY_MOVEMENT_DETECTION_ENABLED = "movement_detection_enabled"
+
+        // Legacy keys for backward compatibility
+        @Deprecated("Use KEY_TRACKING_INTERVAL_MINUTES", ReplaceWith("KEY_TRACKING_INTERVAL_MINUTES"))
+        const val KEY_TRACKING_INTERVAL_SECONDS = "tracking_interval_seconds"
         const val KEY_SHOW_WEATHER_IN_NOTIFICATION = "show_weather_in_notification"
         const val KEY_TRIP_DETECTION_ENABLED = "trip_detection_enabled"
         const val KEY_TRIP_MINIMUM_DURATION_MINUTES = "trip_minimum_duration_minutes"
@@ -86,12 +95,13 @@ data class DeviceSettings(
          */
         val LOCKABLE_KEYS = listOf(
             KEY_TRACKING_ENABLED,
-            KEY_TRACKING_INTERVAL_SECONDS,
+            KEY_TRACKING_INTERVAL_MINUTES,
             KEY_SECRET_MODE_ENABLED,
-            KEY_SHOW_WEATHER_IN_NOTIFICATION,
-            KEY_TRIP_DETECTION_ENABLED,
-            KEY_TRIP_MINIMUM_DURATION_MINUTES,
-            KEY_TRIP_MINIMUM_DISTANCE_METERS,
+            KEY_GEOFENCE_NOTIFICATIONS_ENABLED,
+            KEY_BATTERY_OPTIMIZATION_ENABLED,
+            KEY_NOTIFICATION_SOUNDS_ENABLED,
+            KEY_SOS_ENABLED,
+            KEY_MOVEMENT_DETECTION_ENABLED,
         )
     }
 }

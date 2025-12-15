@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.AdminSettingsRepository
 import three.two.bit.phonemanager.domain.model.MemberDeviceSettings
+import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.domain.model.SettingCategory
 import three.two.bit.phonemanager.domain.model.SettingChange
 import three.two.bit.phonemanager.domain.model.SettingDefinition
@@ -32,11 +33,17 @@ import javax.inject.Inject
 @HiltViewModel
 class DeviceSettingsViewModel @Inject constructor(
     private val adminSettingsRepository: AdminSettingsRepository,
+    private val secureStorage: SecureStorage,
+    private val settingsSyncRepository: three.two.bit.phonemanager.data.repository.SettingsSyncRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
     private val deviceId: String = savedStateHandle.get<String>("deviceId")
         ?: throw IllegalArgumentException("deviceId is required")
+
+    /** Check if viewing the current device */
+    private val isCurrentDevice: Boolean
+        get() = secureStorage.getDeviceId() == deviceId
 
     private val _uiState = MutableStateFlow(DeviceSettingsUiState())
     val uiState: StateFlow<DeviceSettingsUiState> = _uiState.asStateFlow()
@@ -53,16 +60,36 @@ class DeviceSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
+            // Debug: Log device ID comparison
+            val localDeviceId = secureStorage.getDeviceId()
+            val localDisplayName = secureStorage.getDisplayName()
+            Timber.d("Device ID comparison - local: $localDeviceId, requested: $deviceId, isCurrentDevice: $isCurrentDevice")
+            Timber.d("Local display name: $localDisplayName")
+
             adminSettingsRepository.getDeviceSettings(deviceId).fold(
                 onSuccess = { settings ->
+                    Timber.d("Backend returned - deviceName: '${settings.deviceName}', isOnline: ${settings.isOnline}")
+
+                    // Enhance settings with local device info if viewing current device
+                    val enhancedSettings = if (isCurrentDevice) {
+                        Timber.d("Enhancing with local device info")
+                        settings.copy(
+                            deviceName = localDisplayName ?: settings.deviceName,
+                            isOnline = true, // Current device is always online
+                        )
+                    } else {
+                        settings
+                    }
+                    Timber.d("Final - deviceName: '${enhancedSettings.deviceName}', isOnline: ${enhancedSettings.isOnline}")
+
                     _uiState.update {
                         it.copy(
                             isLoading = false,
-                            deviceSettings = settings,
-                            settingsByCategory = groupSettingsByCategory(settings),
+                            deviceSettings = enhancedSettings,
+                            settingsByCategory = groupSettingsByCategory(enhancedSettings),
                         )
                     }
-                    Timber.i("Loaded settings for device $deviceId")
+                    Timber.i("Loaded settings for device $deviceId (isCurrentDevice=$isCurrentDevice)")
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -111,6 +138,23 @@ class DeviceSettingsViewModel @Inject constructor(
                         )
                     }
                     Timber.i("Updated setting $key for device $deviceId")
+
+                    // If updating the current device, trigger local settings sync
+                    val localDeviceId = secureStorage.getDeviceId()
+                    Timber.d("Checking isCurrentDevice: localDeviceId=$localDeviceId, targetDeviceId=$deviceId, match=${localDeviceId == deviceId}")
+                    if (localDeviceId == deviceId) {
+                        Timber.i("Updating current device - triggering local settings sync")
+                        viewModelScope.launch {
+                            settingsSyncRepository.syncAllSettings().fold(
+                                onSuccess = {
+                                    Timber.i("Local settings sync completed successfully")
+                                },
+                                onFailure = { error ->
+                                    Timber.e(error, "Failed to sync local settings")
+                                },
+                            )
+                        }
+                    }
                 },
                 onFailure = { error ->
                     _uiState.update {

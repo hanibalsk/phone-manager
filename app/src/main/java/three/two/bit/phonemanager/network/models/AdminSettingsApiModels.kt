@@ -70,6 +70,8 @@ data class SaveTemplateRequest(
  * Note: Backend GET /api/v1/devices/{deviceId}/settings returns GetSettingsResponse
  * which only includes device_id, settings, last_synced_at, and optional definitions.
  * Admin-specific fields are made optional to handle both response formats.
+ *
+ * Backend settings format: { "key": {"value": X, "is_locked": Y, "updated_at": Z} }
  */
 @Serializable
 data class AdminDeviceSettingsResponse(
@@ -80,12 +82,25 @@ data class AdminDeviceSettingsResponse(
     @SerialName("owner_email") val ownerEmail: String = "",
     @SerialName("is_online") val isOnline: Boolean = false,
     @SerialName("last_seen") val lastSeen: String? = null,
-    val settings: Map<String, @Serializable(with = AnySerializer::class) Any> = emptyMap(),
+    val settings: Map<String, SettingValueResponse> = emptyMap(),
     val locks: Map<String, SettingLockResponse> = emptyMap(),
     @SerialName("last_synced_at") val lastSyncedAt: String? = null,
     @SerialName("last_modified_by") val lastModifiedBy: String? = null,
     val definitions: List<SettingDefinitionResponse>? = null,
-)
+) {
+    /** Extract just the values from settings (for compatibility with domain model) */
+    fun getSettingsValues(): Map<String, Any> = settings.mapValues { it.value.value }
+
+    /** Extract lock info from settings */
+    fun getSettingsLocks(): Map<String, SettingLockResponse> =
+        settings.filter { it.value.isLocked }.mapValues { (key, setting) ->
+            SettingLockResponse(
+                isLocked = setting.isLocked,
+                lockedBy = setting.lockedBy,
+                lockedAt = setting.lockedAt,
+            )
+        }
+}
 
 /**
  * Response for settings update.

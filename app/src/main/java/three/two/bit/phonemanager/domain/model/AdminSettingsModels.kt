@@ -141,7 +141,7 @@ data class SettingsTemplate(
             name = name,
             settings = mapOf(
                 DeviceSettings.KEY_TRACKING_ENABLED to true,
-                DeviceSettings.KEY_TRACKING_INTERVAL_SECONDS to 60,
+                DeviceSettings.KEY_TRACKING_INTERVAL_MINUTES to 5,
                 DeviceSettings.KEY_SECRET_MODE_ENABLED to false,
             ),
             lockedSettings = setOf(DeviceSettings.KEY_TRACKING_ENABLED),
@@ -211,8 +211,9 @@ data class SettingDefinition(
     val validation: SettingValidation? = null,
 ) {
     companion object {
-        /** All available settings with their definitions */
+        /** All available settings with their definitions - must match backend keys */
         val ALL_SETTINGS = listOf(
+            // Location Tracking settings
             SettingDefinition(
                 key = DeviceSettings.KEY_TRACKING_ENABLED,
                 displayName = "Location Tracking",
@@ -222,13 +223,13 @@ data class SettingDefinition(
                 defaultValue = true,
             ),
             SettingDefinition(
-                key = DeviceSettings.KEY_TRACKING_INTERVAL_SECONDS,
+                key = DeviceSettings.KEY_TRACKING_INTERVAL_MINUTES,
                 displayName = "Tracking Interval",
-                description = "How often to record location (in seconds)",
+                description = "How often to record location (in minutes)",
                 category = SettingCategory.TRACKING,
                 type = SettingType.INTEGER,
-                defaultValue = 60,
-                validation = SettingValidation.IntRange(10, 3600),
+                defaultValue = 5,
+                validation = SettingValidation.IntRange(1, 60),
             ),
             SettingDefinition(
                 key = DeviceSettings.KEY_SECRET_MODE_ENABLED,
@@ -239,38 +240,46 @@ data class SettingDefinition(
                 defaultValue = false,
             ),
             SettingDefinition(
-                key = DeviceSettings.KEY_SHOW_WEATHER_IN_NOTIFICATION,
-                displayName = "Show Weather",
-                description = "Display weather in notification",
+                key = DeviceSettings.KEY_MOVEMENT_DETECTION_ENABLED,
+                displayName = "Movement Detection",
+                description = "Detect movement to optimize tracking",
+                category = SettingCategory.TRACKING,
+                type = SettingType.BOOLEAN,
+                defaultValue = true,
+            ),
+            // Notifications settings
+            SettingDefinition(
+                key = DeviceSettings.KEY_GEOFENCE_NOTIFICATIONS_ENABLED,
+                displayName = "Geofence Notifications",
+                description = "Show notifications when entering/leaving geofences",
                 category = SettingCategory.NOTIFICATIONS,
                 type = SettingType.BOOLEAN,
                 defaultValue = true,
             ),
             SettingDefinition(
-                key = DeviceSettings.KEY_TRIP_DETECTION_ENABLED,
-                displayName = "Trip Detection",
-                description = "Automatically detect and record trips",
-                category = SettingCategory.TRIP_DETECTION,
+                key = DeviceSettings.KEY_NOTIFICATION_SOUNDS_ENABLED,
+                displayName = "Notification Sounds",
+                description = "Play sounds for notifications",
+                category = SettingCategory.NOTIFICATIONS,
                 type = SettingType.BOOLEAN,
                 defaultValue = true,
             ),
             SettingDefinition(
-                key = DeviceSettings.KEY_TRIP_MINIMUM_DURATION_MINUTES,
-                displayName = "Minimum Trip Duration",
-                description = "Minimum duration for a trip (in minutes)",
-                category = SettingCategory.TRIP_DETECTION,
-                type = SettingType.INTEGER,
-                defaultValue = 5,
-                validation = SettingValidation.IntRange(1, 60),
+                key = DeviceSettings.KEY_SOS_ENABLED,
+                displayName = "SOS Feature",
+                description = "Enable emergency SOS button",
+                category = SettingCategory.NOTIFICATIONS,
+                type = SettingType.BOOLEAN,
+                defaultValue = true,
             ),
+            // Display settings
             SettingDefinition(
-                key = DeviceSettings.KEY_TRIP_MINIMUM_DISTANCE_METERS,
-                displayName = "Minimum Trip Distance",
-                description = "Minimum distance for a trip (in meters)",
-                category = SettingCategory.TRIP_DETECTION,
-                type = SettingType.INTEGER,
-                defaultValue = 100,
-                validation = SettingValidation.IntRange(10, 10000),
+                key = DeviceSettings.KEY_BATTERY_OPTIMIZATION_ENABLED,
+                displayName = "Battery Optimization",
+                description = "Optimize battery usage for tracking",
+                category = SettingCategory.DISPLAY,
+                type = SettingType.BOOLEAN,
+                defaultValue = true,
             ),
         )
 

@@ -39,8 +39,8 @@ data class DeviceSettingsResponse(
 data class SettingsDto(
     @SerialName("tracking_enabled")
     val trackingEnabled: SettingValueDto<Boolean>? = null,
-    @SerialName("tracking_interval_seconds")
-    val trackingIntervalSeconds: SettingValueDto<Int>? = null,
+    @SerialName("tracking_interval_minutes")
+    val trackingIntervalMinutes: SettingValueDto<Int>? = null,
     @SerialName("secret_mode_enabled")
     val secretModeEnabled: SettingValueDto<Boolean>? = null,
     @SerialName("show_weather_in_notification")
@@ -51,6 +51,16 @@ data class SettingsDto(
     val tripMinimumDurationMinutes: SettingValueDto<Int>? = null,
     @SerialName("trip_minimum_distance_meters")
     val tripMinimumDistanceMeters: SettingValueDto<Int>? = null,
+    @SerialName("movement_detection_enabled")
+    val movementDetectionEnabled: SettingValueDto<Boolean>? = null,
+    @SerialName("geofence_notifications_enabled")
+    val geofenceNotificationsEnabled: SettingValueDto<Boolean>? = null,
+    @SerialName("battery_optimization_enabled")
+    val batteryOptimizationEnabled: SettingValueDto<Boolean>? = null,
+    @SerialName("notification_sounds_enabled")
+    val notificationSoundsEnabled: SettingValueDto<Boolean>? = null,
+    @SerialName("sos_enabled")
+    val sosEnabled: SettingValueDto<Boolean>? = null,
 )
 
 /**
@@ -122,28 +132,26 @@ fun DeviceSettingsResponse.toDomain(): DeviceSettings {
         lockMap[lock.settingKey] = lock.toDomain()
     }
 
+    // Helper to add lock from embedded is_locked flag
+    fun addLockIfLocked(setting: SettingValueDto<*>?, key: String) {
+        setting?.let {
+            if (it.isLocked) lockMap[key] = SettingLock(key, true, null, null)
+        }
+    }
+
     // Add/update locks from embedded is_locked flags in settings
-    settings.trackingEnabled?.let {
-        if (it.isLocked) lockMap["tracking_enabled"] = SettingLock("tracking_enabled", true, null, null)
-    }
-    settings.trackingIntervalSeconds?.let {
-        if (it.isLocked) lockMap["tracking_interval_seconds"] = SettingLock("tracking_interval_seconds", true, null, null)
-    }
-    settings.secretModeEnabled?.let {
-        if (it.isLocked) lockMap["secret_mode_enabled"] = SettingLock("secret_mode_enabled", true, null, null)
-    }
-    settings.showWeatherInNotification?.let {
-        if (it.isLocked) lockMap["show_weather_in_notification"] = SettingLock("show_weather_in_notification", true, null, null)
-    }
-    settings.tripDetectionEnabled?.let {
-        if (it.isLocked) lockMap["trip_detection_enabled"] = SettingLock("trip_detection_enabled", true, null, null)
-    }
-    settings.tripMinimumDurationMinutes?.let {
-        if (it.isLocked) lockMap["trip_minimum_duration_minutes"] = SettingLock("trip_minimum_duration_minutes", true, null, null)
-    }
-    settings.tripMinimumDistanceMeters?.let {
-        if (it.isLocked) lockMap["trip_minimum_distance_meters"] = SettingLock("trip_minimum_distance_meters", true, null, null)
-    }
+    addLockIfLocked(settings.trackingEnabled, DeviceSettings.KEY_TRACKING_ENABLED)
+    addLockIfLocked(settings.trackingIntervalMinutes, DeviceSettings.KEY_TRACKING_INTERVAL_MINUTES)
+    addLockIfLocked(settings.secretModeEnabled, DeviceSettings.KEY_SECRET_MODE_ENABLED)
+    addLockIfLocked(settings.showWeatherInNotification, DeviceSettings.KEY_SHOW_WEATHER_IN_NOTIFICATION)
+    addLockIfLocked(settings.tripDetectionEnabled, DeviceSettings.KEY_TRIP_DETECTION_ENABLED)
+    addLockIfLocked(settings.tripMinimumDurationMinutes, DeviceSettings.KEY_TRIP_MINIMUM_DURATION_MINUTES)
+    addLockIfLocked(settings.tripMinimumDistanceMeters, DeviceSettings.KEY_TRIP_MINIMUM_DISTANCE_METERS)
+    addLockIfLocked(settings.movementDetectionEnabled, DeviceSettings.KEY_MOVEMENT_DETECTION_ENABLED)
+    addLockIfLocked(settings.geofenceNotificationsEnabled, DeviceSettings.KEY_GEOFENCE_NOTIFICATIONS_ENABLED)
+    addLockIfLocked(settings.batteryOptimizationEnabled, DeviceSettings.KEY_BATTERY_OPTIMIZATION_ENABLED)
+    addLockIfLocked(settings.notificationSoundsEnabled, DeviceSettings.KEY_NOTIFICATION_SOUNDS_ENABLED)
+    addLockIfLocked(settings.sosEnabled, DeviceSettings.KEY_SOS_ENABLED)
 
     val syncedAt = lastSyncedAt?.let {
         try {
@@ -153,9 +161,12 @@ fun DeviceSettingsResponse.toDomain(): DeviceSettings {
         }
     }
 
+    // Convert tracking interval from minutes to seconds for internal use
+    val trackingIntervalSeconds = (settings.trackingIntervalMinutes?.value ?: 5) * 60
+
     return DeviceSettings(
         trackingEnabled = settings.trackingEnabled?.value ?: false,
-        trackingIntervalSeconds = settings.trackingIntervalSeconds?.value ?: 300,
+        trackingIntervalSeconds = trackingIntervalSeconds,
         secretModeEnabled = settings.secretModeEnabled?.value ?: false,
         showWeatherInNotification = settings.showWeatherInNotification?.value ?: true,
         tripDetectionEnabled = settings.tripDetectionEnabled?.value ?: true,

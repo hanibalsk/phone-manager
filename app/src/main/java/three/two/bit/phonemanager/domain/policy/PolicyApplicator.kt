@@ -26,9 +26,10 @@ class PolicyApplicator @Inject constructor(
     private val preferencesRepository: PreferencesRepository,
 ) {
     companion object {
-        // Policy setting keys
+        // Policy setting keys - must match backend exactly
+        // Using DeviceSettings keys for consistency
         const val KEY_TRACKING_ENABLED = "tracking_enabled"
-        const val KEY_TRACKING_INTERVAL = "tracking_interval"
+        const val KEY_TRACKING_INTERVAL_MINUTES = "tracking_interval_minutes"
         const val KEY_SECRET_MODE_ENABLED = "secret_mode_enabled"
         const val KEY_MOVEMENT_DETECTION_ENABLED = "movement_detection_enabled"
         const val KEY_TRIP_DETECTION_ENABLED = "trip_detection_enabled"
@@ -44,10 +45,14 @@ class PolicyApplicator @Inject constructor(
         const val KEY_TRIP_MINIMUM_DISTANCE = "trip_minimum_distance"
         const val KEY_TRIP_AUTO_MERGE_ENABLED = "trip_auto_merge_enabled"
 
+        // Legacy key alias for backward compatibility
+        @Deprecated("Use KEY_TRACKING_INTERVAL_MINUTES", ReplaceWith("KEY_TRACKING_INTERVAL_MINUTES"))
+        const val KEY_TRACKING_INTERVAL = "tracking_interval"
+
         // All known policy keys for validation
         val ALL_POLICY_KEYS = setOf(
             KEY_TRACKING_ENABLED,
-            KEY_TRACKING_INTERVAL,
+            KEY_TRACKING_INTERVAL_MINUTES,
             KEY_SECRET_MODE_ENABLED,
             KEY_MOVEMENT_DETECTION_ENABLED,
             KEY_TRIP_DETECTION_ENABLED,
@@ -123,7 +128,7 @@ class PolicyApplicator @Inject constructor(
                 true
             }
 
-            KEY_TRACKING_INTERVAL -> {
+            KEY_TRACKING_INTERVAL_MINUTES, @Suppress("DEPRECATION") KEY_TRACKING_INTERVAL -> {
                 val minutes = value.toInt()
                 if (minutes in 1..60) {
                     preferencesRepository.setTrackingInterval(minutes)
@@ -245,7 +250,7 @@ class PolicyApplicator @Inject constructor(
     fun getSettingDisplayName(settingKey: String): String {
         return when (settingKey) {
             KEY_TRACKING_ENABLED -> "Location Tracking"
-            KEY_TRACKING_INTERVAL -> "Tracking Interval"
+            KEY_TRACKING_INTERVAL_MINUTES, @Suppress("DEPRECATION") KEY_TRACKING_INTERVAL -> "Tracking Interval"
             KEY_SECRET_MODE_ENABLED -> "Secret Mode"
             KEY_MOVEMENT_DETECTION_ENABLED -> "Movement Detection"
             KEY_TRIP_DETECTION_ENABLED -> "Trip Detection"

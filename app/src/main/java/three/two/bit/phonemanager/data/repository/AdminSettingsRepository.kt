@@ -226,21 +226,35 @@ class AdminSettingsRepositoryImpl @Inject constructor(
 
             result.fold(
                 onSuccess = { response ->
+                    // Extract values and locks from the nested setting objects
+                    val settingsValues = response.getSettingsValues()
+                    val settingsLocks = response.getSettingsLocks()
+
+                    Timber.d("Backend settings keys: ${settingsValues.keys}")
+                    Timber.d("Backend settings values: $settingsValues")
+
+                    // Try to get device info from cached member devices list
+                    // (the settings endpoint doesn't return device name or online status)
+                    val cachedDevice = _memberDevices.value.find { it.deviceId == deviceId }
+
                     val settings = MemberDeviceSettings(
                         deviceId = response.deviceId,
-                        deviceName = response.deviceName,
+                        // Use cached device name if backend doesn't provide one
+                        deviceName = response.deviceName.ifEmpty { cachedDevice?.deviceName ?: "" },
                         ownerUserId = response.ownerUserId,
                         ownerName = response.ownerName,
                         ownerEmail = response.ownerEmail,
-                        isOnline = response.isOnline,
-                        lastSeen = response.lastSeen?.let { parseInstant(it) },
-                        settings = response.settings,
-                        locks = response.locks.mapValues { (key, lock) -> lock.toDomain(key) },
+                        // Use cached online status if backend doesn't provide it
+                        isOnline = if (response.isOnline) true else cachedDevice?.isOnline ?: false,
+                        lastSeen = response.lastSeen?.let { parseInstant(it) }
+                            ?: cachedDevice?.lastSeen,
+                        settings = settingsValues,
+                        locks = (response.locks + settingsLocks).mapValues { (key, lock) -> lock.toDomain(key) },
                         lastSyncedAt = response.lastSyncedAt?.let { parseInstant(it) },
                         lastModifiedBy = response.lastModifiedBy,
                     )
                     _currentDeviceSettings.value = settings
-                    Timber.i("Fetched settings for device $deviceId")
+                    Timber.i("Fetched settings for device $deviceId (deviceName='${settings.deviceName}')")
                     Result.success(settings)
                 },
                 onFailure = { error ->

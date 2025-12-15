@@ -120,6 +120,7 @@ class SettingsSyncRepositoryImpl @Inject constructor(
     private val deviceApiService: DeviceApiService,
     private val deviceRepository: DeviceRepository,
     private val authRepository: AuthRepository,
+    private val preferencesRepository: three.two.bit.phonemanager.data.preferences.PreferencesRepository,
 ) : SettingsSyncRepository {
 
     private val json = Json { ignoreUnknownKeys = true }
@@ -182,8 +183,10 @@ class SettingsSyncRepositoryImpl @Inject constructor(
                 onSuccess = { settings ->
                     _serverSettings.value = settings
                     cacheSettings(settings)
+                    // Apply settings to device preferences
+                    applySettingsToPreferences(settings)
                     _syncStatus.value = SettingsSyncStatus.SYNCED
-                    Timber.i("Fetched server settings: ${settings.lockedCount()} locked")
+                    Timber.i("Fetched and applied server settings: ${settings.lockedCount()} locked")
                     Result.success(settings)
                 },
                 onFailure = { error ->
@@ -299,8 +302,10 @@ class SettingsSyncRepositoryImpl @Inject constructor(
     ) {
         Timber.i("Received settings update push from $updatedBy: $updatedSettings")
 
-        // Refresh settings from server to get accurate lock states
-        fetchServerSettings()
+        // Refresh settings from server to get accurate lock states and apply them
+        fetchServerSettings().onSuccess { settings ->
+            Timber.i("Settings updated via push notification, applied to device")
+        }
     }
 
     override suspend fun handleSettingLockPush(
@@ -372,6 +377,43 @@ class SettingsSyncRepositoryImpl @Inject constructor(
         _serverSettings.value = null
         _syncStatus.value = SettingsSyncStatus.SYNCED
         Timber.d("Settings sync cache cleared")
+    }
+
+    /**
+     * Apply server settings to local device preferences.
+     * This ensures the device behavior matches the server-defined settings.
+     */
+    private suspend fun applySettingsToPreferences(settings: DeviceSettings) {
+        try {
+            Timber.d("Applying server settings to device preferences")
+
+            // Apply tracking settings
+            preferencesRepository.setTrackingEnabled(settings.trackingEnabled)
+
+            // Convert seconds to minutes for tracking interval
+            val intervalMinutes = settings.trackingIntervalSeconds / 60
+            if (intervalMinutes in 1..60) {
+                preferencesRepository.setTrackingInterval(intervalMinutes)
+            }
+
+            // Apply secret mode
+            preferencesRepository.setSecretModeEnabled(settings.secretModeEnabled)
+
+            // Apply weather notification setting
+            preferencesRepository.setShowWeatherInNotification(settings.showWeatherInNotification)
+
+            // Apply trip detection settings
+            preferencesRepository.setTripDetectionEnabled(settings.tripDetectionEnabled)
+            preferencesRepository.setTripMinimumDurationMinutes(settings.tripMinimumDurationMinutes)
+            preferencesRepository.setTripMinimumDistanceMeters(settings.tripMinimumDistanceMeters)
+
+            Timber.i(
+                "Applied server settings: tracking=${settings.trackingEnabled}, " +
+                    "interval=${intervalMinutes}min, secretMode=${settings.secretModeEnabled}",
+            )
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to apply some server settings to preferences")
+        }
     }
 
     private suspend fun cacheSettings(settings: DeviceSettings) {
