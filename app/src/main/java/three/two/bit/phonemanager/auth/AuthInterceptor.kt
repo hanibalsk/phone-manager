@@ -1,9 +1,12 @@
 package three.two.bit.phonemanager.auth
 
+import io.ktor.client.call.HttpClientCall
+import io.ktor.client.plugins.HttpSend
 import io.ktor.client.plugins.api.createClientPlugin
+import io.ktor.client.plugins.plugin
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
-import io.ktor.client.statement.HttpResponse
+import io.ktor.client.request.headers
 import io.ktor.http.HttpStatusCode
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.security.SecureStorage
@@ -29,6 +32,21 @@ class AuthInterceptor(
     private val secureStorage: SecureStorage,
     private val authRepositoryProvider: Provider<AuthRepository>
 ) {
+
+    /**
+     * Get current access token
+     */
+    fun getAccessToken(): String? = secureStorage.getAccessToken()
+
+    /**
+     * Check if token is expired
+     */
+    fun isTokenExpired(): Boolean = secureStorage.isTokenExpired()
+
+    /**
+     * Get API key for fallback authentication
+     */
+    fun getApiKey(): String? = secureStorage.getApiKey()
 
     /**
      * Configure request with authentication headers
@@ -61,26 +79,14 @@ class AuthInterceptor(
     }
 
     /**
-     * Handle 401 Unauthorized responses
+     * Attempt to refresh the access token
      *
      * AC E9.11.8: Refresh token on 401, retry request, or logout if refresh fails
      *
-     * @param response Original 401 response
-     * @return true if token was refreshed and request should be retried
+     * @return true if token was refreshed successfully
      */
-    suspend fun handle401Response(response: HttpResponse): Boolean {
-        if (response.status != HttpStatusCode.Unauthorized) {
-            return false
-        }
-
-        Timber.w("Received 401 Unauthorized, attempting token refresh")
-
-        // Skip token refresh for auth endpoints (prevent infinite loop)
-        val url = response.call.request.url.toString()
-        if (url.contains("/auth/")) {
-            Timber.d("Skipping token refresh for auth endpoint: $url")
-            return false
-        }
+    suspend fun refreshTokenIfNeeded(): Boolean {
+        Timber.w("Attempting token refresh")
 
         // Attempt to refresh token (AC E9.11.8)
         // Use Provider to break circular dependency with HttpClient
@@ -88,19 +94,21 @@ class AuthInterceptor(
         val refreshResult = authRepository.refreshToken()
 
         return if (refreshResult.isSuccess) {
-            Timber.i("Token refreshed successfully, retrying request")
-            true // Retry the request
+            Timber.i("Token refreshed successfully")
+            true
         } else {
             Timber.e(refreshResult.exceptionOrNull(), "Token refresh failed, logging out user")
             // Logout user if refresh fails (AC E9.11.8)
             authRepository.logout()
-            false // Don't retry
+            false
         }
     }
 }
 
 /**
- * Ktor plugin for authentication
+ * Ktor plugin for authentication with automatic retry on 401
+ *
+ * Uses HttpSend interceptor to properly retry requests after token refresh.
  *
  * Usage in NetworkModule:
  * ```
@@ -117,12 +125,40 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
         authInterceptor.configureRequest(request)
     }
 
-    // Handle 401 responses and retry with refreshed token
-    onResponse { response ->
-        if (authInterceptor.handle401Response(response)) {
-            // Token was refreshed, Ktor will automatically retry the request
-            Timber.d("Request will be retried with new token")
+    // Use HttpSend interceptor to handle 401 and retry
+    client.plugin(HttpSend).intercept { request ->
+        val originalCall = execute(request)
+
+        // Check if we got a 401 Unauthorized
+        if (originalCall.response.status == HttpStatusCode.Unauthorized) {
+            val url = originalCall.request.url.toString()
+
+            // Skip token refresh for auth endpoints (prevent infinite loop)
+            if (url.contains("/auth/")) {
+                Timber.d("Skipping token refresh for auth endpoint: $url")
+                return@intercept originalCall
+            }
+
+            Timber.w("Received 401 Unauthorized for $url, attempting token refresh")
+
+            // Try to refresh the token
+            if (authInterceptor.refreshTokenIfNeeded()) {
+                // Token refreshed - rebuild request with new token
+                val newToken = authInterceptor.getAccessToken()
+                if (newToken != null) {
+                    Timber.i("Retrying request with new token: $url")
+
+                    // Create new request with updated Authorization header
+                    request.headers.remove("Authorization")
+                    request.header("Authorization", "Bearer $newToken")
+
+                    // Retry the request
+                    return@intercept execute(request)
+                }
+            }
         }
+
+        originalCall
     }
 }
 

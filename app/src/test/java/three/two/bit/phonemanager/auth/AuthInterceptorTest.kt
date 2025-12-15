@@ -1,8 +1,6 @@
 package three.two.bit.phonemanager.auth
 
 import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.takeFrom
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -207,134 +205,73 @@ class AuthInterceptorTest {
         assertTrue(apiKeyHeader == null, "X-API-Key should not be added when Bearer token is available")
     }
 
-    // AC E9.11.8: 401 Handling Tests
+    // AC E9.11.8: Token Refresh Tests
 
     @Test
-    fun `handle401Response returns false for non-401 responses`() = runTest {
+    fun `refreshTokenIfNeeded returns true when token refresh succeeds`() = runTest {
         // Given
-        val response = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.OK
-        }
-
-        // When
-        val result = authInterceptor.handle401Response(response)
-
-        // Then
-        assertFalse(result)
-        coVerify(exactly = 0) { authRepository.refreshToken() }
-    }
-
-    @Test
-    fun `handle401Response skips refresh for auth endpoints`() = runTest {
-        // Given
-        val mockRequest = mockk<io.ktor.client.request.HttpRequest> {
-            every { url } returns io.ktor.http.Url("https://api.example.com/auth/login")
-        }
-        val mockCall = mockk<io.ktor.client.call.HttpClientCall> {
-            every { request } returns mockRequest
-        }
-        val response = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.Unauthorized
-            every { call } returns mockCall
-        }
-
-        // When
-        val result = authInterceptor.handle401Response(response)
-
-        // Then
-        assertFalse(result)
-        coVerify(exactly = 0) { authRepository.refreshToken() }
-    }
-
-    @Test
-    fun `handle401Response returns true and retries when token refresh succeeds`() = runTest {
-        // Given
-        val mockRequest = mockk<io.ktor.client.request.HttpRequest> {
-            every { url } returns io.ktor.http.Url("https://api.example.com/devices")
-        }
-        val mockCall = mockk<io.ktor.client.call.HttpClientCall> {
-            every { request } returns mockRequest
-        }
-        val response = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.Unauthorized
-            every { call } returns mockCall
-        }
         coEvery { authRepository.refreshToken() } returns Result.success("new.access.token")
 
         // When
-        val result = authInterceptor.handle401Response(response)
+        val result = authInterceptor.refreshTokenIfNeeded()
 
         // Then
-        assertTrue(result, "Should return true to indicate request should be retried")
+        assertTrue(result, "Should return true to indicate token was refreshed")
         coVerify { authRepository.refreshToken() }
         coVerify(exactly = 0) { authRepository.logout() }
     }
 
     @Test
-    fun `handle401Response calls logout when token refresh fails`() = runTest {
+    fun `refreshTokenIfNeeded returns false and calls logout when token refresh fails`() = runTest {
         // Given
-        val mockRequest = mockk<io.ktor.client.request.HttpRequest> {
-            every { url } returns io.ktor.http.Url("https://api.example.com/devices")
-        }
-        val mockCall = mockk<io.ktor.client.call.HttpClientCall> {
-            every { request } returns mockRequest
-        }
-        val response = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.Unauthorized
-            every { call } returns mockCall
-        }
         coEvery { authRepository.refreshToken() } returns Result.failure(Exception("Refresh token expired"))
 
         // When
-        val result = authInterceptor.handle401Response(response)
+        val result = authInterceptor.refreshTokenIfNeeded()
 
         // Then
-        assertFalse(result, "Should return false to indicate request should not be retried")
+        assertFalse(result, "Should return false to indicate token refresh failed")
         coVerify { authRepository.refreshToken() }
         coVerify { authRepository.logout() }
     }
 
+    // AC E9.11.8: Helper method tests
+
     @Test
-    fun `handle401Response skips refresh for auth-refresh endpoint`() = runTest {
+    fun `getAccessToken returns token from secure storage`() {
         // Given
-        val mockRequest = mockk<io.ktor.client.request.HttpRequest> {
-            every { url } returns io.ktor.http.Url("https://api.example.com/auth/refresh")
-        }
-        val mockCall = mockk<io.ktor.client.call.HttpClientCall> {
-            every { request } returns mockRequest
-        }
-        val response = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.Unauthorized
-            every { call } returns mockCall
-        }
+        val accessToken = "test.access.token"
+        every { secureStorage.getAccessToken() } returns accessToken
 
         // When
-        val result = authInterceptor.handle401Response(response)
+        val result = authInterceptor.getAccessToken()
 
         // Then
-        assertFalse(result, "Should not retry for auth endpoints")
-        coVerify(exactly = 0) { authRepository.refreshToken() }
+        assertTrue(result == accessToken)
     }
 
     @Test
-    fun `handle401Response skips refresh for auth-register endpoint`() = runTest {
+    fun `isTokenExpired returns value from secure storage`() {
         // Given
-        val mockRequest = mockk<io.ktor.client.request.HttpRequest> {
-            every { url } returns io.ktor.http.Url("https://api.example.com/auth/register")
-        }
-        val mockCall = mockk<io.ktor.client.call.HttpClientCall> {
-            every { request } returns mockRequest
-        }
-        val response = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.Unauthorized
-            every { call } returns mockCall
-        }
+        every { secureStorage.isTokenExpired() } returns true
 
         // When
-        val result = authInterceptor.handle401Response(response)
+        val result = authInterceptor.isTokenExpired()
 
         // Then
-        assertFalse(result)
-        coVerify(exactly = 0) { authRepository.refreshToken() }
+        assertTrue(result)
+    }
+
+    @Test
+    fun `getApiKey returns key from secure storage`() {
+        // Given
+        val apiKey = "test-api-key"
+        every { secureStorage.getApiKey() } returns apiKey
+
+        // When
+        val result = authInterceptor.getApiKey()
+
+        // Then
+        assertTrue(result == apiKey)
     }
 }
