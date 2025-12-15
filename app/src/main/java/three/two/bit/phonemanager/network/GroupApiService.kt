@@ -316,8 +316,8 @@ class GroupApiServiceImpl @Inject constructor(
             header("Authorization", "Bearer $accessToken")
         }.body()
 
-        Timber.i("Fetched group details: ${response.group.name}")
-        Result.success(response.group.toDomain())
+        Timber.i("Fetched group details: ${response.name}")
+        Result.success(response.toDomain())
     } catch (e: Exception) {
         Timber.e(e, "Failed to fetch group details: groupId=$groupId")
         Result.failure(e)

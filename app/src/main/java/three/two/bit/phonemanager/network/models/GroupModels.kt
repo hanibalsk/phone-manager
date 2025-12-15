@@ -28,15 +28,22 @@ data class CreateGroupRequest(
 
 /**
  * Story E11.8 Task 2: Response for create group operation
+ *
+ * Backend returns snake_case fields with some optional values.
  */
 @Serializable
 data class CreateGroupResponse(
     val id: String,
     val name: String,
-    val description: String?,
-    val ownerId: String,
-    val memberCount: Int,
-    val createdAt: String,
+    val slug: String? = null,
+    val description: String? = null,
+    @SerialName("icon_emoji") val iconEmoji: String? = null,
+    @SerialName("owner_id") val ownerId: String? = null,
+    @SerialName("member_count") val memberCount: Int = 1,
+    @SerialName("device_count") val deviceCount: Int = 0,
+    @SerialName("your_role") val userRole: String = "owner",
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
 )
 
 /**
@@ -85,11 +92,11 @@ data class GroupDto(
 /**
  * Story E11.8 Task 2: Response for get group details
  * GET /groups/{groupId}
+ *
+ * Backend returns the group object directly at the root level,
+ * so this is a type alias for GroupDto.
  */
-@Serializable
-data class GroupDetailResponse(
-    val group: GroupDto,
-)
+typealias GroupDetailResponse = GroupDto
 
 /**
  * Story E11.8 Task 2: Response for list group members
@@ -227,10 +234,10 @@ fun CreateGroupResponse.toDomain(): Group = Group(
     id = id,
     name = name,
     description = description,
-    ownerId = ownerId,
+    ownerId = ownerId ?: "",
     memberCount = memberCount,
-    userRole = GroupRole.OWNER, // Creator is always owner
-    createdAt = Instant.parse(createdAt),
+    userRole = GroupRole.fromString(userRole),
+    createdAt = createdAt?.let { Instant.parse(it) },
 )
 
 // ============================================================================
