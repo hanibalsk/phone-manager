@@ -1,6 +1,7 @@
 package three.two.bit.phonemanager.network.models
 
 import kotlinx.datetime.Instant
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.domain.model.Group
 import three.two.bit.phonemanager.domain.model.GroupInvite
@@ -51,26 +52,34 @@ data class UpdateGroupRequest(
 /**
  * Story E11.8 Task 2: Response for list user groups
  * GET /groups
+ *
+ * Backend returns snake_case: { "data": [...], "count": N }
  */
 @Serializable
 data class ListGroupsResponse(
-    val groups: List<GroupDto>,
+    @SerialName("data") val groups: List<GroupDto>,
     val count: Int,
 )
 
 /**
  * Story E11.8 Task 2: Group DTO in API responses
+ *
+ * Backend GroupSummary uses snake_case field names.
  */
 @Serializable
 data class GroupDto(
     val id: String,
     val name: String,
+    val slug: String? = null,
     val description: String? = null,
-    val ownerId: String,
-    val memberCount: Int,
-    val userRole: String, // "owner", "admin", "member"
-    val createdAt: String? = null,
-    val updatedAt: String? = null,
+    @SerialName("icon_emoji") val iconEmoji: String? = null,
+    @SerialName("owner_id") val ownerId: String? = null,
+    @SerialName("member_count") val memberCount: Int = 0,
+    @SerialName("device_count") val deviceCount: Int = 0,
+    @SerialName("your_role") val userRole: String = "member", // "owner", "admin", "member"
+    @SerialName("joined_at") val joinedAt: String? = null,
+    @SerialName("created_at") val createdAt: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
 )
 
 /**
@@ -85,25 +94,71 @@ data class GroupDetailResponse(
 /**
  * Story E11.8 Task 2: Response for list group members
  * GET /groups/{groupId}/members
+ *
+ * Backend returns snake_case: { "data": [...], "pagination": {...} }
  */
 @Serializable
 data class ListMembersResponse(
-    val members: List<GroupMemberDto>,
-    val count: Int,
+    @SerialName("data") val members: List<GroupMemberDto>,
+    val pagination: PaginationDto? = null,
+)
+
+/**
+ * Pagination info from backend responses
+ */
+@Serializable
+data class PaginationDto(
+    val page: Int = 1,
+    @SerialName("page_size") val pageSize: Int = 20,
+    @SerialName("total_count") val totalCount: Int = 0,
+    @SerialName("total_pages") val totalPages: Int = 0,
 )
 
 /**
  * Story E11.8 Task 2: Group member DTO in API responses
+ *
+ * Backend MemberResponse has nested user object.
  */
 @Serializable
 data class GroupMemberDto(
-    val userId: String,
-    val email: String,
-    val displayName: String,
+    val id: String,
+    val user: UserPublicDto,
     val role: String, // "owner", "admin", "member"
-    val deviceCount: Int,
-    val joinedAt: String?,
-    val lastActiveAt: String?,
+    @SerialName("joined_at") val joinedAt: String? = null,
+    @SerialName("invited_by") val invitedBy: String? = null,
+    val devices: List<MemberDeviceDto>? = null,
+)
+
+/**
+ * Public user info (no sensitive data)
+ */
+@Serializable
+data class UserPublicDto(
+    val id: String,
+    @SerialName("display_name") val displayName: String? = null,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
+)
+
+/**
+ * Device info for member listing
+ */
+@Serializable
+data class MemberDeviceDto(
+    val id: String,
+    @SerialName("device_id") val deviceId: String,
+    val name: String? = null,
+    @SerialName("is_online") val isOnline: Boolean = false,
+    @SerialName("last_location") val lastLocation: MemberDeviceLocationDto? = null,
+)
+
+/**
+ * Last location info for device
+ */
+@Serializable
+data class MemberDeviceLocationDto(
+    val latitude: Double,
+    val longitude: Double,
+    val timestamp: String,
 )
 
 /**
@@ -144,10 +199,10 @@ fun GroupDto.toDomain(): Group = Group(
     id = id,
     name = name,
     description = description,
-    ownerId = ownerId,
+    ownerId = ownerId ?: "",
     memberCount = memberCount,
     userRole = GroupRole.fromString(userRole),
-    createdAt = createdAt?.let { Instant.parse(it) },
+    createdAt = (createdAt ?: joinedAt)?.let { Instant.parse(it) },
     updatedAt = updatedAt?.let { Instant.parse(it) },
 )
 
@@ -155,14 +210,14 @@ fun GroupDto.toDomain(): Group = Group(
  * Maps GroupMemberDto from API response to GroupMembership domain model
  */
 fun GroupMemberDto.toDomain(groupId: String): GroupMembership = GroupMembership(
-    userId = userId,
+    userId = user.id,
     groupId = groupId,
-    email = email,
-    displayName = displayName,
+    email = "", // Not provided by backend in public user info
+    displayName = user.displayName ?: "Unknown",
     role = GroupRole.fromString(role),
-    deviceCount = deviceCount,
+    deviceCount = devices?.size ?: 0,
     joinedAt = joinedAt?.let { Instant.parse(it) },
-    lastActiveAt = lastActiveAt?.let { Instant.parse(it) },
+    lastActiveAt = null, // Not provided by backend
 )
 
 /**
