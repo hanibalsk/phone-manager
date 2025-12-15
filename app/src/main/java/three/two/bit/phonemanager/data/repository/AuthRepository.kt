@@ -156,8 +156,8 @@ class AuthRepositoryImpl @Inject constructor(
         val user = User(
             userId = response.user.id,
             email = response.user.email,
-            displayName = response.user.displayName,
-            createdAt = Instant.parse(response.user.createdAt)
+            displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
+            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
         )
         _currentUser.value = user
 
@@ -165,8 +165,8 @@ class AuthRepositoryImpl @Inject constructor(
         secureStorage.saveUserInfo(
             userId = response.user.id,
             email = response.user.email,
-            displayName = response.user.displayName,
-            createdAt = response.user.createdAt
+            displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
+            createdAt = response.user.createdAt ?: ""
         )
 
         Timber.i("User registered successfully: ${user.userId}")
@@ -211,8 +211,8 @@ class AuthRepositoryImpl @Inject constructor(
         val user = User(
             userId = response.user.id,
             email = response.user.email,
-            displayName = response.user.displayName,
-            createdAt = Instant.parse(response.user.createdAt)
+            displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
+            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
         )
         _currentUser.value = user
 
@@ -220,8 +220,8 @@ class AuthRepositoryImpl @Inject constructor(
         secureStorage.saveUserInfo(
             userId = response.user.id,
             email = response.user.email,
-            displayName = response.user.displayName,
-            createdAt = response.user.createdAt
+            displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
+            createdAt = response.user.createdAt ?: ""
         )
 
         Timber.i("User logged in successfully: ${user.userId}")
@@ -267,8 +267,8 @@ class AuthRepositoryImpl @Inject constructor(
         val user = User(
             userId = response.user.id,
             email = response.user.email,
-            displayName = response.user.displayName,
-            createdAt = Instant.parse(response.user.createdAt)
+            displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
+            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
         )
         _currentUser.value = user
 
@@ -276,8 +276,8 @@ class AuthRepositoryImpl @Inject constructor(
         secureStorage.saveUserInfo(
             userId = response.user.id,
             email = response.user.email,
-            displayName = response.user.displayName,
-            createdAt = response.user.createdAt
+            displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
+            createdAt = response.user.createdAt ?: ""
         )
 
         Timber.i("OAuth sign-in successful: ${user.userId}")

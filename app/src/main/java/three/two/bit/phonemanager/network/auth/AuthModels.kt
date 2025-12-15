@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.network.auth
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
@@ -21,7 +22,7 @@ import kotlinx.serialization.Serializable
 data class RegisterRequest(
     val email: String,
     val password: String,
-    val displayName: String
+    @SerialName("display_name") val displayName: String
 )
 
 /**
@@ -43,7 +44,7 @@ data class LoginRequest(
  */
 @Serializable
 data class RefreshRequest(
-    val refreshToken: String
+    @SerialName("refresh_token") val refreshToken: String
 )
 
 /**
@@ -55,7 +56,7 @@ data class RefreshRequest(
 @Serializable
 data class OAuthRequest(
     val provider: String,
-    val idToken: String
+    @SerialName("id_token") val idToken: String
 )
 
 // Response Models
@@ -72,10 +73,10 @@ data class OAuthRequest(
  */
 @Serializable
 data class TokensResponse(
-    val accessToken: String,
-    val refreshToken: String,
-    val tokenType: String = "Bearer",
-    val expiresIn: Long
+    @SerialName("access_token") val accessToken: String,
+    @SerialName("refresh_token") val refreshToken: String,
+    @SerialName("token_type") val tokenType: String = "Bearer",
+    @SerialName("expires_in") val expiresIn: Long
 )
 
 /**
@@ -96,12 +97,12 @@ data class TokensResponse(
 data class UserResponse(
     val id: String,
     val email: String,
-    val displayName: String,
-    val avatarUrl: String? = null,
-    val emailVerified: Boolean = false,
-    val authProvider: String = "email",
-    val organizationId: String? = null,
-    val createdAt: String
+    @SerialName("display_name") val displayName: String? = null,
+    @SerialName("avatar_url") val avatarUrl: String? = null,
+    @SerialName("email_verified") val emailVerified: Boolean = false,
+    @SerialName("auth_provider") val authProvider: String = "email",
+    @SerialName("organization_id") val organizationId: String? = null,
+    @SerialName("created_at") val createdAt: String? = null
 )
 
 /**
@@ -118,8 +119,8 @@ data class UserResponse(
 data class RegisterResponse(
     val user: UserResponse,
     val tokens: TokensResponse,
-    val deviceLinked: Boolean = false,
-    val requiresEmailVerification: Boolean = true
+    @SerialName("device_linked") val deviceLinked: Boolean = false,
+    @SerialName("requires_email_verification") val requiresEmailVerification: Boolean = true
 )
 
 /**
@@ -155,9 +156,9 @@ data class RefreshResponse(
  */
 @Serializable
 data class AuthResponse(
-    val accessToken: String,
-    val refreshToken: String,
-    val expiresIn: Long,
+    @SerialName("access_token") val accessToken: String,
+    @SerialName("refresh_token") val refreshToken: String,
+    @SerialName("expires_in") val expiresIn: Long,
     val user: UserInfo
 )
 
@@ -168,10 +169,10 @@ data class AuthResponse(
  */
 @Serializable
 data class UserInfo(
-    val userId: String,
+    @SerialName("user_id") val userId: String,
     val email: String,
-    val displayName: String,
-    val createdAt: String
+    @SerialName("display_name") val displayName: String,
+    @SerialName("created_at") val createdAt: String
 )
 
 /**
@@ -203,7 +204,7 @@ data class ForgotPasswordResponse(
 @Serializable
 data class ResetPasswordRequest(
     val token: String,
-    val newPassword: String
+    @SerialName("new_password") val newPassword: String
 )
 
 /**
@@ -235,7 +236,7 @@ data class VerifyEmailRequest(
 @Serializable
 data class VerifyEmailResponse(
     val message: String,
-    val emailVerified: Boolean
+    @SerialName("email_verified") val emailVerified: Boolean
 )
 
 /**

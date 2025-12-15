@@ -389,8 +389,8 @@ private fun RegisterResponse.toLegacyAuthResponse() = AuthResponse(
     user = UserInfo(
         userId = user.id,
         email = user.email,
-        displayName = user.displayName,
-        createdAt = user.createdAt
+        displayName = user.displayName ?: user.email.substringBefore('@'),
+        createdAt = user.createdAt ?: ""
     )
 )
 
@@ -401,8 +401,8 @@ private fun LoginResponse.toLegacyAuthResponse() = AuthResponse(
     user = UserInfo(
         userId = user.id,
         email = user.email,
-        displayName = user.displayName,
-        createdAt = user.createdAt
+        displayName = user.displayName ?: user.email.substringBefore('@'),
+        createdAt = user.createdAt ?: ""
     )
 )
 
