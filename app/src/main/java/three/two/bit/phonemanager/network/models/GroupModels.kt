@@ -257,19 +257,19 @@ data class CreateInviteRequest(
 
 /**
  * Story E11.9 Task 2: Response for create invite operation
+ * Uses snake_case field names matching backend response.
  */
 @Serializable
 data class CreateInviteResponse(
     val id: String,
     val code: String,
-    val groupId: String,
-    val groupName: String? = null,
-    val createdBy: String,
-    val createdAt: String,
-    val expiresAt: String,
-    val maxUses: Int,
-    val usesRemaining: Int,
-    val status: String,
+    @SerialName("group_id") val groupId: String? = null,
+    @SerialName("preset_role") val presetRole: String? = null,
+    @SerialName("max_uses") val maxUses: Int,
+    @SerialName("current_uses") val currentUses: Int,
+    @SerialName("expires_at") val expiresAt: String,
+    @SerialName("created_by") val createdBy: InviteCreatorDto,
+    @SerialName("created_at") val createdAt: String,
 )
 
 /**
@@ -423,18 +423,28 @@ fun InviteSummaryDto.toDomain(groupId: String): GroupInvite {
 /**
  * Maps CreateInviteResponse to GroupInvite domain model
  */
-fun CreateInviteResponse.toDomain(): GroupInvite = GroupInvite(
-    id = id,
-    groupId = groupId,
-    groupName = groupName,
-    code = code,
-    createdBy = createdBy,
-    createdAt = Instant.parse(createdAt),
-    expiresAt = Instant.parse(expiresAt),
-    maxUses = maxUses,
-    usesRemaining = usesRemaining,
-    status = InviteStatus.fromString(status),
-)
+fun CreateInviteResponse.toDomain(groupIdFallback: String = ""): GroupInvite {
+    val usesRemaining = if (maxUses < 0) -1 else maxUses - currentUses
+    val expiresAtInstant = Instant.parse(expiresAt)
+    val isExpired = expiresAtInstant < Clock.System.now()
+    val status = when {
+        isExpired -> InviteStatus.EXPIRED
+        maxUses >= 0 && usesRemaining <= 0 -> InviteStatus.USED
+        else -> InviteStatus.ACTIVE
+    }
+    return GroupInvite(
+        id = id,
+        groupId = groupId ?: groupIdFallback,
+        groupName = null,
+        code = code,
+        createdBy = createdBy.id,
+        createdAt = Instant.parse(createdAt),
+        expiresAt = expiresAtInstant,
+        maxUses = maxUses,
+        usesRemaining = usesRemaining,
+        status = status,
+    )
+}
 
 /**
  * Maps GroupPreviewDto to GroupPreview domain model

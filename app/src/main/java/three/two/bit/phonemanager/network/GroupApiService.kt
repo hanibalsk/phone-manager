@@ -524,7 +524,7 @@ class GroupApiServiceImpl @Inject constructor(
         }.body()
 
         Timber.i("Invite created: code=${response.code} for group=$groupId")
-        Result.success(response.toDomain())
+        Result.success(response.toDomain(groupIdFallback = groupId))
     } catch (e: Exception) {
         Timber.e(e, "Failed to create invite: groupId=$groupId")
         Result.failure(e)
