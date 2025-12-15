@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.network.models
 
+import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -274,15 +275,44 @@ data class CreateInviteResponse(
 /**
  * Story E11.9 Task 2: Response for list group invites
  * GET /groups/{groupId}/invites
+ *
+ * Backend returns { data: [...] } with InviteSummary format.
  */
 @Serializable
 data class ListInvitesResponse(
-    val invites: List<InviteDto>,
-    val count: Int,
+    val data: List<InviteSummaryDto>,
+) {
+    val count: Int get() = data.size
+}
+
+/**
+ * Invite summary from backend list response.
+ * Uses snake_case field names matching backend InviteSummary.
+ */
+@Serializable
+data class InviteSummaryDto(
+    val id: String,
+    val code: String,
+    @SerialName("preset_role") val presetRole: String,
+    @SerialName("max_uses") val maxUses: Int,
+    @SerialName("current_uses") val currentUses: Int,
+    @SerialName("expires_at") val expiresAt: String,
+    @SerialName("created_by") val createdBy: InviteCreatorDto,
+    @SerialName("created_at") val createdAt: String,
+)
+
+/**
+ * Creator info in invite summary.
+ */
+@Serializable
+data class InviteCreatorDto(
+    val id: String,
+    @SerialName("display_name") val displayName: String? = null,
 )
 
 /**
  * Story E11.9 Task 2: Invite DTO in API responses
+ * Used for create invite response and other contexts.
  */
 @Serializable
 data class InviteDto(
@@ -357,6 +387,38 @@ fun InviteDto.toDomain(): GroupInvite = GroupInvite(
     usesRemaining = usesRemaining,
     status = InviteStatus.fromString(status),
 )
+
+/**
+ * Maps InviteSummaryDto from API list response to GroupInvite domain model.
+ * Backend list endpoint returns InviteSummary format without groupId/groupName.
+ */
+fun InviteSummaryDto.toDomain(groupId: String): GroupInvite {
+    // Calculate uses remaining from maxUses and currentUses
+    // maxUses of -1 means unlimited
+    val remaining = if (maxUses == -1) Int.MAX_VALUE else (maxUses - currentUses).coerceAtLeast(0)
+
+    // Determine status based on expiry and uses
+    val expiresInstant = Instant.parse(expiresAt)
+    val now = Clock.System.now()
+    val status = when {
+        remaining <= 0 && maxUses != -1 -> InviteStatus.USED
+        expiresInstant <= now -> InviteStatus.EXPIRED
+        else -> InviteStatus.ACTIVE
+    }
+
+    return GroupInvite(
+        id = id,
+        groupId = groupId,
+        groupName = null, // Not provided in summary format
+        code = code,
+        createdBy = createdBy.id,
+        createdAt = Instant.parse(createdAt),
+        expiresAt = expiresInstant,
+        maxUses = maxUses,
+        usesRemaining = remaining,
+        status = status,
+    )
+}
 
 /**
  * Maps CreateInviteResponse to GroupInvite domain model

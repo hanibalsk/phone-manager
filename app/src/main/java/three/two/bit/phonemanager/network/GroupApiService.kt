@@ -546,7 +546,7 @@ class GroupApiServiceImpl @Inject constructor(
             header("Authorization", "Bearer $accessToken")
         }.body()
 
-        val invites = response.invites.map { it.toDomain() }
+        val invites = response.data.map { it.toDomain(groupId) }
         Timber.i("Fetched ${invites.size} invites for group=$groupId")
         Result.success(invites)
     } catch (e: Exception) {
