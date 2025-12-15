@@ -876,7 +876,11 @@
     <string name="unlock_empty_denied">Žiadne zamietnuté žiadosti</string>
     <string name="unlock_empty_withdrawn">Žiadne stiahnuté žiadosti</string>
     <string name="unlock_empty_hint">Žiadosti o odomknutie sa zobrazia tu</string>
-    <string name="unlock_characters_remaining">Zostáva %1$d znakov</string>
+    <plurals name="unlock_characters_remaining">
+        <item quantity="one">Zostáva %1$d znak</item>
+        <item quantity="few">Zostávajú %1$d znaky</item>
+        <item quantity="other">Zostáva %1$d znakov</item>
+    </plurals>
     <string name="unlock_admin_fallback">Kontaktujte svojho IT administrátora</string>
     <string name="button_request_unlock">Požiadať o odomknutie</string>
 

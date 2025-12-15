@@ -462,7 +462,10 @@
     <string name="button_request_unlock">Request Unlock</string>
     <string name="managed_device_title">Managed Device</string>
     <string name="managed_by_group">Managed by group: %1$s</string>
-    <string name="locked_settings_count">%1$d settings locked</string>
+    <plurals name="locked_settings_count">
+        <item quantity="one">%1$d setting locked</item>
+        <item quantity="other">%1$d settings locked</item>
+    </plurals>
     <string name="last_synced">Last synced: %1$s</string>
     <string name="syncing">Syncing…</string>
     <string name="sync_now">Sync Now</string>
