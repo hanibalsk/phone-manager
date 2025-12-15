@@ -65,20 +65,25 @@ data class SaveTemplateRequest(
 /**
  * Response with device settings for admin.
  * AC E12.7.3: View Remote Settings
+ *
+ * Note: Backend GET /api/v1/devices/{deviceId}/settings returns GetSettingsResponse
+ * which only includes device_id, settings, last_synced_at, and optional definitions.
+ * Admin-specific fields are made optional to handle both response formats.
  */
 @Serializable
 data class AdminDeviceSettingsResponse(
     @SerialName("device_id") val deviceId: String,
-    @SerialName("device_name") val deviceName: String,
-    @SerialName("owner_user_id") val ownerUserId: String,
-    @SerialName("owner_name") val ownerName: String,
-    @SerialName("owner_email") val ownerEmail: String,
-    @SerialName("is_online") val isOnline: Boolean,
+    @SerialName("device_name") val deviceName: String = "",
+    @SerialName("owner_user_id") val ownerUserId: String = "",
+    @SerialName("owner_name") val ownerName: String = "",
+    @SerialName("owner_email") val ownerEmail: String = "",
+    @SerialName("is_online") val isOnline: Boolean = false,
     @SerialName("last_seen") val lastSeen: String? = null,
-    val settings: Map<String, @Serializable(with = AnySerializer::class) Any>,
-    val locks: Map<String, SettingLockResponse>,
+    val settings: Map<String, @Serializable(with = AnySerializer::class) Any> = emptyMap(),
+    val locks: Map<String, SettingLockResponse> = emptyMap(),
     @SerialName("last_synced_at") val lastSyncedAt: String? = null,
     @SerialName("last_modified_by") val lastModifiedBy: String? = null,
+    val definitions: List<SettingDefinitionResponse>? = null,
 )
 
 /**
@@ -223,6 +228,23 @@ data class SettingLockResponse(
     @SerialName("is_locked") val isLocked: Boolean,
     @SerialName("locked_by") val lockedBy: String? = null,
     @SerialName("locked_at") val lockedAt: String? = null,
+)
+
+/**
+ * Response for setting definition.
+ * Matches backend SettingDefinition structure.
+ */
+@Serializable
+data class SettingDefinitionResponse(
+    val key: String,
+    @SerialName("display_name") val displayName: String,
+    val description: String? = null,
+    @SerialName("data_type") val dataType: String,
+    @SerialName("default_value") val defaultValue: @Serializable(with = AnySerializer::class) Any,
+    @SerialName("is_lockable") val isLockable: Boolean,
+    val category: String,
+    @SerialName("validation_rules") val validationRules: @Serializable(with = AnySerializer::class) Any? = null,
+    @SerialName("sort_order") val sortOrder: Int,
 )
 
 // ============================================================================

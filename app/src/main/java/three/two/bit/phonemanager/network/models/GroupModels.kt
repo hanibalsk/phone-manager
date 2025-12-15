@@ -152,7 +152,7 @@ data class UserPublicDto(
  */
 @Serializable
 data class MemberDeviceDto(
-    val id: String,
+    val id: String? = null,
     @SerialName("device_id") val deviceId: String,
     val name: String? = null,
     @SerialName("is_online") val isOnline: Boolean = false,

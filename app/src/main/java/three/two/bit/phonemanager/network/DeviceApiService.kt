@@ -232,7 +232,7 @@ interface DeviceApiService {
 
     /**
      * Story E12.7 Task 2: Get device settings for admin
-     * GET /api/v1/admin/devices/{deviceId}/settings
+     * GET /api/v1/devices/{deviceId}/settings
      *
      * AC E12.7.3: View Remote Settings
      *
@@ -247,7 +247,7 @@ interface DeviceApiService {
 
     /**
      * Story E12.7 Task 2: Update device settings (admin)
-     * PUT /api/v1/admin/devices/{deviceId}/settings
+     * PUT /api/v1/devices/{deviceId}/settings
      *
      * AC E12.7.4: Modify Remote Settings
      *
@@ -266,7 +266,7 @@ interface DeviceApiService {
 
     /**
      * Story E12.7 Task 2: Lock/unlock settings (admin)
-     * PUT /api/v1/admin/devices/{deviceId}/settings/locks
+     * PUT /api/v1/devices/{deviceId}/settings/locks
      *
      * AC E12.7.5: Lock/Unlock Settings
      *
@@ -285,7 +285,7 @@ interface DeviceApiService {
 
     /**
      * Story E12.7 Task 2: Get settings history (audit trail)
-     * GET /api/v1/admin/devices/{deviceId}/settings/history
+     * GET /api/v1/devices/{deviceId}/settings/history
      *
      * AC E12.7.8: Audit Trail
      *
@@ -772,7 +772,7 @@ class DeviceApiServiceImpl @Inject constructor(
 
     /**
      * Story E12.7 Task 2: Get device settings for admin
-     * GET /api/v1/admin/devices/{deviceId}/settings
+     * GET /api/v1/devices/{deviceId}/settings
      */
     override suspend fun getAdminDeviceSettings(
         deviceId: String,
@@ -781,7 +781,7 @@ class DeviceApiServiceImpl @Inject constructor(
         Timber.d("Fetching admin settings for device $deviceId")
 
         val response: AdminDeviceSettingsResponse = httpClient.get(
-            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings",
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings",
         ) {
             header("Authorization", "Bearer $accessToken")
         }.body()
@@ -795,7 +795,7 @@ class DeviceApiServiceImpl @Inject constructor(
 
     /**
      * Story E12.7 Task 2: Update device settings (admin)
-     * PUT /api/v1/admin/devices/{deviceId}/settings
+     * PUT /api/v1/devices/{deviceId}/settings
      */
     override suspend fun updateAdminDeviceSettings(
         deviceId: String,
@@ -806,7 +806,7 @@ class DeviceApiServiceImpl @Inject constructor(
         Timber.d("Updating admin settings for device $deviceId: ${changes.keys}")
 
         val response: UpdateSettingsResponse = httpClient.put(
-            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings",
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings",
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")
@@ -826,7 +826,7 @@ class DeviceApiServiceImpl @Inject constructor(
 
     /**
      * Story E12.7 Task 2: Lock/unlock settings
-     * PUT /api/v1/admin/devices/{deviceId}/settings/locks
+     * PUT /api/v1/devices/{deviceId}/settings/locks
      */
     override suspend fun lockDeviceSettings(
         deviceId: String,
@@ -838,7 +838,7 @@ class DeviceApiServiceImpl @Inject constructor(
         Timber.d("${action}ing settings $settingKeys for device $deviceId")
 
         val response: LockSettingsResponse = httpClient.put(
-            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings/locks",
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings/locks",
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")
@@ -858,7 +858,7 @@ class DeviceApiServiceImpl @Inject constructor(
 
     /**
      * Story E12.7 Task 2: Get settings history
-     * GET /api/v1/admin/devices/{deviceId}/settings/history
+     * GET /api/v1/devices/{deviceId}/settings/history
      */
     override suspend fun getSettingsHistory(
         deviceId: String,
@@ -869,7 +869,7 @@ class DeviceApiServiceImpl @Inject constructor(
         Timber.d("Fetching settings history for device $deviceId")
 
         val response: SettingsHistoryResponse = httpClient.get(
-            "${apiConfig.baseUrl}/api/v1/admin/devices/$deviceId/settings/history",
+            "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings/history",
         ) {
             header("Authorization", "Bearer $accessToken")
             parameter("limit", limit)
