@@ -810,7 +810,7 @@ class DeviceApiServiceImpl @Inject constructor(
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")
-            setBody(UpdateDeviceSettingsRequest(changes = changes, notifyUser = notifyUser))
+            setBody(UpdateDeviceSettingsRequest(settings = changes))
         }.body()
 
         if (response.success) {

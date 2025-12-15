@@ -16,11 +16,12 @@ import kotlinx.serialization.Serializable
 /**
  * Request to update device settings.
  * AC E12.7.4: Modify Remote Settings
+ *
+ * Note: Backend UpdateSettingsRequest expects 'settings' field, not 'changes'.
  */
 @Serializable
 data class UpdateDeviceSettingsRequest(
-    val changes: Map<String, @Serializable(with = AnySerializer::class) Any>,
-    @SerialName("notify_user") val notifyUser: Boolean = true,
+    val settings: Map<String, @Serializable(with = AnySerializer::class) Any>,
 )
 
 /**
@@ -89,12 +90,48 @@ data class AdminDeviceSettingsResponse(
 /**
  * Response for settings update.
  * AC E12.7.4: Modify Remote Settings
+ *
+ * Backend UpdateSettingsResponse returns:
+ * - updated: list of keys that were successfully updated
+ * - locked: list of keys that were skipped (locked)
+ * - invalid: list of invalid keys
+ * - settings: map of all current setting values
  */
 @Serializable
 data class UpdateSettingsResponse(
-    val success: Boolean,
-    @SerialName("applied_settings") val appliedSettings: Map<String, @Serializable(with = AnySerializer::class) Any>? = null,
-    @SerialName("push_sent") val pushSent: Boolean = false,
+    val updated: List<String> = emptyList(),
+    val locked: List<String> = emptyList(),
+    val invalid: List<String> = emptyList(),
+    val settings: Map<String, SettingValueResponse> = emptyMap(),
+) {
+    /** Computed success based on whether any updates were applied */
+    val success: Boolean get() = updated.isNotEmpty() || (locked.isEmpty() && invalid.isEmpty())
+
+    /** Get the applied settings values for compatibility */
+    val appliedSettings: Map<String, Any>
+        get() = settings.filter { it.key in updated }.mapValues { it.value.value }
+
+    /** Error message if there were issues */
+    val error: String?
+        get() = when {
+            invalid.isNotEmpty() -> "Invalid settings: ${invalid.joinToString()}"
+            locked.isNotEmpty() && updated.isEmpty() -> "Settings locked: ${locked.joinToString()}"
+            else -> null
+        }
+}
+
+/**
+ * Setting value with lock state from backend.
+ */
+@Serializable
+data class SettingValueResponse(
+    val value: @Serializable(with = AnySerializer::class) Any,
+    @SerialName("is_locked") val isLocked: Boolean = false,
+    @SerialName("locked_by") val lockedBy: String? = null,
+    @SerialName("locked_at") val lockedAt: String? = null,
+    @SerialName("lock_reason") val lockReason: String? = null,
+    @SerialName("updated_at") val updatedAt: String? = null,
+    @SerialName("updated_by") val updatedBy: String? = null,
     val error: String? = null,
 )
 
