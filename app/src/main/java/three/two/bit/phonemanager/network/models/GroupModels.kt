@@ -268,7 +268,7 @@ data class CreateInviteResponse(
     @SerialName("max_uses") val maxUses: Int,
     @SerialName("current_uses") val currentUses: Int,
     @SerialName("expires_at") val expiresAt: String,
-    @SerialName("created_by") val createdBy: InviteCreatorDto,
+    @SerialName("created_by") val createdBy: String,
     @SerialName("created_at") val createdAt: String,
 )
 
@@ -437,7 +437,7 @@ fun CreateInviteResponse.toDomain(groupIdFallback: String = ""): GroupInvite {
         groupId = groupId ?: groupIdFallback,
         groupName = null,
         code = code,
-        createdBy = createdBy.id,
+        createdBy = createdBy,
         createdAt = Instant.parse(createdAt),
         expiresAt = expiresAtInstant,
         maxUses = maxUses,

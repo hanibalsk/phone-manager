@@ -103,6 +103,15 @@ class AuthRepositoryImpl @Inject constructor(
      * if tokens and user info are available.
      */
     private fun restoreUserState() {
+        // Check token state for debugging
+        val hasAccessToken = secureStorage.getAccessToken() != null
+        val hasRefreshToken = secureStorage.getRefreshToken() != null
+        Timber.d("Restoring user state - hasAccess: $hasAccessToken, hasRefresh: $hasRefreshToken")
+
+        if (hasAccessToken && !hasRefreshToken) {
+            Timber.w("Session has access token but no refresh token - session may fail to refresh")
+        }
+
         if (secureStorage.isAuthenticated() && secureStorage.hasUserInfo()) {
             val userId = secureStorage.getUserId()
             val email = secureStorage.getUserEmail()
@@ -327,7 +336,10 @@ class AuthRepositoryImpl @Inject constructor(
             Timber.d("Refreshing access token")
 
             val refreshToken = secureStorage.getRefreshToken()
-                ?: throw IllegalStateException("No refresh token available")
+            if (refreshToken == null) {
+                Timber.e("No refresh token available - user needs to log in again")
+                throw SessionExpiredException("Session expired. Please log in again.")
+            }
 
             val response = authApiService.refreshToken(
                 RefreshRequest(refreshToken = refreshToken)
@@ -443,6 +455,8 @@ class AuthRepositoryImpl @Inject constructor(
      * @param expiresIn Seconds until access token expires
      */
     private fun storeTokens(accessToken: String, refreshToken: String, expiresIn: Long) {
+        Timber.d("Storing tokens - access: ${accessToken.take(20)}..., refresh: ${refreshToken.take(20)}...")
+
         secureStorage.saveAccessToken(accessToken)
         secureStorage.saveRefreshToken(refreshToken)
 
@@ -450,7 +464,13 @@ class AuthRepositoryImpl @Inject constructor(
         val expiryTimeMs = System.currentTimeMillis() + (expiresIn * 1000)
         secureStorage.saveTokenExpiryTime(expiryTimeMs)
 
-        Timber.d("Tokens stored securely, expires in $expiresIn seconds")
+        // Verify tokens were saved
+        val savedRefresh = secureStorage.getRefreshToken()
+        if (savedRefresh == null) {
+            Timber.e("CRITICAL: Refresh token was not saved properly!")
+        } else {
+            Timber.i("Tokens stored securely, expires in $expiresIn seconds, refresh token verified")
+        }
     }
 
     /**
@@ -482,3 +502,8 @@ class AuthRepositoryImpl @Inject constructor(
  * Custom exception for authentication errors with meaningful error codes
  */
 class AuthException(message: String) : Exception(message)
+
+/**
+ * Exception thrown when session has expired and user needs to log in again
+ */
+class SessionExpiredException(message: String) : Exception(message)

@@ -55,14 +55,23 @@ class AuthInterceptor(
      *
      * Always adds Bearer token if available - even if expired.
      * The server will return 401, triggering automatic refresh via handle401Response.
+     *
+     * Note: Uses headers.set() to prevent duplicate headers if service methods
+     * already added Authorization header.
      */
     fun configureRequest(request: HttpRequestBuilder) {
+        // Skip if Authorization header is already set by the calling service
+        if (request.headers.contains("Authorization")) {
+            Timber.v("Authorization header already set, skipping interceptor: ${request.url}")
+            return
+        }
+
         val accessToken = secureStorage.getAccessToken()
 
         if (accessToken != null) {
             // Always add Bearer token if we have one (AC E9.11.2)
             // If expired, server will return 401 and we'll refresh via handle401Response
-            request.header("Authorization", "Bearer $accessToken")
+            request.headers.set("Authorization", "Bearer $accessToken")
             if (secureStorage.isTokenExpired()) {
                 Timber.d("Added expired Bearer token to request (will be refreshed on 401): ${request.url}")
             } else {
@@ -72,7 +81,7 @@ class AuthInterceptor(
             // Fall back to API key for unauthenticated endpoints (AC E9.11.8)
             val apiKey = secureStorage.getApiKey()
             if (!apiKey.isNullOrBlank()) {
-                request.header("X-API-Key", apiKey)
+                request.headers.set("X-API-Key", apiKey)
                 Timber.v("Added API key to request: ${request.url}")
             }
         }
@@ -149,8 +158,8 @@ val AuthPlugin = createClientPlugin("AuthPlugin", ::AuthPluginConfig) {
                     Timber.i("Retrying request with new token: $url")
 
                     // Create new request with updated Authorization header
-                    request.headers.remove("Authorization")
-                    request.header("Authorization", "Bearer $newToken")
+                    // Use set() to replace any existing header value
+                    request.headers.set("Authorization", "Bearer $newToken")
 
                     // Retry the request
                     return@intercept execute(request)
