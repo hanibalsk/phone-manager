@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Story E6.1: Geofence Domain Model

@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.TodayTripStats
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.movement.TransportationMode

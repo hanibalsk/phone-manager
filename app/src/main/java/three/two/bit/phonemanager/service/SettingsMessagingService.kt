@@ -19,7 +19,7 @@ import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
 import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import timber.log.Timber
 import javax.inject.Inject
 

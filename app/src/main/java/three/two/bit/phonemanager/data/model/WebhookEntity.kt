@@ -2,7 +2,7 @@ package three.two.bit.phonemanager.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.Webhook
 
 /**

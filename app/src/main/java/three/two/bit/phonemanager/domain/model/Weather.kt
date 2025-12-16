@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.domain.model
 
 import androidx.annotation.StringRes
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.R

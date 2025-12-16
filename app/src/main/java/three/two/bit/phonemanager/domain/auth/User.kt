@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.domain.auth
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Story E9.11: Domain Model for Authenticated User

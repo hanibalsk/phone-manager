@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Represents a device in a group for location sharing.

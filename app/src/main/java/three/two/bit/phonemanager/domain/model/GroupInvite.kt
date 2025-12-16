@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.domain.model
 
 import kotlin.time.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import three.two.bit.phonemanager.util.InviteCodeUtils
 
 /**

@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Story E12.8: Unlock Request Models

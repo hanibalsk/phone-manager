@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Story E5.1: Proximity Alert Domain Model

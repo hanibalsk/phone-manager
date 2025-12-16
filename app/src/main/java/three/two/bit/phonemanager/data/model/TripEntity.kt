@@ -3,7 +3,7 @@ package three.two.bit.phonemanager.data.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.domain.model.LatLng
 import three.two.bit.phonemanager.domain.model.Trip

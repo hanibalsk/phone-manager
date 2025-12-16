@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.network.models
 
 import kotlin.time.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.domain.model.Group

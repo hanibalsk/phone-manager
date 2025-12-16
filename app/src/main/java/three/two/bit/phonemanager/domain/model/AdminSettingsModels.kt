@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlin.time.Clock
 /**
  * Story E12.7: Admin Settings Management Domain Models

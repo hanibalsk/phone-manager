@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.DetectionSource
 import three.two.bit.phonemanager.domain.model.DeviceState
 import three.two.bit.phonemanager.domain.model.EventLocation

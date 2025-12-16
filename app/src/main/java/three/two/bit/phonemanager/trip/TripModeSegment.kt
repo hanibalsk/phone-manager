@@ -1,6 +1,6 @@
 package three.two.bit.phonemanager.trip
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import three.two.bit.phonemanager.movement.TransportationMode
 
 /**
