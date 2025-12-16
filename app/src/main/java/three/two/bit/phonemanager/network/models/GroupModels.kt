@@ -349,12 +349,14 @@ data class ValidateInviteResponse(
 
 /**
  * Story E11.9 Task 2: Group preview DTO for invite validation
+ * Note: id and memberCount are optional as the server may not always return them
  */
 @Serializable
 data class GroupPreviewDto(
-    val id: String,
+    val id: String? = null,
     val name: String,
-    val memberCount: Int,
+    @SerialName("member_count")
+    val memberCount: Int? = null,
 )
 
 /**
@@ -448,11 +450,12 @@ fun CreateInviteResponse.toDomain(groupIdFallback: String = ""): GroupInvite {
 
 /**
  * Maps GroupPreviewDto to GroupPreview domain model
+ * Provides default values for optional fields that may not be returned by the server
  */
 fun GroupPreviewDto.toDomain(): GroupPreview = GroupPreview(
-    id = id,
+    id = id ?: "",
     name = name,
-    memberCount = memberCount,
+    memberCount = memberCount ?: 0,
 )
 
 /**
