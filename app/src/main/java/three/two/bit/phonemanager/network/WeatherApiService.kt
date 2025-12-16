@@ -70,6 +70,10 @@ class WeatherApiServiceImpl @Inject constructor(private val httpClient: HttpClie
             "Weather fetched successfully: temp=${weather.current.temperature}°C, condition=${weather.current.weatherCode}",
         )
         Result.success(weather)
+    } catch (e: kotlinx.coroutines.CancellationException) {
+        // Coroutine was cancelled (e.g., user navigated away) - rethrow to propagate cancellation
+        Timber.d("Weather fetch cancelled for lat=$latitude, lon=$longitude")
+        throw e
     } catch (e: Exception) {
         Timber.e(e, "Failed to fetch weather for lat=$latitude, lon=$longitude")
         Result.failure(e)

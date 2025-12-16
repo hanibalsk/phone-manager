@@ -89,6 +89,9 @@ class WeatherViewModel @Inject constructor(
                 } else {
                     _uiState.value = WeatherUiState.Error("Unable to load weather. Check network connection.")
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                // Coroutine cancelled (e.g., user navigated away) - don't update state, just let it go
+                throw e
             } catch (e: SecurityException) {
                 // Handle location permission denied
                 _uiState.value = WeatherUiState.Error("Location permission required to display weather")

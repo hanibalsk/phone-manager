@@ -117,6 +117,10 @@ class WeatherCacheImpl @Inject constructor(@ApplicationContext private val conte
             Timber.d("Cached weather retrieved: temp=${weather.current.temperature}°C")
             weather
         }
+    } catch (e: kotlinx.coroutines.CancellationException) {
+        // Coroutine cancelled (e.g., user navigated away) - rethrow to propagate cancellation properly
+        Timber.d("Weather cache read cancelled")
+        throw e
     } catch (e: Exception) {
         Timber.e(e, "Failed to read weather from cache")
         null
@@ -148,6 +152,10 @@ class WeatherCacheImpl @Inject constructor(@ApplicationContext private val conte
                 weather
             }
         }
+    } catch (e: kotlinx.coroutines.CancellationException) {
+        // Coroutine cancelled (e.g., user navigated away) - rethrow to propagate cancellation properly
+        Timber.d("Weather valid cache read cancelled")
+        throw e
     } catch (e: Exception) {
         Timber.e(e, "Failed to read weather from cache")
         null
@@ -180,6 +188,10 @@ class WeatherCacheImpl @Inject constructor(@ApplicationContext private val conte
             val age = now - cachedTime
             age <= CACHE_TTL
         }
+    } catch (e: kotlinx.coroutines.CancellationException) {
+        // Coroutine cancelled (e.g., user navigated away) - rethrow to propagate cancellation properly
+        Timber.d("Cache validity check cancelled")
+        throw e
     } catch (e: Exception) {
         Timber.e(e, "Failed to check cache validity")
         false

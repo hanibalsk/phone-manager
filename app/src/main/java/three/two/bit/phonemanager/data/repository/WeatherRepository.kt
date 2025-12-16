@@ -62,18 +62,24 @@ class WeatherRepositoryImpl @Inject constructor(
         }
 
         // Fetch from API
-        return weatherApiService.getWeather(latitude, longitude).fold(
-            onSuccess = { weather ->
-                // Save to cache for future use
-                weatherCache.saveWeather(weather)
-                Timber.i("Fresh weather fetched and cached: temp=${weather.current.temperature}°C")
-                weather
-            },
-            onFailure = { error ->
-                // AC E7.1.6: On failure, return any cached data if available (even expired)
-                Timber.e(error, "Failed to fetch weather, falling back to cache")
-                weatherCache.getWeather() // Returns even expired cache
-            },
-        )
+        return try {
+            weatherApiService.getWeather(latitude, longitude).fold(
+                onSuccess = { weather ->
+                    // Save to cache for future use
+                    weatherCache.saveWeather(weather)
+                    Timber.i("Fresh weather fetched and cached: temp=${weather.current.temperature}°C")
+                    weather
+                },
+                onFailure = { error ->
+                    // AC E7.1.6: On failure, return any cached data if available (even expired)
+                    Timber.e(error, "Failed to fetch weather, falling back to cache")
+                    weatherCache.getWeather() // Returns even expired cache
+                },
+            )
+        } catch (e: kotlinx.coroutines.CancellationException) {
+            // Coroutine cancelled - rethrow to propagate cancellation properly
+            Timber.d("Weather repository operation cancelled")
+            throw e
+        }
     }
 }
