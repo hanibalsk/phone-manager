@@ -20,6 +20,8 @@ adb emu geo fix -74.006 40.7128  # NYC
 adb emu geo fix 2.3522 48.8566   # Paris
 ```
 
+IMPORTANT: for getting proper component location always use Element Discovery (uiautomator)
+
 ### Navigation
 | Action | Command |
 |--------|---------|

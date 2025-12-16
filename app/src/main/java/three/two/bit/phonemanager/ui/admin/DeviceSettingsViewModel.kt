@@ -90,6 +90,11 @@ class DeviceSettingsViewModel @Inject constructor(
                         )
                     }
                     Timber.i("Loaded settings for device $deviceId (isCurrentDevice=$isCurrentDevice)")
+
+                    // If viewing the current device, sync local settings with server
+                    if (isCurrentDevice) {
+                        triggerLocalSettingsSync()
+                    }
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -139,21 +144,9 @@ class DeviceSettingsViewModel @Inject constructor(
                     }
                     Timber.i("Updated setting $key for device $deviceId")
 
-                    // If updating the current device, trigger local settings sync
-                    val localDeviceId = secureStorage.getDeviceId()
-                    Timber.d("Checking isCurrentDevice: localDeviceId=$localDeviceId, targetDeviceId=$deviceId, match=${localDeviceId == deviceId}")
-                    if (localDeviceId == deviceId) {
-                        Timber.i("Updating current device - triggering local settings sync")
-                        viewModelScope.launch {
-                            settingsSyncRepository.syncAllSettings().fold(
-                                onSuccess = {
-                                    Timber.i("Local settings sync completed successfully")
-                                },
-                                onFailure = { error ->
-                                    Timber.e(error, "Failed to sync local settings")
-                                },
-                            )
-                        }
+                    // Sync to current device if applicable
+                    if (isCurrentDevice) {
+                        triggerLocalSettingsSync()
                     }
                 },
                 onFailure = { error ->
@@ -188,6 +181,11 @@ class DeviceSettingsViewModel @Inject constructor(
                         )
                     }
                     Timber.i("Locked setting $key for device $deviceId")
+
+                    // Sync to current device if applicable
+                    if (isCurrentDevice) {
+                        triggerLocalSettingsSync()
+                    }
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -221,6 +219,11 @@ class DeviceSettingsViewModel @Inject constructor(
                         )
                     }
                     Timber.i("Unlocked setting $key for device $deviceId")
+
+                    // Sync to current device if applicable
+                    if (isCurrentDevice) {
+                        triggerLocalSettingsSync()
+                    }
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -263,6 +266,11 @@ class DeviceSettingsViewModel @Inject constructor(
                             successMessage = "$count settings locked",
                         )
                     }
+
+                    // Sync to current device if applicable
+                    if (isCurrentDevice) {
+                        triggerLocalSettingsSync()
+                    }
                 },
                 onFailure = { error ->
                     _uiState.update {
@@ -291,6 +299,11 @@ class DeviceSettingsViewModel @Inject constructor(
                             isSaving = false,
                             successMessage = "$count settings unlocked",
                         )
+                    }
+
+                    // Sync to current device if applicable
+                    if (isCurrentDevice) {
+                        triggerLocalSettingsSync()
                     }
                 },
                 onFailure = { error ->
@@ -418,6 +431,24 @@ class DeviceSettingsViewModel @Inject constructor(
      */
     fun clearSuccessMessage() {
         _uiState.update { it.copy(successMessage = null) }
+    }
+
+    /**
+     * Trigger local settings sync for the current device.
+     * This ensures the device applies the latest settings from the server.
+     */
+    private fun triggerLocalSettingsSync() {
+        viewModelScope.launch {
+            Timber.i("Triggering local settings sync for current device")
+            settingsSyncRepository.syncAllSettings().fold(
+                onSuccess = {
+                    Timber.i("Local settings sync completed successfully")
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to sync local settings")
+                },
+            )
+        }
     }
 
     /**

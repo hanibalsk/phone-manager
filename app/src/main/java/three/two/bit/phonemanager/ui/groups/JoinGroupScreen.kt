@@ -60,6 +60,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.GroupPreview
+import three.two.bit.phonemanager.util.InviteCodeUtils
 
 /**
  * Story E11.9 Task 8: JoinGroupScreen
@@ -229,7 +230,7 @@ private fun JoinGroupContent(
                 imeAction = ImeAction.Done,
             ),
             keyboardActions = KeyboardActions(
-                onDone = { if (inviteCode.length == 8) onValidate() }
+                onDone = { if (InviteCodeUtils.isValidCodeFormat(inviteCode)) onValidate() }
             ),
             isError = uiState is JoinGroupUiState.Error,
             supportingText = {
@@ -256,7 +257,7 @@ private fun JoinGroupContent(
 
             Button(
                 onClick = onValidate,
-                enabled = inviteCode.length == 8 && uiState !is JoinGroupUiState.Validating,
+                enabled = InviteCodeUtils.isValidCodeFormat(inviteCode) && uiState !is JoinGroupUiState.Validating,
                 modifier = Modifier.weight(1f),
             ) {
                 if (uiState is JoinGroupUiState.Validating) {

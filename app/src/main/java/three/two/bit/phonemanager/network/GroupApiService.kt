@@ -578,16 +578,14 @@ class GroupApiServiceImpl @Inject constructor(
 
     /**
      * Story E11.9 Task 2: Validate an invite code
-     * POST /invites/{code}/validate
+     * GET /invites/{code}/validate
      */
     override suspend fun validateInviteCode(code: String): Result<InviteValidationResult> = try {
         Timber.d("Validating invite code: $code")
 
-        val response: ValidateInviteResponse = httpClient.post(
+        val response: ValidateInviteResponse = httpClient.get(
             "${apiConfig.baseUrl}/api/v1/invites/$code/validate"
-        ) {
-            contentType(ContentType.Application.Json)
-        }.body()
+        ).body()
 
         Timber.i("Invite code validated: valid=${response.valid}")
         Result.success(response.toDomain())

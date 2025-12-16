@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.analytics.Analytics
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.LocationRepository
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
+import three.two.bit.phonemanager.domain.model.DeviceSettings
 import three.two.bit.phonemanager.domain.model.EnhancedServiceState
 import three.two.bit.phonemanager.domain.model.LocationStats
 import three.two.bit.phonemanager.domain.model.ServiceStatus
@@ -32,6 +34,7 @@ class LocationTrackingViewModel @Inject constructor(
     private val serviceController: LocationServiceController,
     private val permissionManager: PermissionManager,
     private val locationRepository: LocationRepository,
+    private val settingsSyncRepository: SettingsSyncRepository,
     private val analytics: Analytics,
 ) : ViewModel() {
 
@@ -194,6 +197,7 @@ class LocationTrackingViewModel @Inject constructor(
         serviceController.startTracking()
             .onSuccess {
                 preferencesRepository.setTrackingEnabled(true)
+                syncTrackingStateToServer(true)
                 _trackingState.value = TrackingState.Active()
                 analytics.logTrackingToggled(true)
                 analytics.logServiceStateChanged("running")
@@ -213,6 +217,7 @@ class LocationTrackingViewModel @Inject constructor(
         serviceController.stopTracking()
             .onSuccess {
                 preferencesRepository.setTrackingEnabled(false)
+                syncTrackingStateToServer(false)
                 _trackingState.value = TrackingState.Stopped
                 analytics.logTrackingToggled(false)
                 analytics.logServiceStateChanged("stopped")
@@ -223,6 +228,28 @@ class LocationTrackingViewModel @Inject constructor(
                 analytics.logServiceStateChanged("error")
                 Timber.e(error, "Failed to stop tracking")
             }
+    }
+
+    /**
+     * Sync tracking enabled state to server.
+     * This ensures the server is aware of local tracking state changes.
+     */
+    private fun syncTrackingStateToServer(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsSyncRepository.updateServerSetting(
+                DeviceSettings.KEY_TRACKING_ENABLED,
+                enabled,
+            ).onFailure { error ->
+                // Log but don't fail - local state is already updated
+                Timber.w(error, "Failed to sync tracking state to server")
+            }.onSuccess { result ->
+                if (result.success) {
+                    Timber.i("Tracking state synced to server: enabled=$enabled")
+                } else if (result.wasLocked) {
+                    Timber.w("Tracking setting is locked by admin, server state not updated")
+                }
+            }
+        }
     }
 }
 

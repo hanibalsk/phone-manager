@@ -715,6 +715,8 @@ class DeviceApiServiceImpl @Inject constructor(
     /**
      * Story E12.6 Task 2: Update a device setting
      * PUT /api/v1/devices/{deviceId}/settings
+     *
+     * Note: Backend expects {"settings": {"key": value}} format
      */
     override suspend fun updateDeviceSetting(
         deviceId: String,
@@ -724,23 +726,46 @@ class DeviceApiServiceImpl @Inject constructor(
     ): Result<UpdateSettingResponse> = try {
         Timber.d("Updating setting $key for device $deviceId")
 
-        val response: UpdateSettingResponse = httpClient.put(
+        // Backend expects settings map format: {"settings": {"key": value}}
+        val settingsMap = mapOf(key to parseSettingValue(value))
+
+        val response: UpdateSettingsResponse = httpClient.put(
             "${apiConfig.baseUrl}/api/v1/devices/$deviceId/settings",
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")
-            setBody(UpdateSettingRequest(key = key, value = value))
+            setBody(UpdateDeviceSettingsRequest(settings = settingsMap))
         }.body()
 
-        if (response.success) {
+        // Convert UpdateSettingsResponse to UpdateSettingResponse for compatibility
+        val updateResponse = UpdateSettingResponse(
+            success = response.success,
+            error = response.error,
+            isLocked = response.locked.contains(key),
+        )
+
+        if (updateResponse.success) {
             Timber.i("Successfully updated setting $key for device $deviceId")
         } else {
-            Timber.w("Failed to update setting $key: ${response.error}, locked=${response.isLocked}")
+            Timber.w("Failed to update setting $key: ${updateResponse.error}, locked=${updateResponse.isLocked}")
         }
-        Result.success(response)
+        Result.success(updateResponse)
     } catch (e: Exception) {
         Timber.e(e, "Failed to update setting $key for device $deviceId")
         Result.failure(e)
+    }
+
+    /**
+     * Parse string value to appropriate type for settings update.
+     */
+    private fun parseSettingValue(value: String): Any {
+        return when {
+            value.equals("true", ignoreCase = true) -> true
+            value.equals("false", ignoreCase = true) -> false
+            value.toIntOrNull() != null -> value.toInt()
+            value.toDoubleOrNull() != null -> value.toDouble()
+            else -> value
+        }
     }
 
     // ============================================================================

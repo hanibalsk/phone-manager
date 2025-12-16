@@ -54,14 +54,17 @@ object InviteCodeUtils {
      * Validate an invite code format.
      *
      * @param code The code to validate
-     * @return True if the code is exactly 8 alphanumeric characters
+     * @return True if the code is valid (8 alphanumeric chars, or 11 chars with dashes like XXX-XXX-XXX)
      */
     fun isValidCodeFormat(code: String): Boolean {
-        return code.length == 8 && code.all { it.isLetterOrDigit() }
+        // Format: 8 alphanumeric OR 11 chars with dashes (XXX-XXX-XXX)
+        val alphanumericOnly = code.filterNot { it == '-' }
+        return (code.length == 8 && code.all { it.isLetterOrDigit() }) ||
+               (code.length == 11 && code.count { it == '-' } == 2 && alphanumericOnly.length == 9 && alphanumericOnly.all { it.isLetterOrDigit() })
     }
 
     /**
-     * Normalize an invite code (uppercase, alphanumeric only, max 8 chars).
+     * Normalize an invite code (uppercase, alphanumeric and dashes only, max 11 chars for format like XXX-XXX-XXX).
      *
      * @param code The raw code input
      * @return Normalized code
@@ -69,8 +72,8 @@ object InviteCodeUtils {
     fun normalizeCode(code: String): String {
         return code
             .uppercase()
-            .filter { it.isLetterOrDigit() }
-            .take(8)
+            .filter { it.isLetterOrDigit() || it == '-' }
+            .take(11) // Allow for format like XXX-XXX-XXX
     }
 
     /**

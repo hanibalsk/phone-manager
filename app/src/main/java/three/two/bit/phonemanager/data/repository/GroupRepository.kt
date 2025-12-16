@@ -25,6 +25,7 @@ import javax.inject.Singleton
 class GroupRepository @Inject constructor(
     private val groupApiService: GroupApiService,
     private val secureStorage: SecureStorage,
+    private val settingsSyncRepository: SettingsSyncRepository,
 ) {
     // Cached groups for offline access and quick display
     private val _cachedGroups = MutableStateFlow<List<Group>>(emptyList())
@@ -430,6 +431,13 @@ class GroupRepository @Inject constructor(
                 Timber.i("Joined group: ${joinResult.groupId} with role=${joinResult.role}")
                 // Refresh groups to include new group
                 getUserGroups()
+                // Sync settings from server after joining group
+                // This ensures the device adopts group/admin-managed settings
+                settingsSyncRepository.syncAllSettings().onSuccess {
+                    Timber.i("Settings synced after joining group ${joinResult.groupId}")
+                }.onFailure { error ->
+                    Timber.w(error, "Failed to sync settings after joining group")
+                }
             }
         }
     }

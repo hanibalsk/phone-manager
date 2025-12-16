@@ -74,7 +74,7 @@ class JoinGroupViewModel @Inject constructor(
         _inviteCode.value = normalizedCode
 
         // Clear previous preview if code changes
-        if (normalizedCode.length < 8) {
+        if (!InviteCodeUtils.isValidCodeFormat(normalizedCode)) {
             _groupPreview.value = null
             if (_uiState.value !is JoinGroupUiState.Error) {
                 _uiState.value = JoinGroupUiState.EnterCode
@@ -88,8 +88,8 @@ class JoinGroupViewModel @Inject constructor(
     fun validateCode() {
         val code = _inviteCode.value
 
-        if (code.length != 8) {
-            _uiState.value = JoinGroupUiState.Error("Code must be 8 characters")
+        if (!InviteCodeUtils.isValidCodeFormat(code)) {
+            _uiState.value = JoinGroupUiState.Error("Invalid code format")
             return
         }
 

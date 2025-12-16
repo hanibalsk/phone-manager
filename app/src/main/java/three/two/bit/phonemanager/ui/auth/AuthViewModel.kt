@@ -1,8 +1,10 @@
 package three.two.bit.phonemanager.ui.auth
 
+import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -12,8 +14,10 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.ConfigRepository
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.security.SecureStorage
+import three.two.bit.phonemanager.worker.SettingsSyncWorker
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -30,10 +34,12 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val authRepository: AuthRepository,
     private val configRepository: ConfigRepository,
     private val deviceApiService: DeviceApiService,
     private val secureStorage: SecureStorage,
+    private val settingsSyncRepository: SettingsSyncRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
@@ -151,6 +157,9 @@ class AuthViewModel @Inject constructor(
 
                 // AC E10.6.6: Auto-link device after successful login
                 autoLinkCurrentDevice(user.userId)
+
+                // Sync settings from server to apply admin/group-managed settings
+                syncSettingsAfterAuth()
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "Login failed")
@@ -190,6 +199,9 @@ class AuthViewModel @Inject constructor(
 
                 // AC E10.6.6: Auto-link device after successful registration
                 autoLinkCurrentDevice(user.userId)
+
+                // Sync settings from server to apply admin/group-managed settings
+                syncSettingsAfterAuth()
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "Registration failed")
@@ -220,6 +232,9 @@ class AuthViewModel @Inject constructor(
 
                 // AC E10.6.6: Auto-link device after successful OAuth
                 autoLinkCurrentDevice(user.userId)
+
+                // Sync settings from server to apply admin/group-managed settings
+                syncSettingsAfterAuth()
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "OAuth sign-in failed: $provider")
@@ -235,6 +250,9 @@ class AuthViewModel @Inject constructor(
      * AC E9.11.6: Logout current user
      */
     fun logout() {
+        // Cancel periodic settings sync worker
+        SettingsSyncWorker.cancel(context)
+
         viewModelScope.launch {
             authRepository.logout()
             _uiState.value = AuthUiState.Idle
@@ -402,6 +420,27 @@ class AuthViewModel @Inject constructor(
                     }
                 },
             )
+        }
+    }
+
+    /**
+     * Sync settings from server after successful authentication.
+     * This ensures the device adopts admin/group-managed settings.
+     * Also schedules periodic settings sync worker.
+     */
+    private fun syncSettingsAfterAuth() {
+        // Schedule periodic settings sync worker
+        SettingsSyncWorker.schedule(context)
+
+        // Perform immediate sync
+        viewModelScope.launch {
+            settingsSyncRepository.syncAllSettings()
+                .onSuccess {
+                    Timber.i("Settings synced after authentication")
+                }
+                .onFailure { error ->
+                    Timber.w(error, "Failed to sync settings after authentication")
+                }
         }
     }
 
