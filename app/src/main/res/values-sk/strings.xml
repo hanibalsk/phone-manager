@@ -958,4 +958,56 @@
     <string name="notification_unlock_request_denied_title">Žiadosť zamietnutá</string>
     <string name="notification_unlock_request_denied">Vaša žiadosť o odomknutie pre %1$s bola zamietnutá</string>
     <string name="notification_unlock_request_denied_with_reason">Vaša žiadosť o odomknutie pre %1$s bola zamietnutá: %2$s</string>
+
+    <!-- Story E9: Admin/Owner Management -->
+    <string name="admin_my_device">Moje zariadenie</string>
+    <string name="admin_users">Používatelia</string>
+    <string name="admin_toggle_view">Prepnúť medzi Moje zariadenie a Používatelia</string>
+    <string name="admin_no_groups">Nie ste administrátorom ani vlastníkom žiadnej skupiny</string>
+    <string name="admin_select_group">Vyberte skupinu na správu</string>
+    <string name="admin_managed_users">Spravovaní používatelia</string>
+    <string name="admin_no_users">V tejto skupine nie sú žiadni používatelia</string>
+    <string name="admin_view_location">Zobraziť polohu</string>
+    <string name="admin_manage_geofence">Spravovať geofence</string>
+    <string name="admin_enable_tracking">Zapnúť sledovanie</string>
+    <string name="admin_disable_tracking">Vypnúť sledovanie</string>
+    <string name="admin_remove_user">Odstrániť používateľa</string>
+    <string name="admin_remove_user_confirm">Naozaj chcete odstrániť %1$s z tejto skupiny?</string>
+    <string name="admin_tracking_updated">Sledovanie aktualizované pre %1$s</string>
+    <string name="admin_user_removed">%1$s bol odstránený zo skupiny</string>
+    <string name="admin_geofence_saved">Geofence uložený pre %1$s</string>
+    <string name="admin_loading_users">Načítavam používateľov…</string>
+    <string name="admin_error_loading_users">Nepodarilo sa načítať používateľov</string>
+    <string name="admin_role_owner">Vlastník</string>
+    <string name="admin_role_admin">Administrátor</string>
+    <string name="admin_role_member">Člen</string>
+    <string name="admin_no_location">Poloha nie je dostupná</string>
+    <string name="admin_user_location_title">Poloha %1$s</string>
+    <string name="admin_user_location_subtitle">Posledná aktualizácia: %1$s</string>
+
+    <!-- Story E9.4: Admin Geofence Management -->
+    <string name="admin_geofences_title">Geofence %1$s</string>
+    <string name="admin_manage_geofences">Spravovať geofence</string>
+    <string name="admin_add_geofence">Pridať geofence</string>
+    <string name="admin_no_geofences_title">Žiadne geofence</string>
+    <string name="admin_no_geofences_message">%1$s nemá nastavené žiadne geofence. Vytvorte jeden pre sledovanie hraníc polohy.</string>
+    <string name="admin_no_geofences_message_generic">Žiadne geofence nie sú nastavené. Vytvorte jeden pre sledovanie hraníc polohy.</string>
+    <string name="admin_delete_geofence_title">Odstrániť geofence?</string>
+    <string name="admin_delete_geofence_message">Naozaj chcete odstrániť \"%1$s\"? Táto akcia sa nedá vrátiť.</string>
+    <string name="admin_create_geofence_title">Vytvoriť geofence</string>
+    <string name="admin_geofence_location">Poloha</string>
+    <string name="admin_geofence_radius">Polomer: %1$s</string>
+    <string name="admin_geofence_triggers">Spúšťacie udalosti</string>
+    <string name="button_create">Vytvoriť</string>
+
+    <!-- Story E9.5: Remote Tracking Control -->
+    <string name="admin_tracking_label">Sledovanie polohy</string>
+    <string name="admin_tracking_enabled">Sledovanie zapnuté</string>
+    <string name="admin_tracking_disabled">Sledovanie vypnuté</string>
+
+    <!-- Story E9.6: Remove User from Managed List -->
+    <string name="admin_remove_user_title">Odstrániť používateľa?</string>
+    <string name="admin_remove_user_message">Naozaj chcete odstrániť %1$s z vášho spravovaného zoznamu? Už nebude sledovaný.</string>
+    <string name="admin_remove">Odstrániť</string>
+    <string name="admin_you">Vy</string>
 </resources>

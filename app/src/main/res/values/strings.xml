@@ -955,4 +955,56 @@
     <string name="settings_navigate_to_devices">Navigate to devices</string>
     <string name="settings_navigate_to_groups">Navigate to groups</string>
     <string name="settings_sign_in_prompt">Sign in to access advanced features</string>
+
+    <!-- Story E9: Admin/Owner Management -->
+    <string name="admin_my_device">My Device</string>
+    <string name="admin_users">Users</string>
+    <string name="admin_toggle_view">Toggle between My Device and Users view</string>
+    <string name="admin_no_groups">You are not an admin or owner of any groups</string>
+    <string name="admin_select_group">Select a group to manage</string>
+    <string name="admin_managed_users">Managed Users</string>
+    <string name="admin_no_users">No users in this group</string>
+    <string name="admin_view_location">View Location</string>
+    <string name="admin_manage_geofence">Manage Geofence</string>
+    <string name="admin_enable_tracking">Enable Tracking</string>
+    <string name="admin_disable_tracking">Disable Tracking</string>
+    <string name="admin_remove_user">Remove User</string>
+    <string name="admin_remove_user_confirm">Are you sure you want to remove %1$s from this group?</string>
+    <string name="admin_tracking_updated">Tracking updated for %1$s</string>
+    <string name="admin_user_removed">%1$s has been removed from the group</string>
+    <string name="admin_geofence_saved">Geofence saved for %1$s</string>
+    <string name="admin_loading_users">Loading users…</string>
+    <string name="admin_error_loading_users">Failed to load users</string>
+    <string name="admin_role_owner">Owner</string>
+    <string name="admin_role_admin">Admin</string>
+    <string name="admin_role_member">Member</string>
+    <string name="admin_no_location">No location available</string>
+    <string name="admin_user_location_title">%1$s Location</string>
+    <string name="admin_user_location_subtitle">Last updated: %1$s</string>
+
+    <!-- Story E9.4: Admin Geofence Management -->
+    <string name="admin_geofences_title">%1$s Geofences</string>
+    <string name="admin_manage_geofences">Manage Geofences</string>
+    <string name="admin_add_geofence">Add Geofence</string>
+    <string name="admin_no_geofences_title">No Geofences</string>
+    <string name="admin_no_geofences_message">%1$s has no geofences set up. Create one to track their location boundaries.</string>
+    <string name="admin_no_geofences_message_generic">No geofences set up. Create one to track location boundaries.</string>
+    <string name="admin_delete_geofence_title">Delete Geofence?</string>
+    <string name="admin_delete_geofence_message">Are you sure you want to delete \"%1$s\"? This action cannot be undone.</string>
+    <string name="admin_create_geofence_title">Create Geofence</string>
+    <string name="admin_geofence_location">Location</string>
+    <string name="admin_geofence_radius">Radius: %1$s</string>
+    <string name="admin_geofence_triggers">Trigger Events</string>
+    <string name="button_create">Create</string>
+
+    <!-- Story E9.5: Remote Tracking Control -->
+    <string name="admin_tracking_label">Location Tracking</string>
+    <string name="admin_tracking_enabled">Tracking enabled</string>
+    <string name="admin_tracking_disabled">Tracking disabled</string>
+
+    <!-- Story E9.6: Remove User from Managed List -->
+    <string name="admin_remove_user_title">Remove User?</string>
+    <string name="admin_remove_user_message">Are you sure you want to remove %1$s from your managed list? They will no longer be tracked.</string>
+    <string name="admin_remove">Remove</string>
+    <string name="admin_you">You</string>
 </resources>

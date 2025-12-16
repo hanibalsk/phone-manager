@@ -3,14 +3,14 @@
 **Author:** Martin
 **Date:** 2025-11-28
 **Project Level:** 2
-**Target Scale:** 24 stories across 8 epics
-**Source:** PRD Phone Manager v1.1 (2025-11-25)
+**Target Scale:** 24 stories across 9 epics
+**Source:** PRD Phone Manager v1.2 (2025-12-16)
 
 ---
 
 ## Epic Overview
 
-This project consists of 8 epics aligned with the PRD MVP features:
+This project consists of 9 epics aligned with the PRD MVP features:
 
 - **Epic 0**: Foundation Infrastructure (DONE) - 5 stories ✅
 - **Epic 1**: Device Registration & Groups (DONE) - 3 stories ✅
@@ -21,8 +21,9 @@ This project consists of 8 epics aligned with the PRD MVP features:
 - **Epic 6**: Geofencing with Webhooks (DONE) - 3 stories ✅
 - **Epic 7**: Weather Forecast (DONE) - 4 stories ✅
 - **Epic 8**: Movement Tracking (DONE) - 14 stories ✅
+- **Epic 9**: Admin/Owner Management (PLANNED) - 6 stories
 
-**Total Stories:** 38 (37 done + 1 remaining)
+**Total Stories:** 44 (37 done + 7 remaining)
 
 ---
 
@@ -543,6 +544,184 @@ Intelligent movement tracking, automatic trip detection, sensor telemetry loggin
 
 ---
 
+## Epic 9: Admin/Owner Management
+
+**Priority:** High
+**Estimated Effort:** Medium-High (5-7 days)
+**Status:** Planned (Not Started)
+**PRD Reference:** PRD v1.2 - Epic 5 (Admin/Owner Management)
+**Dependencies:** Epic 1 ✅ (Device Registration), Epic 3 ✅ (Map Display), Epic 6 ✅ (Geofencing)
+
+### Purpose
+Enable admin/owner users to manage multiple devices from a single app interface. Admins can view other users' locations, create/update geofences, enable/disable tracking, and remove users from their managed list. Reuses existing device screens for consistency.
+
+### Key Requirements
+- **Auth Method**: Backend role/permission determines admin status
+- **Admin Actions**: Full control (view location, geofence, enable/disable tracking, remove users)
+- **Navigation**: Homescreen toggle between "My Device" and "Users" view
+- **UI Reuse**: Existing device screens reused for viewing managed users
+
+### Stories
+
+#### Story E9.1: Admin Role Detection
+**Status:** Planned
+**Estimated Effort:** Small (0.5 day)
+**PRD Reference:** FR-Admin Role
+
+**User Story:**
+As an admin, I want my role detected from backend so I can access admin features
+
+**Acceptance Criteria:**
+- Backend API returns user role (admin/owner/user) on authentication
+- Extend existing auth/device registration to include role field
+- Role cached locally in SecureStorage, refreshed on app launch
+- Admin toggle/menu visible only if role is admin or owner
+- Graceful handling if role endpoint unavailable (default to user role)
+
+**Technical Notes:**
+- Extend DeviceApiService response to include `role` field
+- Create `UserRole` enum: ADMIN, OWNER, USER
+- Store role in PreferencesRepository
+
+---
+
+#### Story E9.2: Homescreen Admin Toggle
+**Status:** Planned
+**Estimated Effort:** Medium (1 day)
+**PRD Reference:** FR-Admin Navigation
+
+**User Story:**
+As an admin, I want to toggle between "My Device" and "Users" view on homescreen
+
+**Acceptance Criteria:**
+- Homescreen displays toggle/switch for admins only (hide for regular users)
+- "My Device" shows current device status (existing functionality)
+- "Users" view shows list of managed devices/users
+- Toggle state persists during session
+- Smooth transition animation between views
+- Loading state while fetching users list
+
+**Technical Notes:**
+- Extend HomeViewModel with `isAdmin` StateFlow
+- Create UsersListScreen composable
+- Fetch managed users via `GET /api/admin/users` or similar endpoint
+
+---
+
+#### Story E9.3: View User Location
+**Status:** Planned
+**Estimated Effort:** Medium (1 day)
+**PRD Reference:** FR-Admin View Location
+
+**User Story:**
+As an admin, I want to view a user's current location using the existing device screen
+
+**Acceptance Criteria:**
+- Select user from list navigates to device detail screen
+- Same UI as "My Device" screen (reused components)
+- Shows user's current location on map
+- Displays last update timestamp
+- Shows user's display name and device info
+- Back navigation returns to users list
+
+**Technical Notes:**
+- Reuse MapScreen/DeviceDetailScreen with `deviceId` parameter
+- Create `AdminDeviceDetailViewModel` or extend existing ViewModel
+- Fetch user location via `GET /api/admin/users/{userId}/location`
+
+---
+
+#### Story E9.4: Geofence Management for Users
+**Status:** Planned
+**Estimated Effort:** High (1.5 days)
+**PRD Reference:** FR-Admin Geofence
+
+**User Story:**
+As an admin, I want to create/update geofence boundaries for a user
+
+**Acceptance Criteria:**
+- Geofence configuration accessible from user detail screen
+- Map-based geofence drawing (circle with adjustable radius)
+- Coordinate input option (latitude, longitude, radius)
+- Save geofence to backend per user
+- Visual indicator when user is inside/outside geofence
+- List existing geofences for user with edit/delete options
+- Support multiple geofences per user (optional)
+
+**Technical Notes:**
+- Extend existing Geofence entity with `targetUserId` field
+- Reuse GeofenceScreen components with admin context
+- API: `POST /api/admin/users/{userId}/geofences`
+- API: `PUT /api/admin/users/{userId}/geofences/{geofenceId}`
+- API: `DELETE /api/admin/users/{userId}/geofences/{geofenceId}`
+
+---
+
+#### Story E9.5: Remote Tracking Control
+**Status:** Planned
+**Estimated Effort:** Medium (1 day)
+**PRD Reference:** FR-Admin Tracking Control
+
+**User Story:**
+As an admin, I want to enable/disable tracking for a user
+
+**Acceptance Criteria:**
+- Toggle control on user detail screen
+- Backend API to update tracking state for managed device
+- Visual confirmation of tracking state change
+- Target device receives update on next sync or via push notification
+- Current tracking state reflected in UI
+- Audit log of tracking state changes (optional)
+
+**Technical Notes:**
+- API: `PUT /api/admin/users/{userId}/tracking` with body `{ enabled: boolean }`
+- Target device polls for settings changes or receives FCM push
+- Store admin-controlled settings separately from user preferences
+
+---
+
+#### Story E9.6: Remove User from Managed List
+**Status:** Planned
+**Estimated Effort:** Small (0.5 day)
+**PRD Reference:** FR-Admin User Removal
+
+**User Story:**
+As an admin, I want to remove a user from my managed list
+
+**Acceptance Criteria:**
+- Remove action accessible from user detail screen or users list (swipe/menu)
+- Confirmation dialog before removal
+- Backend API to revoke management relationship
+- User removed from list immediately after successful API call
+- Removed user's device continues to function independently
+- Cannot remove self from list (validation)
+
+**Technical Notes:**
+- API: `DELETE /api/admin/users/{userId}`
+- Optimistic UI update with rollback on failure
+- Filter out current user from removable list
+
+---
+
+### API Requirements Summary
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/admin/users` | GET | List managed users |
+| `/api/admin/users/{userId}/location` | GET | Get user's current location |
+| `/api/admin/users/{userId}/geofences` | GET/POST | List/Create geofences |
+| `/api/admin/users/{userId}/geofences/{id}` | PUT/DELETE | Update/Delete geofence |
+| `/api/admin/users/{userId}/tracking` | PUT | Enable/disable tracking |
+| `/api/admin/users/{userId}` | DELETE | Remove user from managed list |
+
+### Technical Notes
+- **Auth**: All admin endpoints require admin/owner role validation
+- **UI Reuse**: Leverage existing MapScreen, GeofenceScreen components
+- **State Management**: Extend existing ViewModels with admin context
+- **Backend**: Requires corresponding API implementation on server
+
+---
+
 ## Dependencies
 
 ```
@@ -566,9 +745,13 @@ Epic 3 (Map Display) ✅ ◄────────────┘
               │
               ▼
          Epic 6 (Geofencing + Webhooks) ✅
+              │
+              ▼
+         Epic 9 (Admin/Owner Management) 🔜
+              [Depends on: Epic 1, Epic 3, Epic 6]
 ```
 
-**Critical Path:** Epic 0 → Epic 1 → Epic 3 → Epic 5/6
+**Critical Path:** Epic 0 → Epic 1 → Epic 3 → Epic 5/6 → Epic 9
 **Independent:** Epic 7 (Weather) ✅, Epic 8 (Movement Tracking) ✅
 
 ---
@@ -584,6 +767,8 @@ Epic 3 (Map Display) ✅ ◄────────────┘
 | 5 | Epic 5: Proximity Alerts | Requires group member locations |
 | 6 | Epic 6: Geofencing + Webhooks | Most complex, requires backend webhook dispatcher |
 | 7 | Epic 7: Weather Forecast | Independent, can be done anytime; enhances notification UX |
+| 8 | Epic 8: Movement Tracking | Independent, can be done anytime; trip detection |
+| 9 | Epic 9: Admin/Owner Management | Depends on Epic 1, 3, 6; reuses existing screens |
 
 ---
 
@@ -608,3 +793,4 @@ Epic 3 (Map Display) ✅ ◄────────────┘
 | 2025-11-28 | Martin | Epic 7 marked complete - production ready with device testing verified |
 | 2025-11-30 | Dev Agent | Added Epic 8: Movement Tracking (14 stories) - All implemented and reviewed |
 | 2025-11-30 | Dev Agent | Epic 8 marked complete - bug fixes applied, localization complete |
+| 2025-12-16 | John (PM) | Added Epic 9: Admin/Owner Management (6 stories) - enables multi-user admin control |

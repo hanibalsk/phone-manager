@@ -3,7 +3,9 @@ package three.two.bit.phonemanager.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.domain.model.GroupRole
 import three.two.bit.phonemanager.domain.model.GroupInvite
 import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.InviteValidationResult
@@ -30,6 +32,25 @@ class GroupRepository @Inject constructor(
     // Cached groups for offline access and quick display
     private val _cachedGroups = MutableStateFlow<List<Group>>(emptyList())
     val cachedGroups: Flow<List<Group>> = _cachedGroups.asStateFlow()
+
+    /**
+     * Story E9.1: Check if user has admin/owner access in any group.
+     *
+     * Returns true if the user is OWNER or ADMIN in at least one group.
+     * Used to determine if the admin toggle should be shown on homescreen.
+     */
+    val hasAdminAccess: Flow<Boolean> = _cachedGroups.map { groups ->
+        groups.any { it.userRole == GroupRole.OWNER || it.userRole == GroupRole.ADMIN }
+    }
+
+    /**
+     * Story E9.1: Get groups where user has admin/owner access.
+     *
+     * Returns list of groups where the user can manage members (view locations, update geofences, etc.)
+     */
+    val adminGroups: Flow<List<Group>> = _cachedGroups.map { groups ->
+        groups.filter { it.userRole == GroupRole.OWNER || it.userRole == GroupRole.ADMIN }
+    }
 
     /**
      * AC E11.8.2: Create a new group

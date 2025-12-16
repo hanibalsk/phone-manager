@@ -19,7 +19,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material.icons.rounded.Groups
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Map
@@ -28,6 +30,8 @@ import androidx.compose.material.icons.rounded.Route
 import androidx.compose.material.icons.rounded.ShareLocation
 import androidx.compose.material.icons.rounded.Webhook
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -83,6 +87,7 @@ fun HomeScreen(
     onRequestNotificationPermission: () -> Unit,
     modifier: Modifier = Modifier,
     onNavigateToGroupMembers: () -> Unit = {},
+    onNavigateToAdminUsers: () -> Unit = {},
     onNavigateToSettings: () -> Unit = {},
     onNavigateToMap: () -> Unit = {},
     onNavigateToHistory: () -> Unit = {},
@@ -107,6 +112,10 @@ fun HomeScreen(
     val activeTrip by homeViewModel.activeTrip.collectAsState()
     val todayStats by homeViewModel.todayStats.collectAsState()
     val tripEndedEvent by homeViewModel.tripEndedEvent.collectAsState()
+
+    // Story E9.1-E9.2: Admin access and view mode (AC E9.1.1, E9.2.1)
+    val hasAdminAccess by homeViewModel.hasAdminAccess.collectAsState()
+    val isAdminViewMode by homeViewModel.isAdminViewMode.collectAsState()
 
     // Snackbar state for trip ended feedback
     val snackbarHostState = remember { SnackbarHostState() }
@@ -173,9 +182,23 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            // Hide tracking-related UI in secret mode
+            // Story E9.2: Admin view mode toggle (AC E9.2.1)
+            // Only show when user has admin access and not in secret mode
             AnimatedVisibility(
-                visible = !isSecretMode,
+                visible = hasAdminAccess && !isSecretMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                AdminViewToggle(
+                    isAdminViewMode = isAdminViewMode,
+                    onToggle = { homeViewModel.toggleAdminViewMode() },
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            // Hide tracking-related UI in secret mode and when in admin view mode
+            AnimatedVisibility(
+                visible = !isSecretMode && !isAdminViewMode,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -259,9 +282,22 @@ fun HomeScreen(
                 }
             }
 
-            // Quick Actions Grid - Row 1: Group Members + Map (hidden in secret mode)
+            // Story E9.2: Admin Users View (AC E9.2.2)
+            // Show placeholder for admin users view when in admin mode
             AnimatedVisibility(
-                visible = !isSecretMode,
+                visible = isAdminViewMode && !isSecretMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                AdminUsersPlaceholder(
+                    onNavigateToAdminUsers = onNavigateToAdminUsers,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
+
+            // Quick Actions Grid - Row 1: Group Members + Map (hidden in secret mode and admin view)
+            AnimatedVisibility(
+                visible = !isSecretMode && !isAdminViewMode,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -284,55 +320,67 @@ fun HomeScreen(
                 }
             }
 
-            // Quick Actions Grid - Row 2: History (hidden) + Alerts (visible)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            // Quick Actions Grid - Row 2: History (hidden) + Alerts (visible when not in admin view)
+            AnimatedVisibility(
+                visible = !isAdminViewMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
             ) {
-                // History - hidden in secret mode
-                AnimatedVisibility(
-                    visible = !isSecretMode,
-                    enter = fadeIn() + expandVertically(),
-                    exit = fadeOut() + shrinkVertically(),
-                    modifier = Modifier.weight(1f),
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
+                    // History - hidden in secret mode
+                    AnimatedVisibility(
+                        visible = !isSecretMode,
+                        enter = fadeIn() + expandVertically(),
+                        exit = fadeOut() + shrinkVertically(),
+                        modifier = Modifier.weight(1f),
+                    ) {
+                        QuickActionCard(
+                            icon = Icons.Rounded.History,
+                            title = stringResource(R.string.home_quick_history),
+                            onClick = onNavigateToHistory,
+                        )
+                    }
+                    // Alerts - always visible (except admin view)
                     QuickActionCard(
-                        icon = Icons.Rounded.History,
-                        title = stringResource(R.string.home_quick_history),
-                        onClick = onNavigateToHistory,
+                        icon = Icons.Rounded.NotificationsActive,
+                        title = stringResource(R.string.home_quick_alerts),
+                        onClick = onNavigateToAlerts,
+                        modifier = if (isSecretMode) Modifier.fillMaxWidth() else Modifier.weight(1f),
                     )
                 }
-                // Alerts - always visible
-                QuickActionCard(
-                    icon = Icons.Rounded.NotificationsActive,
-                    title = stringResource(R.string.home_quick_alerts),
-                    onClick = onNavigateToAlerts,
-                    modifier = if (isSecretMode) Modifier.fillMaxWidth() else Modifier.weight(1f),
-                )
             }
 
-            // Quick Actions Grid - Row 3: Geofences + Webhooks (always visible)
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                QuickActionCard(
-                    icon = Icons.Rounded.ShareLocation,
-                    title = stringResource(R.string.home_quick_geofences),
-                    onClick = onNavigateToGeofences,
-                    modifier = Modifier.weight(1f),
-                )
-                QuickActionCard(
-                    icon = Icons.Rounded.Webhook,
-                    title = stringResource(R.string.home_quick_webhooks),
-                    onClick = onNavigateToWebhooks,
-                    modifier = Modifier.weight(1f),
-                )
-            }
-
-            // Quick Actions Grid - Row 4: Trips (hidden in secret mode)
+            // Quick Actions Grid - Row 3: Geofences + Webhooks (visible when not in admin view)
             AnimatedVisibility(
-                visible = !isSecretMode,
+                visible = !isAdminViewMode,
+                enter = fadeIn() + expandVertically(),
+                exit = fadeOut() + shrinkVertically(),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    QuickActionCard(
+                        icon = Icons.Rounded.ShareLocation,
+                        title = stringResource(R.string.home_quick_geofences),
+                        onClick = onNavigateToGeofences,
+                        modifier = Modifier.weight(1f),
+                    )
+                    QuickActionCard(
+                        icon = Icons.Rounded.Webhook,
+                        title = stringResource(R.string.home_quick_webhooks),
+                        onClick = onNavigateToWebhooks,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
+            }
+
+            // Quick Actions Grid - Row 4: Trips (hidden in secret mode and admin view)
+            AnimatedVisibility(
+                visible = !isSecretMode && !isAdminViewMode,
                 enter = fadeIn() + expandVertically(),
                 exit = fadeOut() + shrinkVertically(),
             ) {
@@ -419,6 +467,100 @@ fun HomeScreen(
             onDismiss = {
                 permissionViewModel.onNotificationRationaleDismissed()
             },
+        )
+    }
+}
+
+/**
+ * Story E9.2: Admin View Toggle Component (AC E9.2.1)
+ *
+ * A toggle component that switches between "My Device" and "Users" view.
+ * Uses FilterChips to provide clear visual feedback of the current mode.
+ */
+@Composable
+private fun AdminViewToggle(
+    isAdminViewMode: Boolean,
+    onToggle: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        FilterChip(
+            selected = !isAdminViewMode,
+            onClick = { if (isAdminViewMode) onToggle() },
+            label = { Text(stringResource(R.string.admin_my_device)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Smartphone,
+                    contentDescription = null,
+                    modifier = Modifier.height(18.dp),
+                )
+            },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
+        )
+        FilterChip(
+            selected = isAdminViewMode,
+            onClick = { if (!isAdminViewMode) onToggle() },
+            label = { Text(stringResource(R.string.admin_users)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.height(18.dp),
+                )
+            },
+            colors = FilterChipDefaults.filterChipColors(
+                selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                selectedLabelColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                selectedLeadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            ),
+        )
+    }
+}
+
+/**
+ * Story E9.2: Admin Users Placeholder Component (AC E9.2.2)
+ *
+ * A placeholder component shown when in admin view mode.
+ * This will be replaced with the actual user management UI in Story E9.3.
+ */
+@Composable
+private fun AdminUsersPlaceholder(
+    onNavigateToAdminUsers: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier = modifier.padding(vertical = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(
+            text = stringResource(R.string.admin_managed_users),
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+
+        // Quick action card to navigate to admin users screen
+        QuickActionCard(
+            icon = Icons.Rounded.Groups,
+            title = stringResource(R.string.admin_managed_users),
+            onClick = onNavigateToAdminUsers,
+            modifier = Modifier.fillMaxWidth(),
+        )
+
+        Text(
+            text = stringResource(R.string.admin_select_group),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }
 }

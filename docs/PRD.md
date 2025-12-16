@@ -261,6 +261,63 @@ Create a reliable, battery-efficient location tracking solution that runs seamle
      - WorkManager respects Doze constraints
      - Wake device only when necessary
 
+### Epic 5: Admin/Owner Management
+
+**Priority:** High
+**Estimated Effort:** Medium-High
+
+**Overview:** Admins/owners can manage multiple users' devices from the app. Navigation via homescreen toggle between "My Device" and "Users" view. Reuses existing device screens for consistency.
+
+#### Stories:
+
+1. **Story 5.1**: As an admin, I want my role detected from backend so I can access admin features
+   - **Acceptance Criteria:**
+     - Backend API returns user role (admin/owner/user) on authentication
+     - Admin toggle/menu visible only if role is admin or owner
+     - Role cached locally, refreshed on app launch
+     - Graceful handling if role endpoint unavailable
+
+2. **Story 5.2**: As an admin, I want to toggle between "My Device" and "Users" view on homescreen
+   - **Acceptance Criteria:**
+     - Homescreen displays toggle/switch for admins only
+     - "My Device" shows current device status (existing functionality)
+     - "Users" view shows list of managed devices/users
+     - Toggle state persists during session
+     - Smooth transition animation between views
+
+3. **Story 5.3**: As an admin, I want to view a user's current location using the existing device screen
+   - **Acceptance Criteria:**
+     - Select user from list navigates to device detail screen
+     - Same UI as "My Device" screen (reused components)
+     - Shows user's current location on map
+     - Displays last update timestamp
+     - Back navigation returns to users list
+
+4. **Story 5.4**: As an admin, I want to create/update geofence boundaries for a user
+   - **Acceptance Criteria:**
+     - Geofence configuration accessible from user detail screen
+     - Map-based geofence drawing (circle with adjustable radius)
+     - Coordinate input option (latitude, longitude, radius)
+     - Save geofence to backend per user
+     - Visual indicator when user is inside/outside geofence
+     - Support multiple geofences per user (optional)
+
+5. **Story 5.5**: As an admin, I want to enable/disable tracking for a user
+   - **Acceptance Criteria:**
+     - Toggle control on user detail screen
+     - Backend API to update tracking state for managed device
+     - Push notification or next-sync update to target device
+     - Visual confirmation of tracking state change
+     - Audit log of tracking state changes (optional)
+
+6. **Story 5.6**: As an admin, I want to remove a user from my managed list
+   - **Acceptance Criteria:**
+     - Remove action with confirmation dialog
+     - Backend API to revoke management relationship
+     - User removed from list immediately
+     - Removed user's device continues to function independently
+     - Cannot remove self from list
+
 ---
 
 ## Technical Constraints
@@ -322,12 +379,15 @@ Create a reliable, battery-efficient location tracking solution that runs seamle
 ## Out of Scope (Phase 1)
 
 - Location history visualization in app
-- Multi-user support
 - Cloud backup of location data
-- Geofencing alerts
-- Location sharing with other users
+- Location sharing with other users (peer-to-peer)
 - iOS version
 - Web dashboard
+- Push notifications for geofence alerts (Phase 2)
+
+**Moved to In-Scope (v1.2):**
+- ~~Multi-user support~~ → Epic 5: Admin/Owner Management
+- ~~Geofencing alerts~~ → Epic 5, Story 5.4: Geofence boundaries
 
 ---
 
@@ -383,16 +443,22 @@ Create a reliable, battery-efficient location tracking solution that runs seamle
 ## Approval
 
 **Status**: Updated
-**PRD Version**: 1.1
-**Last Updated**: 2025-10-15
+**PRD Version**: 1.2
+**Last Updated**: 2025-12-16
 **Next Phase**: Tech Spec Generation
+
+**Changelog (v1.2):**
+- Added Epic 5: Admin/Owner Management (6 new stories)
+- Moved multi-user support and geofencing from Out of Scope to In-Scope
+- Admin features: role-based access, user list, location viewing, geofence management, tracking control, user removal
+- UI approach: Homescreen toggle, reuses existing device screens
+- Total epics: 6 (1 enabler + 5 feature epics)
+- Total stories: 23 (6 technical + 17 user-facing)
 
 **Changelog (v1.1):**
 - Added Epic 0: Project Setup and Infrastructure (enabler epic)
 - Updated Technical Constraints (Koin instead of Hilt, added Jetpack Compose)
 - Added 6 technical stories for foundational setup
-- Total epics: 5 (1 enabler + 4 feature epics)
-- Total stories: 17 (6 technical + 11 user-facing)
 
 ---
 

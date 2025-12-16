@@ -37,11 +37,14 @@ import three.two.bit.phonemanager.ui.groups.JoinGroupScreen
 import three.two.bit.phonemanager.ui.groups.ManageMembersScreen
 import three.two.bit.phonemanager.ui.groups.PendingInvitesScreen
 import three.two.bit.phonemanager.ui.groups.QRScannerScreen
+import three.two.bit.phonemanager.ui.admin.AdminGeofenceScreen
+import three.two.bit.phonemanager.ui.admin.AdminUsersScreen
 import three.two.bit.phonemanager.ui.admin.BulkSettingsScreen
 import three.two.bit.phonemanager.ui.admin.DeviceSettingsScreen
 import three.two.bit.phonemanager.ui.admin.MemberDevicesScreen
 import three.two.bit.phonemanager.ui.admin.SettingsHistoryScreen
 import three.two.bit.phonemanager.ui.admin.SettingsTemplateScreen
+import three.two.bit.phonemanager.ui.admin.UserLocationMapScreen
 import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
 import three.two.bit.phonemanager.ui.unlock.UnlockRequestsScreen
 import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
@@ -125,6 +128,17 @@ sealed class Screen(val route: String) {
     // Story E12.8: Unlock Request UI screens
     object UnlockRequests : Screen("unlock_requests/{deviceId}") {
         fun createRoute(deviceId: String) = "unlock_requests/$deviceId"
+    }
+
+    // Story E9.3: Admin Users Management screens
+    object AdminUsers : Screen("admin_users")
+    object UserLocationMap : Screen("user_location/{groupId}/{deviceId}") {
+        fun createRoute(groupId: String, deviceId: String) = "user_location/$groupId/$deviceId"
+    }
+
+    // Story E9.4: Admin Geofence Management screen
+    object AdminGeofence : Screen("admin_geofence/{groupId}/{deviceId}") {
+        fun createRoute(groupId: String, deviceId: String) = "admin_geofence/$groupId/$deviceId"
     }
 
     // Story E13.10: Enterprise Enrollment screens
@@ -281,6 +295,9 @@ fun PhoneManagerNavHost(
                 onRequestNotificationPermission = onRequestNotificationPermission,
                 onNavigateToGroupMembers = {
                     navController.navigate(Screen.GroupMembers.route)
+                },
+                onNavigateToAdminUsers = {
+                    navController.navigate(Screen.AdminUsers.route)
                 },
                 onNavigateToSettings = {
                     navController.navigate(Screen.Settings.route)
@@ -639,6 +656,52 @@ fun PhoneManagerNavHost(
             UnlockRequestsScreen(
                 onNavigateBack = { navController.popBackStack() },
             )
+        }
+
+        // Story E9.3: Admin Users Management screens (AC E9.3.1-E9.3.6)
+        composable(Screen.AdminUsers.route) {
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                AdminUsersScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToUserLocation = { groupId, deviceId ->
+                        navController.navigate(Screen.UserLocationMap.createRoute(groupId, deviceId))
+                    },
+                )
+            }
+        }
+
+        composable(
+            route = Screen.UserLocationMap.route,
+            arguments = listOf(
+                navArgument("groupId") { type = NavType.StringType },
+                navArgument("deviceId") { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val deviceId = backStackEntry.arguments?.getString("deviceId") ?: ""
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                UserLocationMapScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToGeofences = {
+                        navController.navigate(Screen.AdminGeofence.createRoute(groupId, deviceId))
+                    },
+                )
+            }
+        }
+
+        // Story E9.4: Admin Geofence Management screen (AC E9.4.1-E9.4.4)
+        composable(
+            route = Screen.AdminGeofence.route,
+            arguments = listOf(
+                navArgument("groupId") { type = NavType.StringType },
+                navArgument("deviceId") { type = NavType.StringType },
+            ),
+        ) {
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                AdminGeofenceScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                )
+            }
         }
 
         // Story E13.10: Enterprise Enrollment screens (AC E13.10.1-E13.10.9)

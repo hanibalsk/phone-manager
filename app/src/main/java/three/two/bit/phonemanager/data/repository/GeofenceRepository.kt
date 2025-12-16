@@ -78,6 +78,34 @@ interface GeofenceRepository {
      * Sync geofences from server
      */
     suspend fun syncFromServer(): Result<Int>
+
+    // Story E9.4: Admin Geofence Management methods
+
+    /**
+     * Get geofences for a specific device (admin use)
+     *
+     * AC E9.4: List existing geofences for user with edit/delete options
+     */
+    suspend fun getGeofencesForDevice(deviceId: String): Result<List<Geofence>>
+
+    /**
+     * Create a geofence for a specific device (admin use)
+     *
+     * AC E9.4: Save geofence to backend per user
+     */
+    suspend fun createGeofenceForDevice(
+        deviceId: String,
+        name: String,
+        latitude: Double,
+        longitude: Double,
+        radiusMeters: Int,
+        transitionTypes: Set<TransitionType>,
+    ): Result<Geofence>
+
+    /**
+     * Delete a geofence for a specific device (admin use)
+     */
+    suspend fun deleteGeofenceForDevice(geofenceId: String): Result<Unit>
 }
 
 @Singleton
@@ -350,6 +378,72 @@ class GeofenceRepositoryImpl @Inject constructor(
 
             Timber.i("Synced ${response.total} geofences from server")
             response.total
+        }
+    }
+
+    // Story E9.4: Admin Geofence Management implementations
+
+    /**
+     * Get geofences for a specific device (admin use)
+     *
+     * AC E9.4: List existing geofences for user with edit/delete options
+     */
+    override suspend fun getGeofencesForDevice(deviceId: String): Result<List<Geofence>> {
+        if (!networkManager.isNetworkAvailable()) {
+            return Result.failure(NetworkException("No network connection available"))
+        }
+
+        return geofenceApiService.listGeofences(deviceId, includeInactive = true).map { response ->
+            Timber.d("Fetched ${response.total} geofences for device $deviceId")
+            response.geofences.map { it.toDomain() }
+        }
+    }
+
+    /**
+     * Create a geofence for a specific device (admin use)
+     *
+     * AC E9.4: Save geofence to backend per user
+     */
+    override suspend fun createGeofenceForDevice(
+        deviceId: String,
+        name: String,
+        latitude: Double,
+        longitude: Double,
+        radiusMeters: Int,
+        transitionTypes: Set<TransitionType>,
+    ): Result<Geofence> {
+        if (!networkManager.isNetworkAvailable()) {
+            return Result.failure(NetworkException("No network connection available"))
+        }
+
+        val request = CreateGeofenceRequest(
+            deviceId = deviceId,
+            name = name,
+            latitude = latitude,
+            longitude = longitude,
+            radiusMeters = radiusMeters.toDouble(),
+            eventTypes = transitionTypes.map { it.toEventType() },
+            active = true,
+        )
+
+        return geofenceApiService.createGeofence(request).map { dto ->
+            Timber.i("Created geofence for device $deviceId: ${dto.geofenceId}")
+            dto.toDomain()
+        }
+    }
+
+    /**
+     * Delete a geofence for a specific device (admin use)
+     */
+    override suspend fun deleteGeofenceForDevice(geofenceId: String): Result<Unit> {
+        if (!networkManager.isNetworkAvailable()) {
+            return Result.failure(NetworkException("No network connection available"))
+        }
+
+        return geofenceApiService.deleteGeofence(geofenceId).also { result ->
+            result.onSuccess {
+                Timber.i("Deleted geofence (admin): $geofenceId")
+            }
         }
     }
 }
