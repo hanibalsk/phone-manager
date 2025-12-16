@@ -416,6 +416,43 @@ class GroupDetailViewModel @Inject constructor(
     }
 
     /**
+     * Quick add current device to this group (for owners/admins).
+     *
+     * Creates a single-use invite and immediately joins the group,
+     * providing a one-click experience for owners to add their current device.
+     */
+    fun addCurrentDeviceToGroup() {
+        val state = _uiState.value
+        if (state !is GroupDetailUiState.Success || !state.canManageMembers) {
+            _operationResult.value = GroupOperationResult.Error(
+                message = "You don't have permission to add devices to this group"
+            )
+            return
+        }
+
+        viewModelScope.launch {
+            _operationResult.value = GroupOperationResult.Loading
+
+            val result = groupRepository.addCurrentDeviceToGroup(groupId)
+
+            result.fold(
+                onSuccess = { joinResult ->
+                    Timber.i("Device added to group: ${joinResult.groupId}")
+                    _operationResult.value = GroupOperationResult.DeviceAdded
+                    loadGroupDetails() // Refresh member count
+                    loadMembers() // Refresh member list
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to add device to group")
+                    _operationResult.value = GroupOperationResult.Error(
+                        message = getErrorMessage(error)
+                    )
+                }
+            )
+        }
+    }
+
+    /**
      * Check if current user can manage this member
      */
     fun canManageMember(member: GroupMembership): Boolean {
@@ -540,4 +577,9 @@ sealed interface GroupOperationResult {
      * User left the group - navigate back to list
      */
     data object LeftGroup : GroupOperationResult
+
+    /**
+     * Device was added to the group
+     */
+    data object DeviceAdded : GroupOperationResult
 }

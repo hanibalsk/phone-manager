@@ -829,6 +829,7 @@
     <string name="group_detail_view_all">Zobraziť všetko</string>
     <string name="group_detail_no_members">Zatiaľ žiadni členovia</string>
     <string name="group_detail_invite_members">Pozvať členov</string>
+    <string name="group_detail_add_this_device">Pridať toto zariadenie do skupiny</string>
     <string name="group_detail_manage_devices">Spravovať zariadenia členov</string>
     <string name="group_detail_leave">Opustiť skupinu</string>
     <string name="group_detail_delete">Zmazať skupinu</string>

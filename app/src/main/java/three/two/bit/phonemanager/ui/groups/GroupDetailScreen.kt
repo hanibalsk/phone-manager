@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.PhonelinkRing
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -134,6 +135,10 @@ fun GroupDetailScreen(
                 viewModel.clearOperationResult()
                 onLeftGroup()
             }
+            is GroupOperationResult.DeviceAdded -> {
+                snackbarHostState.showSnackbar("Device added to group")
+                viewModel.clearOperationResult()
+            }
             else -> {}
         }
     }
@@ -182,11 +187,13 @@ fun GroupDetailScreen(
                     canManageMembers = state.canManageMembers,
                     canDelete = state.canDelete,
                     canLeave = state.canLeave,
+                    isLoading = operationResult is GroupOperationResult.Loading,
                     onEditName = { showEditNameDialog = true },
                     onEditDescription = { showEditDescriptionDialog = true },
                     onViewMembers = { onNavigateToMembers(state.group.id) },
                     onInviteMembers = { onNavigateToInvite(state.group.id) },
                     onMemberDevices = { onNavigateToMemberDevices(state.group.id) },
+                    onAddDeviceToGroup = { viewModel.addCurrentDeviceToGroup() },
                     onLeaveGroup = { showLeaveDialog = true },
                     onDeleteGroup = { showDeleteDialog = true },
                     modifier = Modifier
@@ -285,11 +292,13 @@ private fun GroupDetailContent(
     canManageMembers: Boolean,
     canDelete: Boolean,
     canLeave: Boolean,
+    isLoading: Boolean,
     onEditName: () -> Unit,
     onEditDescription: () -> Unit,
     onViewMembers: () -> Unit,
     onInviteMembers: () -> Unit,
     onMemberDevices: () -> Unit,
+    onAddDeviceToGroup: () -> Unit,
     onLeaveGroup: () -> Unit,
     onDeleteGroup: () -> Unit,
     modifier: Modifier = Modifier,
@@ -330,6 +339,24 @@ private fun GroupDetailContent(
                 Icon(Icons.Default.PersonAdd, null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(stringResource(R.string.group_detail_invite_members))
+            }
+
+            // Quick add this device to group button (for admins/owners)
+            Button(
+                onClick = onAddDeviceToGroup,
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !isLoading,
+            ) {
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                    )
+                } else {
+                    Icon(Icons.Default.PhonelinkRing, null, modifier = Modifier.size(18.dp))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(R.string.group_detail_add_this_device))
             }
 
             // Story E12.7: Manage member devices button (for admins/owners)

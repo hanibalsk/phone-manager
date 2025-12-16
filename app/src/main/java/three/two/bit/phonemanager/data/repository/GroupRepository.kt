@@ -471,4 +471,40 @@ class GroupRepository @Inject constructor(
         _cachedInvites.value = _cachedInvites.value.filter { it.groupId != groupId }
         Timber.d("Invites cache cleared for group $groupId")
     }
+
+    /**
+     * Quick add current device to a group (for owners/admins)
+     *
+     * This creates a temporary single-use invite and immediately joins the group,
+     * providing a one-click experience for owners to add their current device.
+     *
+     * @param groupId The group's ID to add the device to
+     * @return Result with join result on success
+     */
+    suspend fun addCurrentDeviceToGroup(groupId: String): Result<JoinGroupResult> {
+        Timber.i("Quick adding current device to group: $groupId")
+
+        // Step 1: Create a single-use, short-lived invite
+        val inviteResult = createInvite(
+            groupId = groupId,
+            expiryDays = 1, // Short expiry since we use it immediately
+            maxUses = 1     // Single use
+        )
+
+        val invite = inviteResult.getOrElse { error ->
+            Timber.e(error, "Failed to create invite for quick add")
+            return Result.failure(error)
+        }
+
+        // Step 2: Join using the invite code
+        val joinResult = joinWithInvite(invite.code)
+
+        joinResult.onSuccess {
+            Timber.i("Successfully added current device to group $groupId")
+        }.onFailure { error ->
+            Timber.e(error, "Failed to join group with generated invite")
+        }
+
+        return joinResult
+    }
 }

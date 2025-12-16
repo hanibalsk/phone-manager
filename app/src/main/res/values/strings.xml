@@ -621,6 +621,7 @@
     <string name="group_detail_view_all">View All</string>
     <string name="group_detail_no_members">No members yet</string>
     <string name="group_detail_invite_members">Invite Members</string>
+    <string name="group_detail_add_this_device">Add This Device to Group</string>
     <string name="group_detail_manage_devices">Manage Member Devices</string>
     <string name="group_detail_leave">Leave Group</string>
     <string name="group_detail_delete">Delete Group</string>
