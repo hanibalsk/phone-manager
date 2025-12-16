@@ -14,7 +14,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Pending
-import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -107,7 +107,7 @@ fun RequestDetailDialog(
             if (request.canWithdraw()) {
                 TextButton(onClick = onWithdraw) {
                     Icon(
-                        imageVector = Icons.Default.Undo,
+                        imageVector = Icons.AutoMirrored.Filled.Undo,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                     )
@@ -183,7 +183,7 @@ private fun StatusDisplay(
             stringResource(R.string.unlock_status_denied_detail),
         )
         UnlockRequestStatus.WITHDRAWN -> Triple(
-            Icons.Default.Undo,
+            Icons.AutoMirrored.Filled.Undo,
             MaterialTheme.colorScheme.outline,
             stringResource(R.string.unlock_status_withdrawn_detail),
         )
@@ -286,6 +286,6 @@ private fun AdminResponseDetails(
 
 private fun formatInstant(instant: Instant): String {
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${localDateTime.monthNumber}/${localDateTime.dayOfMonth}/${localDateTime.year} " +
+    return "${localDateTime.monthNumber}/${localDateTime.day}/${localDateTime.year} " +
         "${localDateTime.hour.toString().padStart(2, '0')}:${localDateTime.minute.toString().padStart(2, '0')}"
 }

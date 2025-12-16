@@ -14,11 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.DirectionsBike
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -222,12 +222,12 @@ fun ModeIcon(mode: TransportationMode, modifier: Modifier = Modifier) {
  */
 @Composable
 fun getModeIconAndColor(mode: TransportationMode): Pair<ImageVector, Color> = when (mode) {
-    TransportationMode.WALKING -> Icons.Default.DirectionsWalk to MaterialTheme.colorScheme.tertiary
-    TransportationMode.RUNNING -> Icons.Default.DirectionsRun to MaterialTheme.colorScheme.error
-    TransportationMode.CYCLING -> Icons.Default.DirectionsBike to MaterialTheme.colorScheme.secondary
+    TransportationMode.WALKING -> Icons.AutoMirrored.Filled.DirectionsWalk to MaterialTheme.colorScheme.tertiary
+    TransportationMode.RUNNING -> Icons.AutoMirrored.Filled.DirectionsRun to MaterialTheme.colorScheme.error
+    TransportationMode.CYCLING -> Icons.AutoMirrored.Filled.DirectionsBike to MaterialTheme.colorScheme.secondary
     TransportationMode.IN_VEHICLE -> Icons.Default.DirectionsCar to MaterialTheme.colorScheme.primary
     TransportationMode.STATIONARY -> Icons.Default.HourglassEmpty to MaterialTheme.colorScheme.outline
-    TransportationMode.UNKNOWN -> Icons.Default.Help to MaterialTheme.colorScheme.outline
+    TransportationMode.UNKNOWN -> Icons.AutoMirrored.Filled.Help to MaterialTheme.colorScheme.outline
 }
 
 /**

@@ -287,6 +287,6 @@ private fun formatValue(value: Any?): String {
 
 private fun formatDateTime(instant: Instant): String {
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
-    return "${localDateTime.monthNumber}/${localDateTime.dayOfMonth}/${localDateTime.year} " +
+    return "${localDateTime.monthNumber}/${localDateTime.day}/${localDateTime.year} " +
         "${localDateTime.hour}:${localDateTime.minute.toString().padStart(2, '0')}"
 }

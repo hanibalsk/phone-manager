@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DateRangePicker
@@ -321,7 +321,7 @@ private fun formatDate(date: LocalDate): String {
         12 -> "Dec"
         else -> ""
     }
-    return "$dayOfWeek, $month ${date.dayOfMonth}"
+    return "$dayOfWeek, $month ${date.day}"
 }
 
 @Composable
@@ -372,7 +372,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.Center,
     ) {
         Icon(
-            imageVector = Icons.Default.DirectionsWalk,
+            imageVector = Icons.AutoMirrored.Filled.DirectionsWalk,
             contentDescription = null,
             modifier = Modifier.size(64.dp),
             tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),

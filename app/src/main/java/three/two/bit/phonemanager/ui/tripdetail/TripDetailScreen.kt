@@ -467,7 +467,7 @@ private fun formatDate(dateTime: kotlinx.datetime.LocalDateTime): String {
         12 -> "December"
         else -> ""
     }
-    return "$month ${dateTime.dayOfMonth}, ${dateTime.year}"
+    return "$month ${dateTime.day}, ${dateTime.year}"
 }
 
 private fun formatTime(dateTime: kotlinx.datetime.LocalDateTime): String {

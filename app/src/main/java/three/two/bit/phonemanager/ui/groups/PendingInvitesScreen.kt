@@ -399,7 +399,7 @@ private fun formatDate(instant: Instant): String {
     return String.format(
         "%d/%d/%d",
         localDateTime.monthNumber,
-        localDateTime.dayOfMonth,
+        localDateTime.day,
         localDateTime.year,
     )
 }

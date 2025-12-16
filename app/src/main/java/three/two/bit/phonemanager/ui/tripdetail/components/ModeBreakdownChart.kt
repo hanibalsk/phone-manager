@@ -13,11 +13,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.DirectionsBike
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.DirectionsWalk
-import androidx.compose.material.icons.filled.Help
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
+import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -146,12 +146,12 @@ private fun getModeLabel(mode: TransportationMode): String = when (mode) {
 }
 
 private fun getModeIcon(mode: TransportationMode): ImageVector = when (mode) {
-    TransportationMode.WALKING -> Icons.Default.DirectionsWalk
-    TransportationMode.RUNNING -> Icons.Default.DirectionsRun
-    TransportationMode.CYCLING -> Icons.Default.DirectionsBike
+    TransportationMode.WALKING -> Icons.AutoMirrored.Filled.DirectionsWalk
+    TransportationMode.RUNNING -> Icons.AutoMirrored.Filled.DirectionsRun
+    TransportationMode.CYCLING -> Icons.AutoMirrored.Filled.DirectionsBike
     TransportationMode.IN_VEHICLE -> Icons.Default.DirectionsCar
     TransportationMode.STATIONARY -> Icons.Default.HourglassEmpty
-    TransportationMode.UNKNOWN -> Icons.Default.Help
+    TransportationMode.UNKNOWN -> Icons.AutoMirrored.Filled.Help
 }
 
 private fun getModeColor(mode: TransportationMode): Color = when (mode) {

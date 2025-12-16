@@ -611,7 +611,7 @@ private fun formatFullTimestamp(instant: Instant): String {
     return String.format(
         "%d/%d/%d %02d:%02d",
         localDateTime.monthNumber,
-        localDateTime.dayOfMonth,
+        localDateTime.day,
         localDateTime.year,
         localDateTime.hour,
         localDateTime.minute,

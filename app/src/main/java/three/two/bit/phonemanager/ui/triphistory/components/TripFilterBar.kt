@@ -12,10 +12,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.DirectionsBike
+import androidx.compose.material.icons.automirrored.filled.DirectionsBike
 import androidx.compose.material.icons.filled.DirectionsCar
-import androidx.compose.material.icons.filled.DirectionsRun
-import androidx.compose.material.icons.filled.DirectionsWalk
+import androidx.compose.material.icons.automirrored.filled.DirectionsRun
+import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
@@ -113,19 +113,19 @@ fun TripFilterBar(
             ) {
                 ModeFilterChip(
                     mode = TransportationMode.WALKING,
-                    icon = Icons.Default.DirectionsWalk,
+                    icon = Icons.AutoMirrored.Filled.DirectionsWalk,
                     isSelected = TransportationMode.WALKING in selectedModes,
                     onToggle = { onModeToggled(TransportationMode.WALKING) },
                 )
                 ModeFilterChip(
                     mode = TransportationMode.RUNNING,
-                    icon = Icons.Default.DirectionsRun,
+                    icon = Icons.AutoMirrored.Filled.DirectionsRun,
                     isSelected = TransportationMode.RUNNING in selectedModes,
                     onToggle = { onModeToggled(TransportationMode.RUNNING) },
                 )
                 ModeFilterChip(
                     mode = TransportationMode.CYCLING,
-                    icon = Icons.Default.DirectionsBike,
+                    icon = Icons.AutoMirrored.Filled.DirectionsBike,
                     isSelected = TransportationMode.CYCLING in selectedModes,
                     onToggle = { onModeToggled(TransportationMode.CYCLING) },
                 )
