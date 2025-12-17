@@ -21,6 +21,7 @@ import three.two.bit.phonemanager.network.models.CreateInviteRequest
 import three.two.bit.phonemanager.network.models.CreateInviteResponse
 import three.two.bit.phonemanager.network.models.GroupDetailResponse
 import three.two.bit.phonemanager.network.models.GroupOperationResponse
+import three.two.bit.phonemanager.network.models.JoinGroupRequest
 import three.two.bit.phonemanager.network.models.JoinGroupResponse
 import three.two.bit.phonemanager.network.models.ListGroupsResponse
 import three.two.bit.phonemanager.network.models.ListInvitesResponse
@@ -499,16 +500,16 @@ class GroupApiServiceImpl @Inject constructor(
 
     /**
      * Story E11.9 Task 2: Validate an invite code
-     * GET /invites/{code}/validate
+     * GET /invites/{code}
      */
     override suspend fun validateInviteCode(code: String): Result<InviteValidationResult> = try {
         Timber.d("Validating invite code: $code")
 
         val response: ValidateInviteResponse = httpClient.get(
-            "${apiConfig.baseUrl}/api/v1/invites/$code/validate",
+            "${apiConfig.baseUrl}/api/v1/invites/$code",
         ).body()
 
-        Timber.i("Invite code validated: valid=${response.valid}")
+        Timber.i("Invite code validated: valid=${response.isValid}")
         Result.success(response.toDomain())
     } catch (e: Exception) {
         Timber.e(e, "Failed to validate invite code: $code")
@@ -517,19 +518,20 @@ class GroupApiServiceImpl @Inject constructor(
 
     /**
      * Story E11.9 Task 2: Join a group using an invite code
-     * POST /invites/{code}/join
+     * POST /groups/join
      */
     override suspend fun joinWithInvite(code: String, accessToken: String): Result<JoinGroupResult> = try {
         Timber.d("Joining group with invite code: $code")
 
         val response: JoinGroupResponse = httpClient.post(
-            "${apiConfig.baseUrl}/api/v1/invites/$code/join",
+            "${apiConfig.baseUrl}/api/v1/groups/join",
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")
+            setBody(JoinGroupRequest(code = code))
         }.body()
 
-        Timber.i("Joined group: ${response.groupId} with role=${response.role}")
+        Timber.i("Joined group: ${response.group.id} with role=${response.membership.role}")
         Result.success(response.toDomain())
     } catch (e: Exception) {
         Timber.e(e, "Failed to join group with invite code: $code")

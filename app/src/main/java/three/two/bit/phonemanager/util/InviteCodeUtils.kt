@@ -21,28 +21,30 @@ object InviteCodeUtils {
      *
      * Supports:
      * - Custom scheme: phonemanager://join/{code}
-     * - Plain 8-character alphanumeric code
+     * - Plain XXX-XXX-XXX format (11 characters with dashes)
      * - HTTPS URL format: https://example.com/join/{code}
      *
      * @param content The raw content from QR scan, deep link, or user input
-     * @return The extracted 8-character invite code (uppercase), or null if not found
+     * @return The extracted invite code in XXX-XXX-XXX format (uppercase), or null if not found
      */
     fun extractInviteCode(content: String): String? {
         val trimmed = content.trim()
 
         // Check for custom scheme deep link format: phonemanager://join/{code}
-        val deepLinkRegex = Regex("""$DEEP_LINK_SCHEME://join/([A-Za-z0-9]{8})""", RegexOption.IGNORE_CASE)
+        // Supports XXX-XXX-XXX format (11 chars with dashes)
+        val deepLinkRegex = Regex("""$DEEP_LINK_SCHEME://join/([A-Za-z0-9]{3}-[A-Za-z0-9]{3}-[A-Za-z0-9]{3})""", RegexOption.IGNORE_CASE)
         deepLinkRegex.find(trimmed)?.let { match ->
             return match.groupValues[1].uppercase()
         }
 
-        // Check for plain 8-character alphanumeric code
-        if (trimmed.length == 8 && trimmed.all { it.isLetterOrDigit() }) {
+        // Check for plain XXX-XXX-XXX format (11 characters with dashes)
+        val codeRegex = Regex("""^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$""")
+        if (codeRegex.matches(trimmed)) {
             return trimmed.uppercase()
         }
 
         // Check for HTTPS URL format: https://example.com/join/{code}
-        val urlRegex = Regex("""https?://[^/]+/join/([A-Za-z0-9]{8})""", RegexOption.IGNORE_CASE)
+        val urlRegex = Regex("""https?://[^/]+/join/([A-Za-z0-9]{3}-[A-Za-z0-9]{3}-[A-Za-z0-9]{3})""", RegexOption.IGNORE_CASE)
         urlRegex.find(trimmed)?.let { match ->
             return match.groupValues[1].uppercase()
         }
@@ -54,16 +56,12 @@ object InviteCodeUtils {
      * Validate an invite code format.
      *
      * @param code The code to validate
-     * @return True if the code is valid (8 alphanumeric chars, or 11 chars with dashes like XXX-XXX-XXX)
+     * @return True if the code is valid (XXX-XXX-XXX format: 11 chars with dashes)
      */
     fun isValidCodeFormat(code: String): Boolean {
-        // Format: 8 alphanumeric OR 11 chars with dashes (XXX-XXX-XXX)
-        val alphanumericOnly = code.filterNot { it == '-' }
-        return (code.length == 8 && code.all { it.isLetterOrDigit() }) ||
-            (
-                code.length == 11 && code.count { it == '-' } == 2 && alphanumericOnly.length == 9 &&
-                    alphanumericOnly.all { it.isLetterOrDigit() }
-                )
+        // Format: XXX-XXX-XXX (11 chars with 2 dashes, 9 alphanumeric)
+        val codeRegex = Regex("""^[A-Za-z0-9]{3}-[A-Za-z0-9]{3}-[A-Za-z0-9]{3}$""")
+        return codeRegex.matches(code)
     }
 
     /**

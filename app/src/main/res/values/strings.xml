@@ -593,10 +593,10 @@
     <string name="join_group_success">Successfully joined the group!</string>
     <string name="join_group_sign_in_required">Please sign in to join the group</string>
     <string name="join_group_enter_code_title">Enter Invite Code</string>
-    <string name="join_group_enter_code_subtitle">Enter the 8-character code you received or scan a QR code</string>
+    <string name="join_group_enter_code_subtitle">Enter the code you received or scan a QR code</string>
     <string name="join_group_code_label">Invite Code</string>
-    <string name="join_group_code_placeholder">ABCD1234</string>
-    <string name="join_group_code_counter">%1$d/8 characters</string>
+    <string name="join_group_code_placeholder">XXX-XXX-XXX</string>
+    <string name="join_group_code_counter">%1$d/11 characters</string>
     <string name="join_group_scan_qr">Scan QR</string>
     <string name="join_group_validate">Validate</string>
     <string name="join_group_joining">Joining…</string>

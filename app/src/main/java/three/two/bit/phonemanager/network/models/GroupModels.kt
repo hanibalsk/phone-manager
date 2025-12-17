@@ -314,30 +314,72 @@ data class ValidateInviteRequest(val code: String)
 
 /**
  * Story E11.9 Task 2: Response for validate invite code
+ * GET /invites/{code}
+ *
+ * Backend returns PublicInviteInfo with snake_case fields.
  */
 @Serializable
-data class ValidateInviteResponse(val valid: Boolean, val group: GroupPreviewDto? = null, val error: String? = null)
-
-/**
- * Story E11.9 Task 2: Group preview DTO for invite validation
- * Note: id and memberCount are optional as the server may not always return them
- */
-@Serializable
-data class GroupPreviewDto(
-    val id: String? = null,
-    val name: String,
-    @SerialName("member_count")
-    val memberCount: Int? = null,
+data class ValidateInviteResponse(
+    @SerialName("is_valid")
+    val isValid: Boolean = false,
+    val group: GroupPreviewDto,
+    @SerialName("preset_role")
+    val presetRole: String = "member",
+    @SerialName("expires_at")
+    val expiresAt: String? = null,
 )
 
 /**
+ * Story E11.9 Task 2: Group preview DTO for invite validation
+ * Backend PublicGroupInfo has name, icon_emoji, member_count (no id).
+ */
+@Serializable
+data class GroupPreviewDto(
+    val name: String,
+    @SerialName("icon_emoji")
+    val iconEmoji: String? = null,
+    @SerialName("member_count")
+    val memberCount: Long = 0,
+)
+
+/**
+ * Story E11.9 Task 2: Request body for joining a group with invite code
+ * POST /groups/join
+ */
+@Serializable
+data class JoinGroupRequest(val code: String)
+
+/**
  * Story E11.9 Task 2: Response for joining a group with invite code
- * POST /invites/{code}/join
+ * POST /groups/join
+ *
+ * Backend returns nested structure with group and membership info.
  */
 @Serializable
 data class JoinGroupResponse(
-    val groupId: String,
+    val group: JoinGroupInfoDto,
+    val membership: JoinMembershipInfoDto,
+)
+
+/**
+ * Group info in join response
+ */
+@Serializable
+data class JoinGroupInfoDto(
+    val id: String,
+    val name: String,
+    @SerialName("member_count")
+    val memberCount: Long = 0,
+)
+
+/**
+ * Membership info in join response
+ */
+@Serializable
+data class JoinMembershipInfoDto(
+    val id: String,
     val role: String, // "member", "admin", "owner"
+    @SerialName("joined_at")
     val joinedAt: String,
 )
 
@@ -421,28 +463,28 @@ fun CreateInviteResponse.toDomain(groupIdFallback: String = ""): GroupInvite {
 
 /**
  * Maps GroupPreviewDto to GroupPreview domain model
- * Provides default values for optional fields that may not be returned by the server
+ * Backend PublicGroupInfo doesn't include id, so we use empty string.
  */
 fun GroupPreviewDto.toDomain(): GroupPreview = GroupPreview(
-    id = id ?: "",
+    id = "", // Backend PublicGroupInfo doesn't include group id
     name = name,
-    memberCount = memberCount ?: 0,
+    memberCount = memberCount.toInt(),
 )
 
 /**
  * Maps ValidateInviteResponse to InviteValidationResult domain model
  */
 fun ValidateInviteResponse.toDomain(): InviteValidationResult = InviteValidationResult(
-    valid = valid,
-    group = group?.toDomain(),
-    error = error,
+    valid = isValid,
+    group = group.toDomain(),
+    error = null, // Backend PublicInviteInfo doesn't include error field
 )
 
 /**
  * Maps JoinGroupResponse to JoinGroupResult domain model
  */
 fun JoinGroupResponse.toDomain(): JoinGroupResult = JoinGroupResult(
-    groupId = groupId,
-    role = GroupRole.fromString(role),
-    joinedAt = Instant.parse(joinedAt),
+    groupId = group.id,
+    role = GroupRole.fromString(membership.role),
+    joinedAt = Instant.parse(membership.joinedAt),
 )

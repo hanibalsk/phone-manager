@@ -63,7 +63,7 @@ class JoinGroupViewModel @Inject constructor(
     }
 
     /**
-     * Update the invite code (auto-uppercase, max 8 characters)
+     * Update the invite code (auto-uppercase, XXX-XXX-XXX format)
      *
      * @param code The new invite code
      */
@@ -132,7 +132,8 @@ class JoinGroupViewModel @Inject constructor(
             return
         }
 
-        if (code.length != 8) {
+        // Invite code format is XXX-XXX-XXX (11 characters with dashes)
+        if (code.length != 11) {
             _joinResult.value = JoinResult.Error("Invalid invite code")
             return
         }
