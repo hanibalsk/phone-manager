@@ -610,7 +610,7 @@ private fun formatFullTimestamp(instant: Instant): String {
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
     return String.format(
         "%d/%d/%d %02d:%02d",
-        localDateTime.monthNumber,
+        localDateTime.month.ordinal + 1,
         localDateTime.day,
         localDateTime.year,
         localDateTime.hour,

@@ -28,7 +28,7 @@ import javax.inject.Singleton
  * - Manual car mode activation
  */
 @Singleton
-class AndroidAutoDetector @Inject constructor(@ApplicationContext private val context: Context) {
+class AndroidAutoDetector @Inject constructor(@param:ApplicationContext private val context: Context) {
     private val uiModeManager: UiModeManager =
         context.getSystemService(Context.UI_MODE_SERVICE) as UiModeManager
 

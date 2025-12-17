@@ -427,7 +427,7 @@ private fun formatTimestamp(instant: Instant): String {
             // Other dates: show date
             String.format(
                 "%d/%d/%d",
-                localDateTime.monthNumber,
+                localDateTime.month.ordinal + 1,
                 localDateTime.day,
                 localDateTime.year
             )

@@ -306,7 +306,7 @@ private fun formatDate(date: LocalDate): String {
         kotlinx.datetime.DayOfWeek.SATURDAY -> "Sat"
         kotlinx.datetime.DayOfWeek.SUNDAY -> "Sun"
     }
-    val month = when (date.monthNumber) {
+    val month = when (date.month.ordinal + 1) {
         1 -> "Jan"
         2 -> "Feb"
         3 -> "Mar"

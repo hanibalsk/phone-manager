@@ -65,7 +65,7 @@ interface WeatherCache {
 
 @OptIn(ExperimentalTime::class)
 @Singleton
-class WeatherCacheImpl @Inject constructor(@ApplicationContext private val context: Context) : WeatherCache {
+class WeatherCacheImpl @Inject constructor(@param:ApplicationContext private val context: Context) : WeatherCache {
 
     companion object {
         /**

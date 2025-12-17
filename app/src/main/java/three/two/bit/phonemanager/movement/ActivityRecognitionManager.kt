@@ -30,7 +30,7 @@ import javax.inject.Singleton
  * to enable adaptive location tracking intervals.
  */
 @Singleton
-class ActivityRecognitionManager @Inject constructor(@ApplicationContext private val context: Context) {
+class ActivityRecognitionManager @Inject constructor(@param:ApplicationContext private val context: Context) {
     private val activityClient: ActivityRecognitionClient =
         ActivityRecognition.getClient(context)
 

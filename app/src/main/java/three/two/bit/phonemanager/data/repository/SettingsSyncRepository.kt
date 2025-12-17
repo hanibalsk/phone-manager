@@ -116,7 +116,7 @@ private val Context.settingsSyncDataStore: DataStore<Preferences> by preferences
 
 @Singleton
 class SettingsSyncRepositoryImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val deviceApiService: DeviceApiService,
     private val deviceRepository: DeviceRepository,
     private val authRepository: AuthRepository,

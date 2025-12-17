@@ -86,7 +86,7 @@ enum class DetectionSource {
  */
 @Singleton
 class TransportationModeManager @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val activityRecognitionManager: ActivityRecognitionManager,
     private val bluetoothCarDetector: BluetoothCarDetector,
     private val androidAutoDetector: AndroidAutoDetector,

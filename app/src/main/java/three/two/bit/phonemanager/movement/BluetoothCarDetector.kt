@@ -32,7 +32,7 @@ import javax.inject.Singleton
  * - Device class hints indicating car audio/hands-free
  */
 @Singleton
-class BluetoothCarDetector @Inject constructor(@ApplicationContext private val context: Context) {
+class BluetoothCarDetector @Inject constructor(@param:ApplicationContext private val context: Context) {
     private val bluetoothManager: BluetoothManager? =
         context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
 

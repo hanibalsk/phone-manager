@@ -74,7 +74,7 @@ data class LocationCoordinates(val latitude: Double, val longitude: Double)
  *
  * Maps standardized weather condition codes to descriptive conditions
  */
-enum class WeatherCode(val code: Int, @StringRes val descriptionResId: Int, val emoji: String) {
+enum class WeatherCode(val code: Int, @param:StringRes val descriptionResId: Int, val emoji: String) {
     CLEAR_SKY(0, R.string.weather_condition_clear_sky, "☀️"),
     MAINLY_CLEAR(1, R.string.weather_condition_mainly_clear, "🌤️"),
     PARTLY_CLOUDY(2, R.string.weather_condition_partly_cloudy, "⛅"),

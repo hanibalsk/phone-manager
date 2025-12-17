@@ -149,7 +149,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
         deviceId: String,
         geofenceId: String,
         transitionType: TransitionType,
-        timestamp: kotlinx.datetime.Instant,
+        timestamp: kotlin.time.Instant,
         latitude: Double,
         longitude: Double,
     ) {

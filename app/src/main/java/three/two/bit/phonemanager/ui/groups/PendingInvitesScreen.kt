@@ -398,7 +398,7 @@ private fun formatDate(instant: Instant): String {
     val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
     return String.format(
         "%d/%d/%d",
-        localDateTime.monthNumber,
+        localDateTime.month.ordinal + 1,
         localDateTime.day,
         localDateTime.year,
     )

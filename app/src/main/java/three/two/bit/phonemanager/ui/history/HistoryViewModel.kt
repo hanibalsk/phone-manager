@@ -128,7 +128,7 @@ constructor(
     fun onStartDateSelected(dateMillis: Long?) {
         if (dateMillis != null) {
             val timeZone = TimeZone.currentSystemDefault()
-            val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(dateMillis)
+            val instant = kotlin.time.Instant.fromEpochMilliseconds(dateMillis)
             val date = instant.toLocalDateTime(timeZone).date
 
             _uiState.update {
@@ -158,7 +158,7 @@ constructor(
 
         if (dateMillis != null && startDate != null) {
             val timeZone = TimeZone.currentSystemDefault()
-            val instant = kotlinx.datetime.Instant.fromEpochMilliseconds(dateMillis)
+            val instant = kotlin.time.Instant.fromEpochMilliseconds(dateMillis)
             val endDate = instant.toLocalDateTime(timeZone).date
 
             // Ensure end date is not before start date

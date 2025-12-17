@@ -31,7 +31,7 @@ import javax.inject.Singleton
  * - Permission checking
  */
 @Singleton
-class LocationManager @Inject constructor(@ApplicationContext private val context: Context) {
+class LocationManager @Inject constructor(@param:ApplicationContext private val context: Context) {
 
     private val fusedLocationClient: FusedLocationProviderClient =
         LocationServices.getFusedLocationProviderClient(context)

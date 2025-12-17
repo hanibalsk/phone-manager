@@ -39,7 +39,7 @@ import kotlin.time.Duration.Companion.seconds
 @HiltViewModel
 class MovementEventsViewModel @Inject constructor(
     private val movementEventRepository: MovementEventRepository,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
 ) : ViewModel() {
 
     companion object {

@@ -23,7 +23,7 @@ import javax.inject.Singleton
  * - Checking if exact alarms can be scheduled (Android 12+)
  */
 @Singleton
-class PowerUtil @Inject constructor(@ApplicationContext private val context: Context) {
+class PowerUtil @Inject constructor(@param:ApplicationContext private val context: Context) {
 
     private val powerManager: PowerManager? by lazy {
         context.getSystemService()

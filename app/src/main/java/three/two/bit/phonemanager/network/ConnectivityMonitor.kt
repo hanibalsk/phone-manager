@@ -20,7 +20,7 @@ import javax.inject.Singleton
  * Provides real-time network state as a Flow
  */
 @Singleton
-class ConnectivityMonitor @Inject constructor(@ApplicationContext private val context: Context) {
+class ConnectivityMonitor @Inject constructor(@param:ApplicationContext private val context: Context) {
 
     private val connectivityManager: ConnectivityManager by lazy {
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager

@@ -39,7 +39,7 @@ class TripDetailViewModel @Inject constructor(
     private val tripRepository: TripRepository,
     private val locationRepository: LocationRepository,
     private val movementEventRepository: MovementEventRepository,
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 

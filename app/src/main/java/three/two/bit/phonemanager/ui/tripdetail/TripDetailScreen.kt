@@ -452,7 +452,7 @@ private fun getTripName(trip: Trip): String = when (trip.dominantMode) {
 }
 
 private fun formatDate(dateTime: kotlinx.datetime.LocalDateTime): String {
-    val month = when (dateTime.monthNumber) {
+    val month = when (dateTime.month.ordinal + 1) {
         1 -> "January"
         2 -> "February"
         3 -> "March"

@@ -97,7 +97,7 @@ interface PreferencesRepository {
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 @Singleton
-class PreferencesRepositoryImpl @Inject constructor(@ApplicationContext private val context: Context) :
+class PreferencesRepositoryImpl @Inject constructor(@param:ApplicationContext private val context: Context) :
     PreferencesRepository {
 
     private object PreferencesKeys {
