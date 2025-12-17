@@ -138,6 +138,15 @@ class LocationTrackingService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         Timber.d("onStartCommand: action=${intent?.action}")
 
+        // CRITICAL: Call startForeground() IMMEDIATELY for any START_TRACKING action
+        // Android requires this within 5 seconds of startForegroundService() being called.
+        // We must do this BEFORE any async work to avoid ANR/crash.
+        if (intent?.action == ACTION_START_TRACKING) {
+            createNotificationChannels()
+            val notification = createNotification()
+            startForeground(NOTIFICATION_ID, notification)
+        }
+
         when (intent?.action) {
             ACTION_START_TRACKING -> {
                 startForegroundTracking()
@@ -162,12 +171,9 @@ class LocationTrackingService : Service() {
     private fun startForegroundTracking() {
         Timber.d("Starting foreground tracking")
 
-        // Story E2.2: Create notification channels (normal and secret)
-        createNotificationChannels()
-
-        // Start foreground with notification
-        val notification = createNotification()
-        startForeground(NOTIFICATION_ID, notification)
+        // NOTE: startForeground() is called in onStartCommand() BEFORE this method
+        // to ensure it happens immediately. The notification channels are also
+        // created there. This avoids the "did not call startForeground()" crash.
 
         // Update service health
         locationRepository.updateServiceHealth(
