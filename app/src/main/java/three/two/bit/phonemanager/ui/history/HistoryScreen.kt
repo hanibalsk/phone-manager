@@ -84,9 +84,13 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
             position = CameraPosition.fromLatLngZoom(firstPoint, 18f)
         }
 
+    // Track if map is loaded - CameraUpdateFactory requires Maps SDK to be initialized
+    var isMapLoaded by remember { mutableStateOf(false) }
+
     // Center camera when polyline changes and zoom to show all points
-    LaunchedEffect(uiState.polylinePoints) {
-        if (uiState.polylinePoints.isNotEmpty()) {
+    // Only run after map is loaded to avoid CameraUpdateFactory not initialized error
+    LaunchedEffect(uiState.polylinePoints, isMapLoaded) {
+        if (isMapLoaded && uiState.polylinePoints.isNotEmpty()) {
             if (uiState.polylinePoints.size == 1) {
                 // Single point - zoom in close
                 cameraPositionState.position = CameraPosition.fromLatLngZoom(uiState.polylinePoints.first(), 18f)
@@ -179,6 +183,7 @@ fun HistoryScreen(viewModel: HistoryViewModel = hiltViewModel(), onNavigateBack:
                                 scrollGesturesEnabled = true,
                                 zoomGesturesEnabled = true,
                             ),
+                            onMapLoaded = { isMapLoaded = true },
                         ) {
                             // AC E4.1.2: Polyline connecting locations chronologically
                             if (uiState.polylinePoints.isNotEmpty()) {
