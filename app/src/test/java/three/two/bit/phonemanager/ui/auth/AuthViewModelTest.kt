@@ -21,7 +21,9 @@ import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.network.models.LinkedDeviceInfo
 import three.two.bit.phonemanager.network.models.LinkedDeviceResponse
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.security.SecureStorage
+import android.content.Context
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -39,10 +41,12 @@ import kotlin.test.assertTrue
 @OptIn(ExperimentalCoroutinesApi::class)
 class AuthViewModelTest {
 
+    private lateinit var context: Context
     private lateinit var authRepository: AuthRepository
     private lateinit var configRepository: ConfigRepository
     private lateinit var deviceApiService: DeviceApiService
     private lateinit var secureStorage: SecureStorage
+    private lateinit var settingsSyncRepository: SettingsSyncRepository
     private lateinit var viewModel: AuthViewModel
     private val testDispatcher = StandardTestDispatcher()
 
@@ -68,10 +72,12 @@ class AuthViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
+        context = mockk(relaxed = true)
         authRepository = mockk(relaxed = true)
         configRepository = mockk(relaxed = true)
         deviceApiService = mockk(relaxed = true)
         secureStorage = mockk(relaxed = true)
+        settingsSyncRepository = mockk(relaxed = true)
 
         // Mock secureStorage to return access token and device ID for auto-link functionality
         every { secureStorage.getAccessToken() } returns "test-access-token"
@@ -86,7 +92,7 @@ class AuthViewModelTest {
             deviceApiService.linkDevice(any(), any(), any(), any(), any())
         } returns Result.success(testLinkedDeviceResponse)
 
-        viewModel = AuthViewModel(authRepository, configRepository, deviceApiService, secureStorage)
+        viewModel = AuthViewModel(context, authRepository, configRepository, deviceApiService, secureStorage, settingsSyncRepository)
     }
 
     @After

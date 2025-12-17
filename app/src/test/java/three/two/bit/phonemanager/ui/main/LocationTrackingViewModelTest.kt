@@ -19,6 +19,7 @@ import org.junit.Test
 import three.two.bit.phonemanager.analytics.Analytics
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.LocationRepository
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.permission.PermissionManager
 import three.two.bit.phonemanager.permission.PermissionState
 import three.two.bit.phonemanager.service.LocationServiceController
@@ -39,6 +40,7 @@ class LocationTrackingViewModelTest {
     private lateinit var serviceController: LocationServiceController
     private lateinit var permissionManager: PermissionManager
     private lateinit var locationRepository: LocationRepository
+    private lateinit var settingsSyncRepository: SettingsSyncRepository
     private lateinit var analytics: Analytics
 
     private val testDispatcher = StandardTestDispatcher()
@@ -52,6 +54,7 @@ class LocationTrackingViewModelTest {
         serviceController = mockk(relaxed = true)
         permissionManager = mockk(relaxed = true)
         locationRepository = mockk(relaxed = true)
+        settingsSyncRepository = mockk(relaxed = true)
         analytics = mockk(relaxed = true)
 
         // Setup default mock responses
@@ -232,6 +235,7 @@ class LocationTrackingViewModelTest {
         serviceController = serviceController,
         permissionManager = permissionManager,
         locationRepository = locationRepository,
+        settingsSyncRepository = settingsSyncRepository,
         analytics = analytics,
     )
 }

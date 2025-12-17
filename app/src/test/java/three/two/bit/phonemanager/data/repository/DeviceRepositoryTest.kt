@@ -33,12 +33,14 @@ class DeviceRepositoryTest {
     private lateinit var secureStorage: SecureStorage
     private lateinit var deviceApiService: DeviceApiService
     private lateinit var networkManager: NetworkManager
+    private lateinit var authRepository: AuthRepository
 
     @Before
     fun setup() {
         secureStorage = mockk(relaxed = true)
         deviceApiService = mockk(relaxed = true)
         networkManager = mockk(relaxed = true)
+        authRepository = mockk(relaxed = true)
 
         every { secureStorage.getDeviceId() } returns "test-device-id"
         every { networkManager.isNetworkAvailable() } returns true
@@ -47,6 +49,7 @@ class DeviceRepositoryTest {
             secureStorage = secureStorage,
             deviceApiService = deviceApiService,
             networkManager = networkManager,
+            authRepository = authRepository,
         )
     }
 

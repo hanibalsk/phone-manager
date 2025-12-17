@@ -17,6 +17,7 @@ import three.two.bit.phonemanager.network.models.MemberDevicesResponse
 import three.two.bit.phonemanager.network.models.SaveTemplateResponse
 import three.two.bit.phonemanager.network.models.SettingChangeResponse
 import three.two.bit.phonemanager.network.models.SettingLockResponse
+import three.two.bit.phonemanager.network.models.SettingValueResponse
 import three.two.bit.phonemanager.network.models.SettingsHistoryResponse
 import three.two.bit.phonemanager.network.models.SettingsTemplateResponse
 import three.two.bit.phonemanager.network.models.TemplatesResponse
@@ -141,8 +142,8 @@ class AdminSettingsRepositoryTest {
             isOnline = true,
             lastSeen = "2025-01-15T10:00:00Z",
             settings = mapOf(
-                "tracking_enabled" to true,
-                "tracking_interval_seconds" to 60,
+                "tracking_enabled" to SettingValueResponse(value = true, isLocked = true, lockedBy = "admin@test.com", lockedAt = "2025-01-15T09:00:00Z"),
+                "tracking_interval_seconds" to SettingValueResponse(value = 60),
             ),
             locks = mapOf(
                 "tracking_enabled" to SettingLockResponse(
@@ -212,8 +213,10 @@ class AdminSettingsRepositoryTest {
     fun `updateDeviceSettings returns applied settings on success`() = runTest {
         val changes = mapOf<String, Any>("tracking_enabled" to false)
         val response = UpdateSettingsResponse(
-            success = true,
-            appliedSettings = changes,
+            updated = listOf("tracking_enabled"),
+            locked = emptyList(),
+            invalid = emptyList(),
+            settings = mapOf("tracking_enabled" to SettingValueResponse(value = false)),
         )
         coEvery {
             deviceApiService.updateAdminDeviceSettings(
@@ -233,8 +236,10 @@ class AdminSettingsRepositoryTest {
     @Test
     fun `updateDeviceSettings returns failure on error response`() = runTest {
         val response = UpdateSettingsResponse(
-            success = false,
-            error = "Permission denied",
+            updated = emptyList(),
+            locked = listOf("tracking_enabled"),
+            invalid = emptyList(),
+            settings = emptyMap(),
         )
         coEvery {
             deviceApiService.updateAdminDeviceSettings(
@@ -248,7 +253,7 @@ class AdminSettingsRepositoryTest {
         val result = repository.updateDeviceSettings(testDeviceId, mapOf("tracking_enabled" to false))
 
         assertTrue(result.isFailure)
-        assertEquals("Permission denied", result.exceptionOrNull()?.message)
+        assertEquals("Settings locked: tracking_enabled", result.exceptionOrNull()?.message)
     }
 
     // AC E12.7.5: Lock/Unlock Settings Tests
