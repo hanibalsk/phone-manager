@@ -4,7 +4,12 @@ import android.content.Context
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
+import io.mockk.just
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.runs
+import io.mockk.unmockkObject
+import three.two.bit.phonemanager.worker.SettingsSyncWorker
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -79,6 +84,14 @@ class AuthViewModelTest {
         secureStorage = mockk(relaxed = true)
         settingsSyncRepository = mockk(relaxed = true)
 
+        // Mock SettingsSyncWorker companion object to avoid WorkManager initialization
+        mockkObject(SettingsSyncWorker.Companion)
+        every { SettingsSyncWorker.schedule(any()) } just runs
+        every { SettingsSyncWorker.cancel(any()) } just runs
+
+        // Mock settingsSyncRepository.syncAllSettings to return proper Result<Unit>
+        coEvery { settingsSyncRepository.syncAllSettings() } returns Result.success(Unit)
+
         // Mock secureStorage to return access token and device ID for auto-link functionality
         every { secureStorage.getAccessToken() } returns "test-access-token"
         every { secureStorage.getDeviceId() } returns "test-device-uuid"
@@ -106,6 +119,7 @@ class AuthViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
+        unmockkObject(SettingsSyncWorker.Companion)
     }
 
     // AC E9.11.7: Login Validation Tests

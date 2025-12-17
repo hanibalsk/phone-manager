@@ -60,39 +60,36 @@ class JoinGroupViewModelTest {
 
         // When
         viewModel.setInviteCode("abcd1234")
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        viewModel.inviteCode.test {
-            assertEquals("ABCD1234", awaitItem())
-        }
+        assertEquals("ABCD1234", viewModel.inviteCode.value)
     }
 
     @Test
-    fun `setInviteCode limits to 8 characters`() = runTest {
+    fun `setInviteCode limits to 11 characters for dash format support`() = runTest {
         // Given
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
 
-        // When
-        viewModel.setInviteCode("ABCD1234EXTRA")
+        // When - normalizeCode takes max 11 chars to support XXX-XXX-XXX format
+        viewModel.setInviteCode("ABCD1234EXTRA123")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then
-        viewModel.inviteCode.test {
-            assertEquals("ABCD1234", awaitItem())
-        }
+        // Then - limited to 11 characters
+        assertEquals("ABCD1234EXT", viewModel.inviteCode.value)
     }
 
     @Test
-    fun `setInviteCode filters non-alphanumeric characters`() = runTest {
+    fun `setInviteCode filters non-alphanumeric characters but keeps dashes`() = runTest {
         // Given
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
 
-        // When
+        // When - normalizeCode keeps alphanumeric AND dashes, removes other special chars
         viewModel.setInviteCode("AB-CD_12!34")
+        testDispatcher.scheduler.advanceUntilIdle()
 
-        // Then
-        viewModel.inviteCode.test {
-            assertEquals("ABCD1234", awaitItem())
-        }
+        // Then - dashes are preserved, underscore and ! are removed
+        assertEquals("AB-CD1234", viewModel.inviteCode.value)
     }
 
     @Test
@@ -100,16 +97,16 @@ class JoinGroupViewModelTest {
         // Given
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
         viewModel.setInviteCode("ABC")
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // When
         viewModel.validateCode()
+        testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        viewModel.uiState.test {
-            val state = awaitItem()
-            assertTrue(state is JoinGroupUiState.Error)
-            assertEquals("Code must be 8 characters", (state as JoinGroupUiState.Error).message)
-        }
+        val state = viewModel.uiState.value
+        assertTrue(state is JoinGroupUiState.Error)
+        assertEquals("Invalid code format", (state as JoinGroupUiState.Error).message)
     }
 
     @Test

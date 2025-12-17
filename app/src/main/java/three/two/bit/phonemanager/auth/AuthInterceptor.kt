@@ -65,6 +65,13 @@ class AuthInterceptor(
             return
         }
 
+        // Skip if X-API-Key is already set - the service explicitly wants API key auth
+        // Adding Bearer token would cause the backend to check JWT first and fail
+        if (request.headers.contains("X-API-Key")) {
+            Timber.v("X-API-Key header already set, skipping Bearer token: ${request.url}")
+            return
+        }
+
         val accessToken = secureStorage.getAccessToken()
 
         if (accessToken != null) {

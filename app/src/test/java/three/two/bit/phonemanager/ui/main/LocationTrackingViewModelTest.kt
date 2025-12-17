@@ -20,6 +20,7 @@ import three.two.bit.phonemanager.analytics.Analytics
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.LocationRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
+import three.two.bit.phonemanager.domain.model.SettingUpdateResult
 import three.two.bit.phonemanager.permission.PermissionManager
 import three.two.bit.phonemanager.permission.PermissionState
 import three.two.bit.phonemanager.service.LocationServiceController
@@ -67,6 +68,11 @@ class LocationTrackingViewModelTest {
         every { locationRepository.observeTodayLocationCount() } returns flowOf(0)
         every { locationRepository.observeLastLocation() } returns flowOf(null)
         every { locationRepository.observeAverageAccuracy() } returns flowOf(null)
+
+        // Mock updateServerSetting to return proper Result<SettingUpdateResult>
+        coEvery { settingsSyncRepository.updateServerSetting(any(), any()) } returns Result.success(
+            SettingUpdateResult(success = true)
+        )
     }
 
     @After

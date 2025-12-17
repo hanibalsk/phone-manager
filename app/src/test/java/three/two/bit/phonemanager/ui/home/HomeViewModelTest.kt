@@ -40,6 +40,8 @@ class HomeViewModelTest {
         coEvery { preferencesRepository.isSecretModeEnabled } returns secretModeFlow
         every { groupRepository.hasAdminAccess } returns kotlinx.coroutines.flow.flowOf(false)
         every { groupRepository.adminGroups } returns kotlinx.coroutines.flow.flowOf(emptyList())
+        // Mock getUserGroups to return proper Result type
+        coEvery { groupRepository.getUserGroups() } returns Result.success(emptyList())
     }
 
     @Test
