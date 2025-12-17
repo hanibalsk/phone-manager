@@ -368,7 +368,7 @@ class AuthRepositoryTest {
 
         // Then
         assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is IllegalStateException)
+        assertTrue(result.exceptionOrNull() is SessionExpiredException)
     }
 
     @Test

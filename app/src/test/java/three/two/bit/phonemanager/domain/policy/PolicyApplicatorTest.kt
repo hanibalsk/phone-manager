@@ -245,7 +245,7 @@ class PolicyApplicatorTest {
     @Test
     fun `ALL_POLICY_KEYS contains known keys`() {
         assertTrue(PolicyApplicator.ALL_POLICY_KEYS.contains("tracking_enabled"))
-        assertTrue(PolicyApplicator.ALL_POLICY_KEYS.contains("tracking_interval"))
+        assertTrue(PolicyApplicator.ALL_POLICY_KEYS.contains("tracking_interval_minutes"))
         assertTrue(PolicyApplicator.ALL_POLICY_KEYS.contains("secret_mode_enabled"))
         assertTrue(PolicyApplicator.ALL_POLICY_KEYS.contains("movement_detection_enabled"))
         assertTrue(PolicyApplicator.ALL_POLICY_KEYS.contains("trip_detection_enabled"))
