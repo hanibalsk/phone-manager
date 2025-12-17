@@ -87,9 +87,9 @@ class GeofenceApiServiceImpl @Inject constructor(
 
             val httpResponse: HttpResponse = httpClient.get("${apiConfig.baseUrl}/api/v1/geofences") {
                 header("X-API-Key", apiConfig.apiKey)
-                parameter("deviceId", deviceId)
+                parameter("device_id", deviceId)
                 if (includeInactive) {
-                    parameter("includeInactive", true)
+                    parameter("include_inactive", true)
                 }
             }
 
