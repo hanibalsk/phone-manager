@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlin.time.Clock
+import kotlin.time.Instant
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
@@ -227,7 +228,7 @@ class TripManagerTest {
     @Test
     fun `TripModeSegment calculates duration correctly`() {
         val now = Clock.System.now()
-        val later = kotlinx.datetime.Instant.fromEpochMilliseconds(
+        val later = Instant.fromEpochMilliseconds(
             now.toEpochMilliseconds() + 60000,
         )
 
@@ -261,7 +262,7 @@ class TripManagerTest {
             startTime = now,
         )
 
-        val later = kotlinx.datetime.Instant.fromEpochMilliseconds(
+        val later = Instant.fromEpochMilliseconds(
             now.toEpochMilliseconds() + 30000,
         )
         val ended = segment.end(later)

@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package three.two.bit.phonemanager.security
 
 import android.content.Context
