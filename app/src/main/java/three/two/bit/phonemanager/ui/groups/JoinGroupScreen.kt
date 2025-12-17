@@ -230,7 +230,7 @@ private fun JoinGroupContent(
                 imeAction = ImeAction.Done,
             ),
             keyboardActions = KeyboardActions(
-                onDone = { if (InviteCodeUtils.isValidCodeFormat(inviteCode)) onValidate() }
+                onDone = { if (InviteCodeUtils.isValidCodeFormat(inviteCode)) onValidate() },
             ),
             isError = uiState is JoinGroupUiState.Error,
             supportingText = {
@@ -382,11 +382,7 @@ private fun GroupPreviewCard(
  * Join confirmation dialog
  */
 @Composable
-private fun JoinConfirmationDialog(
-    group: GroupPreview,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+private fun JoinConfirmationDialog(group: GroupPreview, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         icon = {

@@ -2,10 +2,10 @@ package three.two.bit.phonemanager.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.AlertDirection
 import three.two.bit.phonemanager.domain.model.ProximityAlert
 import three.two.bit.phonemanager.domain.model.ProximityState
+import kotlin.time.Instant
 
 /**
  * Story E5.1: ProximityAlertEntity - Room database entity for proximity alerts

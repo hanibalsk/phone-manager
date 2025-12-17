@@ -38,11 +38,7 @@ object MockAuthHelper {
      *
      * @throws IllegalArgumentException for invalid input
      */
-    suspend fun mockRegister(
-        email: String,
-        password: String,
-        displayName: String
-    ): AuthResponse {
+    suspend fun mockRegister(email: String, password: String, displayName: String): AuthResponse {
         Timber.d("[MOCK] Registering user: $email")
 
         // Simulate network delay
@@ -68,10 +64,7 @@ object MockAuthHelper {
      *
      * @throws IllegalStateException for invalid credentials
      */
-    suspend fun mockLogin(
-        email: String,
-        password: String
-    ): AuthResponse {
+    suspend fun mockLogin(email: String, password: String): AuthResponse {
         Timber.d("[MOCK] Logging in user: $email")
 
         // Simulate network delay
@@ -95,10 +88,7 @@ object MockAuthHelper {
      * @param provider OAuth provider (google, apple)
      * @param idToken Mock ID token (can be any string)
      */
-    suspend fun mockOAuthSignIn(
-        provider: String,
-        idToken: String
-    ): AuthResponse {
+    suspend fun mockOAuthSignIn(provider: String, idToken: String): AuthResponse {
         Timber.d("[MOCK] OAuth sign-in with provider: $provider")
 
         // Simulate network delay
@@ -142,7 +132,7 @@ object MockAuthHelper {
         // Return new tokens with same user info
         return generateMockAuthResponse(
             email = "refreshed@example.com",
-            displayName = "Refreshed User"
+            displayName = "Refreshed User",
         )
     }
 
@@ -165,10 +155,7 @@ object MockAuthHelper {
      *
      * Creates realistic auth response with JWT-like tokens.
      */
-    private fun generateMockAuthResponse(
-        email: String,
-        displayName: String
-    ): AuthResponse {
+    private fun generateMockAuthResponse(email: String, displayName: String): AuthResponse {
         val userId = UUID.randomUUID().toString()
         val now = System.currentTimeMillis()
 
@@ -180,8 +167,8 @@ object MockAuthHelper {
                 userId = userId,
                 email = email,
                 displayName = displayName,
-                createdAt = java.time.Instant.ofEpochMilli(now).toString()
-            )
+                createdAt = java.time.Instant.ofEpochMilli(now).toString(),
+            ),
         )
     }
 

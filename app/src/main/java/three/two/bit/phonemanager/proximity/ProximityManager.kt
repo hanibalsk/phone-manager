@@ -2,7 +2,6 @@ package three.two.bit.phonemanager.proximity
 
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.flow.first
-import kotlin.time.Clock
 import three.two.bit.phonemanager.data.repository.AlertRepository
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.ProximityAlert
@@ -12,6 +11,7 @@ import three.two.bit.phonemanager.util.ProximityCheckResult
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
 
 /**
  * Story E5.2: Proximity Manager

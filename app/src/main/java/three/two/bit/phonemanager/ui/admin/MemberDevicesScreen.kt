@@ -368,10 +368,7 @@ private fun MemberDeviceCard(
 }
 
 @Composable
-private fun EmptyDeviceList(
-    message: String,
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyDeviceList(message: String, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

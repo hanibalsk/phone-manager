@@ -59,7 +59,8 @@ interface GeofenceManager {
 }
 
 @Singleton
-class GeofenceManagerImpl @Inject constructor(@param:ApplicationContext private val context: Context) : GeofenceManager {
+class GeofenceManagerImpl @Inject constructor(@param:ApplicationContext private val context: Context) :
+    GeofenceManager {
 
     private val geofencingClient: GeofencingClient = LocationServices.getGeofencingClient(context)
 

@@ -2,9 +2,6 @@ package three.two.bit.phonemanager.data.repository
 
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlin.time.toJavaInstant
 import three.two.bit.phonemanager.data.database.MovementEventDao
 import three.two.bit.phonemanager.data.model.MovementEventEntity
 import three.two.bit.phonemanager.data.model.toDomain
@@ -33,6 +30,9 @@ import java.time.format.DateTimeFormatter
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 
 /**
  * Story E8.3: MovementEventRepositoryImpl - Implementation of MovementEventRepository
@@ -192,65 +192,62 @@ class MovementEventRepositoryImpl @Inject constructor(
     /**
      * Convert domain MovementEvent to API request DTO.
      */
-    private fun MovementEvent.toApiRequest(deviceId: String): CreateMovementEventRequest {
-        return CreateMovementEventRequest(
-            eventId = UUID.randomUUID().toString(),
-            deviceId = deviceId,
-            timestamp = formatTimestamp(timestamp),
-            previousMode = previousMode.name,
-            newMode = newMode.name,
-            detectionSource = DetectionSourceDetails(
-                primary = detectionSource.name,
-                contributing = listOf(detectionSource.name),
-            ),
-            confidence = confidence,
-            detectionLatencyMs = detectionLatencyMs.toInt(),
-            location = location?.let {
-                MovementEventLocationDto(
-                    latitude = it.latitude,
-                    longitude = it.longitude,
-                    accuracy = it.accuracy,
-                    speed = it.speed,
-                )
-            },
-            deviceState = deviceState?.let {
-                MovementEventDeviceStateDto(
-                    batteryLevel = it.batteryLevel,
-                    batteryCharging = it.batteryCharging,
-                    networkType = it.networkType?.name,
-                    networkStrength = it.networkStrength,
-                )
-            },
-            telemetry = sensorTelemetry?.let {
-                MovementEventTelemetryDto(
-                    accelerometer = if (it.accelerometerMagnitude != null) {
-                        AccelerometerTelemetryDto(
-                            magnitude = it.accelerometerMagnitude,
-                            variance = it.accelerometerVariance,
-                            peakFrequency = it.accelerometerPeakFrequency,
-                        )
-                    } else {
-                        null
-                    },
-                    gyroscope = it.gyroscopeMagnitude?.let { mag ->
-                        GyroscopeTelemetryDto(magnitude = mag)
-                    },
-                    stepCount = it.stepCount,
-                    significantMotion = it.significantMotion,
-                    activityRecognition = if (it.activityType != null && it.activityConfidence != null) {
-                        ActivityRecognitionDto(
-                            type = it.activityType,
-                            confidence = it.activityConfidence,
-                        )
-                    } else {
-                        null
-                    },
-                )
-            },
-            tripId = tripId,
-        )
-    }
+    private fun MovementEvent.toApiRequest(deviceId: String): CreateMovementEventRequest = CreateMovementEventRequest(
+        eventId = UUID.randomUUID().toString(),
+        deviceId = deviceId,
+        timestamp = formatTimestamp(timestamp),
+        previousMode = previousMode.name,
+        newMode = newMode.name,
+        detectionSource = DetectionSourceDetails(
+            primary = detectionSource.name,
+            contributing = listOf(detectionSource.name),
+        ),
+        confidence = confidence,
+        detectionLatencyMs = detectionLatencyMs.toInt(),
+        location = location?.let {
+            MovementEventLocationDto(
+                latitude = it.latitude,
+                longitude = it.longitude,
+                accuracy = it.accuracy,
+                speed = it.speed,
+            )
+        },
+        deviceState = deviceState?.let {
+            MovementEventDeviceStateDto(
+                batteryLevel = it.batteryLevel,
+                batteryCharging = it.batteryCharging,
+                networkType = it.networkType?.name,
+                networkStrength = it.networkStrength,
+            )
+        },
+        telemetry = sensorTelemetry?.let {
+            MovementEventTelemetryDto(
+                accelerometer = if (it.accelerometerMagnitude != null) {
+                    AccelerometerTelemetryDto(
+                        magnitude = it.accelerometerMagnitude,
+                        variance = it.accelerometerVariance,
+                        peakFrequency = it.accelerometerPeakFrequency,
+                    )
+                } else {
+                    null
+                },
+                gyroscope = it.gyroscopeMagnitude?.let { mag ->
+                    GyroscopeTelemetryDto(magnitude = mag)
+                },
+                stepCount = it.stepCount,
+                significantMotion = it.significantMotion,
+                activityRecognition = if (it.activityType != null && it.activityConfidence != null) {
+                    ActivityRecognitionDto(
+                        type = it.activityType,
+                        confidence = it.activityConfidence,
+                    )
+                } else {
+                    null
+                },
+            )
+        },
+        tripId = tripId,
+    )
 
-    private fun formatTimestamp(instant: Instant): String =
-        isoFormatter.format(instant.toJavaInstant())
+    private fun formatTimestamp(instant: Instant): String = isoFormatter.format(instant.toJavaInstant())
 }

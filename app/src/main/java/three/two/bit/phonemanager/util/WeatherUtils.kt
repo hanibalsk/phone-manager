@@ -30,8 +30,7 @@ fun Weather.toNotificationTitle(): String {
  * @param context Context to resolve the localized weather condition string
  * @return Condition description like "Partly Cloudy"
  */
-fun Weather.toNotificationText(context: Context): String =
-    context.getString(current.weatherCode.descriptionResId)
+fun Weather.toNotificationText(context: Context): String = context.getString(current.weatherCode.descriptionResId)
 
 /**
  * Maps WeatherCode to emoji for notification display

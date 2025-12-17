@@ -105,7 +105,7 @@ class JoinGroupViewModel @Inject constructor(
                     } else {
                         _groupPreview.value = null
                         _uiState.value = JoinGroupUiState.Error(
-                            result.error ?: "Invalid or expired invite code"
+                            result.error ?: "Invalid or expired invite code",
                         )
                         Timber.w("Code validation failed: ${result.error}")
                     }
@@ -113,10 +113,10 @@ class JoinGroupViewModel @Inject constructor(
                 onFailure = { error ->
                     _groupPreview.value = null
                     _uiState.value = JoinGroupUiState.Error(
-                        error.message ?: "Failed to validate code"
+                        error.message ?: "Failed to validate code",
                     )
                     Timber.e(error, "Code validation error")
-                }
+                },
             )
         }
     }
@@ -159,7 +159,7 @@ class JoinGroupViewModel @Inject constructor(
                     }
                     _joinResult.value = JoinResult.Error(errorMessage)
                     Timber.e(error, "Failed to join group")
-                }
+                },
             )
         }
     }

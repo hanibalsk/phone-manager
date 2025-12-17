@@ -1,7 +1,5 @@
 package three.two.bit.phonemanager.network.models
 
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.domain.model.Group
@@ -12,6 +10,8 @@ import three.two.bit.phonemanager.domain.model.GroupRole
 import three.two.bit.phonemanager.domain.model.InviteStatus
 import three.two.bit.phonemanager.domain.model.InviteValidationResult
 import three.two.bit.phonemanager.domain.model.JoinGroupResult
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 // ============================================================================
 // Story E11.8: Group Management API Models
@@ -22,10 +22,7 @@ import three.two.bit.phonemanager.domain.model.JoinGroupResult
  * POST /groups
  */
 @Serializable
-data class CreateGroupRequest(
-    val name: String,
-    val description: String? = null,
-)
+data class CreateGroupRequest(val name: String, val description: String? = null)
 
 /**
  * Story E11.8 Task 2: Response for create group operation
@@ -52,10 +49,7 @@ data class CreateGroupResponse(
  * PUT /groups/{groupId}
  */
 @Serializable
-data class UpdateGroupRequest(
-    val name: String? = null,
-    val description: String? = null,
-)
+data class UpdateGroupRequest(val name: String? = null, val description: String? = null)
 
 /**
  * Story E11.8 Task 2: Response for list user groups
@@ -64,10 +58,7 @@ data class UpdateGroupRequest(
  * Backend returns snake_case: { "data": [...], "count": N }
  */
 @Serializable
-data class ListGroupsResponse(
-    @SerialName("data") val groups: List<GroupDto>,
-    val count: Int,
-)
+data class ListGroupsResponse(@SerialName("data") val groups: List<GroupDto>, val count: Int)
 
 /**
  * Story E11.8 Task 2: Group DTO in API responses
@@ -163,11 +154,7 @@ data class MemberDeviceDto(
  * Last location info for device
  */
 @Serializable
-data class MemberDeviceLocationDto(
-    val latitude: Double,
-    val longitude: Double,
-    val timestamp: String,
-)
+data class MemberDeviceLocationDto(val latitude: Double, val longitude: Double, val timestamp: String)
 
 /**
  * Story E11.8 Task 2: Request body for updating member role
@@ -182,19 +169,14 @@ data class UpdateMemberRoleRequest(
  * Story E11.8 Task 2: Generic success response
  */
 @Serializable
-data class GroupOperationResponse(
-    val success: Boolean,
-    val message: String? = null,
-)
+data class GroupOperationResponse(val success: Boolean, val message: String? = null)
 
 /**
  * Story E11.8 Task 2: Request body for transferring ownership
  * POST /groups/{groupId}/transfer-ownership
  */
 @Serializable
-data class TransferOwnershipRequest(
-    val newOwnerId: String,
-)
+data class TransferOwnershipRequest(val newOwnerId: String)
 
 // ============================================================================
 // Mapping Functions
@@ -279,9 +261,7 @@ data class CreateInviteResponse(
  * Backend returns { data: [...] } with InviteSummary format.
  */
 @Serializable
-data class ListInvitesResponse(
-    val data: List<InviteSummaryDto>,
-) {
+data class ListInvitesResponse(val data: List<InviteSummaryDto>) {
     val count: Int get() = data.size
 }
 
@@ -305,10 +285,7 @@ data class InviteSummaryDto(
  * Creator info in invite summary.
  */
 @Serializable
-data class InviteCreatorDto(
-    val id: String,
-    @SerialName("display_name") val displayName: String? = null,
-)
+data class InviteCreatorDto(val id: String, @SerialName("display_name") val displayName: String? = null)
 
 /**
  * Story E11.9 Task 2: Invite DTO in API responses
@@ -333,19 +310,13 @@ data class InviteDto(
  * POST /invites/{code}/validate
  */
 @Serializable
-data class ValidateInviteRequest(
-    val code: String,
-)
+data class ValidateInviteRequest(val code: String)
 
 /**
  * Story E11.9 Task 2: Response for validate invite code
  */
 @Serializable
-data class ValidateInviteResponse(
-    val valid: Boolean,
-    val group: GroupPreviewDto? = null,
-    val error: String? = null,
-)
+data class ValidateInviteResponse(val valid: Boolean, val group: GroupPreviewDto? = null, val error: String? = null)
 
 /**
  * Story E11.9 Task 2: Group preview DTO for invite validation

@@ -378,8 +378,11 @@ private fun MemberCard(
                         DropdownMenuItem(
                             text = {
                                 Text(
-                                    if (member.role == GroupRole.ADMIN) stringResource(R.string.group_demote_to_member)
-                                    else stringResource(R.string.group_promote_to_admin)
+                                    if (member.role == GroupRole.ADMIN) {
+                                        stringResource(R.string.group_demote_to_member)
+                                    } else {
+                                        stringResource(R.string.group_promote_to_admin)
+                                    },
                                 )
                             },
                             onClick = {

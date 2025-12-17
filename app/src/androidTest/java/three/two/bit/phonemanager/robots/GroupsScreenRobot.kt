@@ -14,9 +14,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
  *     .clickCreate()
  * ```
  */
-class GroupsScreenRobot(
-    composeTestRule: ComposeTestRule
-) : BaseRobot(composeTestRule) {
+class GroupsScreenRobot(composeTestRule: ComposeTestRule) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_GROUPS_SCREEN = "groups_screen"
@@ -150,11 +148,9 @@ class GroupsScreenRobot(
     /**
      * Perform complete group join via code.
      */
-    fun joinGroupWithCode(inviteCode: String): GroupsScreenRobot {
-        return clickJoinGroup()
-            .enterInviteCode(inviteCode)
-            .clickJoin()
-    }
+    fun joinGroupWithCode(inviteCode: String): GroupsScreenRobot = clickJoinGroup()
+        .enterInviteCode(inviteCode)
+        .clickJoin()
 
     // =============================================================================
     // Group Detail Actions

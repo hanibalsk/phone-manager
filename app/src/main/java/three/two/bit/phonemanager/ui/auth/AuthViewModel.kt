@@ -80,10 +80,7 @@ class AuthViewModel @Inject constructor(
     /**
      * Fetch public configuration from server with retry logic
      */
-    private fun fetchPublicConfigWithRetry(
-        maxRetries: Int = 3,
-        initialDelayMs: Long = 1000L
-    ) {
+    private fun fetchPublicConfigWithRetry(maxRetries: Int = 3, initialDelayMs: Long = 1000L) {
         viewModelScope.launch {
             _isConfigLoading.value = true
             var currentDelay = initialDelayMs
@@ -165,7 +162,7 @@ class AuthViewModel @Inject constructor(
                 Timber.e(exception, "Login failed")
                 _uiState.value = AuthUiState.Error(
                     message = getErrorMessage(exception),
-                    errorCode = "login_failed"
+                    errorCode = "login_failed",
                 )
             }
         }
@@ -207,7 +204,7 @@ class AuthViewModel @Inject constructor(
                 Timber.e(exception, "Registration failed")
                 _uiState.value = AuthUiState.Error(
                     message = getErrorMessage(exception),
-                    errorCode = "registration_failed"
+                    errorCode = "registration_failed",
                 )
             }
         }
@@ -240,7 +237,7 @@ class AuthViewModel @Inject constructor(
                 Timber.e(exception, "OAuth sign-in failed: $provider")
                 _uiState.value = AuthUiState.Error(
                     message = getErrorMessage(exception),
-                    errorCode = "oauth_failed"
+                    errorCode = "oauth_failed",
                 )
             }
         }
@@ -294,11 +291,7 @@ class AuthViewModel @Inject constructor(
      *
      * @return true if input is valid
      */
-    private fun validateRegisterInput(
-        email: String,
-        password: String,
-        displayName: String
-    ): Boolean {
+    private fun validateRegisterInput(email: String, password: String, displayName: String): Boolean {
         var isValid = true
 
         if (!isValidEmail(email)) {
@@ -312,7 +305,8 @@ class AuthViewModel @Inject constructor(
         }
 
         if (!isValidPassword(password)) {
-            _passwordError.value = "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character"
+            _passwordError.value =
+                "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character"
             isValid = false
         }
 
@@ -325,9 +319,8 @@ class AuthViewModel @Inject constructor(
      * @param email Email address to validate
      * @return true if email format is valid
      */
-    private fun isValidEmail(email: String): Boolean {
-        return email.matches(Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"))
-    }
+    private fun isValidEmail(email: String): Boolean =
+        email.matches(Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"))
 
     /**
      * Validate password strength
@@ -360,17 +353,15 @@ class AuthViewModel @Inject constructor(
      * @param exception Exception from repository
      * @return User-friendly error message
      */
-    private fun getErrorMessage(exception: Throwable?): String {
-        return when (exception?.message) {
-            "email_already_exists" -> "An account with this email already exists"
-            "invalid_credentials" -> "Invalid email or password"
-            "weak_password" -> "Password does not meet security requirements"
-            "account_locked" -> "Your account has been locked. Please contact support."
-            "account_disabled" -> "Your account has been disabled. Please contact support."
-            "network_error" -> "Unable to connect to server. Please check your internet connection."
-            "oauth_failed" -> "Sign-in with this provider failed. Please try again."
-            else -> exception?.message ?: "An error occurred. Please try again."
-        }
+    private fun getErrorMessage(exception: Throwable?): String = when (exception?.message) {
+        "email_already_exists" -> "An account with this email already exists"
+        "invalid_credentials" -> "Invalid email or password"
+        "weak_password" -> "Password does not meet security requirements"
+        "account_locked" -> "Your account has been locked. Please contact support."
+        "account_disabled" -> "Your account has been disabled. Please contact support."
+        "network_error" -> "Unable to connect to server. Please check your internet connection."
+        "oauth_failed" -> "Sign-in with this provider failed. Please try again."
+        else -> exception?.message ?: "An error occurred. Please try again."
     }
 
     /**
@@ -414,7 +405,7 @@ class AuthViewModel @Inject constructor(
                         else -> {
                             Timber.e(exception, "Failed to auto-link device")
                             DeviceLinkState.Failed(
-                                message = "Could not link device. You can try again from Settings."
+                                message = "Could not link device. You can try again from Settings.",
                             )
                         }
                     }

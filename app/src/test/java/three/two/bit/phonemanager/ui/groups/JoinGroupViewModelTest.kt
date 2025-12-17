@@ -11,7 +11,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Instant
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.AuthRepository
@@ -24,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Story E11.9 Task 14: Unit tests for JoinGroupViewModel
@@ -181,7 +181,7 @@ class JoinGroupViewModelTest {
         val joinResult = JoinGroupResult(
             groupId = "group-1",
             role = GroupRole.MEMBER,
-            joinedAt = Instant.parse("2025-01-01T00:00:00Z")
+            joinedAt = Instant.parse("2025-01-01T00:00:00Z"),
         )
         every { authRepository.isLoggedIn() } returns true
         coEvery { groupRepository.joinWithInvite("ABCD1234") } returns Result.success(joinResult)
@@ -207,7 +207,7 @@ class JoinGroupViewModelTest {
         // Given
         every { authRepository.isLoggedIn() } returns true
         coEvery { groupRepository.joinWithInvite("ABCD1234") } returns Result.failure(
-            Exception("already_member")
+            Exception("already_member"),
         )
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)

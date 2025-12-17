@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.data.model.LocationEntity
@@ -27,6 +26,7 @@ import three.two.bit.phonemanager.movement.TransportationMode
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
+import kotlin.time.Instant
 
 /**
  * Story E8.10: TripDetailViewModel
@@ -103,7 +103,9 @@ class TripDetailViewModel @Inject constructor(
                     )
                 }
 
-                Timber.d("Loaded trip details: ${locations.size} locations, ${movementEvents.size} events, corrected=$hasCorrectedPath")
+                Timber.d(
+                    "Loaded trip details: ${locations.size} locations, ${movementEvents.size} events, corrected=$hasCorrectedPath",
+                )
             } catch (e: Exception) {
                 Timber.e(e, "Failed to load trip details")
                 _uiState.update {

@@ -14,8 +14,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.domain.model.DeviceSettings
@@ -27,6 +25,8 @@ import three.two.bit.phonemanager.network.DeviceApiService
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Story E12.6: Repository for syncing device settings with server.
@@ -277,29 +277,19 @@ class SettingsSyncRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getSettingLockStatus(key: String): SettingLock? {
-        return _serverSettings.value?.getLock(key) ?: loadCachedLock(key)
-    }
+    override suspend fun getSettingLockStatus(key: String): SettingLock? =
+        _serverSettings.value?.getLock(key) ?: loadCachedLock(key)
 
-    override suspend fun isSettingLocked(key: String): Boolean {
-        return _serverSettings.value?.isLocked(key)
-            ?: loadCachedLock(key)?.isLocked
-            ?: false
-    }
+    override suspend fun isSettingLocked(key: String): Boolean = _serverSettings.value?.isLocked(key)
+        ?: loadCachedLock(key)?.isLocked
+        ?: false
 
-    override suspend fun syncAllSettings(): Result<Unit> {
-        return fetchServerSettings().map { }
-    }
+    override suspend fun syncAllSettings(): Result<Unit> = fetchServerSettings().map { }
 
-    override suspend fun getLockedBy(key: String): String? {
-        return _serverSettings.value?.getLockedBy(key)
-            ?: loadCachedLock(key)?.lockedBy
-    }
+    override suspend fun getLockedBy(key: String): String? = _serverSettings.value?.getLockedBy(key)
+        ?: loadCachedLock(key)?.lockedBy
 
-    override suspend fun handleSettingsUpdatePush(
-        updatedSettings: Map<String, Any>,
-        updatedBy: String,
-    ) {
+    override suspend fun handleSettingsUpdatePush(updatedSettings: Map<String, Any>, updatedBy: String) {
         Timber.i("Received settings update push from $updatedBy: $updatedSettings")
 
         // Refresh settings from server to get accurate lock states and apply them
@@ -308,11 +298,7 @@ class SettingsSyncRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun handleSettingLockPush(
-        settingKey: String,
-        isLocked: Boolean,
-        adminName: String?,
-    ) {
+    override suspend fun handleSettingLockPush(settingKey: String, isLocked: Boolean, adminName: String?) {
         Timber.i("Received setting lock push: $settingKey -> locked=$isLocked by $adminName")
 
         // Update cached lock state immediately

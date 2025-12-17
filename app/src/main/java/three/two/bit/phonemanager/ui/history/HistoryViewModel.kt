@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -23,6 +22,7 @@ import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.util.PolylineUtils
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Clock
 
 /**
  * Story E4.1/E4.2: HistoryViewModel

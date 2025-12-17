@@ -13,9 +13,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
  *     .verifyLocationPermissionEnabled()
  * ```
  */
-class SettingsScreenRobot(
-    composeTestRule: ComposeTestRule
-) : BaseRobot(composeTestRule) {
+class SettingsScreenRobot(composeTestRule: ComposeTestRule) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_SETTINGS_SCREEN = "settings_screen"

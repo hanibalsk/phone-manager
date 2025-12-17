@@ -32,10 +32,7 @@ data class LocationPayload(
  * Story 0.2.2: Batch location transmission
  */
 @Serializable
-data class LocationBatchPayload(
-    @SerialName("device_id") val deviceId: String,
-    val locations: List<LocationPayload>
-)
+data class LocationBatchPayload(@SerialName("device_id") val deviceId: String, val locations: List<LocationPayload>)
 
 /**
  * Story 0.2.2: API response models
@@ -44,7 +41,7 @@ data class LocationBatchPayload(
 data class LocationUploadResponse(
     val success: Boolean,
     val message: String? = null,
-    @SerialName("processed_count") val processedCount: Int = 0
+    @SerialName("processed_count") val processedCount: Int = 0,
 )
 
 /**

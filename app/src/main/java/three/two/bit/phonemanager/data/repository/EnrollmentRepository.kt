@@ -232,26 +232,24 @@ class EnrollmentRepositoryImpl @Inject constructor(
      *
      * Uses PolicyApplicator to map policy values to local preferences.
      */
-    override suspend fun applyPolicies(policy: DevicePolicy): Result<Unit> {
-        return try {
-            // Save policy to storage first
-            savePolicies(policy)
+    override suspend fun applyPolicies(policy: DevicePolicy): Result<Unit> = try {
+        // Save policy to storage first
+        savePolicies(policy)
 
-            // Apply policy settings to preferences
-            val applicationResult = policyApplicator.applyPolicies(policy)
+        // Apply policy settings to preferences
+        val applicationResult = policyApplicator.applyPolicies(policy)
 
-            if (applicationResult.success) {
-                Timber.i("Policies applied successfully: ${applicationResult.appliedSettings.size} settings")
-                Result.success(Unit)
-            } else {
-                val failedKeys = applicationResult.failedSettings.map { it.settingKey }
-                Timber.w("Some policies failed to apply: $failedKeys")
-                Result.success(Unit) // Still success if policy saved
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to apply policies")
-            Result.failure(e)
+        if (applicationResult.success) {
+            Timber.i("Policies applied successfully: ${applicationResult.appliedSettings.size} settings")
+            Result.success(Unit)
+        } else {
+            val failedKeys = applicationResult.failedSettings.map { it.settingKey }
+            Timber.w("Some policies failed to apply: $failedKeys")
+            Result.success(Unit) // Still success if policy saved
         }
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to apply policies")
+        Result.failure(e)
     }
 
     /**
@@ -274,16 +272,13 @@ class EnrollmentRepositoryImpl @Inject constructor(
     /**
      * Check if a setting is locked by policy.
      */
-    override fun isSettingLocked(key: String): Boolean {
-        return _devicePolicy.value?.isLocked(key) == true
-    }
+    override fun isSettingLocked(key: String): Boolean = _devicePolicy.value?.isLocked(key) == true
 
     /**
      * Get a policy value.
      */
-    override fun <T> getPolicyValue(key: String, default: T): T {
-        return _devicePolicy.value?.getPolicyValue(key, default) ?: default
-    }
+    override fun <T> getPolicyValue(key: String, default: T): T =
+        _devicePolicy.value?.getPolicyValue(key, default) ?: default
 
     /**
      * Clear error state.
@@ -295,15 +290,13 @@ class EnrollmentRepositoryImpl @Inject constructor(
     /**
      * Create device info for enrollment.
      */
-    private fun createDeviceInfo(): DeviceEnrollmentInfo {
-        return DeviceEnrollmentInfo(
-            deviceId = secureStorage.getDeviceId(),
-            manufacturer = Build.MANUFACTURER ?: "Unknown",
-            model = Build.MODEL ?: "Unknown",
-            osVersion = "Android ${Build.VERSION.RELEASE ?: "Unknown"}",
-            appVersion = BuildConfig.VERSION_NAME,
-        )
-    }
+    private fun createDeviceInfo(): DeviceEnrollmentInfo = DeviceEnrollmentInfo(
+        deviceId = secureStorage.getDeviceId(),
+        manufacturer = Build.MANUFACTURER ?: "Unknown",
+        model = Build.MODEL ?: "Unknown",
+        osVersion = "Android ${Build.VERSION.RELEASE ?: "Unknown"}",
+        appVersion = BuildConfig.VERSION_NAME,
+    )
 
     /**
      * Save organization info to secure storage.

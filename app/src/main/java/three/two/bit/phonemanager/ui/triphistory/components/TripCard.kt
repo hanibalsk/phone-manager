@@ -13,12 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.automirrored.filled.DirectionsBike
-import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.automirrored.filled.DirectionsRun
 import androidx.compose.material.icons.automirrored.filled.DirectionsWalk
 import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.HourglassEmpty
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -40,10 +40,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import three.two.bit.phonemanager.R
-import java.text.DateFormat
-import java.util.Date
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.movement.TransportationMode
+import java.text.DateFormat
+import java.util.Date
 
 /**
  * Story E8.9: TripCard Component
@@ -265,12 +265,7 @@ private fun formatTripTimes(trip: Trip): String {
  * Trip Geocoding Enhancement: Supports displayName parameter
  */
 @Composable
-fun SimpleTripCard(
-    trip: Trip,
-    onClick: () -> Unit,
-    displayName: String? = null,
-    modifier: Modifier = Modifier,
-) {
+fun SimpleTripCard(trip: Trip, onClick: () -> Unit, displayName: String? = null, modifier: Modifier = Modifier) {
     TripCardContent(
         trip = trip,
         onClick = onClick,

@@ -1,7 +1,6 @@
 package three.two.bit.phonemanager.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.DetectionSource
 import three.two.bit.phonemanager.domain.model.DeviceState
 import three.two.bit.phonemanager.domain.model.EventLocation
@@ -11,6 +10,7 @@ import three.two.bit.phonemanager.domain.model.SensorTelemetry
 import three.two.bit.phonemanager.movement.TransportationMode
 import three.two.bit.phonemanager.network.models.BatchMovementEventsResponse
 import three.two.bit.phonemanager.network.models.MovementEventsListResponse
+import kotlin.time.Instant
 
 /**
  * Story E8.3: MovementEventRepository - Repository interface for movement event data
@@ -183,10 +183,7 @@ interface MovementEventRepository {
      * @param deviceId Device identifier
      * @return Result containing batch upload response
      */
-    suspend fun syncEvents(
-        events: List<MovementEvent>,
-        deviceId: String,
-    ): Result<BatchMovementEventsResponse>
+    suspend fun syncEvents(events: List<MovementEvent>, deviceId: String): Result<BatchMovementEventsResponse>
 
     /**
      * Fetch remote events for a device.

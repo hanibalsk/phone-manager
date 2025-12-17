@@ -16,13 +16,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Pending
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -56,7 +56,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
@@ -64,6 +63,7 @@ import three.two.bit.phonemanager.domain.model.UnlockRequest
 import three.two.bit.phonemanager.domain.model.UnlockRequestFilter
 import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
 import three.two.bit.phonemanager.domain.model.UnlockRequestSummary
+import kotlin.time.Instant
 
 /**
  * Story E12.8: Unlock Requests Screen
@@ -208,10 +208,7 @@ fun UnlockRequestsScreen(
  * AC E12.8.10: Show badge with pending request count
  */
 @Composable
-private fun RequestSummaryRow(
-    summary: UnlockRequestSummary,
-    modifier: Modifier = Modifier,
-) {
+private fun RequestSummaryRow(summary: UnlockRequestSummary, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -411,10 +408,7 @@ private fun RequestCard(
  * AC E12.8.3: Status badge
  */
 @Composable
-private fun StatusChip(
-    status: UnlockRequestStatus,
-    modifier: Modifier = Modifier,
-) {
+private fun StatusChip(status: UnlockRequestStatus, modifier: Modifier = Modifier) {
     val (icon, color, text) = when (status) {
         UnlockRequestStatus.PENDING -> Triple(
             Icons.Default.Pending,
@@ -468,10 +462,7 @@ private fun StatusChip(
  * AC E12.8.6: Admin Response Display
  */
 @Composable
-private fun AdminResponseSection(
-    request: UnlockRequest,
-    modifier: Modifier = Modifier,
-) {
+private fun AdminResponseSection(request: UnlockRequest, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -526,10 +517,7 @@ private fun AdminResponseSection(
  * Empty state when no requests match filter.
  */
 @Composable
-private fun EmptyRequestsState(
-    filter: UnlockRequestFilter,
-    modifier: Modifier = Modifier,
-) {
+private fun EmptyRequestsState(filter: UnlockRequestFilter, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier,
         contentAlignment = Alignment.Center,

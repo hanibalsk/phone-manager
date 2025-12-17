@@ -4,7 +4,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.DetectionSource
 import three.two.bit.phonemanager.domain.model.DeviceState
 import three.two.bit.phonemanager.domain.model.EventLocation
@@ -13,6 +12,7 @@ import three.two.bit.phonemanager.domain.model.MovementEvent
 import three.two.bit.phonemanager.domain.model.NetworkType
 import three.two.bit.phonemanager.domain.model.SensorTelemetry
 import three.two.bit.phonemanager.movement.TransportationMode
+import kotlin.time.Instant
 
 /**
  * Story E8.1: MovementEventEntity - Database entity for storing movement detection events

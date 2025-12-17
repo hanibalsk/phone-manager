@@ -36,10 +36,7 @@ interface EnrollmentApiService {
      * @param deviceInfo Device information to send
      * @return Result with EnrollmentResult on success
      */
-    suspend fun enrollDevice(
-        enrollmentToken: String,
-        deviceInfo: DeviceEnrollmentInfo,
-    ): Result<EnrollmentResult>
+    suspend fun enrollDevice(enrollmentToken: String, deviceInfo: DeviceEnrollmentInfo): Result<EnrollmentResult>
 
     /**
      * Unenroll a device from an organization.
@@ -51,10 +48,7 @@ interface EnrollmentApiService {
      * @param accessToken The user's access token
      * @return Result with Unit on success
      */
-    suspend fun unenrollDevice(
-        deviceId: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun unenrollDevice(deviceId: String, accessToken: String): Result<Unit>
 }
 
 /**
@@ -88,10 +82,7 @@ class EnrollmentApiServiceImpl @Inject constructor(
         Timber.e(e, "Enrollment failed")
     }
 
-    override suspend fun unenrollDevice(
-        deviceId: String,
-        accessToken: String,
-    ): Result<Unit> = runCatching {
+    override suspend fun unenrollDevice(deviceId: String, accessToken: String): Result<Unit> = runCatching {
         Timber.d("Unenrolling device: $deviceId")
 
         val response: UnenrollDeviceResponse = httpClient.post(

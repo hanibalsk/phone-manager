@@ -37,9 +37,7 @@ import androidx.compose.ui.test.performTextInput
  * }
  * ```
  */
-abstract class BaseRobot(
-    protected val composeTestRule: ComposeTestRule
-) {
+abstract class BaseRobot(protected val composeTestRule: ComposeTestRule) {
     protected val semanticsProvider: SemanticsNodeInteractionsProvider = composeTestRule
     // =============================================================================
     // Common Assertions

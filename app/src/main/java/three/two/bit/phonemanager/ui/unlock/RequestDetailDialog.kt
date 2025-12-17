@@ -10,11 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Pending
-import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -28,12 +28,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.UnlockRequest
 import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
+import kotlin.time.Instant
 
 /**
  * Story E12.8: Request Detail Dialog
@@ -125,11 +125,7 @@ fun RequestDetailDialog(
 }
 
 @Composable
-private fun DetailRow(
-    label: String,
-    value: String,
-    modifier: Modifier = Modifier,
-) {
+private fun DetailRow(label: String, value: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,
@@ -145,11 +141,7 @@ private fun DetailRow(
 }
 
 @Composable
-private fun DetailRow(
-    label: String,
-    content: @Composable () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun DetailRow(label: String, content: @Composable () -> Unit, modifier: Modifier = Modifier) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
             text = label,
@@ -162,10 +154,7 @@ private fun DetailRow(
 }
 
 @Composable
-private fun StatusDisplay(
-    status: UnlockRequestStatus,
-    modifier: Modifier = Modifier,
-) {
+private fun StatusDisplay(status: UnlockRequestStatus, modifier: Modifier = Modifier) {
     val (icon, color, text) = when (status) {
         UnlockRequestStatus.PENDING -> Triple(
             Icons.Default.Pending,
@@ -212,10 +201,7 @@ private fun StatusDisplay(
  * AC E12.8.6: Admin Response Display
  */
 @Composable
-private fun AdminResponseDetails(
-    request: UnlockRequest,
-    modifier: Modifier = Modifier,
-) {
+private fun AdminResponseDetails(request: UnlockRequest, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(

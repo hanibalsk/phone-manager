@@ -17,9 +17,8 @@ import three.two.bit.phonemanager.domain.model.EnrollmentResult
 import three.two.bit.phonemanager.domain.model.EnrollmentStatus
 import three.two.bit.phonemanager.domain.model.EnrollmentToken
 import three.two.bit.phonemanager.domain.model.OrganizationInfo
-// Note: EnrollmentRepository is now an interface, tests use EnrollmentRepositoryImpl
-import three.two.bit.phonemanager.domain.policy.PolicyApplicator
 import three.two.bit.phonemanager.domain.policy.PolicyApplicationResult
+import three.two.bit.phonemanager.domain.policy.PolicyApplicator
 import three.two.bit.phonemanager.network.EnrollmentApiService
 import three.two.bit.phonemanager.security.SecureStorage
 import kotlin.test.assertEquals

@@ -43,28 +43,28 @@ class AuthRepositoryTest {
         id = "user-123",
         email = "test@example.com",
         displayName = "Test User",
-        createdAt = "2025-12-01T10:00:00Z"
+        createdAt = "2025-12-01T10:00:00Z",
     )
 
     private val testTokensResponse = TokensResponse(
         accessToken = "access.token.123",
         refreshToken = "refresh.token.456",
         tokenType = "Bearer",
-        expiresIn = 3600L // 1 hour
+        expiresIn = 3600L, // 1 hour
     )
 
     private val testRegisterResponse = RegisterResponse(
         user = testUserResponse,
-        tokens = testTokensResponse
+        tokens = testTokensResponse,
     )
 
     private val testLoginResponse = LoginResponse(
         user = testUserResponse,
-        tokens = testTokensResponse
+        tokens = testTokensResponse,
     )
 
     private val testRefreshResponse = RefreshResponse(
-        tokens = testTokensResponse
+        tokens = testTokensResponse,
     )
 
     @Before
@@ -85,17 +85,19 @@ class AuthRepositoryTest {
         val result = authRepository.register(
             email = "new@example.com",
             password = "Password123!",
-            displayName = "New User"
+            displayName = "New User",
         )
 
         // Then
         assertTrue(result.isSuccess)
         coVerify {
-            authApiService.register(match { request ->
-                request.email == "new@example.com" &&
-                    request.password == "Password123!" &&
-                    request.displayName == "New User"
-            })
+            authApiService.register(
+                match { request ->
+                    request.email == "new@example.com" &&
+                        request.password == "Password123!" &&
+                        request.displayName == "New User"
+                },
+            )
         }
     }
 
@@ -169,10 +171,12 @@ class AuthRepositoryTest {
         // Then
         assertTrue(result.isSuccess)
         coVerify {
-            authApiService.login(match { request ->
-                request.email == "test@example.com" &&
-                    request.password == "Password123!"
-            })
+            authApiService.login(
+                match { request ->
+                    request.email == "test@example.com" &&
+                        request.password == "Password123!"
+                },
+            )
         }
     }
 
@@ -231,10 +235,12 @@ class AuthRepositoryTest {
         // Then
         assertTrue(result.isSuccess)
         coVerify {
-            authApiService.oauthSignIn(match { request ->
-                request.provider == "google" &&
-                    request.idToken == "id.token.from.google"
-            })
+            authApiService.oauthSignIn(
+                match { request ->
+                    request.provider == "google" &&
+                        request.idToken == "id.token.from.google"
+                },
+            )
         }
     }
 
@@ -328,9 +334,11 @@ class AuthRepositoryTest {
         // Then
         assertTrue(result.isSuccess)
         coVerify {
-            authApiService.refreshToken(match { request ->
-                request.refreshToken == refreshToken
-            })
+            authApiService.refreshToken(
+                match { request ->
+                    request.refreshToken == refreshToken
+                },
+            )
         }
     }
 
@@ -343,8 +351,8 @@ class AuthRepositoryTest {
                 accessToken = "new.access.token",
                 refreshToken = "new.refresh.token",
                 tokenType = "Bearer",
-                expiresIn = 3600L
-            )
+                expiresIn = 3600L,
+            ),
         )
         coEvery { authApiService.refreshToken(any()) } returns newRefreshResponse
 
@@ -446,8 +454,8 @@ class AuthRepositoryTest {
                 accessToken = "access.token",
                 refreshToken = "refresh.token",
                 tokenType = "Bearer",
-                expiresIn = 3600L
-            )
+                expiresIn = 3600L,
+            ),
         )
         coEvery { authApiService.login(any()) } returns loginResponse
 
@@ -456,11 +464,13 @@ class AuthRepositoryTest {
 
         // Then
         verify {
-            secureStorage.saveTokenExpiryTime(match { expiryTime ->
-                val expectedMinExpiry = System.currentTimeMillis() + (3600 * 1000) - 1000
-                val expectedMaxExpiry = System.currentTimeMillis() + (3600 * 1000) + 1000
-                expiryTime in expectedMinExpiry..expectedMaxExpiry
-            })
+            secureStorage.saveTokenExpiryTime(
+                match { expiryTime ->
+                    val expectedMinExpiry = System.currentTimeMillis() + (3600 * 1000) - 1000
+                    val expectedMaxExpiry = System.currentTimeMillis() + (3600 * 1000) + 1000
+                    expiryTime in expectedMinExpiry..expectedMaxExpiry
+                },
+            )
         }
     }
 }

@@ -29,17 +29,17 @@ enum class UnlockRequestStatus {
     DENIED,
 
     /** User withdrew the request before admin responded */
-    WITHDRAWN;
+    WITHDRAWN,
+
+    ;
 
     companion object {
-        fun fromString(value: String): UnlockRequestStatus {
-            return when (value.lowercase()) {
-                "pending" -> PENDING
-                "approved" -> APPROVED
-                "denied" -> DENIED
-                "withdrawn" -> WITHDRAWN
-                else -> PENDING
-            }
+        fun fromString(value: String): UnlockRequestStatus = when (value.lowercase()) {
+            "pending" -> PENDING
+            "approved" -> APPROVED
+            "denied" -> DENIED
+            "withdrawn" -> WITHDRAWN
+            else -> PENDING
         }
     }
 }
@@ -121,10 +121,8 @@ data class UnlockRequest(
      * Get display name for the setting.
      * Uses SettingDefinition if available, otherwise formats key.
      */
-    fun getSettingDisplayName(): String {
-        return SettingDefinition.forKey(settingKey)?.displayName
-            ?: settingKey.replace("_", " ").replaceFirstChar { it.uppercase() }
-    }
+    fun getSettingDisplayName(): String = SettingDefinition.forKey(settingKey)?.displayName
+        ?: settingKey.replace("_", " ").replaceFirstChar { it.uppercase() }
 }
 
 /**

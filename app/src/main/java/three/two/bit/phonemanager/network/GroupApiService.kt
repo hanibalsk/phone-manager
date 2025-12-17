@@ -50,11 +50,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with created group on success
      */
-    suspend fun createGroup(
-        name: String,
-        description: String?,
-        accessToken: String,
-    ): Result<Group>
+    suspend fun createGroup(name: String, description: String?, accessToken: String): Result<Group>
 
     /**
      * AC E11.8.1: Get all groups the user belongs to
@@ -73,10 +69,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with group details on success
      */
-    suspend fun getGroupDetails(
-        groupId: String,
-        accessToken: String,
-    ): Result<Group>
+    suspend fun getGroupDetails(groupId: String, accessToken: String): Result<Group>
 
     /**
      * AC E11.8.8: Update group information
@@ -88,12 +81,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with success status
      */
-    suspend fun updateGroup(
-        groupId: String,
-        name: String?,
-        description: String?,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun updateGroup(groupId: String, name: String?, description: String?, accessToken: String): Result<Unit>
 
     /**
      * AC E11.8.7: Delete a group
@@ -103,10 +91,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with success status
      */
-    suspend fun deleteGroup(
-        groupId: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun deleteGroup(groupId: String, accessToken: String): Result<Unit>
 
     /**
      * AC E11.8.4: Get group members
@@ -116,10 +101,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with list of members on success
      */
-    suspend fun getGroupMembers(
-        groupId: String,
-        accessToken: String,
-    ): Result<List<GroupMembership>>
+    suspend fun getGroupMembers(groupId: String, accessToken: String): Result<List<GroupMembership>>
 
     /**
      * AC E11.8.5: Update member role
@@ -131,12 +113,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with success status
      */
-    suspend fun updateMemberRole(
-        groupId: String,
-        userId: String,
-        role: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun updateMemberRole(groupId: String, userId: String, role: String, accessToken: String): Result<Unit>
 
     /**
      * AC E11.8.5: Remove member from group
@@ -147,11 +124,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with success status
      */
-    suspend fun removeMember(
-        groupId: String,
-        userId: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun removeMember(groupId: String, userId: String, accessToken: String): Result<Unit>
 
     /**
      * AC E11.8.6: Leave a group
@@ -161,10 +134,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with success status
      */
-    suspend fun leaveGroup(
-        groupId: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun leaveGroup(groupId: String, accessToken: String): Result<Unit>
 
     /**
      * AC E11.8.5: Transfer group ownership
@@ -175,11 +145,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with success status
      */
-    suspend fun transferOwnership(
-        groupId: String,
-        newOwnerId: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun transferOwnership(groupId: String, newOwnerId: String, accessToken: String): Result<Unit>
 
     // ==========================================================================
     // Story E11.9: Group Invite Endpoints
@@ -195,12 +161,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with created invite on success
      */
-    suspend fun createInvite(
-        groupId: String,
-        expiryDays: Int,
-        maxUses: Int,
-        accessToken: String,
-    ): Result<GroupInvite>
+    suspend fun createInvite(groupId: String, expiryDays: Int, maxUses: Int, accessToken: String): Result<GroupInvite>
 
     /**
      * AC E11.9.6: Get all invites for a group
@@ -210,10 +171,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with list of invites on success
      */
-    suspend fun getGroupInvites(
-        groupId: String,
-        accessToken: String,
-    ): Result<List<GroupInvite>>
+    suspend fun getGroupInvites(groupId: String, accessToken: String): Result<List<GroupInvite>>
 
     /**
      * AC E11.9.7: Revoke an invite
@@ -224,11 +182,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with success status
      */
-    suspend fun revokeInvite(
-        groupId: String,
-        inviteId: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun revokeInvite(groupId: String, inviteId: String, accessToken: String): Result<Unit>
 
     /**
      * AC E11.9.4: Validate an invite code
@@ -247,10 +201,7 @@ interface GroupApiService {
      * @param accessToken JWT access token
      * @return Result with join result including role assigned
      */
-    suspend fun joinWithInvite(
-        code: String,
-        accessToken: String,
-    ): Result<JoinGroupResult>
+    suspend fun joinWithInvite(code: String, accessToken: String): Result<JoinGroupResult>
 }
 
 @Singleton
@@ -263,11 +214,7 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.8 Task 2: Create a new group
      * POST /groups
      */
-    override suspend fun createGroup(
-        name: String,
-        description: String?,
-        accessToken: String,
-    ): Result<Group> = try {
+    override suspend fun createGroup(name: String, description: String?, accessToken: String): Result<Group> = try {
         Timber.d("Creating group: name=$name")
 
         val response: CreateGroupResponse = httpClient.post("${apiConfig.baseUrl}/api/v1/groups") {
@@ -306,10 +253,7 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.8 Task 2: Get group details
      * GET /groups/{groupId}
      */
-    override suspend fun getGroupDetails(
-        groupId: String,
-        accessToken: String,
-    ): Result<Group> = try {
+    override suspend fun getGroupDetails(groupId: String, accessToken: String): Result<Group> = try {
         Timber.d("Fetching group details: groupId=$groupId")
 
         val response: GroupDetailResponse = httpClient.get("${apiConfig.baseUrl}/api/v1/groups/$groupId") {
@@ -352,10 +296,7 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.8 Task 2: Delete a group
      * DELETE /groups/{groupId}
      */
-    override suspend fun deleteGroup(
-        groupId: String,
-        accessToken: String,
-    ): Result<Unit> = try {
+    override suspend fun deleteGroup(groupId: String, accessToken: String): Result<Unit> = try {
         Timber.d("Deleting group: groupId=$groupId")
 
         httpClient.delete("${apiConfig.baseUrl}/api/v1/groups/$groupId") {
@@ -373,14 +314,11 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.8 Task 2: Get group members
      * GET /groups/{groupId}/members
      */
-    override suspend fun getGroupMembers(
-        groupId: String,
-        accessToken: String,
-    ): Result<List<GroupMembership>> = try {
+    override suspend fun getGroupMembers(groupId: String, accessToken: String): Result<List<GroupMembership>> = try {
         Timber.d("Fetching group members: groupId=$groupId")
 
         val response: ListMembersResponse = httpClient.get(
-            "${apiConfig.baseUrl}/api/v1/groups/$groupId/members"
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/members",
         ) {
             header("Authorization", "Bearer $accessToken")
         }.body()
@@ -406,7 +344,7 @@ class GroupApiServiceImpl @Inject constructor(
         Timber.d("Updating member role: groupId=$groupId, userId=$userId, role=$role")
 
         val response: GroupOperationResponse = httpClient.put(
-            "${apiConfig.baseUrl}/api/v1/groups/$groupId/members/$userId/role"
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/members/$userId/role",
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")
@@ -429,11 +367,7 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.8 Task 2: Remove member from group
      * DELETE /groups/{groupId}/members/{userId}
      */
-    override suspend fun removeMember(
-        groupId: String,
-        userId: String,
-        accessToken: String,
-    ): Result<Unit> = try {
+    override suspend fun removeMember(groupId: String, userId: String, accessToken: String): Result<Unit> = try {
         Timber.d("Removing member: groupId=$groupId, userId=$userId")
 
         httpClient.delete("${apiConfig.baseUrl}/api/v1/groups/$groupId/members/$userId") {
@@ -451,10 +385,7 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.8 Task 2: Leave a group
      * POST /groups/{groupId}/leave
      */
-    override suspend fun leaveGroup(
-        groupId: String,
-        accessToken: String,
-    ): Result<Unit> = try {
+    override suspend fun leaveGroup(groupId: String, accessToken: String): Result<Unit> = try {
         Timber.d("Leaving group: groupId=$groupId")
 
         httpClient.post("${apiConfig.baseUrl}/api/v1/groups/$groupId/leave") {
@@ -472,32 +403,29 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.8 Task 2: Transfer group ownership
      * POST /groups/{groupId}/transfer-ownership
      */
-    override suspend fun transferOwnership(
-        groupId: String,
-        newOwnerId: String,
-        accessToken: String,
-    ): Result<Unit> = try {
-        Timber.d("Transferring ownership: groupId=$groupId to newOwnerId=$newOwnerId")
+    override suspend fun transferOwnership(groupId: String, newOwnerId: String, accessToken: String): Result<Unit> =
+        try {
+            Timber.d("Transferring ownership: groupId=$groupId to newOwnerId=$newOwnerId")
 
-        val response: GroupOperationResponse = httpClient.post(
-            "${apiConfig.baseUrl}/api/v1/groups/$groupId/transfer-ownership"
-        ) {
-            contentType(ContentType.Application.Json)
-            header("Authorization", "Bearer $accessToken")
-            setBody(TransferOwnershipRequest(newOwnerId = newOwnerId))
-        }.body()
+            val response: GroupOperationResponse = httpClient.post(
+                "${apiConfig.baseUrl}/api/v1/groups/$groupId/transfer-ownership",
+            ) {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $accessToken")
+                setBody(TransferOwnershipRequest(newOwnerId = newOwnerId))
+            }.body()
 
-        if (response.success) {
-            Timber.i("Ownership transferred: $groupId to $newOwnerId")
-            Result.success(Unit)
-        } else {
-            Timber.e("Failed to transfer ownership: ${response.message}")
-            Result.failure(Exception(response.message ?: "Failed to transfer ownership"))
+            if (response.success) {
+                Timber.i("Ownership transferred: $groupId to $newOwnerId")
+                Result.success(Unit)
+            } else {
+                Timber.e("Failed to transfer ownership: ${response.message}")
+                Result.failure(Exception(response.message ?: "Failed to transfer ownership"))
+            }
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to transfer ownership: groupId=$groupId")
+            Result.failure(e)
         }
-    } catch (e: Exception) {
-        Timber.e(e, "Failed to transfer ownership: groupId=$groupId")
-        Result.failure(e)
-    }
 
     // ==========================================================================
     // Story E11.9: Group Invite Endpoints Implementation
@@ -516,7 +444,7 @@ class GroupApiServiceImpl @Inject constructor(
         Timber.d("Creating invite: groupId=$groupId, expiryDays=$expiryDays, maxUses=$maxUses")
 
         val response: CreateInviteResponse = httpClient.post(
-            "${apiConfig.baseUrl}/api/v1/groups/$groupId/invites"
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/invites",
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")
@@ -534,14 +462,11 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.9 Task 2: Get all invites for a group
      * GET /groups/{groupId}/invites
      */
-    override suspend fun getGroupInvites(
-        groupId: String,
-        accessToken: String,
-    ): Result<List<GroupInvite>> = try {
+    override suspend fun getGroupInvites(groupId: String, accessToken: String): Result<List<GroupInvite>> = try {
         Timber.d("Fetching invites: groupId=$groupId")
 
         val response: ListInvitesResponse = httpClient.get(
-            "${apiConfig.baseUrl}/api/v1/groups/$groupId/invites"
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/invites",
         ) {
             header("Authorization", "Bearer $accessToken")
         }.body()
@@ -558,11 +483,7 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.9 Task 2: Revoke an invite
      * DELETE /groups/{groupId}/invites/{inviteId}
      */
-    override suspend fun revokeInvite(
-        groupId: String,
-        inviteId: String,
-        accessToken: String,
-    ): Result<Unit> = try {
+    override suspend fun revokeInvite(groupId: String, inviteId: String, accessToken: String): Result<Unit> = try {
         Timber.d("Revoking invite: inviteId=$inviteId in group=$groupId")
 
         httpClient.delete("${apiConfig.baseUrl}/api/v1/groups/$groupId/invites/$inviteId") {
@@ -584,7 +505,7 @@ class GroupApiServiceImpl @Inject constructor(
         Timber.d("Validating invite code: $code")
 
         val response: ValidateInviteResponse = httpClient.get(
-            "${apiConfig.baseUrl}/api/v1/invites/$code/validate"
+            "${apiConfig.baseUrl}/api/v1/invites/$code/validate",
         ).body()
 
         Timber.i("Invite code validated: valid=${response.valid}")
@@ -598,14 +519,11 @@ class GroupApiServiceImpl @Inject constructor(
      * Story E11.9 Task 2: Join a group using an invite code
      * POST /invites/{code}/join
      */
-    override suspend fun joinWithInvite(
-        code: String,
-        accessToken: String,
-    ): Result<JoinGroupResult> = try {
+    override suspend fun joinWithInvite(code: String, accessToken: String): Result<JoinGroupResult> = try {
         Timber.d("Joining group with invite code: $code")
 
         val response: JoinGroupResponse = httpClient.post(
-            "${apiConfig.baseUrl}/api/v1/invites/$code/join"
+            "${apiConfig.baseUrl}/api/v1/invites/$code/join",
         ) {
             contentType(ContentType.Application.Json)
             header("Authorization", "Bearer $accessToken")

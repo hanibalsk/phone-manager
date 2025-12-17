@@ -43,7 +43,7 @@ class GroupListViewModel @Inject constructor(
         } else {
             _uiState.value = GroupListUiState.Error(
                 message = "Please sign in to view your groups",
-                errorCode = "not_authenticated"
+                errorCode = "not_authenticated",
             )
         }
     }
@@ -57,7 +57,7 @@ class GroupListViewModel @Inject constructor(
         if (!authRepository.isLoggedIn()) {
             _uiState.value = GroupListUiState.Error(
                 message = "Please sign in to view your groups",
-                errorCode = "not_authenticated"
+                errorCode = "not_authenticated",
             )
             return
         }
@@ -80,9 +80,9 @@ class GroupListViewModel @Inject constructor(
                     Timber.e(error, "Failed to load groups")
                     _uiState.value = GroupListUiState.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
     }
@@ -96,14 +96,14 @@ class GroupListViewModel @Inject constructor(
     fun createGroup(name: String, description: String?) {
         if (name.isBlank()) {
             _createGroupResult.value = CreateGroupResult.Error(
-                message = "Group name is required"
+                message = "Group name is required",
             )
             return
         }
 
         if (name.length > 50) {
             _createGroupResult.value = CreateGroupResult.Error(
-                message = "Group name must be 50 characters or less"
+                message = "Group name must be 50 characters or less",
             )
             return
         }
@@ -113,7 +113,7 @@ class GroupListViewModel @Inject constructor(
 
             val result = groupRepository.createGroup(
                 name = name.trim(),
-                description = description?.trim()?.takeIf { it.isNotBlank() }
+                description = description?.trim()?.takeIf { it.isNotBlank() },
             )
 
             result.fold(
@@ -126,9 +126,9 @@ class GroupListViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to create group")
                     _createGroupResult.value = CreateGroupResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
     }
@@ -196,9 +196,7 @@ sealed interface GroupListUiState {
      *
      * @property groups List of user's groups
      */
-    data class Success(
-        val groups: List<Group>,
-    ) : GroupListUiState
+    data class Success(val groups: List<Group>) : GroupListUiState
 
     /**
      * Error loading groups
@@ -206,10 +204,7 @@ sealed interface GroupListUiState {
      * @property message User-friendly error message
      * @property errorCode Optional error code for debugging
      */
-    data class Error(
-        val message: String,
-        val errorCode: String? = null,
-    ) : GroupListUiState
+    data class Error(val message: String, val errorCode: String? = null) : GroupListUiState
 
     /**
      * Empty state - user has no groups

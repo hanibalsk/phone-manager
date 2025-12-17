@@ -90,7 +90,10 @@ class UnlockRequestViewModel @Inject constructor(
             UnlockRequestFilter.PENDING -> allRequests.filter { it.isPending() }
             UnlockRequestFilter.APPROVED -> allRequests.filter { it.isApproved() }
             UnlockRequestFilter.DENIED -> allRequests.filter { it.isDenied() }
-            UnlockRequestFilter.WITHDRAWN -> allRequests.filter { it.status == three.two.bit.phonemanager.domain.model.UnlockRequestStatus.WITHDRAWN }
+            UnlockRequestFilter.WITHDRAWN -> allRequests.filter {
+                it.status ==
+                    three.two.bit.phonemanager.domain.model.UnlockRequestStatus.WITHDRAWN
+            }
         }
     }.stateIn(
         scope = viewModelScope,
@@ -280,7 +283,5 @@ class UnlockRequestViewModel @Inject constructor(
     /**
      * Get remaining characters for reason.
      */
-    fun getRemainingCharacters(): Int {
-        return 200 - _reason.value.length
-    }
+    fun getRemainingCharacters(): Int = 200 - _reason.value.length
 }

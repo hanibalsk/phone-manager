@@ -3,9 +3,6 @@ package three.two.bit.phonemanager.data.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlin.time.Clock
-import kotlin.time.Instant
-import kotlin.time.toJavaInstant
 import three.two.bit.phonemanager.data.database.TripDao
 import three.two.bit.phonemanager.data.model.TripEntity
 import three.two.bit.phonemanager.data.model.toDomain
@@ -30,6 +27,9 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
+import kotlin.time.Instant
+import kotlin.time.toJavaInstant
 
 /**
  * Story E8.3: TripRepositoryImpl - Implementation of TripRepository
@@ -270,14 +270,12 @@ class TripRepositoryImpl @Inject constructor(
         limit = limit,
     )
 
-    override suspend fun getTripPath(tripId: String): Result<TripPathResponse> =
-        tripApiService.getTripPath(tripId)
+    override suspend fun getTripPath(tripId: String): Result<TripPathResponse> = tripApiService.getTripPath(tripId)
 
     override suspend fun triggerPathCorrection(tripId: String): Result<PathCorrectionResponse> =
         tripApiService.triggerPathCorrection(tripId)
 
-    private fun formatInstant(instant: Instant): String =
-        isoFormatter.format(instant.toJavaInstant())
+    private fun formatInstant(instant: Instant): String = isoFormatter.format(instant.toJavaInstant())
 
     private fun mapTripStateToApiStatus(state: TripState): String = when (state) {
         TripState.IDLE -> "ACTIVE" // Map IDLE to ACTIVE for API

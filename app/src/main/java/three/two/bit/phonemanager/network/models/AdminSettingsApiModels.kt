@@ -21,7 +21,11 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class UpdateDeviceSettingsRequest(
-    val settings: Map<String, @Serializable(with = AnySerializer::class) Any>,
+    val settings: Map<
+        String,
+        @Serializable(with = AnySerializer::class)
+        Any,
+        >,
 )
 
 /**
@@ -29,10 +33,7 @@ data class UpdateDeviceSettingsRequest(
  * AC E12.7.5: Lock/Unlock Settings
  */
 @Serializable
-data class LockSettingsRequest(
-    @SerialName("setting_keys") val settingKeys: List<String>,
-    val lock: Boolean,
-)
+data class LockSettingsRequest(@SerialName("setting_keys") val settingKeys: List<String>, val lock: Boolean)
 
 /**
  * Request for bulk settings update.
@@ -41,7 +42,11 @@ data class LockSettingsRequest(
 @Serializable
 data class BulkUpdateSettingsRequest(
     @SerialName("device_ids") val deviceIds: List<String>,
-    val settings: Map<String, @Serializable(with = AnySerializer::class) Any>,
+    val settings: Map<
+        String,
+        @Serializable(with = AnySerializer::class)
+        Any,
+        >,
     val locks: List<String>? = null,
     @SerialName("notify_users") val notifyUsers: Boolean = true,
 )
@@ -54,7 +59,11 @@ data class BulkUpdateSettingsRequest(
 data class SaveTemplateRequest(
     val name: String,
     val description: String? = null,
-    val settings: Map<String, @Serializable(with = AnySerializer::class) Any>,
+    val settings: Map<
+        String,
+        @Serializable(with = AnySerializer::class)
+        Any,
+        >,
     @SerialName("locked_settings") val lockedSettings: List<String>,
     @SerialName("is_shared") val isShared: Boolean = false,
 )
@@ -140,7 +149,9 @@ data class UpdateSettingsResponse(
  */
 @Serializable
 data class SettingValueResponse(
-    val value: @Serializable(with = AnySerializer::class) Any,
+    val value:
+    @Serializable(with = AnySerializer::class)
+    Any,
     @SerialName("is_locked") val isLocked: Boolean = false,
     @SerialName("locked_by") val lockedBy: String? = null,
     @SerialName("locked_at") val lockedAt: String? = null,
@@ -167,10 +178,7 @@ data class LockSettingsResponse(
  * AC E12.7.6: Bulk Settings Application
  */
 @Serializable
-data class BulkUpdateResponse(
-    val successful: List<BulkUpdateDeviceResult>,
-    val failed: List<BulkUpdateDeviceResult>,
-)
+data class BulkUpdateResponse(val successful: List<BulkUpdateDeviceResult>, val failed: List<BulkUpdateDeviceResult>)
 
 @Serializable
 data class BulkUpdateDeviceResult(
@@ -178,7 +186,11 @@ data class BulkUpdateDeviceResult(
     @SerialName("device_name") val deviceName: String = "",
     val success: Boolean = true,
     val error: String? = null,
-    @SerialName("applied_settings") val appliedSettings: Map<String, @Serializable(with = AnySerializer::class) Any>? = null,
+    @SerialName("applied_settings") val appliedSettings: Map<
+        String,
+        @Serializable(with = AnySerializer::class)
+        Any,
+        >? = null,
 )
 
 /**
@@ -196,8 +208,12 @@ data class SettingsHistoryResponse(
 data class SettingChangeResponse(
     val id: String,
     @SerialName("setting_key") val settingKey: String,
-    @SerialName("old_value") val oldValue: @Serializable(with = AnySerializer::class) Any? = null,
-    @SerialName("new_value") val newValue: @Serializable(with = AnySerializer::class) Any? = null,
+    @SerialName("old_value") val oldValue:
+    @Serializable(with = AnySerializer::class)
+    Any? = null,
+    @SerialName("new_value") val newValue:
+    @Serializable(with = AnySerializer::class)
+    Any? = null,
     @SerialName("changed_by") val changedBy: String,
     @SerialName("changed_by_name") val changedByName: String,
     @SerialName("changed_at") val changedAt: String,
@@ -209,16 +225,18 @@ data class SettingChangeResponse(
  * AC E12.7.7: Settings Templates
  */
 @Serializable
-data class TemplatesResponse(
-    val templates: List<SettingsTemplateResponse>,
-)
+data class TemplatesResponse(val templates: List<SettingsTemplateResponse>)
 
 @Serializable
 data class SettingsTemplateResponse(
     val id: String,
     val name: String,
     val description: String? = null,
-    val settings: Map<String, @Serializable(with = AnySerializer::class) Any>,
+    val settings: Map<
+        String,
+        @Serializable(with = AnySerializer::class)
+        Any,
+        >,
     @SerialName("locked_settings") val lockedSettings: List<String>,
     @SerialName("created_by") val createdBy: String,
     @SerialName("created_by_name") val createdByName: String,
@@ -265,9 +283,7 @@ data class DeviceLastLocationResponse(
  * Backend returns just { devices: [...] } without total_count.
  */
 @Serializable
-data class MemberDevicesResponse(
-    val devices: List<MemberDeviceResponse>,
-) {
+data class MemberDevicesResponse(val devices: List<MemberDeviceResponse>) {
     val totalCount: Int get() = devices.size
 }
 
@@ -292,10 +308,14 @@ data class SettingDefinitionResponse(
     @SerialName("display_name") val displayName: String,
     val description: String? = null,
     @SerialName("data_type") val dataType: String,
-    @SerialName("default_value") val defaultValue: @Serializable(with = AnySerializer::class) Any,
+    @SerialName("default_value") val defaultValue:
+    @Serializable(with = AnySerializer::class)
+    Any,
     @SerialName("is_lockable") val isLockable: Boolean,
     val category: String,
-    @SerialName("validation_rules") val validationRules: @Serializable(with = AnySerializer::class) Any? = null,
+    @SerialName("validation_rules") val validationRules:
+    @Serializable(with = AnySerializer::class)
+    Any? = null,
     @SerialName("sort_order") val sortOrder: Int,
 )
 

@@ -142,7 +142,13 @@ class AdminSettingsRepositoryTest {
             isOnline = true,
             lastSeen = "2025-01-15T10:00:00Z",
             settings = mapOf(
-                "tracking_enabled" to SettingValueResponse(value = true, isLocked = true, lockedBy = "admin@test.com", lockedAt = "2025-01-15T09:00:00Z"),
+                "tracking_enabled" to
+                    SettingValueResponse(
+                        value = true,
+                        isLocked = true,
+                        lockedBy = "admin@test.com",
+                        lockedAt = "2025-01-15T09:00:00Z",
+                    ),
                 "tracking_interval_seconds" to SettingValueResponse(value = 60),
             ),
             locks = mapOf(

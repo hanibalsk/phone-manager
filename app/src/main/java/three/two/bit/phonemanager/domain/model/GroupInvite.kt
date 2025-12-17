@@ -1,8 +1,8 @@
 package three.two.bit.phonemanager.domain.model
 
+import three.two.bit.phonemanager.util.InviteCodeUtils
 import kotlin.time.Clock
 import kotlin.time.Instant
-import three.two.bit.phonemanager.util.InviteCodeUtils
 
 /**
  * Story E11.9: Represents an invite to join a group.
@@ -49,10 +49,9 @@ data class GroupInvite(
      *
      * @return true if the invite can be used
      */
-    fun isValid(): Boolean =
-        status == InviteStatus.ACTIVE &&
-            !isExpired() &&
-            (usesRemaining > 0 || maxUses == -1)
+    fun isValid(): Boolean = status == InviteStatus.ACTIVE &&
+        !isExpired() &&
+        (usesRemaining > 0 || maxUses == -1)
 
     /**
      * Check if this is a multi-use invite (unlimited or > 1 uses).
@@ -129,7 +128,9 @@ enum class InviteStatus {
     /**
      * Invite has been fully used (all uses consumed).
      */
-    USED;
+    USED,
+
+    ;
 
     companion object {
         /**
@@ -184,11 +185,7 @@ enum class ExpiryUrgency {
  * @property group Group preview if valid (id, name, memberCount)
  * @property error Error message if invalid
  */
-data class InviteValidationResult(
-    val valid: Boolean,
-    val group: GroupPreview? = null,
-    val error: String? = null,
-)
+data class InviteValidationResult(val valid: Boolean, val group: GroupPreview? = null, val error: String? = null)
 
 /**
  * Story E11.9: Preview of a group for invite validation.
@@ -199,11 +196,7 @@ data class InviteValidationResult(
  * @property name Group's display name
  * @property memberCount Number of members in the group
  */
-data class GroupPreview(
-    val id: String,
-    val name: String,
-    val memberCount: Int,
-)
+data class GroupPreview(val id: String, val name: String, val memberCount: Int)
 
 /**
  * Story E11.9: Result from joining a group with an invite code.
@@ -212,8 +205,4 @@ data class GroupPreview(
  * @property role The role assigned to the new member
  * @property joinedAt When the user joined the group
  */
-data class JoinGroupResult(
-    val groupId: String,
-    val role: GroupRole,
-    val joinedAt: Instant,
-)
+data class JoinGroupResult(val groupId: String, val role: GroupRole, val joinedAt: Instant)

@@ -6,7 +6,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.time.Instant
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.network.auth.AuthApiService
@@ -19,6 +18,7 @@ import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Instant
 
 /**
  * Story E9.11, Task 4: Authentication Repository Interface
@@ -82,7 +82,7 @@ interface AuthRepository {
 @Singleton
 class AuthRepositoryImpl @Inject constructor(
     private val authApiService: AuthApiService,
-    private val secureStorage: SecureStorage
+    private val secureStorage: SecureStorage,
 ) : AuthRepository {
 
     private val _currentUser = MutableStateFlow<User?>(null)
@@ -123,7 +123,7 @@ class AuthRepositoryImpl @Inject constructor(
                     userId = userId,
                     email = email,
                     displayName = displayName ?: email.substringBefore('@'),
-                    createdAt = createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
+                    createdAt = createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST,
                 )
                 _currentUser.value = user
                 Timber.d("User state restored from storage: ${user.userId}")
@@ -139,26 +139,22 @@ class AuthRepositoryImpl @Inject constructor(
      * @param displayName User display name
      * @return Result with User on success, exception on failure
      */
-    override suspend fun register(
-        email: String,
-        password: String,
-        displayName: String
-    ): Result<User> = try {
+    override suspend fun register(email: String, password: String, displayName: String): Result<User> = try {
         Timber.d("Registering user: $email")
 
         val response = authApiService.register(
             RegisterRequest(
                 email = email,
                 password = password,
-                displayName = displayName
-            )
+                displayName = displayName,
+            ),
         )
 
         // Store tokens securely (AC E9.11.6)
         storeTokens(
             response.tokens.accessToken,
             response.tokens.refreshToken,
-            response.tokens.expiresIn
+            response.tokens.expiresIn,
         )
 
         // Map to domain model and update current user
@@ -166,7 +162,7 @@ class AuthRepositoryImpl @Inject constructor(
             userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
-            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
+            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST,
         )
         _currentUser.value = user
 
@@ -175,7 +171,7 @@ class AuthRepositoryImpl @Inject constructor(
             userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
-            createdAt = response.user.createdAt ?: ""
+            createdAt = response.user.createdAt ?: "",
         )
 
         Timber.i("User registered successfully: ${user.userId}")
@@ -196,24 +192,21 @@ class AuthRepositoryImpl @Inject constructor(
      * @param password User password
      * @return Result with User on success, exception on failure
      */
-    override suspend fun login(
-        email: String,
-        password: String
-    ): Result<User> = try {
+    override suspend fun login(email: String, password: String): Result<User> = try {
         Timber.d("Logging in user: $email")
 
         val response = authApiService.login(
             LoginRequest(
                 email = email,
-                password = password
-            )
+                password = password,
+            ),
         )
 
         // Store tokens securely (AC E9.11.6)
         storeTokens(
             response.tokens.accessToken,
             response.tokens.refreshToken,
-            response.tokens.expiresIn
+            response.tokens.expiresIn,
         )
 
         // Map to domain model and update current user
@@ -221,7 +214,7 @@ class AuthRepositoryImpl @Inject constructor(
             userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
-            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
+            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST,
         )
         _currentUser.value = user
 
@@ -230,7 +223,7 @@ class AuthRepositoryImpl @Inject constructor(
             userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
-            createdAt = response.user.createdAt ?: ""
+            createdAt = response.user.createdAt ?: "",
         )
 
         Timber.i("User logged in successfully: ${user.userId}")
@@ -252,24 +245,21 @@ class AuthRepositoryImpl @Inject constructor(
      * @param idToken ID token from OAuth provider
      * @return Result with User on success, exception on failure
      */
-    override suspend fun oauthLogin(
-        provider: String,
-        idToken: String
-    ): Result<User> = runCatching {
+    override suspend fun oauthLogin(provider: String, idToken: String): Result<User> = runCatching {
         Timber.d("OAuth sign-in with provider: $provider")
 
         val response = authApiService.oauthSignIn(
             OAuthRequest(
                 provider = provider,
-                idToken = idToken
-            )
+                idToken = idToken,
+            ),
         )
 
         // Store tokens securely (AC E9.11.6)
         storeTokens(
             response.tokens.accessToken,
             response.tokens.refreshToken,
-            response.tokens.expiresIn
+            response.tokens.expiresIn,
         )
 
         // Map to domain model and update current user
@@ -277,7 +267,7 @@ class AuthRepositoryImpl @Inject constructor(
             userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
-            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST
+            createdAt = response.user.createdAt?.let { Instant.parse(it) } ?: Instant.DISTANT_PAST,
         )
         _currentUser.value = user
 
@@ -286,7 +276,7 @@ class AuthRepositoryImpl @Inject constructor(
             userId = response.user.id,
             email = response.user.email,
             displayName = response.user.displayName ?: response.user.email.substringBefore('@'),
-            createdAt = response.user.createdAt ?: ""
+            createdAt = response.user.createdAt ?: "",
         )
 
         Timber.i("OAuth sign-in successful: ${user.userId}")
@@ -342,14 +332,14 @@ class AuthRepositoryImpl @Inject constructor(
             }
 
             val response = authApiService.refreshToken(
-                RefreshRequest(refreshToken = refreshToken)
+                RefreshRequest(refreshToken = refreshToken),
             )
 
             // Store new tokens (AC E9.11.8)
             storeTokens(
                 response.tokens.accessToken,
                 response.tokens.refreshToken,
-                response.tokens.expiresIn
+                response.tokens.expiresIn,
             )
 
             Timber.i("Access token refreshed successfully")
@@ -414,36 +404,28 @@ class AuthRepositoryImpl @Inject constructor(
      *
      * @return true if user has valid tokens and session
      */
-    override fun isLoggedIn(): Boolean {
-        return secureStorage.isAuthenticated()
-    }
+    override fun isLoggedIn(): Boolean = secureStorage.isAuthenticated()
 
     /**
      * Get current authenticated user
      *
      * @return Current user or null if not authenticated
      */
-    override fun getCurrentUser(): User? {
-        return _currentUser.value
-    }
+    override fun getCurrentUser(): User? = _currentUser.value
 
     /**
      * Story E12.6: Get current access token
      *
      * @return Access token if available, null if not authenticated
      */
-    override fun getAccessToken(): String? {
-        return secureStorage.getAccessToken()
-    }
+    override fun getAccessToken(): String? = secureStorage.getAccessToken()
 
     /**
      * Story E12.6: Get current user ID
      *
      * @return User ID if authenticated, null otherwise
      */
-    override fun getUserId(): String? {
-        return _currentUser.value?.userId
-    }
+    override fun getUserId(): String? = _currentUser.value?.userId
 
     /**
      * Store authentication tokens securely

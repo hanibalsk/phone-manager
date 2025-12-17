@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.data.repository.MovementEventRepository
@@ -27,6 +26,7 @@ import three.two.bit.phonemanager.movement.TransportationMode
 import timber.log.Timber
 import java.io.File
 import javax.inject.Inject
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.seconds
 

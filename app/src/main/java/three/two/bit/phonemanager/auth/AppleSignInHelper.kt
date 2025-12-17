@@ -62,12 +62,10 @@ class AppleSignInHelper @Inject constructor() {
      * @param activity Activity context for launching flow
      * @return Result with ID token on success, error on failure
      */
-    suspend fun signIn(activity: Activity): Result<String> {
-        return if (BuildConfig.USE_MOCK_AUTH) {
-            mockSignIn()
-        } else {
-            realSignIn(activity)
-        }
+    suspend fun signIn(activity: Activity): Result<String> = if (BuildConfig.USE_MOCK_AUTH) {
+        mockSignIn()
+    } else {
+        realSignIn(activity)
     }
 
     /**
@@ -231,9 +229,7 @@ class AppleSignInHelper @Inject constructor() {
      * Note: Apple Sign-In requires a Services ID configured in Apple Developer Portal.
      * Set APPLE_OAUTH_CLIENT_ID in local.properties.
      */
-    private fun getAppleClientId(): String {
-        return BuildConfig.APPLE_OAUTH_CLIENT_ID
-    }
+    private fun getAppleClientId(): String = BuildConfig.APPLE_OAUTH_CLIENT_ID
 
     /**
      * Get redirect URI for OAuth callback

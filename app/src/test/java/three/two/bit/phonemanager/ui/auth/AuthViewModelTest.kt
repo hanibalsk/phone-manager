@@ -1,5 +1,6 @@
 package three.two.bit.phonemanager.ui.auth
 
+import android.content.Context
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -11,22 +12,21 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Instant
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.ConfigRepository
+import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.network.models.LinkedDeviceInfo
 import three.two.bit.phonemanager.network.models.LinkedDeviceResponse
-import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.security.SecureStorage
-import android.content.Context
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Unit tests for AuthViewModel (Story E9.11, Task 7)
@@ -54,7 +54,7 @@ class AuthViewModelTest {
         userId = "user-123",
         email = "test@example.com",
         displayName = "Test User",
-        createdAt = Instant.parse("2025-12-01T10:00:00Z")
+        createdAt = Instant.parse("2025-12-01T10:00:00Z"),
     )
 
     private val testLinkedDeviceResponse = LinkedDeviceResponse(
@@ -92,7 +92,15 @@ class AuthViewModelTest {
             deviceApiService.linkDevice(any(), any(), any(), any(), any())
         } returns Result.success(testLinkedDeviceResponse)
 
-        viewModel = AuthViewModel(context, authRepository, configRepository, deviceApiService, secureStorage, settingsSyncRepository)
+        viewModel =
+            AuthViewModel(
+                context,
+                authRepository,
+                configRepository,
+                deviceApiService,
+                secureStorage,
+                settingsSyncRepository,
+            )
     }
 
     @After
@@ -179,7 +187,7 @@ class AuthViewModelTest {
     fun `login sets error state on invalid credentials`() = runTest {
         // Given
         coEvery { authRepository.login(any(), any()) } returns Result.failure(
-            RuntimeException("invalid_credentials")
+            RuntimeException("invalid_credentials"),
         )
 
         // When
@@ -234,7 +242,7 @@ class AuthViewModelTest {
         // Then
         assertEquals(
             "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character",
-            viewModel.passwordError.value
+            viewModel.passwordError.value,
         )
     }
 
@@ -247,7 +255,7 @@ class AuthViewModelTest {
         // Then
         assertEquals(
             "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character",
-            viewModel.passwordError.value
+            viewModel.passwordError.value,
         )
     }
 
@@ -260,7 +268,7 @@ class AuthViewModelTest {
         // Then
         assertEquals(
             "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character",
-            viewModel.passwordError.value
+            viewModel.passwordError.value,
         )
     }
 
@@ -273,7 +281,7 @@ class AuthViewModelTest {
         // Then
         assertEquals(
             "Password must be at least 8 characters with 1 uppercase, 1 number, and 1 special character",
-            viewModel.passwordError.value
+            viewModel.passwordError.value,
         )
     }
 
@@ -309,7 +317,7 @@ class AuthViewModelTest {
     fun `register sets error state on email already exists`() = runTest {
         // Given
         coEvery { authRepository.register(any(), any(), any()) } returns Result.failure(
-            RuntimeException("email_already_exists")
+            RuntimeException("email_already_exists"),
         )
 
         // When
@@ -369,7 +377,7 @@ class AuthViewModelTest {
     fun `oauthSignIn sets error state on failure`() = runTest {
         // Given
         coEvery { authRepository.oauthLogin(any(), any()) } returns Result.failure(
-            RuntimeException("oauth_failed")
+            RuntimeException("oauth_failed"),
         )
 
         // When
@@ -415,7 +423,7 @@ class AuthViewModelTest {
     fun `resetState clears UI state to idle`() = runTest {
         // Given - set error state
         coEvery { authRepository.login(any(), any()) } returns Result.failure(
-            RuntimeException("error")
+            RuntimeException("error"),
         )
         viewModel.login("test@example.com", "Password123!")
         advanceUntilIdle()
@@ -448,7 +456,7 @@ class AuthViewModelTest {
     fun `error message for network error`() = runTest {
         // Given
         coEvery { authRepository.login(any(), any()) } returns Result.failure(
-            RuntimeException("network_error")
+            RuntimeException("network_error"),
         )
 
         // When
@@ -464,7 +472,7 @@ class AuthViewModelTest {
     fun `error message for weak password`() = runTest {
         // Given
         coEvery { authRepository.register(any(), any(), any()) } returns Result.failure(
-            RuntimeException("weak_password")
+            RuntimeException("weak_password"),
         )
 
         // When
@@ -480,7 +488,7 @@ class AuthViewModelTest {
     fun `error message for account locked`() = runTest {
         // Given
         coEvery { authRepository.login(any(), any()) } returns Result.failure(
-            RuntimeException("account_locked")
+            RuntimeException("account_locked"),
         )
 
         // When
@@ -496,7 +504,7 @@ class AuthViewModelTest {
     fun `error message for account disabled`() = runTest {
         // Given
         coEvery { authRepository.login(any(), any()) } returns Result.failure(
-            RuntimeException("account_disabled")
+            RuntimeException("account_disabled"),
         )
 
         // When
@@ -512,7 +520,7 @@ class AuthViewModelTest {
     fun `error message for unknown error`() = runTest {
         // Given
         coEvery { authRepository.login(any(), any()) } returns Result.failure(
-            RuntimeException("Some unexpected error")
+            RuntimeException("Some unexpected error"),
         )
 
         // When
@@ -537,7 +545,7 @@ class AuthViewModelTest {
             "user.name@domain.org",
             "user-name@domain.co.uk",
             "user_name@domain.io",
-            "test123@example.com"
+            "test123@example.com",
         )
 
         for (email in validEmails) {

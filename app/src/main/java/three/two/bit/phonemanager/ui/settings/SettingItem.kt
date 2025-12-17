@@ -224,11 +224,7 @@ fun SettingTextItem(
  * Displayed on long-press of a locked setting.
  */
 @Composable
-private fun SettingLockTooltip(
-    settingName: String,
-    lockedBy: String?,
-    onDismiss: () -> Unit,
-) {
+private fun SettingLockTooltip(settingName: String, lockedBy: String?, onDismiss: () -> Unit) {
     androidx.compose.material3.AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.setting_locked)) },

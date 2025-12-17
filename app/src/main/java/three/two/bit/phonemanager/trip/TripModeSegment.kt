@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.trip
 
-import kotlin.time.Instant
 import three.two.bit.phonemanager.movement.TransportationMode
+import kotlin.time.Instant
 
 /**
  * Story E8.4: TripModeSegment - Represents a segment of a trip in a specific transportation mode

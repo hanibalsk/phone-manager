@@ -47,11 +47,7 @@ import three.two.bit.phonemanager.domain.model.GroupRole
  * AC E11.8.7: Delete group confirmation dialog
  */
 @Composable
-fun DeleteGroupDialog(
-    groupName: String,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+fun DeleteGroupDialog(groupName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -93,11 +89,7 @@ fun DeleteGroupDialog(
  * AC E11.8.6: Leave group confirmation dialog
  */
 @Composable
-fun LeaveGroupDialog(
-    groupName: String,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+fun LeaveGroupDialog(groupName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -138,11 +130,7 @@ fun LeaveGroupDialog(
  * AC E11.8.8: Edit group name dialog
  */
 @Composable
-fun EditGroupNameDialog(
-    currentName: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit,
-) {
+fun EditGroupNameDialog(currentName: String, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     var newName by remember { mutableStateOf(currentName) }
     var nameError by remember { mutableStateOf<String?>(null) }
 
@@ -151,24 +139,22 @@ fun EditGroupNameDialog(
     val errorNameTooLong = stringResource(R.string.group_dialog_name_too_long)
     val errorNameUnchanged = stringResource(R.string.group_dialog_name_unchanged)
 
-    fun validateName(): Boolean {
-        return when {
-            newName.isBlank() -> {
-                nameError = errorNameRequired
-                false
-            }
-            newName.length > 50 -> {
-                nameError = errorNameTooLong
-                false
-            }
-            newName.trim() == currentName -> {
-                nameError = errorNameUnchanged
-                false
-            }
-            else -> {
-                nameError = null
-                true
-            }
+    fun validateName(): Boolean = when {
+        newName.isBlank() -> {
+            nameError = errorNameRequired
+            false
+        }
+        newName.length > 50 -> {
+            nameError = errorNameTooLong
+            false
+        }
+        newName.trim() == currentName -> {
+            nameError = errorNameUnchanged
+            false
+        }
+        else -> {
+            nameError = null
+            true
         }
     }
 
@@ -229,11 +215,7 @@ fun EditGroupNameDialog(
  * AC E11.8.8: Edit group description dialog
  */
 @Composable
-fun EditGroupDescriptionDialog(
-    currentDescription: String?,
-    onDismiss: () -> Unit,
-    onConfirm: (String?) -> Unit,
-) {
+fun EditGroupDescriptionDialog(currentDescription: String?, onDismiss: () -> Unit, onConfirm: (String?) -> Unit) {
     var newDescription by remember { mutableStateOf(currentDescription ?: "") }
 
     AlertDialog(
@@ -274,15 +256,11 @@ fun EditGroupDescriptionDialog(
  * AC E11.8.5: Change member role dialog
  */
 @Composable
-fun ChangeRoleDialog(
-    member: GroupMembership,
-    onDismiss: () -> Unit,
-    onChangeRole: (GroupRole) -> Unit,
-) {
+fun ChangeRoleDialog(member: GroupMembership, onDismiss: () -> Unit, onChangeRole: (GroupRole) -> Unit) {
     val currentRole = member.role
     var selectedRole by remember {
         mutableStateOf(
-            if (currentRole == GroupRole.ADMIN) GroupRole.MEMBER else GroupRole.ADMIN
+            if (currentRole == GroupRole.ADMIN) GroupRole.MEMBER else GroupRole.ADMIN,
         )
     }
 
@@ -342,13 +320,7 @@ fun ChangeRoleDialog(
  * Role selection option
  */
 @Composable
-private fun RoleOption(
-    title: String,
-    description: String,
-    selected: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
+private fun RoleOption(title: String, description: String, selected: Boolean, enabled: Boolean, onClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -396,11 +368,7 @@ private fun RoleOption(
  * AC E11.8.5: Remove member confirmation dialog
  */
 @Composable
-fun RemoveMemberDialog(
-    memberName: String,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+fun RemoveMemberDialog(memberName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -441,11 +409,7 @@ fun RemoveMemberDialog(
  * AC E11.8.5: Transfer group ownership dialog
  */
 @Composable
-fun TransferGroupOwnershipDialog(
-    memberName: String,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+fun TransferGroupOwnershipDialog(memberName: String, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {

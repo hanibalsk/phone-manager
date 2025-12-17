@@ -11,7 +11,6 @@ import io.ktor.http.HttpStatusCode
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
-
 import javax.inject.Provider
 
 /**
@@ -30,7 +29,7 @@ import javax.inject.Provider
  */
 class AuthInterceptor(
     private val secureStorage: SecureStorage,
-    private val authRepositoryProvider: Provider<AuthRepository>
+    private val authRepositoryProvider: Provider<AuthRepository>,
 ) {
 
     /**

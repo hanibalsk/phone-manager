@@ -4,7 +4,6 @@ import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Clock
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.domain.model.UnlockRequestFilter
@@ -19,6 +18,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 /**
  * Unit tests for UnlockRequestRepository

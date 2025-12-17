@@ -31,8 +31,5 @@ sealed class AuthUiState {
      * @property message Error message to display
      * @property errorCode Optional error code for specific handling
      */
-    data class Error(
-        val message: String,
-        val errorCode: String? = null
-    ) : AuthUiState()
+    data class Error(val message: String, val errorCode: String? = null) : AuthUiState()
 }

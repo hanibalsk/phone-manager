@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.LocalDate
@@ -61,6 +60,7 @@ import three.two.bit.phonemanager.domain.model.DailyForecast
 import three.two.bit.phonemanager.domain.model.Weather
 import three.two.bit.phonemanager.domain.model.WeatherCode
 import kotlin.math.roundToInt
+import kotlin.time.Clock
 
 /**
  * Story E7.3: Weather Screen - Display current conditions and 5-day forecast

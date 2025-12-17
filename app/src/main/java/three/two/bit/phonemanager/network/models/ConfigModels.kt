@@ -10,10 +10,7 @@ import kotlinx.serialization.Serializable
  * GET /api/v1/config/public
  */
 @Serializable
-data class PublicConfigResponse(
-    val auth: AuthConfigResponse,
-    val features: FeaturesConfigResponse,
-)
+data class PublicConfigResponse(val auth: AuthConfigResponse, val features: FeaturesConfigResponse)
 
 /**
  * Authentication configuration from the server.

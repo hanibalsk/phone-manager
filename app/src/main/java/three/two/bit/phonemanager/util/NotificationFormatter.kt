@@ -1,9 +1,9 @@
 package three.two.bit.phonemanager.util
 
 import android.content.Context
-import kotlin.time.Clock
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.movement.TransportationMode
+import kotlin.time.Clock
 
 /**
  * Utility object for formatting notification content.

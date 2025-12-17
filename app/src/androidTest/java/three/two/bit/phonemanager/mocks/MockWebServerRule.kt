@@ -31,9 +31,7 @@ import java.util.concurrent.TimeUnit
  * }
  * ```
  */
-class MockWebServerRule(
-    private val port: Int = 8080
-) : ExternalResource() {
+class MockWebServerRule(private val port: Int = 8080) : ExternalResource() {
 
     lateinit var server: MockWebServer
         private set
@@ -67,9 +65,8 @@ class MockWebServerRule(
     /**
      * Get the next recorded request, waiting up to the specified timeout.
      */
-    fun takeRequest(timeout: Long = 5, unit: TimeUnit = TimeUnit.SECONDS): RecordedRequest? {
-        return server.takeRequest(timeout, unit)
-    }
+    fun takeRequest(timeout: Long = 5, unit: TimeUnit = TimeUnit.SECONDS): RecordedRequest? =
+        server.takeRequest(timeout, unit)
 
     /**
      * Get the total number of requests received.
@@ -124,7 +121,7 @@ class MockWebServerRule(
         server.enqueue(
             MockResponse()
                 .setBody("{}")
-                .throttleBody(bytesPerPeriod, periodMs, TimeUnit.MILLISECONDS)
+                .throttleBody(bytesPerPeriod, periodMs, TimeUnit.MILLISECONDS),
         )
     }
 }

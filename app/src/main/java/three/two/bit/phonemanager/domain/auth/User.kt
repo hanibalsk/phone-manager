@@ -8,9 +8,4 @@ import kotlin.time.Instant
  * Represents the currently authenticated user in the application.
  * Mapped from network UserInfo model.
  */
-data class User(
-    val userId: String,
-    val email: String,
-    val displayName: String,
-    val createdAt: Instant
-)
+data class User(val userId: String, val email: String, val displayName: String, val createdAt: Instant)

@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlin.time.Instant
 import kotlinx.serialization.Serializable
+import kotlin.time.Instant
 
 /**
  * Story E13.10: Android Enrollment Flow Domain Models
@@ -16,9 +16,7 @@ import kotlinx.serialization.Serializable
  * @property token The enrollment token/code
  * @property isValid Whether the token format is valid
  */
-data class EnrollmentToken(
-    val token: String,
-) {
+data class EnrollmentToken(val token: String) {
     /**
      * Check if the token format is valid (16-20 alphanumeric characters).
      */
@@ -59,11 +57,7 @@ data class EnrollmentToken(
  * @property locks List of setting keys that are locked
  * @property groupId The group ID the device belongs to
  */
-data class DevicePolicy(
-    val settings: Map<String, Any>,
-    val locks: List<String>,
-    val groupId: String?,
-) {
+data class DevicePolicy(val settings: Map<String, Any>, val locks: List<String>, val groupId: String?) {
     /**
      * Check if a specific setting is defined in the policy.
      */
@@ -77,9 +71,7 @@ data class DevicePolicy(
      * @return The setting value or default
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T> getPolicyValue(key: String, default: T): T {
-        return (settings[key] as? T) ?: default
-    }
+    fun <T> getPolicyValue(key: String, default: T): T = (settings[key] as? T) ?: default
 
     /**
      * Get the value for a specific policy setting, or null if not found.
@@ -87,9 +79,7 @@ data class DevicePolicy(
      * @param key The setting key
      * @return The setting value or null
      */
-    fun getPolicyValue(key: String): Any? {
-        return settings[key]
-    }
+    fun getPolicyValue(key: String): Any? = settings[key]
 
     /**
      * Check if a specific setting is locked by policy.
@@ -136,12 +126,7 @@ data class DevicePolicy(
  * @property supportPhone IT support phone number
  */
 @Serializable
-data class OrganizationInfo(
-    val id: String,
-    val name: String,
-    val contactEmail: String?,
-    val supportPhone: String?,
-) {
+data class OrganizationInfo(val id: String, val name: String, val contactEmail: String?, val supportPhone: String?) {
     /**
      * Check if IT contact information is available.
      */
@@ -150,14 +135,12 @@ data class OrganizationInfo(
     /**
      * Get formatted contact display string.
      */
-    fun getContactDisplay(): String {
-        return buildString {
-            contactEmail?.let { append("Email: $it") }
-            if (!contactEmail.isNullOrBlank() && !supportPhone.isNullOrBlank()) {
-                append(" | ")
-            }
-            supportPhone?.let { append("Phone: $it") }
+    fun getContactDisplay(): String = buildString {
+        contactEmail?.let { append("Email: $it") }
+        if (!contactEmail.isNullOrBlank() && !supportPhone.isNullOrBlank()) {
+            append(" | ")
         }
+        supportPhone?.let { append("Phone: $it") }
     }
 
     companion object {

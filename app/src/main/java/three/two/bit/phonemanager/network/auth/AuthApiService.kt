@@ -31,10 +31,7 @@ import javax.inject.Singleton
  * for development and testing without backend dependency.
  */
 @Singleton
-class AuthApiService @Inject constructor(
-    private val httpClient: HttpClient,
-    private val apiConfig: ApiConfiguration
-) {
+class AuthApiService @Inject constructor(private val httpClient: HttpClient, private val apiConfig: ApiConfiguration) {
 
     companion object {
         private const val AUTH_BASE_PATH = "/api/v1/auth"
@@ -57,7 +54,7 @@ class AuthApiService @Inject constructor(
             val mockResponse = MockAuthHelper.mockRegister(
                 request.email,
                 request.password,
-                request.displayName
+                request.displayName,
             )
             return mockResponse.toRegisterResponse()
         }
@@ -77,7 +74,7 @@ class AuthApiService @Inject constructor(
             return MockAuthHelper.mockRegister(
                 request.email,
                 request.password,
-                request.displayName
+                request.displayName,
             )
         }
         val response: RegisterResponse = httpClient.post("${apiConfig.baseUrl}$AUTH_BASE_PATH/register") {
@@ -173,8 +170,8 @@ class AuthApiService @Inject constructor(
                     accessToken = mockResponse.accessToken,
                     refreshToken = mockResponse.refreshToken,
                     tokenType = "Bearer",
-                    expiresIn = mockResponse.expiresIn
-                )
+                    expiresIn = mockResponse.expiresIn,
+                ),
             )
         }
 
@@ -256,7 +253,7 @@ class AuthApiService @Inject constructor(
         if (MockAuthHelper.USE_MOCK_AUTH) {
             MockAuthHelper.mockRequestPasswordReset(email)
             return ForgotPasswordResponse(
-                message = "If your email is registered, you will receive a password reset link."
+                message = "If your email is registered, you will receive a password reset link.",
             )
         }
 
@@ -281,7 +278,7 @@ class AuthApiService @Inject constructor(
         if (MockAuthHelper.USE_MOCK_AUTH) {
             // Mock always succeeds for valid token format
             return ResetPasswordResponse(
-                message = "Password has been reset successfully. Please log in with your new password."
+                message = "Password has been reset successfully. Please log in with your new password.",
             )
         }
 
@@ -305,7 +302,7 @@ class AuthApiService @Inject constructor(
         if (MockAuthHelper.USE_MOCK_AUTH) {
             return VerifyEmailResponse(
                 message = "Email has been verified successfully.",
-                emailVerified = true
+                emailVerified = true,
             )
         }
 
@@ -328,7 +325,7 @@ class AuthApiService @Inject constructor(
         // Use mock if enabled for development
         if (MockAuthHelper.USE_MOCK_AUTH) {
             return RequestVerificationResponse(
-                message = "Verification email has been sent."
+                message = "Verification email has been sent.",
             )
         }
 
@@ -345,10 +342,7 @@ class AuthApiService @Inject constructor(
  * @property allDevices If true, invalidate all sessions for the user
  */
 @kotlinx.serialization.Serializable
-private data class LogoutRequest(
-    val refreshToken: String,
-    val allDevices: Boolean = false
-)
+private data class LogoutRequest(val refreshToken: String, val allDevices: Boolean = false)
 
 // Extension functions to convert between response types
 
@@ -357,14 +351,14 @@ private fun AuthResponse.toRegisterResponse() = RegisterResponse(
         id = user.userId,
         email = user.email,
         displayName = user.displayName,
-        createdAt = user.createdAt
+        createdAt = user.createdAt,
     ),
     tokens = TokensResponse(
         accessToken = accessToken,
         refreshToken = refreshToken,
         tokenType = "Bearer",
-        expiresIn = expiresIn
-    )
+        expiresIn = expiresIn,
+    ),
 )
 
 private fun AuthResponse.toLoginResponse() = LoginResponse(
@@ -372,14 +366,14 @@ private fun AuthResponse.toLoginResponse() = LoginResponse(
         id = user.userId,
         email = user.email,
         displayName = user.displayName,
-        createdAt = user.createdAt
+        createdAt = user.createdAt,
     ),
     tokens = TokensResponse(
         accessToken = accessToken,
         refreshToken = refreshToken,
         tokenType = "Bearer",
-        expiresIn = expiresIn
-    )
+        expiresIn = expiresIn,
+    ),
 )
 
 private fun RegisterResponse.toLegacyAuthResponse() = AuthResponse(
@@ -390,8 +384,8 @@ private fun RegisterResponse.toLegacyAuthResponse() = AuthResponse(
         userId = user.id,
         email = user.email,
         displayName = user.displayName ?: user.email.substringBefore('@'),
-        createdAt = user.createdAt ?: ""
-    )
+        createdAt = user.createdAt ?: "",
+    ),
 )
 
 private fun LoginResponse.toLegacyAuthResponse() = AuthResponse(
@@ -402,7 +396,6 @@ private fun LoginResponse.toLegacyAuthResponse() = AuthResponse(
         userId = user.id,
         email = user.email,
         displayName = user.displayName ?: user.email.substringBefore('@'),
-        createdAt = user.createdAt ?: ""
-    )
+        createdAt = user.createdAt ?: "",
+    ),
 )
-

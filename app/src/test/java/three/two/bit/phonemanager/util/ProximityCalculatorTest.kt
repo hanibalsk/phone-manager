@@ -1,7 +1,6 @@
 package three.two.bit.phonemanager.util
 
 import com.google.android.gms.maps.model.LatLng
-import kotlin.time.Clock
 import org.junit.Test
 import three.two.bit.phonemanager.domain.model.AlertDirection
 import three.two.bit.phonemanager.domain.model.ProximityAlert
@@ -9,6 +8,7 @@ import three.two.bit.phonemanager.domain.model.ProximityState
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 class ProximityCalculatorTest {
 

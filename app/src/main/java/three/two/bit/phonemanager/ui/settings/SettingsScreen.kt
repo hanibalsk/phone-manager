@@ -233,12 +233,12 @@ fun SettingsScreen(
                 // Logged In State
                 Column(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     Text(
                         text = stringResource(R.string.settings_account),
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     OutlinedTextField(
@@ -248,32 +248,32 @@ fun SettingsScreen(
                         enabled = false,
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        supportingText = { Text(stringResource(R.string.auth_signed_in_as, user.displayName)) }
+                        supportingText = { Text(stringResource(R.string.auth_signed_in_as, user.displayName)) },
                     )
 
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         // My Devices navigation button
                         androidx.compose.material3.OutlinedCard(
                             onClick = onNavigateToMyDevices,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
                                     text = stringResource(R.string.settings_my_devices),
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyLarge,
                                 )
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = stringResource(R.string.settings_navigate_to_devices)
+                                    contentDescription = stringResource(R.string.settings_navigate_to_devices),
                                 )
                             }
                         }
@@ -281,22 +281,22 @@ fun SettingsScreen(
                         // Groups navigation button
                         androidx.compose.material3.OutlinedCard(
                             onClick = onNavigateToGroups,
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         ) {
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Text(
                                     text = stringResource(R.string.settings_groups),
-                                    style = MaterialTheme.typography.bodyLarge
+                                    style = MaterialTheme.typography.bodyLarge,
                                 )
                                 Icon(
                                     imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
-                                    contentDescription = stringResource(R.string.settings_navigate_to_groups)
+                                    contentDescription = stringResource(R.string.settings_navigate_to_groups),
                                 )
                             }
                         }
@@ -306,7 +306,7 @@ fun SettingsScreen(
                         onClick = { showLogoutDialog = true },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .testTag("logout_button")
+                            .testTag("logout_button"),
                     ) {
                         Text(stringResource(R.string.auth_sign_out))
                     }
@@ -318,17 +318,17 @@ fun SettingsScreen(
                 Column(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
                     Text(
                         text = stringResource(R.string.settings_sign_in_prompt),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
 
                     Button(
                         onClick = onNavigateToLogin,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Text(stringResource(R.string.auth_sign_in))
                     }
@@ -668,7 +668,7 @@ fun SettingsScreen(
                         showLogoutDialog = false
                         viewModel.logout()
                     },
-                    modifier = Modifier.testTag("confirm_button")
+                    modifier = Modifier.testTag("confirm_button"),
                 ) {
                     Text(stringResource(R.string.auth_sign_out))
                 }
@@ -676,11 +676,11 @@ fun SettingsScreen(
             dismissButton = {
                 TextButton(
                     onClick = { showLogoutDialog = false },
-                    modifier = Modifier.testTag("cancel_button")
+                    modifier = Modifier.testTag("cancel_button"),
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
-            }
+            },
         )
     }
 

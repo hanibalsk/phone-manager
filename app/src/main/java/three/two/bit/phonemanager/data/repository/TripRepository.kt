@@ -1,13 +1,13 @@
 package three.two.bit.phonemanager.data.repository
 
 import kotlinx.coroutines.flow.Flow
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.TodayTripStats
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.movement.TransportationMode
 import three.two.bit.phonemanager.network.models.PathCorrectionResponse
 import three.two.bit.phonemanager.network.models.TripPathResponse
 import three.two.bit.phonemanager.network.models.TripsListResponse
+import kotlin.time.Instant
 
 /**
  * Story E8.3: TripRepository - Repository interface for trip data

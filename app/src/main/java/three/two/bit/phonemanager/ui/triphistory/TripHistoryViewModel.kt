@@ -8,9 +8,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -22,6 +20,8 @@ import three.two.bit.phonemanager.location.GeocodingService
 import three.two.bit.phonemanager.movement.TransportationMode
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Story E8.9: TripHistoryViewModel

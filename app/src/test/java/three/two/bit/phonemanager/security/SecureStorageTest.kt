@@ -47,7 +47,7 @@ class SecureStorageTest {
                 any<String>(),
                 any(),
                 any(),
-                any()
+                any(),
             )
         } returns encryptedPrefs
 

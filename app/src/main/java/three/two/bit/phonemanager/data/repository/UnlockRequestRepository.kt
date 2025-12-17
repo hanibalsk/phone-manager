@@ -3,8 +3,6 @@ package three.two.bit.phonemanager.data.repository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.time.Clock
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.UnlockRequest
 import three.two.bit.phonemanager.domain.model.UnlockRequestFilter
 import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
@@ -13,6 +11,8 @@ import three.two.bit.phonemanager.network.DeviceApiService
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Story E12.8: Unlock Request Repository
@@ -47,11 +47,7 @@ interface UnlockRequestRepository {
      * @param reason User-provided reason (max 200 characters)
      * @return Result with created request on success
      */
-    suspend fun createUnlockRequest(
-        deviceId: String,
-        settingKey: String,
-        reason: String,
-    ): Result<UnlockRequest>
+    suspend fun createUnlockRequest(deviceId: String, settingKey: String, reason: String): Result<UnlockRequest>
 
     /**
      * Get all unlock requests for a device.
@@ -333,9 +329,7 @@ class UnlockRequestRepositoryImpl @Inject constructor(
         Timber.i("Updated unlock request $requestId status to $status")
     }
 
-    override fun getRequestById(requestId: String): UnlockRequest? {
-        return _requests.value.find { it.id == requestId }
-    }
+    override fun getRequestById(requestId: String): UnlockRequest? = _requests.value.find { it.id == requestId }
 
     override fun clearError() {
         _error.value = null
@@ -355,12 +349,10 @@ class UnlockRequestRepositoryImpl @Inject constructor(
         )
     }
 
-    private fun parseInstant(isoString: String): Instant {
-        return try {
-            Instant.parse(isoString)
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to parse instant: $isoString")
-            Clock.System.now()
-        }
+    private fun parseInstant(isoString: String): Instant = try {
+        Instant.parse(isoString)
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to parse instant: $isoString")
+        Clock.System.now()
     }
 }

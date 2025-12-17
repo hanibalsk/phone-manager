@@ -298,10 +298,7 @@ private fun InviteContent(
  * Large invite code display card
  */
 @Composable
-private fun InviteCodeCard(
-    invite: GroupInvite,
-    onCopyCode: () -> Unit,
-) {
+private fun InviteCodeCard(invite: GroupInvite, onCopyCode: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -440,7 +437,9 @@ private fun ExpiryIndicator(invite: GroupInvite) {
 
     val (backgroundColor, textColor) = when (urgency) {
         ExpiryUrgency.NORMAL -> MaterialTheme.colorScheme.surfaceVariant to MaterialTheme.colorScheme.onSurfaceVariant
-        ExpiryUrgency.WARNING -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
+        ExpiryUrgency.WARNING ->
+            MaterialTheme.colorScheme.tertiaryContainer to
+                MaterialTheme.colorScheme.onTertiaryContainer
         ExpiryUrgency.CRITICAL -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
         ExpiryUrgency.EXPIRED -> MaterialTheme.colorScheme.error to MaterialTheme.colorScheme.onError
     }
@@ -478,9 +477,9 @@ private fun formatRemainingTime(milliseconds: Long): String {
     val days = hours / 24
 
     return when {
-        days > 0 -> "Expires in ${days} ${if (days == 1L) "day" else "days"}"
-        hours > 0 -> "Expires in ${hours} ${if (hours == 1L) "hour" else "hours"}"
-        minutes > 0 -> "Expires in ${minutes} ${if (minutes == 1L) "minute" else "minutes"}"
+        days > 0 -> "Expires in $days ${if (days == 1L) "day" else "days"}"
+        hours > 0 -> "Expires in $hours ${if (hours == 1L) "hour" else "hours"}"
+        minutes > 0 -> "Expires in $minutes ${if (minutes == 1L) "minute" else "minutes"}"
         else -> "Expires in less than a minute"
     }
 }

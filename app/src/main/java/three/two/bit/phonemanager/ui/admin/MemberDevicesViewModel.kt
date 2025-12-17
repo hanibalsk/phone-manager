@@ -174,23 +174,21 @@ class MemberDevicesViewModel @Inject constructor(
         devices: List<MemberDeviceSettings>,
         searchQuery: String,
         statusFilter: DeviceStatusFilter,
-    ): List<MemberDeviceSettings> {
-        return devices.filter { device ->
-            // Apply search filter
-            val matchesSearch = searchQuery.isBlank() ||
-                device.deviceName.contains(searchQuery, ignoreCase = true) ||
-                device.ownerName.contains(searchQuery, ignoreCase = true) ||
-                device.ownerEmail.contains(searchQuery, ignoreCase = true)
+    ): List<MemberDeviceSettings> = devices.filter { device ->
+        // Apply search filter
+        val matchesSearch = searchQuery.isBlank() ||
+            device.deviceName.contains(searchQuery, ignoreCase = true) ||
+            device.ownerName.contains(searchQuery, ignoreCase = true) ||
+            device.ownerEmail.contains(searchQuery, ignoreCase = true)
 
-            // Apply status filter
-            val matchesStatus = when (statusFilter) {
-                DeviceStatusFilter.ALL -> true
-                DeviceStatusFilter.ONLINE -> device.isOnline
-                DeviceStatusFilter.OFFLINE -> !device.isOnline
-            }
-
-            matchesSearch && matchesStatus
+        // Apply status filter
+        val matchesStatus = when (statusFilter) {
+            DeviceStatusFilter.ALL -> true
+            DeviceStatusFilter.ONLINE -> device.isOnline
+            DeviceStatusFilter.OFFLINE -> !device.isOnline
         }
+
+        matchesSearch && matchesStatus
     }
 }
 

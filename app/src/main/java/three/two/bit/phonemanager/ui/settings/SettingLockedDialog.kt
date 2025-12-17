@@ -200,9 +200,7 @@ fun ManagedStatusCard(
  * - Warn about cached lock states
  */
 @Composable
-fun OfflineBanner(
-    modifier: Modifier = Modifier,
-) {
+fun OfflineBanner(modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -233,9 +231,7 @@ fun OfflineBanner(
  * Shows when user is not signed in and settings sync requires authentication.
  */
 @Composable
-fun NotAuthenticatedBanner(
-    modifier: Modifier = Modifier,
-) {
+fun NotAuthenticatedBanner(modifier: Modifier = Modifier) {
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -385,11 +381,7 @@ fun EnrollmentStatusCard(
  * Contact info row for enrollment card.
  */
 @Composable
-private fun EnrollmentContactRow(
-    icon: ImageVector,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
+private fun EnrollmentContactRow(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,

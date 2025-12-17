@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Clock
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
@@ -25,6 +24,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 /**
  * Unit tests for UnlockRequestViewModel
@@ -59,9 +59,8 @@ class UnlockRequestViewModelTest {
         every { unlockRequestRepository.error } returns errorFlow
     }
 
-    private fun createViewModel(): UnlockRequestViewModel {
-        return UnlockRequestViewModel(unlockRequestRepository, savedStateHandle)
-    }
+    private fun createViewModel(): UnlockRequestViewModel =
+        UnlockRequestViewModel(unlockRequestRepository, savedStateHandle)
 
     // AC E12.8.3: View My Unlock Requests Tests
 
@@ -523,19 +522,14 @@ class UnlockRequestViewModelTest {
     }
 
     // Helper function to create test requests
-    private fun createTestRequest(
-        id: String,
-        status: UnlockRequestStatus,
-    ): UnlockRequest {
-        return UnlockRequest(
-            id = id,
-            deviceId = testDeviceId,
-            settingKey = "tracking_enabled",
-            reason = "Test reason",
-            status = status,
-            requestedBy = "user@test.com",
-            requestedByName = "Test User",
-            createdAt = Clock.System.now(),
-        )
-    }
+    private fun createTestRequest(id: String, status: UnlockRequestStatus): UnlockRequest = UnlockRequest(
+        id = id,
+        deviceId = testDeviceId,
+        settingKey = "tracking_enabled",
+        reason = "Test reason",
+        status = status,
+        requestedBy = "user@test.com",
+        requestedByName = "Test User",
+        createdAt = Clock.System.now(),
+    )
 }

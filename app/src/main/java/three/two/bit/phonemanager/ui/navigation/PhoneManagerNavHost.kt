@@ -12,31 +12,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import kotlinx.coroutines.delay
-import three.two.bit.phonemanager.ui.alerts.AlertsScreen
-import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
-import three.two.bit.phonemanager.ui.auth.ForgotPasswordScreen
-import three.two.bit.phonemanager.ui.auth.LoginScreen
-import three.two.bit.phonemanager.ui.auth.RegisterScreen
-import three.two.bit.phonemanager.ui.geofences.CreateGeofenceScreen
-import three.two.bit.phonemanager.ui.geofences.GeofencesScreen
-import three.two.bit.phonemanager.ui.group.GroupMembersScreen
-import three.two.bit.phonemanager.ui.history.HistoryScreen
-import three.two.bit.phonemanager.ui.home.HomeScreen
-import three.two.bit.phonemanager.ui.home.HomeViewModel
-import three.two.bit.phonemanager.ui.map.MapScreen
-import three.two.bit.phonemanager.ui.movementevents.MovementEventsScreen
-import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
-import three.two.bit.phonemanager.ui.registration.RegistrationScreen
-import three.two.bit.phonemanager.ui.settings.SettingsScreen
-import three.two.bit.phonemanager.ui.devices.DeviceDetailScreen
-import three.two.bit.phonemanager.ui.devices.DeviceListScreen
-import three.two.bit.phonemanager.ui.groups.GroupDetailScreen
-import three.two.bit.phonemanager.ui.groups.GroupListScreen
-import three.two.bit.phonemanager.ui.groups.InviteMembersScreen
-import three.two.bit.phonemanager.ui.groups.JoinGroupScreen
-import three.two.bit.phonemanager.ui.groups.ManageMembersScreen
-import three.two.bit.phonemanager.ui.groups.PendingInvitesScreen
-import three.two.bit.phonemanager.ui.groups.QRScannerScreen
 import three.two.bit.phonemanager.ui.admin.AdminGeofenceScreen
 import three.two.bit.phonemanager.ui.admin.AdminUsersScreen
 import three.two.bit.phonemanager.ui.admin.BulkSettingsScreen
@@ -45,16 +20,41 @@ import three.two.bit.phonemanager.ui.admin.MemberDevicesScreen
 import three.two.bit.phonemanager.ui.admin.SettingsHistoryScreen
 import three.two.bit.phonemanager.ui.admin.SettingsTemplateScreen
 import three.two.bit.phonemanager.ui.admin.UserLocationMapScreen
-import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
-import three.two.bit.phonemanager.ui.unlock.UnlockRequestsScreen
-import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
-import three.two.bit.phonemanager.ui.weather.WeatherScreen
-import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
-import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
+import three.two.bit.phonemanager.ui.alerts.AlertsScreen
+import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
+import three.two.bit.phonemanager.ui.auth.ForgotPasswordScreen
+import three.two.bit.phonemanager.ui.auth.LoginScreen
+import three.two.bit.phonemanager.ui.auth.RegisterScreen
+import three.two.bit.phonemanager.ui.devices.DeviceDetailScreen
+import three.two.bit.phonemanager.ui.devices.DeviceListScreen
 import three.two.bit.phonemanager.ui.enrollment.EnrollmentQRScannerScreen
 import three.two.bit.phonemanager.ui.enrollment.EnrollmentScreen
 import three.two.bit.phonemanager.ui.enrollment.EnrollmentSuccessScreen
 import three.two.bit.phonemanager.ui.enrollment.SetupScreen
+import three.two.bit.phonemanager.ui.geofences.CreateGeofenceScreen
+import three.two.bit.phonemanager.ui.geofences.GeofencesScreen
+import three.two.bit.phonemanager.ui.group.GroupMembersScreen
+import three.two.bit.phonemanager.ui.groups.GroupDetailScreen
+import three.two.bit.phonemanager.ui.groups.GroupListScreen
+import three.two.bit.phonemanager.ui.groups.InviteMembersScreen
+import three.two.bit.phonemanager.ui.groups.JoinGroupScreen
+import three.two.bit.phonemanager.ui.groups.ManageMembersScreen
+import three.two.bit.phonemanager.ui.groups.PendingInvitesScreen
+import three.two.bit.phonemanager.ui.groups.QRScannerScreen
+import three.two.bit.phonemanager.ui.history.HistoryScreen
+import three.two.bit.phonemanager.ui.home.HomeScreen
+import three.two.bit.phonemanager.ui.home.HomeViewModel
+import three.two.bit.phonemanager.ui.map.MapScreen
+import three.two.bit.phonemanager.ui.movementevents.MovementEventsScreen
+import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
+import three.two.bit.phonemanager.ui.registration.RegistrationScreen
+import three.two.bit.phonemanager.ui.settings.SettingsScreen
+import three.two.bit.phonemanager.ui.tripdetail.TripDetailScreen
+import three.two.bit.phonemanager.ui.triphistory.TripHistoryScreen
+import three.two.bit.phonemanager.ui.unlock.UnlockRequestsScreen
+import three.two.bit.phonemanager.ui.weather.WeatherScreen
+import three.two.bit.phonemanager.ui.webhooks.CreateWebhookScreen
+import three.two.bit.phonemanager.ui.webhooks.WebhooksScreen
 
 sealed class Screen(val route: String) {
     // Story E9.11: Authentication screens
@@ -252,7 +252,7 @@ fun PhoneManagerNavHost(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
-                }
+                },
             )
         }
 
@@ -265,7 +265,7 @@ fun PhoneManagerNavHost(
                     navController.navigate(Screen.Home.route) {
                         popUpTo(Screen.Register.route) { inclusive = true }
                     }
-                }
+                },
             )
         }
 
@@ -451,7 +451,7 @@ fun PhoneManagerNavHost(
         composable(
             route = Screen.DeviceDetail.route,
             arguments = listOf(
-                navArgument("deviceId") { type = NavType.StringType }
+                navArgument("deviceId") { type = NavType.StringType },
             ),
         ) {
             DeviceDetailScreen(
@@ -541,7 +541,7 @@ fun PhoneManagerNavHost(
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
-                }
+                },
             ),
         ) { backStackEntry ->
             val code = backStackEntry.arguments?.getString("code")
@@ -580,7 +580,7 @@ fun PhoneManagerNavHost(
         composable(
             route = Screen.MemberDevices.route,
             arguments = listOf(
-                navArgument("groupId") { type = NavType.StringType }
+                navArgument("groupId") { type = NavType.StringType },
             ),
         ) {
             MemberDevicesScreen(
@@ -597,7 +597,7 @@ fun PhoneManagerNavHost(
         composable(
             route = Screen.AdminDeviceSettings.route,
             arguments = listOf(
-                navArgument("deviceId") { type = NavType.StringType }
+                navArgument("deviceId") { type = NavType.StringType },
             ),
         ) {
             DeviceSettingsScreen(
@@ -611,7 +611,7 @@ fun PhoneManagerNavHost(
         composable(
             route = Screen.AdminSettingsHistory.route,
             arguments = listOf(
-                navArgument("deviceId") { type = NavType.StringType }
+                navArgument("deviceId") { type = NavType.StringType },
             ),
         ) {
             SettingsHistoryScreen(
@@ -622,7 +622,7 @@ fun PhoneManagerNavHost(
         composable(
             route = Screen.BulkSettings.route,
             arguments = listOf(
-                navArgument("deviceIds") { type = NavType.StringType }
+                navArgument("deviceIds") { type = NavType.StringType },
             ),
         ) { backStackEntry ->
             val deviceIdsString = backStackEntry.arguments?.getString("deviceIds") ?: ""
@@ -650,7 +650,7 @@ fun PhoneManagerNavHost(
         composable(
             route = Screen.UnlockRequests.route,
             arguments = listOf(
-                navArgument("deviceId") { type = NavType.StringType }
+                navArgument("deviceId") { type = NavType.StringType },
             ),
         ) {
             UnlockRequestsScreen(
@@ -731,7 +731,7 @@ fun PhoneManagerNavHost(
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
-                }
+                },
             ),
         ) { backStackEntry ->
             val token = backStackEntry.arguments?.getString("token")

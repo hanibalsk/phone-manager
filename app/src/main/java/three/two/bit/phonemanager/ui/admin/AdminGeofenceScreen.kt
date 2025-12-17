@@ -81,10 +81,7 @@ import kotlin.math.roundToInt
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AdminGeofenceScreen(
-    viewModel: AdminGeofenceViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit,
-) {
+fun AdminGeofenceScreen(viewModel: AdminGeofenceViewModel = hiltViewModel(), onNavigateBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -233,10 +230,7 @@ fun AdminGeofenceScreen(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SwipeableGeofenceItem(
-    geofence: Geofence,
-    onDelete: () -> Unit,
-) {
+private fun SwipeableGeofenceItem(geofence: Geofence, onDelete: () -> Unit) {
     val currentOnDelete by rememberUpdatedState(onDelete)
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
@@ -356,11 +350,7 @@ private fun formatGeofenceDescription(geofence: Geofence): String {
  * Empty state when no geofences exist
  */
 @Composable
-private fun EmptyGeofencesContent(
-    deviceName: String,
-    modifier: Modifier = Modifier,
-    onCreateClick: () -> Unit,
-) {
+private fun EmptyGeofencesContent(deviceName: String, modifier: Modifier = Modifier, onCreateClick: () -> Unit) {
     Column(
         modifier = modifier.padding(32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

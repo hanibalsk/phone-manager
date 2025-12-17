@@ -5,7 +5,6 @@ import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
@@ -20,6 +19,7 @@ import three.two.bit.phonemanager.domain.model.Weather
 import three.two.bit.phonemanager.domain.model.WeatherCode
 import three.two.bit.phonemanager.network.NetworkManager
 import three.two.bit.phonemanager.network.WeatherApiService
+import kotlin.time.Clock
 
 /**
  * Story E7.1: WeatherRepository Unit Tests

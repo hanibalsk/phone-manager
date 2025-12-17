@@ -3,13 +3,13 @@ package three.two.bit.phonemanager.data.model
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import kotlin.time.Instant
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.domain.model.LatLng
 import three.two.bit.phonemanager.domain.model.Trip
 import three.two.bit.phonemanager.domain.model.TripState
 import three.two.bit.phonemanager.domain.model.TripTrigger
 import three.two.bit.phonemanager.movement.TransportationMode
+import kotlin.time.Instant
 
 /**
  * Story E8.1: TripEntity - Database entity for storing trip data

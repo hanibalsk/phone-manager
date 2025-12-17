@@ -96,7 +96,7 @@ class GeofenceApiServiceImpl @Inject constructor(
             if (!httpResponse.status.isSuccess()) {
                 Timber.w("Geofences API returned ${httpResponse.status.value}")
                 return Result.failure(
-                    GeofenceApiException("Geofences API error (${httpResponse.status.value})")
+                    GeofenceApiException("Geofences API error (${httpResponse.status.value})"),
                 )
             }
 

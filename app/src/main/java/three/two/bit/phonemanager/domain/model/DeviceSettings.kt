@@ -168,11 +168,7 @@ enum class SettingsSyncStatus {
  * @property error Error message if update failed
  * @property wasLocked True if the update failed because setting is locked
  */
-data class SettingUpdateResult(
-    val success: Boolean,
-    val error: String? = null,
-    val wasLocked: Boolean = false,
-)
+data class SettingUpdateResult(val success: Boolean, val error: String? = null, val wasLocked: Boolean = false)
 
 /**
  * Story E12.6: Managed device status.

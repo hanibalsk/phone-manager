@@ -42,7 +42,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -50,6 +49,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
@@ -75,22 +75,19 @@ import java.util.concurrent.Executors
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QRScannerScreen(
-    onNavigateBack: () -> Unit,
-    onCodeScanned: (String) -> Unit,
-) {
+fun QRScannerScreen(onNavigateBack: () -> Unit, onCodeScanned: (String) -> Unit) {
     val context = LocalContext.current
     var hasCameraPermission by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
                 context,
-                Manifest.permission.CAMERA
-            ) == PackageManager.PERMISSION_GRANTED
+                Manifest.permission.CAMERA,
+            ) == PackageManager.PERMISSION_GRANTED,
         )
     }
 
     val permissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
+        contract = ActivityResultContracts.RequestPermission(),
     ) { isGranted ->
         hasCameraPermission = isGranted
     }
@@ -141,10 +138,7 @@ fun QRScannerScreen(
  * Camera preview with QR code scanning
  */
 @Composable
-private fun CameraPreviewContent(
-    onCodeScanned: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun CameraPreviewContent(onCodeScanned: (String) -> Unit, modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraExecutor = remember { Executors.newSingleThreadExecutor() }
@@ -189,7 +183,7 @@ private fun CameraPreviewContent(
                                     if (mediaImage != null && !hasScanned) {
                                         val image = InputImage.fromMediaImage(
                                             mediaImage,
-                                            imageProxy.imageInfo.rotationDegrees
+                                            imageProxy.imageInfo.rotationDegrees,
                                         )
 
                                         barcodeScanner.process(image)
@@ -223,7 +217,7 @@ private fun CameraPreviewContent(
                                 lifecycleOwner,
                                 CameraSelector.DEFAULT_BACK_CAMERA,
                                 preview,
-                                imageAnalysis
+                                imageAnalysis,
                             )
                         } catch (e: Exception) {
                             Timber.e(e, "Camera binding failed")
@@ -418,4 +412,3 @@ private fun PermissionDeniedContent(
         }
     }
 }
-

@@ -44,11 +44,11 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -80,7 +80,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onGoogleSignIn: () -> Unit = {},
     onAppleSignIn: () -> Unit = {},
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val emailError by viewModel.emailError.collectAsState()
@@ -123,7 +123,7 @@ fun LoginScreen(
 
     Scaffold(
         modifier = Modifier.testTag("login_screen"),
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -132,13 +132,13 @@ fun LoginScreen(
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             // Title
             Text(
                 text = stringResource(R.string.auth_welcome_back),
                 style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -146,7 +146,7 @@ fun LoginScreen(
             Text(
                 text = stringResource(R.string.auth_sign_in_to_continue),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             // Config retry banner - shown when config failed to load
@@ -157,15 +157,15 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = stringResource(R.string.auth_unable_to_load_server_settings),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     TextButton(
-                        onClick = { viewModel.refreshConfig() }
+                        onClick = { viewModel.refreshConfig() },
                     ) {
                         Text(stringResource(R.string.retry))
                     }
@@ -186,15 +186,15 @@ fun LoginScreen(
                         .testTag("email_input"),
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Email,
-                        imeAction = ImeAction.Next
+                        imeAction = ImeAction.Next,
                     ),
                     keyboardActions = KeyboardActions(
-                        onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                        onNext = { focusManager.moveFocus(FocusDirection.Down) },
                     ),
                     singleLine = true,
                     isError = emailError != null,
                     supportingText = emailError?.let { { Text(it) } },
-                    enabled = uiState !is AuthUiState.Loading
+                    enabled = uiState !is AuthUiState.Loading,
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -214,13 +214,13 @@ fun LoginScreen(
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
-                        imeAction = ImeAction.Done
+                        imeAction = ImeAction.Done,
                     ),
                     keyboardActions = KeyboardActions(
                         onDone = {
                             focusManager.clearFocus()
                             viewModel.login(email, password)
-                        }
+                        },
                     ),
                     trailingIcon = {
                         IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -234,14 +234,14 @@ fun LoginScreen(
                                     stringResource(R.string.auth_hide_password)
                                 } else {
                                     stringResource(R.string.auth_show_password)
-                                }
+                                },
                             )
                         }
                     },
                     singleLine = true,
                     isError = passwordError != null,
                     supportingText = passwordError?.let { { Text(it) } },
-                    enabled = uiState !is AuthUiState.Loading
+                    enabled = uiState !is AuthUiState.Loading,
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -250,7 +250,7 @@ fun LoginScreen(
                 TextButton(
                     onClick = onNavigateToForgotPassword,
                     modifier = Modifier.align(Alignment.End),
-                    enabled = uiState !is AuthUiState.Loading
+                    enabled = uiState !is AuthUiState.Loading,
                 ) {
                     Text(stringResource(R.string.auth_forgot_password))
                 }
@@ -264,12 +264,12 @@ fun LoginScreen(
                         .fillMaxWidth()
                         .height(48.dp)
                         .testTag("sign_in_button"),
-                    enabled = uiState !is AuthUiState.Loading
+                    enabled = uiState !is AuthUiState.Loading,
                 ) {
                     if (uiState is AuthUiState.Loading) {
                         CircularProgressIndicator(
                             modifier = Modifier.size(24.dp),
-                            color = MaterialTheme.colorScheme.onPrimary
+                            color = MaterialTheme.colorScheme.onPrimary,
                         )
                     } else {
                         Text(stringResource(R.string.auth_sign_in))
@@ -283,14 +283,14 @@ fun LoginScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     HorizontalDivider(modifier = Modifier.weight(1f))
                     Text(
                         text = stringResource(R.string.common_or),
                         modifier = Modifier.padding(horizontal = 16.dp),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     HorizontalDivider(modifier = Modifier.weight(1f))
                 }
@@ -307,12 +307,12 @@ fun LoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
-                        enabled = uiState !is AuthUiState.Loading
+                        enabled = uiState !is AuthUiState.Loading,
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_google),
                             contentDescription = stringResource(R.string.auth_google),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(20.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.auth_continue_google))
@@ -328,12 +328,12 @@ fun LoginScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(48.dp),
-                        enabled = uiState !is AuthUiState.Loading
+                        enabled = uiState !is AuthUiState.Loading,
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_apple),
                             contentDescription = stringResource(R.string.auth_apple),
-                            modifier = Modifier.size(20.dp)
+                            modifier = Modifier.size(20.dp),
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(stringResource(R.string.auth_continue_apple))
@@ -347,16 +347,16 @@ fun LoginScreen(
             if (isRegistrationEnabled && !isOAuthOnly) {
                 Row(
                     horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text(
                         text = stringResource(R.string.auth_no_account_question),
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                     TextButton(
                         onClick = onNavigateToRegister,
                         modifier = Modifier.testTag("create_account_link"),
-                        enabled = uiState !is AuthUiState.Loading
+                        enabled = uiState !is AuthUiState.Loading,
                     ) {
                         Text(stringResource(R.string.auth_create_account))
                     }
@@ -373,7 +373,7 @@ fun LoginScreenPreview() {
         LoginScreen(
             onNavigateToRegister = {},
             onNavigateToForgotPassword = {},
-            onLoginSuccess = {}
+            onLoginSuccess = {},
         )
     }
 }

@@ -2,8 +2,8 @@ package three.two.bit.phonemanager.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.Webhook
+import kotlin.time.Instant
 
 /**
  * Story E6.3: WebhookEntity - Room entity for webhook configuration storage

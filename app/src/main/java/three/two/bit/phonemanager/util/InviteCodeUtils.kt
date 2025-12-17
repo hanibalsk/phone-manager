@@ -60,7 +60,10 @@ object InviteCodeUtils {
         // Format: 8 alphanumeric OR 11 chars with dashes (XXX-XXX-XXX)
         val alphanumericOnly = code.filterNot { it == '-' }
         return (code.length == 8 && code.all { it.isLetterOrDigit() }) ||
-               (code.length == 11 && code.count { it == '-' } == 2 && alphanumericOnly.length == 9 && alphanumericOnly.all { it.isLetterOrDigit() })
+            (
+                code.length == 11 && code.count { it == '-' } == 2 && alphanumericOnly.length == 9 &&
+                    alphanumericOnly.all { it.isLetterOrDigit() }
+                )
     }
 
     /**
@@ -82,7 +85,5 @@ object InviteCodeUtils {
      * @param code The invite code
      * @return The deep link URL (e.g., "phonemanager://join/ABC12XYZ")
      */
-    fun generateDeepLink(code: String): String {
-        return "$DEEP_LINK_SCHEME://join/${code.uppercase()}"
-    }
+    fun generateDeepLink(code: String): String = "$DEEP_LINK_SCHEME://join/${code.uppercase()}"
 }

@@ -4,8 +4,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlin.time.Clock
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.BulkSettingsResult
 import three.two.bit.phonemanager.domain.model.DeviceSettingsResult
 import three.two.bit.phonemanager.domain.model.MemberDeviceSettings
@@ -18,6 +16,8 @@ import three.two.bit.phonemanager.network.models.SettingLockResponse
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Story E12.7: Admin Settings Management Repository
@@ -75,29 +75,19 @@ interface AdminSettingsRepository {
      * Lock settings for a device.
      * AC E12.7.5: Lock/Unlock Settings
      */
-    suspend fun lockSettings(
-        deviceId: String,
-        settingKeys: List<String>,
-    ): Result<Int>
+    suspend fun lockSettings(deviceId: String, settingKeys: List<String>): Result<Int>
 
     /**
      * Unlock settings for a device.
      * AC E12.7.5: Lock/Unlock Settings
      */
-    suspend fun unlockSettings(
-        deviceId: String,
-        settingKeys: List<String>,
-    ): Result<Int>
+    suspend fun unlockSettings(deviceId: String, settingKeys: List<String>): Result<Int>
 
     /**
      * Get settings change history for a device.
      * AC E12.7.8: Audit Trail
      */
-    suspend fun getSettingsHistory(
-        deviceId: String,
-        limit: Int = 50,
-        offset: Int = 0,
-    ): Result<List<SettingChange>>
+    suspend fun getSettingsHistory(deviceId: String, limit: Int = 50, offset: Int = 0): Result<List<SettingChange>>
 
     /**
      * Apply settings to multiple devices.
@@ -315,10 +305,7 @@ class AdminSettingsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun lockSettings(
-        deviceId: String,
-        settingKeys: List<String>,
-    ): Result<Int> {
+    override suspend fun lockSettings(deviceId: String, settingKeys: List<String>): Result<Int> {
         val accessToken = authRepository.getAccessToken()
             ?: return Result.failure(IllegalStateException("Not authenticated"))
 
@@ -367,10 +354,7 @@ class AdminSettingsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun unlockSettings(
-        deviceId: String,
-        settingKeys: List<String>,
-    ): Result<Int> {
+    override suspend fun unlockSettings(deviceId: String, settingKeys: List<String>): Result<Int> {
         val accessToken = authRepository.getAccessToken()
             ?: return Result.failure(IllegalStateException("Not authenticated"))
 
@@ -417,11 +401,7 @@ class AdminSettingsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getSettingsHistory(
-        deviceId: String,
-        limit: Int,
-        offset: Int,
-    ): Result<List<SettingChange>> {
+    override suspend fun getSettingsHistory(deviceId: String, limit: Int, offset: Int): Result<List<SettingChange>> {
         val accessToken = authRepository.getAccessToken()
             ?: return Result.failure(IllegalStateException("Not authenticated"))
 
@@ -680,31 +660,25 @@ class AdminSettingsRepositoryImpl @Inject constructor(
         _error.value = null
     }
 
-    private fun parseInstant(isoString: String): Instant? {
-        return try {
-            Instant.parse(isoString)
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to parse instant: $isoString")
-            null
-        }
+    private fun parseInstant(isoString: String): Instant? = try {
+        Instant.parse(isoString)
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to parse instant: $isoString")
+        null
     }
 
-    private fun parseChangeType(type: String): SettingChangeType {
-        return when (type.uppercase()) {
-            "VALUE_CHANGED", "CHANGED" -> SettingChangeType.VALUE_CHANGED
-            "LOCKED" -> SettingChangeType.LOCKED
-            "UNLOCKED" -> SettingChangeType.UNLOCKED
-            "RESET" -> SettingChangeType.RESET
-            else -> SettingChangeType.VALUE_CHANGED
-        }
+    private fun parseChangeType(type: String): SettingChangeType = when (type.uppercase()) {
+        "VALUE_CHANGED", "CHANGED" -> SettingChangeType.VALUE_CHANGED
+        "LOCKED" -> SettingChangeType.LOCKED
+        "UNLOCKED" -> SettingChangeType.UNLOCKED
+        "RESET" -> SettingChangeType.RESET
+        else -> SettingChangeType.VALUE_CHANGED
     }
 
-    private fun SettingLockResponse.toDomain(key: String): SettingLock {
-        return SettingLock(
-            settingKey = key,
-            isLocked = isLocked,
-            lockedBy = lockedBy,
-            lockedAt = lockedAt?.let { parseInstant(it) },
-        )
-    }
+    private fun SettingLockResponse.toDomain(key: String): SettingLock = SettingLock(
+        settingKey = key,
+        isLocked = isLocked,
+        lockedBy = lockedBy,
+        lockedAt = lockedAt?.let { parseInstant(it) },
+    )
 }

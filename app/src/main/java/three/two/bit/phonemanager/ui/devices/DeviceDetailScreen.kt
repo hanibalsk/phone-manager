@@ -51,11 +51,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.UserDevice
+import kotlin.time.Instant
 
 /**
  * Story E10.6 Task 5: Device Detail Screen
@@ -261,7 +261,15 @@ private fun DeviceDetailContent(
         ) {
             Icon(Icons.Default.Delete, null, modifier = Modifier.size(18.dp))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(if (isCurrentDevice) stringResource(R.string.device_unlink_this) else stringResource(R.string.device_unlink))
+            Text(
+                if (isCurrentDevice) {
+                    stringResource(
+                        R.string.device_unlink_this,
+                    )
+                } else {
+                    stringResource(R.string.device_unlink)
+                },
+            )
         }
 
         // Transfer button (only for owners)
@@ -299,11 +307,7 @@ private fun DeviceDetailContent(
  * Device header with icon and name
  */
 @Composable
-private fun DeviceHeader(
-    device: UserDevice,
-    isCurrentDevice: Boolean,
-    onEditNameClick: () -> Unit,
-) {
+private fun DeviceHeader(device: UserDevice, isCurrentDevice: Boolean, onEditNameClick: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -383,15 +387,27 @@ private fun DeviceInfoCard(device: UserDevice) {
             )
             InfoRow(
                 label = stringResource(R.string.device_info_status_label),
-                value = if (device.active) stringResource(R.string.device_status_active) else stringResource(R.string.device_status_inactive),
+                value = if (device.active) {
+                    stringResource(
+                        R.string.device_status_active,
+                    )
+                } else {
+                    stringResource(R.string.device_status_inactive)
+                },
             )
 
             device.linkedAt?.let { linkedAt ->
-                InfoRow(label = stringResource(R.string.device_info_linked_label), value = formatFullTimestamp(linkedAt))
+                InfoRow(
+                    label = stringResource(R.string.device_info_linked_label),
+                    value = formatFullTimestamp(linkedAt),
+                )
             }
 
             device.lastSeenAt?.let { lastSeen ->
-                InfoRow(label = stringResource(R.string.device_info_last_seen_label), value = formatFullTimestamp(lastSeen))
+                InfoRow(
+                    label = stringResource(R.string.device_info_last_seen_label),
+                    value = formatFullTimestamp(lastSeen),
+                )
             }
         }
     }
@@ -543,11 +559,7 @@ private fun TransferOwnershipDialog(
  * Edit device name dialog
  */
 @Composable
-private fun EditDeviceNameDialog(
-    currentName: String,
-    onDismiss: () -> Unit,
-    onConfirm: (newName: String) -> Unit,
-) {
+private fun EditDeviceNameDialog(currentName: String, onDismiss: () -> Unit, onConfirm: (newName: String) -> Unit) {
     var newName by remember { mutableStateOf(currentName) }
     var showError by remember { mutableStateOf(false) }
 

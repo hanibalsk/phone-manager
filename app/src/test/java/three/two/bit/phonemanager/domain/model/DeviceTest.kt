@@ -1,10 +1,10 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlin.time.Instant
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Test
+import kotlin.time.Instant
 
 class DeviceTest {
     @Test

@@ -71,7 +71,9 @@ class MovementEventApiServiceImpl @Inject constructor(
 ) : MovementEventApiService {
 
     override suspend fun uploadEvent(request: CreateMovementEventRequest): Result<MovementEventUploadResponse> = try {
-        Timber.d("Uploading movement event: ${request.eventId}, mode change: ${request.previousMode} -> ${request.newMode}")
+        Timber.d(
+            "Uploading movement event: ${request.eventId}, mode change: ${request.previousMode} -> ${request.newMode}",
+        )
 
         val response: MovementEventUploadResponse = httpClient.post("${apiConfig.baseUrl}/api/v1/movement-events") {
             contentType(ContentType.Application.Json)

@@ -90,24 +90,22 @@ class BootReceiver : BroadcastReceiver() {
      * This checks if the application class is a test application (HiltTestApplication)
      * which indicates we're running under androidTest.
      */
-    private fun isRunningInTestEnvironment(context: Context): Boolean {
-        return try {
-            // Check if the application class name contains "Test" (HiltTestApplication)
-            val appClassName = context.applicationContext.javaClass.name
-            val isTestApp = appClassName.contains("Test", ignoreCase = true) ||
-                    appClassName.contains("Hilt_", ignoreCase = true)
+    private fun isRunningInTestEnvironment(context: Context): Boolean = try {
+        // Check if the application class name contains "Test" (HiltTestApplication)
+        val appClassName = context.applicationContext.javaClass.name
+        val isTestApp = appClassName.contains("Test", ignoreCase = true) ||
+            appClassName.contains("Hilt_", ignoreCase = true)
 
-            // Also check for test runner in the call stack
-            val isTestRunner = Thread.currentThread().stackTrace.any { element ->
-                element.className.contains("androidx.test") ||
+        // Also check for test runner in the call stack
+        val isTestRunner = Thread.currentThread().stackTrace.any { element ->
+            element.className.contains("androidx.test") ||
                 element.className.contains("junit") ||
                 element.className.contains("InstrumentationRegistry")
-            }
-
-            isTestApp || isTestRunner
-        } catch (e: Exception) {
-            Timber.w(e, "Failed to detect test environment, assuming production")
-            false
         }
+
+        isTestApp || isTestRunner
+    } catch (e: Exception) {
+        Timber.w(e, "Failed to detect test environment, assuming production")
+        false
     }
 }

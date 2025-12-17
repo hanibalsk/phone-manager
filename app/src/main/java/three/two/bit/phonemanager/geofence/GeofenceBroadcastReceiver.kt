@@ -15,7 +15,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import three.two.bit.phonemanager.MainActivity
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.database.GeofenceEventDao
@@ -29,6 +28,7 @@ import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.time.Clock
 
 /**
  * Story E6.1/E6.2: GeofenceBroadcastReceiver - Handles geofence transition events

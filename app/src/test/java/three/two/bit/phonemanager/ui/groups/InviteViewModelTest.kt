@@ -11,8 +11,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Clock
-import kotlin.time.Instant
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.GroupRepository
@@ -24,7 +22,9 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
+import kotlin.time.Instant
 
 /**
  * Story E11.9 Task 14: Unit tests for InviteViewModel
@@ -105,7 +105,7 @@ class InviteViewModelTest {
         coEvery { groupRepository.getGroupDetails("group-1") } returns Result.success(testGroup)
         coEvery { groupRepository.getGroupInvites("group-1") } returns Result.success(emptyList())
         coEvery { groupRepository.createInvite("group-1", any(), any()) } returns Result.failure(
-            Exception("Network error")
+            Exception("Network error"),
         )
 
         viewModel = InviteViewModel(groupRepository, savedStateHandle)
@@ -194,7 +194,7 @@ class InviteViewModelTest {
         val testGroup = createTestGroup()
         coEvery { groupRepository.getGroupDetails("group-1") } returns Result.success(testGroup)
         coEvery { groupRepository.getGroupInvites("group-1") } returns Result.failure(
-            Exception("Failed to load invites")
+            Exception("Failed to load invites"),
         )
 
         // When
@@ -261,7 +261,7 @@ class InviteViewModelTest {
         coEvery { groupRepository.getGroupDetails("group-1") } returns Result.success(testGroup)
         coEvery { groupRepository.getGroupInvites("group-1") } returns Result.success(listOf(testInvite))
         coEvery { groupRepository.revokeInvite("group-1", "invite-1") } returns Result.failure(
-            Exception("Cannot revoke")
+            Exception("Cannot revoke"),
         )
 
         viewModel = InviteViewModel(groupRepository, savedStateHandle)
@@ -344,10 +344,7 @@ class InviteViewModelTest {
 
     // Helper functions
 
-    private fun createTestGroup(
-        id: String = "group-1",
-        name: String = "Family Group",
-    ) = Group(
+    private fun createTestGroup(id: String = "group-1", name: String = "Family Group") = Group(
         id = id,
         name = name,
         description = "Test group",
@@ -358,10 +355,7 @@ class InviteViewModelTest {
         updatedAt = Instant.parse("2025-01-01T00:00:00Z"),
     )
 
-    private fun createTestInvite(
-        id: String = "invite-1",
-        code: String = "ABCD1234",
-    ) = GroupInvite(
+    private fun createTestInvite(id: String = "invite-1", code: String = "ABCD1234") = GroupInvite(
         id = id,
         groupId = "group-1",
         groupName = "Family Group",

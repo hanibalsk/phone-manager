@@ -46,9 +46,7 @@ interface ConfigRepository {
 }
 
 @Singleton
-class ConfigRepositoryImpl @Inject constructor(
-    private val configApiService: ConfigApiService,
-) : ConfigRepository {
+class ConfigRepositoryImpl @Inject constructor(private val configApiService: ConfigApiService) : ConfigRepository {
 
     private val _config = MutableStateFlow<PublicConfigResponse?>(null)
     override val config: Flow<PublicConfigResponse?> = _config.asStateFlow()
@@ -72,37 +70,26 @@ class ConfigRepositoryImpl @Inject constructor(
     override fun getCachedConfig(): PublicConfigResponse? = _config.value
 
     // Auth feature helpers
-    override fun isRegistrationEnabled(): Boolean =
-        _config.value?.auth?.registrationEnabled ?: true
+    override fun isRegistrationEnabled(): Boolean = _config.value?.auth?.registrationEnabled ?: true
 
-    override fun isInviteOnly(): Boolean =
-        _config.value?.auth?.inviteOnly ?: false
+    override fun isInviteOnly(): Boolean = _config.value?.auth?.inviteOnly ?: false
 
-    override fun isOAuthOnly(): Boolean =
-        _config.value?.auth?.oauthOnly ?: false
+    override fun isOAuthOnly(): Boolean = _config.value?.auth?.oauthOnly ?: false
 
-    override fun isGoogleSignInEnabled(): Boolean =
-        _config.value?.auth?.googleEnabled ?: false
+    override fun isGoogleSignInEnabled(): Boolean = _config.value?.auth?.googleEnabled ?: false
 
-    override fun isAppleSignInEnabled(): Boolean =
-        _config.value?.auth?.appleEnabled ?: false
+    override fun isAppleSignInEnabled(): Boolean = _config.value?.auth?.appleEnabled ?: false
 
     // Feature flag helpers
-    override fun isGeofencesEnabled(): Boolean =
-        _config.value?.features?.geofences ?: true
+    override fun isGeofencesEnabled(): Boolean = _config.value?.features?.geofences ?: true
 
-    override fun isProximityAlertsEnabled(): Boolean =
-        _config.value?.features?.proximityAlerts ?: true
+    override fun isProximityAlertsEnabled(): Boolean = _config.value?.features?.proximityAlerts ?: true
 
-    override fun isWebhooksEnabled(): Boolean =
-        _config.value?.features?.webhooks ?: true
+    override fun isWebhooksEnabled(): Boolean = _config.value?.features?.webhooks ?: true
 
-    override fun isMovementTrackingEnabled(): Boolean =
-        _config.value?.features?.movementTracking ?: true
+    override fun isMovementTrackingEnabled(): Boolean = _config.value?.features?.movementTracking ?: true
 
-    override fun isB2BEnabled(): Boolean =
-        _config.value?.features?.b2b ?: false
+    override fun isB2BEnabled(): Boolean = _config.value?.features?.b2b ?: false
 
-    override fun isGeofenceEventsEnabled(): Boolean =
-        _config.value?.features?.geofenceEvents ?: true
+    override fun isGeofenceEventsEnabled(): Boolean = _config.value?.features?.geofenceEvents ?: true
 }

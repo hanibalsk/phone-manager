@@ -29,9 +29,8 @@ import javax.inject.Inject
  * AC E12.6.6: Settings status section
  */
 @HiltViewModel
-class SettingsSyncViewModel @Inject constructor(
-    private val settingsSyncRepository: SettingsSyncRepository,
-) : ViewModel() {
+class SettingsSyncViewModel @Inject constructor(private val settingsSyncRepository: SettingsSyncRepository) :
+    ViewModel() {
 
     /** Current sync status */
     val syncStatus: StateFlow<SettingsSyncStatus> = settingsSyncRepository.syncStatus
@@ -99,25 +98,19 @@ class SettingsSyncViewModel @Inject constructor(
      * Check if a specific setting is locked.
      * AC E12.6.1: Lock indicator display
      */
-    fun isSettingLocked(key: String): Boolean {
-        return _lockStates.value[key]?.isLocked == true
-    }
+    fun isSettingLocked(key: String): Boolean = _lockStates.value[key]?.isLocked == true
 
     /**
      * Get lock information for a specific setting.
      * AC E12.6.1: Lock indicator display
      */
-    fun getSettingLock(key: String): SettingLock? {
-        return _lockStates.value[key]
-    }
+    fun getSettingLock(key: String): SettingLock? = _lockStates.value[key]
 
     /**
      * Get who locked a specific setting.
      * AC E12.6.1: Show "Managed by [admin name]"
      */
-    fun getLockedBy(key: String): String? {
-        return _lockStates.value[key]?.lockedBy
-    }
+    fun getLockedBy(key: String): String? = _lockStates.value[key]?.lockedBy
 
     /**
      * Handle push notification with settings update.
@@ -126,10 +119,7 @@ class SettingsSyncViewModel @Inject constructor(
      * @param updatedSettings Map of setting keys to new values
      * @param updatedBy Who made the changes (admin email/name)
      */
-    fun handlePushNotification(
-        updatedSettings: Map<String, Any>,
-        updatedBy: String,
-    ) {
+    fun handlePushNotification(updatedSettings: Map<String, Any>, updatedBy: String) {
         viewModelScope.launch {
             Timber.i("Handling settings push from $updatedBy")
             settingsSyncRepository.handleSettingsUpdatePush(updatedSettings, updatedBy)
@@ -241,7 +231,4 @@ data class SettingsSyncUiState(
 /**
  * Information about a push notification update.
  */
-data class PushUpdateInfo(
-    val updatedBy: String,
-    val settingsChanged: List<String>,
-)
+data class PushUpdateInfo(val updatedBy: String, val settingsChanged: List<String>)

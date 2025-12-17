@@ -31,10 +31,7 @@ import three.two.bit.phonemanager.R
  * @param onConfirm Callback with group name and description when user confirms
  */
 @Composable
-fun CreateGroupDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (name: String, description: String?) -> Unit,
-) {
+fun CreateGroupDialog(onDismiss: () -> Unit, onConfirm: (name: String, description: String?) -> Unit) {
     var groupName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var nameError by remember { mutableStateOf<String?>(null) }
@@ -43,20 +40,18 @@ fun CreateGroupDialog(
     val errorTooLong = stringResource(R.string.create_group_name_too_long)
 
     // Validate name
-    fun validateName(): Boolean {
-        return when {
-            groupName.isBlank() -> {
-                nameError = errorRequired
-                false
-            }
-            groupName.length > 50 -> {
-                nameError = errorTooLong
-                false
-            }
-            else -> {
-                nameError = null
-                true
-            }
+    fun validateName(): Boolean = when {
+        groupName.isBlank() -> {
+            nameError = errorRequired
+            false
+        }
+        groupName.length > 50 -> {
+            nameError = errorTooLong
+            false
+        }
+        else -> {
+            nameError = null
+            true
         }
     }
 

@@ -26,32 +26,30 @@ object QRCodeGenerator {
      * @param size The size of the QR code in pixels (default: 300)
      * @return Bitmap of the QR code, or null if generation fails
      */
-    fun generateQRCode(content: String, size: Int = DEFAULT_SIZE): Bitmap? {
-        return try {
-            val hints = mapOf(
-                EncodeHintType.MARGIN to 1,
-                EncodeHintType.ERROR_CORRECTION to com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.M,
-            )
+    fun generateQRCode(content: String, size: Int = DEFAULT_SIZE): Bitmap? = try {
+        val hints = mapOf(
+            EncodeHintType.MARGIN to 1,
+            EncodeHintType.ERROR_CORRECTION to com.google.zxing.qrcode.decoder.ErrorCorrectionLevel.M,
+        )
 
-            val writer = QRCodeWriter()
-            val bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, size, size, hints)
+        val writer = QRCodeWriter()
+        val bitMatrix = writer.encode(content, BarcodeFormat.QR_CODE, size, size, hints)
 
-            val width = bitMatrix.width
-            val height = bitMatrix.height
-            val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
+        val width = bitMatrix.width
+        val height = bitMatrix.height
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565)
 
-            for (x in 0 until width) {
-                for (y in 0 until height) {
-                    bitmap.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
-                }
+        for (x in 0 until width) {
+            for (y in 0 until height) {
+                bitmap.setPixel(x, y, if (bitMatrix[x, y]) Color.BLACK else Color.WHITE)
             }
-
-            Timber.d("QR code generated successfully for content: ${content.take(50)}...")
-            bitmap
-        } catch (e: Exception) {
-            Timber.e(e, "Failed to generate QR code")
-            null
         }
+
+        Timber.d("QR code generated successfully for content: ${content.take(50)}...")
+        bitmap
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to generate QR code")
+        null
     }
 
     /**
@@ -74,7 +72,5 @@ object QRCodeGenerator {
      * @param content The content to encode
      * @return Bitmap of the high-res QR code (600x600), or null if generation fails
      */
-    fun generateHighResQRCode(content: String): Bitmap? {
-        return generateQRCode(content, 600)
-    }
+    fun generateHighResQRCode(content: String): Bitmap? = generateQRCode(content, 600)
 }

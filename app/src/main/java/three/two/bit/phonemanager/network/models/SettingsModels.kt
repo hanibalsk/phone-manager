@@ -1,10 +1,10 @@
 package three.two.bit.phonemanager.network.models
 
-import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.domain.model.DeviceSettings
 import three.two.bit.phonemanager.domain.model.SettingLock
+import kotlin.time.Instant
 
 /**
  * Story E12.6: Network models for device settings sync.
@@ -98,10 +98,7 @@ data class SettingLockDto(
  * Story E12.6 (AC E12.6.4): Request to update a single setting.
  */
 @Serializable
-data class UpdateSettingRequest(
-    val key: String,
-    val value: String,
-)
+data class UpdateSettingRequest(val key: String, val value: String)
 
 /**
  * Story E12.6 (AC E12.6.4): Response from setting update.

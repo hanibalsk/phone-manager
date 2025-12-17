@@ -449,36 +449,31 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
     /**
      * Check if device is enrolled
      */
-    fun isEnrolled(): Boolean {
-        return getEnrollmentStatus() == three.two.bit.phonemanager.domain.model.EnrollmentStatus.ENROLLED
-    }
+    fun isEnrolled(): Boolean =
+        getEnrollmentStatus() == three.two.bit.phonemanager.domain.model.EnrollmentStatus.ENROLLED
 
     /**
      * Serialize settings map to JSON string
      */
-    private fun serializeSettingsToJson(settings: Map<String, Any>): String {
-        return buildString {
-            append("{")
-            settings.entries.forEachIndexed { index, (key, value) ->
-                if (index > 0) append(",")
-                append("\"$key\":")
-                when (value) {
-                    is String -> append("\"$value\"")
-                    is Boolean -> append(value)
-                    is Number -> append(value)
-                    else -> append("\"$value\"")
-                }
+    private fun serializeSettingsToJson(settings: Map<String, Any>): String = buildString {
+        append("{")
+        settings.entries.forEachIndexed { index, (key, value) ->
+            if (index > 0) append(",")
+            append("\"$key\":")
+            when (value) {
+                is String -> append("\"$value\"")
+                is Boolean -> append(value)
+                is Number -> append(value)
+                else -> append("\"$value\"")
             }
-            append("}")
         }
+        append("}")
     }
 
     /**
      * Serialize locks list to JSON string
      */
-    private fun serializeLocksToJson(locks: List<String>): String {
-        return "[${locks.joinToString(",") { "\"$it\"" }}]"
-    }
+    private fun serializeLocksToJson(locks: List<String>): String = "[${locks.joinToString(",") { "\"$it\"" }}]"
 
     /**
      * Parse settings JSON string to map

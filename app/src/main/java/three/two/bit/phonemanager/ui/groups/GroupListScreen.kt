@@ -18,8 +18,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Group
-import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -47,9 +47,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import three.two.bit.phonemanager.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Group
 import three.two.bit.phonemanager.domain.model.GroupRole
 
@@ -183,10 +183,7 @@ fun GroupListScreen(
  * AC E11.8.1: Group list with cards
  */
 @Composable
-private fun GroupList(
-    groups: List<Group>,
-    onGroupClick: (Group) -> Unit,
-) {
+private fun GroupList(groups: List<Group>, onGroupClick: (Group) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -210,10 +207,7 @@ private fun GroupList(
  * AC E11.8.1: Group card showing name, member count, and user role badge
  */
 @Composable
-private fun GroupCard(
-    group: Group,
-    onClick: () -> Unit,
-) {
+private fun GroupCard(group: Group, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -379,10 +373,7 @@ private fun EmptyState(onCreateGroup: () -> Unit) {
  * Error state with retry option
  */
 @Composable
-private fun ErrorState(
-    message: String,
-    onRetry: () -> Unit,
-) {
+private fun ErrorState(message: String, onRetry: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()

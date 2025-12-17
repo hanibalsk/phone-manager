@@ -95,8 +95,9 @@ class InviteViewModel @Inject constructor(
                 },
                 onFailure = { error ->
                     Timber.e(error, "Failed to load invites")
-                    _uiState.value = InviteUiState.Error("load_invites_failed", error.message ?: "Failed to load invites")
-                }
+                    _uiState.value =
+                        InviteUiState.Error("load_invites_failed", error.message ?: "Failed to load invites")
+                },
             )
         }
     }
@@ -114,7 +115,7 @@ class InviteViewModel @Inject constructor(
             groupRepository.createInvite(
                 groupId = groupId,
                 expiryDays = expiryDays,
-                maxUses = maxUses
+                maxUses = maxUses,
             ).fold(
                 onSuccess = { invite ->
                     _currentInvite.value = invite
@@ -125,9 +126,9 @@ class InviteViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to create invite")
                     _operationResult.value = InviteOperationResult.Error(
-                        error.message ?: "Failed to create invite"
+                        error.message ?: "Failed to create invite",
                     )
-                }
+                },
             )
         }
     }
@@ -154,9 +155,9 @@ class InviteViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to revoke invite")
                     _operationResult.value = InviteOperationResult.Error(
-                        error.message ?: "Failed to revoke invite"
+                        error.message ?: "Failed to revoke invite",
                     )
-                }
+                },
             )
         }
     }
@@ -189,7 +190,7 @@ class InviteViewModel @Inject constructor(
             message = "Join my Phone Manager group '$groupName' with code: ${invite.code}",
             deepLink = invite.getDeepLink(),
             code = invite.code,
-            groupName = groupName
+            groupName = groupName,
         )
     }
 
@@ -232,9 +233,4 @@ sealed interface InviteOperationResult {
 /**
  * Content for sharing an invite
  */
-data class ShareContent(
-    val message: String,
-    val deepLink: String,
-    val code: String,
-    val groupName: String,
-)
+data class ShareContent(val message: String, val deepLink: String, val code: String, val groupName: String)

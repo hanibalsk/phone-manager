@@ -3,13 +3,13 @@ package three.two.bit.phonemanager.service
 import android.content.Context
 import io.mockk.every
 import io.mockk.mockk
-import kotlin.time.Clock
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.movement.TransportationMode
 import three.two.bit.phonemanager.util.NotificationFormatter
+import kotlin.time.Clock
 
 /**
  * Test coverage for notification formatting functions.

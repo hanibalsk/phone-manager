@@ -214,9 +214,7 @@ class EnrollmentViewModel @Inject constructor(
      * Get the number of locked settings for display.
      * AC E13.10.6: Show locked settings count.
      */
-    fun getLockedSettingsCount(): Int {
-        return devicePolicy.value?.lockedCount() ?: 0
-    }
+    fun getLockedSettingsCount(): Int = devicePolicy.value?.lockedCount() ?: 0
 }
 
 /**

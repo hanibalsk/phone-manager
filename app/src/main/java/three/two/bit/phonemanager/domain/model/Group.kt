@@ -84,7 +84,9 @@ enum class GroupRole {
     /**
      * Basic access: can view group, view members, leave group.
      */
-    MEMBER;
+    MEMBER,
+
+    ;
 
     companion object {
         /**

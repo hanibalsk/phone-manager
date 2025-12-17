@@ -5,9 +5,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import three.two.bit.phonemanager.domain.model.Group
-import three.two.bit.phonemanager.domain.model.GroupRole
 import three.two.bit.phonemanager.domain.model.GroupInvite
 import three.two.bit.phonemanager.domain.model.GroupMembership
+import three.two.bit.phonemanager.domain.model.GroupRole
 import three.two.bit.phonemanager.domain.model.InviteValidationResult
 import three.two.bit.phonemanager.domain.model.JoinGroupResult
 import three.two.bit.phonemanager.network.GroupApiService
@@ -66,7 +66,7 @@ class GroupRepository @Inject constructor(
         return groupApiService.createGroup(
             name = name,
             description = description,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess { group ->
                 Timber.i("Group created: ${group.id}")
@@ -106,7 +106,7 @@ class GroupRepository @Inject constructor(
 
         return groupApiService.getGroupDetails(
             groupId = groupId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess { group ->
                 Timber.i("Loaded group details: ${group.name}")
@@ -126,11 +126,7 @@ class GroupRepository @Inject constructor(
      * @param description New description (optional)
      * @return Result with success status
      */
-    suspend fun updateGroup(
-        groupId: String,
-        name: String?,
-        description: String?,
-    ): Result<Unit> {
+    suspend fun updateGroup(groupId: String, name: String?, description: String?): Result<Unit> {
         val accessToken = secureStorage.getAccessToken()
             ?: return Result.failure(IllegalStateException("Authentication required"))
 
@@ -138,7 +134,7 @@ class GroupRepository @Inject constructor(
             groupId = groupId,
             name = name,
             description = description,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess {
                 Timber.i("Group updated: $groupId")
@@ -147,7 +143,7 @@ class GroupRepository @Inject constructor(
                     if (group.id == groupId) {
                         group.copy(
                             name = name ?: group.name,
-                            description = description ?: group.description
+                            description = description ?: group.description,
                         )
                     } else {
                         group
@@ -169,7 +165,7 @@ class GroupRepository @Inject constructor(
 
         return groupApiService.deleteGroup(
             groupId = groupId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess {
                 Timber.i("Group deleted: $groupId")
@@ -191,7 +187,7 @@ class GroupRepository @Inject constructor(
 
         return groupApiService.getGroupMembers(
             groupId = groupId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess { members ->
                 Timber.i("Loaded ${members.size} members for group $groupId")
@@ -207,11 +203,7 @@ class GroupRepository @Inject constructor(
      * @param role New role ("admin" or "member")
      * @return Result with success status
      */
-    suspend fun updateMemberRole(
-        groupId: String,
-        userId: String,
-        role: String,
-    ): Result<Unit> {
+    suspend fun updateMemberRole(groupId: String, userId: String, role: String): Result<Unit> {
         val accessToken = secureStorage.getAccessToken()
             ?: return Result.failure(IllegalStateException("Authentication required"))
 
@@ -219,7 +211,7 @@ class GroupRepository @Inject constructor(
             groupId = groupId,
             userId = userId,
             role = role,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess {
                 Timber.i("Member role updated: $userId to $role in group $groupId")
@@ -241,7 +233,7 @@ class GroupRepository @Inject constructor(
         return groupApiService.removeMember(
             groupId = groupId,
             userId = userId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess {
                 Timber.i("Member removed: $userId from group $groupId")
@@ -269,7 +261,7 @@ class GroupRepository @Inject constructor(
 
         return groupApiService.leaveGroup(
             groupId = groupId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess {
                 Timber.i("Left group: $groupId")
@@ -293,7 +285,7 @@ class GroupRepository @Inject constructor(
         return groupApiService.transferOwnership(
             groupId = groupId,
             newOwnerId = newOwnerId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess {
                 Timber.i("Ownership transferred: $groupId to $newOwnerId")
@@ -309,9 +301,7 @@ class GroupRepository @Inject constructor(
      * @param groupId The group's ID
      * @return Group from cache or null if not found
      */
-    fun getCachedGroup(groupId: String): Group? {
-        return _cachedGroups.value.find { it.id == groupId }
-    }
+    fun getCachedGroup(groupId: String): Group? = _cachedGroups.value.find { it.id == groupId }
 
     /**
      * Get cached group count
@@ -345,11 +335,7 @@ class GroupRepository @Inject constructor(
      * @param maxUses Maximum number of uses (-1 for unlimited, default: 1)
      * @return Result with created GroupInvite on success
      */
-    suspend fun createInvite(
-        groupId: String,
-        expiryDays: Int = 7,
-        maxUses: Int = 1,
-    ): Result<GroupInvite> {
+    suspend fun createInvite(groupId: String, expiryDays: Int = 7, maxUses: Int = 1): Result<GroupInvite> {
         val accessToken = secureStorage.getAccessToken()
             ?: return Result.failure(IllegalStateException("Authentication required"))
 
@@ -357,7 +343,7 @@ class GroupRepository @Inject constructor(
             groupId = groupId,
             expiryDays = expiryDays,
             maxUses = maxUses,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess { invite ->
                 Timber.i("Invite created: ${invite.code} for group $groupId")
@@ -379,7 +365,7 @@ class GroupRepository @Inject constructor(
 
         return groupApiService.getGroupInvites(
             groupId = groupId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess { invites ->
                 Timber.i("Loaded ${invites.size} invites for group $groupId")
@@ -404,7 +390,7 @@ class GroupRepository @Inject constructor(
         return groupApiService.revokeInvite(
             groupId = groupId,
             inviteId = inviteId,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess {
                 Timber.i("Invite revoked: $inviteId")
@@ -422,8 +408,8 @@ class GroupRepository @Inject constructor(
      * @param code The 8-character invite code
      * @return Result with validation result including group preview
      */
-    suspend fun validateInviteCode(code: String): Result<InviteValidationResult> {
-        return groupApiService.validateInviteCode(code).also { result ->
+    suspend fun validateInviteCode(code: String): Result<InviteValidationResult> =
+        groupApiService.validateInviteCode(code).also { result ->
             result.onSuccess { validation ->
                 if (validation.valid) {
                     Timber.i("Invite code valid: group=${validation.group?.name}")
@@ -432,7 +418,6 @@ class GroupRepository @Inject constructor(
                 }
             }
         }
-    }
 
     /**
      * AC E11.9.4: Join a group using an invite code
@@ -446,7 +431,7 @@ class GroupRepository @Inject constructor(
 
         return groupApiService.joinWithInvite(
             code = code,
-            accessToken = accessToken
+            accessToken = accessToken,
         ).also { result ->
             result.onSuccess { joinResult ->
                 Timber.i("Joined group: ${joinResult.groupId} with role=${joinResult.role}")
@@ -469,9 +454,8 @@ class GroupRepository @Inject constructor(
      * @param groupId The group's ID
      * @return List of cached invites for the group
      */
-    fun getCachedInvitesForGroup(groupId: String): List<GroupInvite> {
-        return _cachedInvites.value.filter { it.groupId == groupId }
-    }
+    fun getCachedInvitesForGroup(groupId: String): List<GroupInvite> =
+        _cachedInvites.value.filter { it.groupId == groupId }
 
     /**
      * Get cached invite by code
@@ -479,9 +463,7 @@ class GroupRepository @Inject constructor(
      * @param code The 8-character invite code
      * @return Invite from cache or null if not found
      */
-    fun getCachedInviteByCode(code: String): GroupInvite? {
-        return _cachedInvites.value.find { it.code == code }
-    }
+    fun getCachedInviteByCode(code: String): GroupInvite? = _cachedInvites.value.find { it.code == code }
 
     /**
      * Clear invites cache for a specific group
@@ -509,7 +491,7 @@ class GroupRepository @Inject constructor(
         val inviteResult = createInvite(
             groupId = groupId,
             expiryDays = 1, // Short expiry since we use it immediately
-            maxUses = 1     // Single use
+            maxUses = 1, // Single use
         )
 
         val invite = inviteResult.getOrElse { error ->

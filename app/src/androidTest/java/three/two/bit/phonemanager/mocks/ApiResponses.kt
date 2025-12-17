@@ -19,11 +19,12 @@ object ApiResponses {
     fun loginSuccess(
         userId: String = "test-user-123",
         email: String = "test@example.com",
-        token: String = "test-jwt-token-abc123"
+        token: String = "test-jwt-token-abc123",
     ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "user": {
                     "id": "$userId",
@@ -34,20 +35,20 @@ object ApiResponses {
                 "token": "$token",
                 "expiresAt": "2025-12-31T23:59:59Z"
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     fun loginFailure(message: String = "Invalid credentials"): MockResponse = MockResponse()
         .setResponseCode(401)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
         .setBody("""{"error": "$message"}""")
 
-    fun registerSuccess(
-        userId: String = "new-user-456",
-        email: String = "newuser@example.com"
-    ): MockResponse = MockResponse()
-        .setResponseCode(201)
-        .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+    fun registerSuccess(userId: String = "new-user-456", email: String = "newuser@example.com"): MockResponse =
+        MockResponse()
+            .setResponseCode(201)
+            .addHeader("Content-Type", CONTENT_TYPE_JSON)
+            .setBody(
+                """
             {
                 "user": {
                     "id": "$userId",
@@ -56,7 +57,8 @@ object ApiResponses {
                 },
                 "message": "Registration successful"
             }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
     fun registerFailure(message: String = "Email already exists"): MockResponse = MockResponse()
         .setResponseCode(409)
@@ -67,13 +69,12 @@ object ApiResponses {
     // Device Registration Responses
     // =============================================================================
 
-    fun deviceRegisterSuccess(
-        deviceId: String = "device-abc123",
-        deviceName: String = "Test Device"
-    ): MockResponse = MockResponse()
-        .setResponseCode(201)
-        .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+    fun deviceRegisterSuccess(deviceId: String = "device-abc123", deviceName: String = "Test Device"): MockResponse =
+        MockResponse()
+            .setResponseCode(201)
+            .addHeader("Content-Type", CONTENT_TYPE_JSON)
+            .setBody(
+                """
             {
                 "device": {
                     "id": "$deviceId",
@@ -83,52 +84,62 @@ object ApiResponses {
                     "createdAt": "2025-01-01T00:00:00Z"
                 }
             }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
-    fun deviceListSuccess(devices: List<DeviceData> = listOf(
-        DeviceData("device-1", "Phone", true),
-        DeviceData("device-2", "Tablet", false)
-    )): MockResponse = MockResponse()
+    fun deviceListSuccess(
+        devices: List<DeviceData> = listOf(
+            DeviceData("device-1", "Phone", true),
+            DeviceData("device-2", "Tablet", false),
+        ),
+    ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "devices": [
                     ${devices.joinToString(",") { device ->
-                        """{"id": "${device.id}", "name": "${device.name}", "isPrimary": ${device.isPrimary}}"""
-                    }}
+                """{"id": "${device.id}", "name": "${device.name}", "isPrimary": ${device.isPrimary}}"""
+            }}
                 ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     // =============================================================================
     // Group Management Responses
     // =============================================================================
 
-    fun groupListSuccess(groups: List<GroupData> = listOf(
-        GroupData("group-1", "Family", 3),
-        GroupData("group-2", "Work", 5)
-    )): MockResponse = MockResponse()
+    fun groupListSuccess(
+        groups: List<GroupData> = listOf(
+            GroupData("group-1", "Family", 3),
+            GroupData("group-2", "Work", 5),
+        ),
+    ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "groups": [
                     ${groups.joinToString(",") { group ->
-                        """{"id": "${group.id}", "name": "${group.name}", "memberCount": ${group.memberCount}}"""
-                    }}
+                """{"id": "${group.id}", "name": "${group.name}", "memberCount": ${group.memberCount}}"""
+            }}
                 ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     fun groupCreateSuccess(
         groupId: String = "new-group-789",
         groupName: String = "New Group",
-        inviteCode: String = "ABC123"
+        inviteCode: String = "ABC123",
     ): MockResponse = MockResponse()
         .setResponseCode(201)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "group": {
                     "id": "$groupId",
@@ -138,15 +149,15 @@ object ApiResponses {
                     "createdAt": "2025-01-01T00:00:00Z"
                 }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
-    fun groupJoinSuccess(
-        groupId: String = "joined-group-123",
-        groupName: String = "Joined Group"
-    ): MockResponse = MockResponse()
-        .setResponseCode(200)
-        .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+    fun groupJoinSuccess(groupId: String = "joined-group-123", groupName: String = "Joined Group"): MockResponse =
+        MockResponse()
+            .setResponseCode(200)
+            .addHeader("Content-Type", CONTENT_TYPE_JSON)
+            .setBody(
+                """
             {
                 "group": {
                     "id": "$groupId",
@@ -155,19 +166,23 @@ object ApiResponses {
                 },
                 "message": "Successfully joined group"
             }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
-    fun groupMembersSuccess(members: List<MemberData> = listOf(
-        MemberData("user-1", "Alice", 37.7749, -122.4194),
-        MemberData("user-2", "Bob", 37.8044, -122.2712)
-    )): MockResponse = MockResponse()
+    fun groupMembersSuccess(
+        members: List<MemberData> = listOf(
+            MemberData("user-1", "Alice", 37.7749, -122.4194),
+            MemberData("user-2", "Bob", 37.8044, -122.2712),
+        ),
+    ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "members": [
                     ${members.joinToString(",") { member ->
-                        """{
+                """{
                             "id": "${member.id}",
                             "name": "${member.name}",
                             "location": {
@@ -176,10 +191,11 @@ object ApiResponses {
                                 "timestamp": "2025-01-01T12:00:00Z"
                             }
                         }"""
-                    }}
+            }}
                 ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     // =============================================================================
     // Location Tracking Responses
@@ -200,55 +216,60 @@ object ApiResponses {
         locations: List<LocationData> = listOf(
             LocationData(37.7749, -122.4194, "2025-01-01T10:00:00Z"),
             LocationData(37.7750, -122.4195, "2025-01-01T10:05:00Z"),
-            LocationData(37.7755, -122.4190, "2025-01-01T10:10:00Z")
-        )
+            LocationData(37.7755, -122.4190, "2025-01-01T10:10:00Z"),
+        ),
     ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "deviceId": "$deviceId",
                 "locations": [
                     ${locations.joinToString(",") { loc ->
-                        """{"latitude": ${loc.lat}, "longitude": ${loc.lon}, "timestamp": "${loc.timestamp}"}"""
-                    }}
+                """{"latitude": ${loc.lat}, "longitude": ${loc.lon}, "timestamp": "${loc.timestamp}"}"""
+            }}
                 ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     // =============================================================================
     // Geofence Responses
     // =============================================================================
 
-    fun geofenceListSuccess(geofences: List<GeofenceData> = listOf(
-        GeofenceData("geo-1", "Home", 37.7749, -122.4194, 100),
-        GeofenceData("geo-2", "Work", 37.8044, -122.2712, 200)
-    )): MockResponse = MockResponse()
+    fun geofenceListSuccess(
+        geofences: List<GeofenceData> = listOf(
+            GeofenceData("geo-1", "Home", 37.7749, -122.4194, 100),
+            GeofenceData("geo-2", "Work", 37.8044, -122.2712, 200),
+        ),
+    ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "geofences": [
                     ${geofences.joinToString(",") { geo ->
-                        """{
+                """{
                             "id": "${geo.id}",
                             "name": "${geo.name}",
                             "center": {"latitude": ${geo.lat}, "longitude": ${geo.lon}},
                             "radius": ${geo.radius},
                             "active": true
                         }"""
-                    }}
+            }}
                 ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
-    fun geofenceCreateSuccess(
-        geofenceId: String = "new-geo-456",
-        name: String = "New Geofence"
-    ): MockResponse = MockResponse()
-        .setResponseCode(201)
-        .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+    fun geofenceCreateSuccess(geofenceId: String = "new-geo-456", name: String = "New Geofence"): MockResponse =
+        MockResponse()
+            .setResponseCode(201)
+            .addHeader("Content-Type", CONTENT_TYPE_JSON)
+            .setBody(
+                """
             {
                 "geofence": {
                     "id": "$geofenceId",
@@ -256,15 +277,14 @@ object ApiResponses {
                     "active": true
                 }
             }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
-    fun geofenceEventSuccess(
-        eventType: String = "ENTER",
-        geofenceId: String = "geo-123"
-    ): MockResponse = MockResponse()
+    fun geofenceEventSuccess(eventType: String = "ENTER", geofenceId: String = "geo-123"): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "event": {
                     "type": "$eventType",
@@ -272,66 +292,73 @@ object ApiResponses {
                     "timestamp": "2025-01-01T12:00:00Z"
                 }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     // =============================================================================
     // Trip Responses
     // =============================================================================
 
-    fun tripListSuccess(trips: List<TripData> = listOf(
-        TripData("trip-1", "2025-01-01T08:00:00Z", "2025-01-01T08:30:00Z", 5000.0, "driving"),
-        TripData("trip-2", "2025-01-01T12:00:00Z", "2025-01-01T12:15:00Z", 1500.0, "walking")
-    )): MockResponse = MockResponse()
+    fun tripListSuccess(
+        trips: List<TripData> = listOf(
+            TripData("trip-1", "2025-01-01T08:00:00Z", "2025-01-01T08:30:00Z", 5000.0, "driving"),
+            TripData("trip-2", "2025-01-01T12:00:00Z", "2025-01-01T12:15:00Z", 1500.0, "walking"),
+        ),
+    ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "trips": [
                     ${trips.joinToString(",") { trip ->
-                        """{
+                """{
                             "id": "${trip.id}",
                             "startTime": "${trip.startTime}",
                             "endTime": "${trip.endTime}",
                             "distance": ${trip.distance},
                             "mode": "${trip.mode}"
                         }"""
-                    }}
+            }}
                 ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     // =============================================================================
     // Proximity Alert Responses
     // =============================================================================
 
-    fun proximityAlertListSuccess(alerts: List<ProximityAlertData> = listOf(
-        ProximityAlertData("alert-1", "user-2", 500, true),
-        ProximityAlertData("alert-2", "user-3", 1000, false)
-    )): MockResponse = MockResponse()
+    fun proximityAlertListSuccess(
+        alerts: List<ProximityAlertData> = listOf(
+            ProximityAlertData("alert-1", "user-2", 500, true),
+            ProximityAlertData("alert-2", "user-3", 1000, false),
+        ),
+    ): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "alerts": [
                     ${alerts.joinToString(",") { alert ->
-                        """{
+                """{
                             "id": "${alert.id}",
                             "targetUserId": "${alert.targetUserId}",
                             "radius": ${alert.radius},
                             "active": ${alert.active}
                         }"""
-                    }}
+            }}
                 ]
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
-    fun proximityEventSuccess(
-        eventType: String = "ENTER",
-        alertId: String = "alert-123"
-    ): MockResponse = MockResponse()
+    fun proximityEventSuccess(eventType: String = "ENTER", alertId: String = "alert-123"): MockResponse = MockResponse()
         .setResponseCode(200)
         .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+        .setBody(
+            """
             {
                 "event": {
                     "type": "$eventType",
@@ -339,19 +366,19 @@ object ApiResponses {
                     "timestamp": "2025-01-01T12:00:00Z"
                 }
             }
-        """.trimIndent())
+            """.trimIndent(),
+        )
 
     // =============================================================================
     // Enterprise Enrollment Responses
     // =============================================================================
 
-    fun enrollmentSuccess(
-        enrollmentId: String = "enroll-123",
-        policyName: String = "Company Policy"
-    ): MockResponse = MockResponse()
-        .setResponseCode(200)
-        .addHeader("Content-Type", CONTENT_TYPE_JSON)
-        .setBody("""
+    fun enrollmentSuccess(enrollmentId: String = "enroll-123", policyName: String = "Company Policy"): MockResponse =
+        MockResponse()
+            .setResponseCode(200)
+            .addHeader("Content-Type", CONTENT_TYPE_JSON)
+            .setBody(
+                """
             {
                 "enrollment": {
                     "id": "$enrollmentId",
@@ -360,7 +387,8 @@ object ApiResponses {
                     "enrolledAt": "2025-01-01T00:00:00Z"
                 }
             }
-        """.trimIndent())
+                """.trimIndent(),
+            )
 
     // =============================================================================
     // Error Responses
@@ -405,6 +433,12 @@ object ApiResponses {
     data class MemberData(val id: String, val name: String, val lat: Double, val lon: Double)
     data class LocationData(val lat: Double, val lon: Double, val timestamp: String)
     data class GeofenceData(val id: String, val name: String, val lat: Double, val lon: Double, val radius: Int)
-    data class TripData(val id: String, val startTime: String, val endTime: String, val distance: Double, val mode: String)
+    data class TripData(
+        val id: String,
+        val startTime: String,
+        val endTime: String,
+        val distance: Double,
+        val mode: String,
+    )
     data class ProximityAlertData(val id: String, val targetUserId: String, val radius: Int, val active: Boolean)
 }

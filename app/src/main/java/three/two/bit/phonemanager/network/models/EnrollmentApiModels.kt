@@ -45,21 +45,13 @@ data class DeviceInfoDto(
  * AC E13.10.4: Enroll device with token and device info.
  */
 @Serializable
-data class EnrollDeviceRequest(
-    val enrollmentToken: String,
-    val deviceInfo: DeviceInfoDto,
-)
+data class EnrollDeviceRequest(val enrollmentToken: String, val deviceInfo: DeviceInfoDto)
 
 /**
  * User data in enrollment response.
  */
 @Serializable
-data class EnrollmentUserDto(
-    val userId: String,
-    val email: String,
-    val accessToken: String,
-    val refreshToken: String,
-)
+data class EnrollmentUserDto(val userId: String, val email: String, val accessToken: String, val refreshToken: String)
 
 /**
  * Organization data in enrollment response.
@@ -137,11 +129,7 @@ data class EnrollDeviceResponse(
  * AC E13.10.7: Enrollment error handling.
  */
 @Serializable
-data class EnrollmentErrorResponse(
-    val error: String,
-    val code: String? = null,
-    val details: String? = null,
-) {
+data class EnrollmentErrorResponse(val error: String, val code: String? = null, val details: String? = null) {
     companion object {
         const val ERROR_INVALID_TOKEN = "invalid_token"
         const val ERROR_EXPIRED_TOKEN = "expired_token"
@@ -160,10 +148,7 @@ data class EnrollmentErrorResponse(
  * AC E13.10.9: Unenroll device.
  */
 @Serializable
-data class UnenrollDeviceResponse(
-    val success: Boolean,
-    val message: String? = null,
-)
+data class UnenrollDeviceResponse(val success: Boolean, val message: String? = null)
 
 /**
  * Error response when unenrollment is blocked.

@@ -54,13 +54,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Group
 import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.GroupRole
+import kotlin.time.Instant
 
 /**
  * Story E11.8 Task 8: Group Detail Screen
@@ -423,11 +423,7 @@ private fun GroupDetailContent(
  * Group header with icon and name
  */
 @Composable
-private fun GroupHeader(
-    group: Group,
-    canEdit: Boolean,
-    onEditName: () -> Unit,
-) {
+private fun GroupHeader(group: Group, canEdit: Boolean, onEditName: () -> Unit) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -488,11 +484,7 @@ private fun GroupHeader(
  * Group information card with details
  */
 @Composable
-private fun GroupInfoCard(
-    group: Group,
-    canEdit: Boolean,
-    onEditDescription: () -> Unit,
-) {
+private fun GroupInfoCard(group: Group, canEdit: Boolean, onEditDescription: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier
@@ -542,7 +534,12 @@ private fun GroupInfoCard(
                 InfoRow(label = stringResource(R.string.group_detail_created), value = formatFullTimestamp(createdAt))
             }
 
-            InfoRow(label = stringResource(R.string.group_detail_your_role), value = group.userRole.name.lowercase().replaceFirstChar { it.uppercase() })
+            InfoRow(
+                label = stringResource(R.string.group_detail_your_role),
+                value = group.userRole.name.lowercase().replaceFirstChar {
+                    it.uppercase()
+                },
+            )
         }
     }
 }
@@ -551,11 +548,7 @@ private fun GroupInfoCard(
  * Members preview card
  */
 @Composable
-private fun MembersPreviewCard(
-    members: List<GroupMembership>,
-    totalCount: Int,
-    onViewAll: () -> Unit,
-) {
+private fun MembersPreviewCard(members: List<GroupMembership>, totalCount: Int, onViewAll: () -> Unit) {
     Card(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier

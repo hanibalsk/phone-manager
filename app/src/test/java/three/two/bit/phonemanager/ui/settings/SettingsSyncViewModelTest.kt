@@ -12,7 +12,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Instant
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
@@ -26,6 +25,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Story E12.6 Task 12: Unit tests for SettingsSyncViewModel
@@ -61,9 +61,7 @@ class SettingsSyncViewModelTest {
         coEvery { settingsSyncRepository.syncAllSettings() } returns Result.success(Unit)
     }
 
-    private fun createViewModel(): SettingsSyncViewModel {
-        return SettingsSyncViewModel(settingsSyncRepository)
-    }
+    private fun createViewModel(): SettingsSyncViewModel = SettingsSyncViewModel(settingsSyncRepository)
 
     // AC E12.6.2: Setting sync on app start Tests
 

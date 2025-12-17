@@ -14,9 +14,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
  *     .clickSignIn()
  * ```
  */
-class AuthScreenRobot(
-    composeTestRule: ComposeTestRule
-) : BaseRobot(composeTestRule) {
+class AuthScreenRobot(composeTestRule: ComposeTestRule) : BaseRobot(composeTestRule) {
 
     // Test tags - should match those defined in the Compose UI
     companion object {
@@ -82,11 +80,9 @@ class AuthScreenRobot(
     /**
      * Perform a complete login flow.
      */
-    fun performLogin(email: String, password: String): AuthScreenRobot {
-        return enterEmail(email)
-            .enterPassword(password)
-            .clickSignIn()
-    }
+    fun performLogin(email: String, password: String): AuthScreenRobot = enterEmail(email)
+        .enterPassword(password)
+        .clickSignIn()
 
     // =============================================================================
     // Registration Screen Actions
@@ -127,17 +123,11 @@ class AuthScreenRobot(
     /**
      * Perform a complete registration flow.
      */
-    fun performRegistration(
-        name: String,
-        email: String,
-        password: String
-    ): AuthScreenRobot {
-        return enterName(name)
-            .enterEmail(email)
-            .enterPassword(password)
-            .enterConfirmPassword(password)
-            .clickRegister()
-    }
+    fun performRegistration(name: String, email: String, password: String): AuthScreenRobot = enterName(name)
+        .enterEmail(email)
+        .enterPassword(password)
+        .enterConfirmPassword(password)
+        .clickRegister()
 
     // =============================================================================
     // Forgot Password Screen Actions
@@ -154,10 +144,8 @@ class AuthScreenRobot(
     /**
      * Perform forgot password flow.
      */
-    fun performForgotPassword(email: String): AuthScreenRobot {
-        return enterEmail(email)
-            .clickResetPassword()
-    }
+    fun performForgotPassword(email: String): AuthScreenRobot = enterEmail(email)
+        .clickResetPassword()
 
     // =============================================================================
     // Assertions

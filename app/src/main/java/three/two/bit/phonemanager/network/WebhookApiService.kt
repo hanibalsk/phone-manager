@@ -137,7 +137,7 @@ class WebhookApiServiceImpl @Inject constructor(
             if (!httpResponse.status.isSuccess()) {
                 Timber.w("Webhooks API returned ${httpResponse.status.value}: endpoint may not be implemented")
                 return Result.failure(
-                    WebhookApiException("Webhooks API not available (${httpResponse.status.value})")
+                    WebhookApiException("Webhooks API not available (${httpResponse.status.value})"),
                 )
             }
 

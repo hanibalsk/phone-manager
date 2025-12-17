@@ -18,9 +18,7 @@ import javax.inject.Inject
  * Uses BuildConfig.USE_MOCK_AUTH to determine mock vs real API calls.
  */
 @HiltViewModel
-class ForgotPasswordViewModel @Inject constructor(
-    private val authApiService: AuthApiService,
-) : ViewModel() {
+class ForgotPasswordViewModel @Inject constructor(private val authApiService: AuthApiService) : ViewModel() {
 
     private val _uiState = MutableStateFlow(ForgotPasswordUiState())
     val uiState: StateFlow<ForgotPasswordUiState> = _uiState.asStateFlow()
@@ -86,9 +84,8 @@ class ForgotPasswordViewModel @Inject constructor(
         _uiState.value = ForgotPasswordUiState()
     }
 
-    private fun isValidEmail(email: String): Boolean {
-        return email.matches(Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"))
-    }
+    private fun isValidEmail(email: String): Boolean =
+        email.matches(Regex("[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}"))
 }
 
 /**

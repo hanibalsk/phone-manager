@@ -19,10 +19,7 @@ sealed interface DeviceUiState {
      * @property devices List of user's devices
      * @property currentDeviceId The device ID of the current device running the app
      */
-    data class Success(
-        val devices: List<UserDevice>,
-        val currentDeviceId: String,
-    ) : DeviceUiState
+    data class Success(val devices: List<UserDevice>, val currentDeviceId: String) : DeviceUiState
 
     /**
      * Error state when something went wrong
@@ -30,10 +27,7 @@ sealed interface DeviceUiState {
      * @property message User-friendly error message
      * @property errorCode Optional error code for debugging
      */
-    data class Error(
-        val message: String,
-        val errorCode: String? = null,
-    ) : DeviceUiState
+    data class Error(val message: String, val errorCode: String? = null) : DeviceUiState
 
     /**
      * Empty state when user has no linked devices
@@ -57,19 +51,13 @@ sealed interface DeviceDetailUiState {
      * @property isCurrentDevice Whether this is the current device
      * @property isOwner Whether the current user is the owner
      */
-    data class Success(
-        val device: UserDevice,
-        val isCurrentDevice: Boolean,
-        val isOwner: Boolean = true,
-    ) : DeviceDetailUiState
+    data class Success(val device: UserDevice, val isCurrentDevice: Boolean, val isOwner: Boolean = true) :
+        DeviceDetailUiState
 
     /**
      * Error loading device details
      */
-    data class Error(
-        val message: String,
-        val errorCode: String? = null,
-    ) : DeviceDetailUiState
+    data class Error(val message: String, val errorCode: String? = null) : DeviceDetailUiState
 }
 
 /**
@@ -89,10 +77,7 @@ sealed interface DeviceOperationResult {
      * @property message Error message to display
      * @property errorCode Optional error code
      */
-    data class Error(
-        val message: String,
-        val errorCode: String? = null,
-    ) : DeviceOperationResult
+    data class Error(val message: String, val errorCode: String? = null) : DeviceOperationResult
 
     /**
      * Operation is in progress

@@ -14,7 +14,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Clock
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -27,6 +26,7 @@ import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.DeviceLocation
 import three.two.bit.phonemanager.domain.model.DeviceSettings
+import kotlin.time.Clock
 
 /**
  * Unit tests for UserLocationMapViewModel

@@ -84,12 +84,7 @@ class GeocodingService @Inject constructor(private val context: Context) {
      * @param endLng End longitude (optional)
      * @return A trip title (e.g., "123 Main St → 456 Oak Ave") or null
      */
-    suspend fun getTripTitle(
-        startLat: Double,
-        startLng: Double,
-        endLat: Double?,
-        endLng: Double?,
-    ): String? {
+    suspend fun getTripTitle(startLat: Double, startLng: Double, endLat: Double?, endLng: Double?): String? {
         val startName = getLocationName(startLat, startLng) ?: return null
 
         return if (endLat != null && endLng != null) {
@@ -101,26 +96,30 @@ class GeocodingService @Inject constructor(private val context: Context) {
     }
 
     @Suppress("DEPRECATION")
-    private suspend fun getAddressFromCoordinates(latitude: Double, longitude: Double): android.location.Address? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+    private suspend fun getAddressFromCoordinates(latitude: Double, longitude: Double): android.location.Address? =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             // Use the new async API for Android 13+
             suspendCancellableCoroutine { continuation ->
-                geocoder?.getFromLocation(latitude, longitude, 1, object : Geocoder.GeocodeListener {
-                    override fun onGeocode(addresses: MutableList<android.location.Address>) {
-                        continuation.resume(addresses.firstOrNull())
-                    }
+                geocoder?.getFromLocation(
+                    latitude,
+                    longitude,
+                    1,
+                    object : Geocoder.GeocodeListener {
+                        override fun onGeocode(addresses: MutableList<android.location.Address>) {
+                            continuation.resume(addresses.firstOrNull())
+                        }
 
-                    override fun onError(errorMessage: String?) {
-                        Timber.w("Geocode error: $errorMessage")
-                        continuation.resume(null)
-                    }
-                }) ?: continuation.resume(null)
+                        override fun onError(errorMessage: String?) {
+                            Timber.w("Geocode error: $errorMessage")
+                            continuation.resume(null)
+                        }
+                    },
+                ) ?: continuation.resume(null)
             }
         } else {
             // Use the deprecated sync API for older Android versions
             geocoder?.getFromLocation(latitude, longitude, 1)?.firstOrNull()
         }
-    }
 
     private fun formatLocationName(address: android.location.Address): String {
         // Priority order for location name:

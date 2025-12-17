@@ -8,7 +8,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import three.two.bit.phonemanager.data.repository.AdminSettingsRepository
 import three.two.bit.phonemanager.domain.model.BulkSettingsResult
 import three.two.bit.phonemanager.domain.model.SettingDefinition
@@ -16,6 +15,7 @@ import three.two.bit.phonemanager.domain.model.SettingsTemplate
 import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
+import kotlin.time.Clock
 
 /**
  * Story E12.7: ViewModel for Settings Templates
@@ -29,9 +29,8 @@ import javax.inject.Inject
  * - Apply templates to devices
  */
 @HiltViewModel
-class SettingsTemplateViewModel @Inject constructor(
-    private val adminSettingsRepository: AdminSettingsRepository,
-) : ViewModel() {
+class SettingsTemplateViewModel @Inject constructor(private val adminSettingsRepository: AdminSettingsRepository) :
+    ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsTemplateUiState())
     val uiState: StateFlow<SettingsTemplateUiState> = _uiState.asStateFlow()
@@ -364,9 +363,7 @@ class SettingsTemplateViewModel @Inject constructor(
     /**
      * Get available settings for template creation.
      */
-    fun getAvailableSettings(): List<SettingDefinition> {
-        return SettingDefinition.ALL_SETTINGS
-    }
+    fun getAvailableSettings(): List<SettingDefinition> = SettingDefinition.ALL_SETTINGS
 }
 
 /**

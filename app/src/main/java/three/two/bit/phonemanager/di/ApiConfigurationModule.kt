@@ -23,10 +23,7 @@ object ApiConfigurationModule {
 
     @Provides
     @Singleton
-    fun provideApiConfiguration(
-        @ApplicationContext context: Context,
-        secureStorage: SecureStorage,
-    ): ApiConfiguration {
+    fun provideApiConfiguration(@ApplicationContext context: Context, secureStorage: SecureStorage): ApiConfiguration {
         // Get base URL from secure storage - require HTTPS in production
         val baseUrl = secureStorage.getApiBaseUrl()
             ?: BuildConfig.API_BASE_URL.takeIf { it.isNotBlank() }

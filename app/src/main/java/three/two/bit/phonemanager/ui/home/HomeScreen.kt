@@ -162,7 +162,7 @@ fun HomeScreen(
                 actions = {
                     IconButton(
                         onClick = onNavigateToSettings,
-                        modifier = Modifier.testTag("settings_button")
+                        modifier = Modifier.testTag("settings_button"),
                     ) {
                         Icon(Icons.Default.Settings, stringResource(R.string.settings))
                     }
@@ -478,11 +478,7 @@ fun HomeScreen(
  * Uses FilterChips to provide clear visual feedback of the current mode.
  */
 @Composable
-private fun AdminViewToggle(
-    isAdminViewMode: Boolean,
-    onToggle: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun AdminViewToggle(isAdminViewMode: Boolean, onToggle: () -> Unit, modifier: Modifier = Modifier) {
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -534,10 +530,7 @@ private fun AdminViewToggle(
  * This will be replaced with the actual user management UI in Story E9.3.
  */
 @Composable
-private fun AdminUsersPlaceholder(
-    onNavigateToAdminUsers: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun AdminUsersPlaceholder(onNavigateToAdminUsers: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.padding(vertical = 16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),

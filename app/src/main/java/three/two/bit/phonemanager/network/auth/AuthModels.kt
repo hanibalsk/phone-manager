@@ -19,11 +19,7 @@ import kotlinx.serialization.Serializable
  * @property displayName User display name
  */
 @Serializable
-data class RegisterRequest(
-    val email: String,
-    val password: String,
-    @SerialName("display_name") val displayName: String
-)
+data class RegisterRequest(val email: String, val password: String, @SerialName("display_name") val displayName: String)
 
 /**
  * AC E9.11.3: Login Request
@@ -32,10 +28,7 @@ data class RegisterRequest(
  * @property password User password
  */
 @Serializable
-data class LoginRequest(
-    val email: String,
-    val password: String
-)
+data class LoginRequest(val email: String, val password: String)
 
 /**
  * AC E9.11.8: Token Refresh Request
@@ -43,9 +36,7 @@ data class LoginRequest(
  * @property refreshToken The refresh token to exchange for new access token
  */
 @Serializable
-data class RefreshRequest(
-    @SerialName("refresh_token") val refreshToken: String
-)
+data class RefreshRequest(@SerialName("refresh_token") val refreshToken: String)
 
 /**
  * AC E9.11.5: OAuth Sign-In Request
@@ -54,10 +45,7 @@ data class RefreshRequest(
  * @property idToken ID token from OAuth provider
  */
 @Serializable
-data class OAuthRequest(
-    val provider: String,
-    @SerialName("id_token") val idToken: String
-)
+data class OAuthRequest(val provider: String, @SerialName("id_token") val idToken: String)
 
 // Response Models
 
@@ -76,7 +64,7 @@ data class TokensResponse(
     @SerialName("access_token") val accessToken: String,
     @SerialName("refresh_token") val refreshToken: String,
     @SerialName("token_type") val tokenType: String = "Bearer",
-    @SerialName("expires_in") val expiresIn: Long
+    @SerialName("expires_in") val expiresIn: Long,
 )
 
 /**
@@ -102,7 +90,7 @@ data class UserResponse(
     @SerialName("email_verified") val emailVerified: Boolean = false,
     @SerialName("auth_provider") val authProvider: String = "email",
     @SerialName("organization_id") val organizationId: String? = null,
-    @SerialName("created_at") val createdAt: String? = null
+    @SerialName("created_at") val createdAt: String? = null,
 )
 
 /**
@@ -120,7 +108,7 @@ data class RegisterResponse(
     val user: UserResponse,
     val tokens: TokensResponse,
     @SerialName("device_linked") val deviceLinked: Boolean = false,
-    @SerialName("requires_email_verification") val requiresEmailVerification: Boolean = true
+    @SerialName("requires_email_verification") val requiresEmailVerification: Boolean = true,
 )
 
 /**
@@ -132,10 +120,7 @@ data class RegisterResponse(
  * @property tokens Token information
  */
 @Serializable
-data class LoginResponse(
-    val user: UserResponse,
-    val tokens: TokensResponse
-)
+data class LoginResponse(val user: UserResponse, val tokens: TokensResponse)
 
 /**
  * AC E9.11.8: Refresh Response
@@ -145,9 +130,7 @@ data class LoginResponse(
  * @property tokens New token information
  */
 @Serializable
-data class RefreshResponse(
-    val tokens: TokensResponse
-)
+data class RefreshResponse(val tokens: TokensResponse)
 
 /**
  * Legacy AuthResponse for mock mode compatibility
@@ -159,7 +142,7 @@ data class AuthResponse(
     @SerialName("access_token") val accessToken: String,
     @SerialName("refresh_token") val refreshToken: String,
     @SerialName("expires_in") val expiresIn: Long,
-    val user: UserInfo
+    val user: UserInfo,
 )
 
 /**
@@ -172,7 +155,7 @@ data class UserInfo(
     @SerialName("user_id") val userId: String,
     val email: String,
     @SerialName("display_name") val displayName: String,
-    @SerialName("created_at") val createdAt: String
+    @SerialName("created_at") val createdAt: String,
 )
 
 /**
@@ -181,9 +164,7 @@ data class UserInfo(
  * @property email User email address
  */
 @Serializable
-data class ForgotPasswordRequest(
-    val email: String
-)
+data class ForgotPasswordRequest(val email: String)
 
 /**
  * Forgot Password Response
@@ -191,9 +172,7 @@ data class ForgotPasswordRequest(
  * @property message Response message
  */
 @Serializable
-data class ForgotPasswordResponse(
-    val message: String
-)
+data class ForgotPasswordResponse(val message: String)
 
 /**
  * Reset Password Request
@@ -202,10 +181,7 @@ data class ForgotPasswordResponse(
  * @property newPassword New password
  */
 @Serializable
-data class ResetPasswordRequest(
-    val token: String,
-    @SerialName("new_password") val newPassword: String
-)
+data class ResetPasswordRequest(val token: String, @SerialName("new_password") val newPassword: String)
 
 /**
  * Reset Password Response
@@ -213,9 +189,7 @@ data class ResetPasswordRequest(
  * @property message Response message
  */
 @Serializable
-data class ResetPasswordResponse(
-    val message: String
-)
+data class ResetPasswordResponse(val message: String)
 
 /**
  * Verify Email Request
@@ -223,9 +197,7 @@ data class ResetPasswordResponse(
  * @property token Email verification token
  */
 @Serializable
-data class VerifyEmailRequest(
-    val token: String
-)
+data class VerifyEmailRequest(val token: String)
 
 /**
  * Verify Email Response
@@ -234,10 +206,7 @@ data class VerifyEmailRequest(
  * @property emailVerified Whether email is now verified
  */
 @Serializable
-data class VerifyEmailResponse(
-    val message: String,
-    @SerialName("email_verified") val emailVerified: Boolean
-)
+data class VerifyEmailResponse(val message: String, @SerialName("email_verified") val emailVerified: Boolean)
 
 /**
  * Request Verification Response
@@ -245,9 +214,7 @@ data class VerifyEmailResponse(
  * @property message Response message
  */
 @Serializable
-data class RequestVerificationResponse(
-    val message: String
-)
+data class RequestVerificationResponse(val message: String)
 
 /**
  * Error Response
@@ -258,7 +225,4 @@ data class RequestVerificationResponse(
  * @property message Human-readable error message
  */
 @Serializable
-data class AuthErrorResponse(
-    val error: String,
-    val message: String
-)
+data class AuthErrorResponse(val error: String, val message: String)

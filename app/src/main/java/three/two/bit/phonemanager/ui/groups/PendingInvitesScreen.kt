@@ -49,12 +49,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.ExpiryUrgency
 import three.two.bit.phonemanager.domain.model.GroupInvite
+import kotlin.time.Instant
 
 /**
  * Story E11.9 Task 7: PendingInvitesScreen
@@ -261,11 +261,7 @@ private fun InvitesList(
  * Individual invite card
  */
 @Composable
-private fun InviteCard(
-    invite: GroupInvite,
-    onClick: () -> Unit,
-    onRevokeClick: () -> Unit,
-) {
+private fun InviteCard(invite: GroupInvite, onClick: () -> Unit, onRevokeClick: () -> Unit) {
     val urgency = invite.getExpiryUrgency()
 
     val cardColors = when (urgency) {
@@ -351,11 +347,7 @@ private fun InviteCard(
  * Revoke invite confirmation dialog
  */
 @Composable
-private fun RevokeInviteDialog(
-    invite: GroupInvite,
-    onDismiss: () -> Unit,
-    onConfirm: () -> Unit,
-) {
+private fun RevokeInviteDialog(invite: GroupInvite, onDismiss: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(R.string.group_revoke_invite_title)) },
@@ -418,8 +410,8 @@ private fun formatExpiryStatus(invite: GroupInvite): String {
     val days = hours / 24
 
     return when {
-        days > 0 -> "Expires in ${days} ${if (days == 1L) "day" else "days"}"
-        hours > 0 -> "Expires in ${hours} ${if (hours == 1L) "hour" else "hours"}"
+        days > 0 -> "Expires in $days ${if (days == 1L) "day" else "days"}"
+        hours > 0 -> "Expires in $hours ${if (hours == 1L) "hour" else "hours"}"
         minutes > 0 -> "Expires in ${minutes}m"
         else -> "Expires soon"
     }

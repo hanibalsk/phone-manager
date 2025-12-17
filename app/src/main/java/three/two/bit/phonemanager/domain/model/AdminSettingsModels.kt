@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlin.time.Instant
 import kotlin.time.Clock
+import kotlin.time.Instant
 /**
  * Story E12.7: Admin Settings Management Domain Models
  *
@@ -131,12 +131,7 @@ data class SettingsTemplate(
 
     companion object {
         /** Default template with tracking enabled settings */
-        fun createDefault(
-            id: String,
-            name: String,
-            createdBy: String,
-            createdByName: String,
-        ) = SettingsTemplate(
+        fun createDefault(id: String, name: String, createdBy: String, createdByName: String) = SettingsTemplate(
             id = id,
             name = name,
             settings = mapOf(
@@ -156,10 +151,7 @@ data class SettingsTemplate(
  * Result of applying settings to devices.
  * AC E12.7.6: Bulk Settings Application
  */
-data class BulkSettingsResult(
-    val successful: List<DeviceSettingsResult>,
-    val failed: List<DeviceSettingsResult>,
-) {
+data class BulkSettingsResult(val successful: List<DeviceSettingsResult>, val failed: List<DeviceSettingsResult>) {
     val successCount: Int get() = successful.size
     val failureCount: Int get() = failed.size
     val totalCount: Int get() = successCount + failureCount
@@ -284,12 +276,10 @@ data class SettingDefinition(
         )
 
         /** Get definition by key */
-        fun forKey(key: String): SettingDefinition? =
-            ALL_SETTINGS.find { it.key == key }
+        fun forKey(key: String): SettingDefinition? = ALL_SETTINGS.find { it.key == key }
 
         /** Get settings grouped by category */
-        fun byCategory(): Map<SettingCategory, List<SettingDefinition>> =
-            ALL_SETTINGS.groupBy { it.category }
+        fun byCategory(): Map<SettingCategory, List<SettingDefinition>> = ALL_SETTINGS.groupBy { it.category }
     }
 }
 

@@ -7,7 +7,6 @@ import io.mockk.mockk
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import kotlin.time.Clock
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.database.MovementEventDao
@@ -24,6 +23,7 @@ import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 /**
  * Story E8.3: MovementEventRepository Unit Tests

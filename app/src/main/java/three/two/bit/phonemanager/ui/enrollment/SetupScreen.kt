@@ -45,11 +45,7 @@ import three.two.bit.phonemanager.R
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SetupScreen(
-    onPersonalSetup: () -> Unit,
-    onEnterpriseSetup: () -> Unit,
-    onScanQrCode: () -> Unit,
-) {
+fun SetupScreen(onPersonalSetup: () -> Unit, onEnterpriseSetup: () -> Unit, onScanQrCode: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(

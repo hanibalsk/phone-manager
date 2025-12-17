@@ -58,10 +58,7 @@ enum class DetectionSourceDto {
  * Detection source details for movement event
  */
 @Serializable
-data class DetectionSourceDetails(
-    val primary: String,
-    val contributing: List<String> = emptyList(),
-)
+data class DetectionSourceDetails(val primary: String, val contributing: List<String> = emptyList())
 
 /**
  * Location snapshot at time of movement event
@@ -89,10 +86,7 @@ data class MovementEventDeviceStateDto(
  * Activity recognition data
  */
 @Serializable
-data class ActivityRecognitionDto(
-    val type: String,
-    val confidence: Int,
-)
+data class ActivityRecognitionDto(val type: String, val confidence: Int)
 
 /**
  * Accelerometer telemetry data
@@ -108,9 +102,7 @@ data class AccelerometerTelemetryDto(
  * Gyroscope telemetry data
  */
 @Serializable
-data class GyroscopeTelemetryDto(
-    val magnitude: Float? = null,
-)
+data class GyroscopeTelemetryDto(val magnitude: Float? = null)
 
 /**
  * Sensor telemetry data for movement event
@@ -149,9 +141,7 @@ data class CreateMovementEventRequest(
  * POST /api/v1/movement-events/batch
  */
 @Serializable
-data class BatchMovementEventsRequest(
-    val events: List<CreateMovementEventRequest>,
-)
+data class BatchMovementEventsRequest(val events: List<CreateMovementEventRequest>)
 
 /**
  * Movement event response from server
@@ -178,20 +168,13 @@ data class MovementEventDto(
  * POST /api/v1/movement-events response
  */
 @Serializable
-data class MovementEventUploadResponse(
-    val eventId: String,
-    val processedAt: String,
-)
+data class MovementEventUploadResponse(val eventId: String, val processedAt: String)
 
 /**
  * Batch event error details
  */
 @Serializable
-data class BatchEventError(
-    val eventId: String,
-    val error: String,
-    val message: String,
-)
+data class BatchEventError(val eventId: String, val error: String, val message: String)
 
 /**
  * Batch movement events response
@@ -208,19 +191,11 @@ data class BatchMovementEventsResponse(
  * Pagination info for movement events list
  */
 @Serializable
-data class MovementEventsPaginationInfo(
-    val total: Int,
-    val limit: Int,
-    val offset: Int,
-    val hasMore: Boolean,
-)
+data class MovementEventsPaginationInfo(val total: Int, val limit: Int, val offset: Int, val hasMore: Boolean)
 
 /**
  * List movement events response
  * GET /api/v1/devices/{deviceId}/movement-events response
  */
 @Serializable
-data class MovementEventsListResponse(
-    val events: List<MovementEventDto>,
-    val pagination: MovementEventsPaginationInfo,
-)
+data class MovementEventsListResponse(val events: List<MovementEventDto>, val pagination: MovementEventsPaginationInfo)

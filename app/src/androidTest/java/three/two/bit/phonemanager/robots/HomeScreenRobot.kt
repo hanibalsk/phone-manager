@@ -13,9 +13,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
  *     .toggleTracking()
  * ```
  */
-class HomeScreenRobot(
-    composeTestRule: ComposeTestRule
-) : BaseRobot(composeTestRule) {
+class HomeScreenRobot(composeTestRule: ComposeTestRule) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_HOME_SCREEN = "home_screen"

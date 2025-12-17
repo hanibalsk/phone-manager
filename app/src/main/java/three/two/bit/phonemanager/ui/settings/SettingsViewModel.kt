@@ -18,10 +18,10 @@ import three.two.bit.phonemanager.data.repository.EnrollmentRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
 import three.two.bit.phonemanager.domain.auth.User
-import three.two.bit.phonemanager.domain.model.DeviceSettings
-import three.two.bit.phonemanager.domain.model.ManagedDeviceStatus
 import three.two.bit.phonemanager.domain.model.DevicePolicy
+import three.two.bit.phonemanager.domain.model.DeviceSettings
 import three.two.bit.phonemanager.domain.model.EnrollmentStatus
+import three.two.bit.phonemanager.domain.model.ManagedDeviceStatus
 import three.two.bit.phonemanager.domain.model.OrganizationInfo
 import three.two.bit.phonemanager.domain.model.SettingLock
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
@@ -618,25 +618,19 @@ constructor(
      * AC E12.6.1: Lock indicator display
      * AC E12.6.3: Lock enforcement
      */
-    fun isSettingLocked(key: String): Boolean {
-        return serverSettings.value?.isLocked(key) ?: false
-    }
+    fun isSettingLocked(key: String): Boolean = serverSettings.value?.isLocked(key) ?: false
 
     /**
      * Get who locked a setting.
      * AC E12.6.1: Show "Managed by [admin name]"
      */
-    fun getLockedBy(key: String): String? {
-        return serverSettings.value?.getLockedBy(key)
-    }
+    fun getLockedBy(key: String): String? = serverSettings.value?.getLockedBy(key)
 
     /**
      * Get lock information for a setting.
      * AC E12.6.1: Lock indicator display
      */
-    fun getSettingLock(key: String): SettingLock? {
-        return serverSettings.value?.getLock(key)
-    }
+    fun getSettingLock(key: String): SettingLock? = serverSettings.value?.getLock(key)
 
     /**
      * Show locked dialog for a setting.
@@ -671,12 +665,7 @@ constructor(
      * Story E12.8: Submit unlock request for a setting.
      * AC E12.8.2: Submit Unlock Request
      */
-    fun submitUnlockRequest(
-        settingKey: String,
-        reason: String,
-        onSuccess: () -> Unit,
-        onError: (String) -> Unit,
-    ) {
+    fun submitUnlockRequest(settingKey: String, reason: String, onSuccess: () -> Unit, onError: (String) -> Unit) {
         viewModelScope.launch {
             val result = unlockRequestRepository.createUnlockRequest(
                 deviceId = deviceId,
@@ -726,10 +715,7 @@ constructor(
 /**
  * Story E12.6: State for locked setting dialog
  */
-data class LockDialogState(
-    val settingKey: String,
-    val lockedBy: String?,
-)
+data class LockDialogState(val settingKey: String, val lockedBy: String?)
 
 /**
  * UI State for Settings Screen

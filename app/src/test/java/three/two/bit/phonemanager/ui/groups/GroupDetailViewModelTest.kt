@@ -11,7 +11,6 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Instant
 import org.junit.Before
 import org.junit.Test
 import three.two.bit.phonemanager.data.repository.AuthRepository
@@ -22,6 +21,7 @@ import three.two.bit.phonemanager.domain.model.GroupRole
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Story E11.8 Task 13: Unit tests for GroupDetailViewModel
@@ -96,7 +96,7 @@ class GroupDetailViewModelTest {
     fun `loadGroupDetails shows error on failure`() = runTest {
         // Given
         coEvery { groupRepository.getGroupDetails("group-1") } returns Result.failure(
-            Exception("Network error")
+            Exception("Network error"),
         )
 
         // When
@@ -380,11 +380,7 @@ class GroupDetailViewModelTest {
         updatedAt = Instant.parse("2025-01-01T00:00:00Z"),
     )
 
-    private fun createTestMembership(
-        userId: String,
-        displayName: String,
-        role: GroupRole,
-    ) = GroupMembership(
+    private fun createTestMembership(userId: String, displayName: String, role: GroupRole) = GroupMembership(
         userId = userId,
         groupId = "group-1",
         email = "$displayName@test.com",

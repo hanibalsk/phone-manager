@@ -19,9 +19,9 @@ import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.data.repository.UnlockRequestRepository
 import three.two.bit.phonemanager.domain.model.UnlockRequestStatus
-import kotlin.time.Instant
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Instant
 
 /**
  * Story E12.6: Firebase Messaging Service for settings updates.
@@ -273,11 +273,7 @@ class SettingsMessagingService : FirebaseMessagingService() {
      * Show notification for settings update.
      * AC E12.6.5: Show notification with admin name.
      */
-    private fun showSettingsUpdateNotification(
-        adminName: String,
-        groupName: String?,
-        changedSettings: List<String>,
-    ) {
+    private fun showSettingsUpdateNotification(adminName: String, groupName: String?, changedSettings: List<String>) {
         val title = getString(R.string.notification_settings_updated_title)
         val message = if (groupName != null) {
             getString(R.string.notification_settings_updated_by_admin_group, adminName, groupName)
@@ -291,11 +287,7 @@ class SettingsMessagingService : FirebaseMessagingService() {
     /**
      * Show notification for setting locked.
      */
-    private fun showSettingLockedNotification(
-        settingKey: String,
-        adminName: String,
-        groupName: String?,
-    ) {
+    private fun showSettingLockedNotification(settingKey: String, adminName: String, groupName: String?) {
         val title = getString(R.string.notification_setting_locked_title)
         val settingName = getSettingDisplayName(settingKey)
         val message = getString(R.string.notification_setting_locked_by_admin, settingName, adminName)
@@ -349,15 +341,13 @@ class SettingsMessagingService : FirebaseMessagingService() {
     /**
      * Get display name for a setting key.
      */
-    private fun getSettingDisplayName(settingKey: String): String {
-        return when (settingKey) {
-            "tracking_enabled" -> getString(R.string.setting_tracking_enabled)
-            "tracking_interval_seconds" -> getString(R.string.setting_tracking_interval)
-            "secret_mode_enabled" -> getString(R.string.setting_secret_mode)
-            "show_weather_in_notification" -> getString(R.string.setting_weather_notification)
-            "trip_detection_enabled" -> getString(R.string.setting_trip_detection)
-            else -> settingKey.replace("_", " ").replaceFirstChar { it.uppercase() }
-        }
+    private fun getSettingDisplayName(settingKey: String): String = when (settingKey) {
+        "tracking_enabled" -> getString(R.string.setting_tracking_enabled)
+        "tracking_interval_seconds" -> getString(R.string.setting_tracking_interval)
+        "secret_mode_enabled" -> getString(R.string.setting_secret_mode)
+        "show_weather_in_notification" -> getString(R.string.setting_weather_notification)
+        "trip_detection_enabled" -> getString(R.string.setting_trip_detection)
+        else -> settingKey.replace("_", " ").replaceFirstChar { it.uppercase() }
     }
 
     /**

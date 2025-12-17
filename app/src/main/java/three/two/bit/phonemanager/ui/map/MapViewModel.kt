@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlin.time.Instant
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.domain.model.Device
@@ -22,6 +20,8 @@ import three.two.bit.phonemanager.location.LocationManager
 import three.two.bit.phonemanager.proximity.ProximityManager
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Story E3.1/E3.2/E3.3/E5.2: MapViewModel

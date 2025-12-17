@@ -1,7 +1,7 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlin.time.Instant
 import three.two.bit.phonemanager.movement.TransportationMode
+import kotlin.time.Instant
 
 /**
  * Story E8.3: MovementEvent Domain Model

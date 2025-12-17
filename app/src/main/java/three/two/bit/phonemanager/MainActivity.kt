@@ -185,7 +185,9 @@ class MainActivity : ComponentActivity() {
                         val idToken = uri.getQueryParameter("id_token")
                         val state = uri.getQueryParameter("state")
                         val error = uri.getQueryParameter("error")
-                        Timber.i("Apple OAuth callback received, hasToken=${idToken != null}, hasError=${error != null}")
+                        Timber.i(
+                            "Apple OAuth callback received, hasToken=${idToken != null}, hasError=${error != null}",
+                        )
                         appleSignInHelper.handleCallback(idToken, state, error)
                     } else {
                         Timber.w("Unknown auth provider in deep link: $provider")

@@ -76,7 +76,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (user == null) {
             _uiState.value = DeviceUiState.Error(
                 message = "You must be signed in to view your devices",
-                errorCode = "not_authenticated"
+                errorCode = "not_authenticated",
             )
             return
         }
@@ -85,7 +85,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (accessToken == null) {
             _uiState.value = DeviceUiState.Error(
                 message = "Authentication required",
-                errorCode = "no_token"
+                errorCode = "no_token",
             )
             return
         }
@@ -96,7 +96,7 @@ class DeviceManagementViewModel @Inject constructor(
             val result = deviceApiService.getUserDevices(
                 userId = user.userId,
                 includeInactive = false,
-                accessToken = accessToken
+                accessToken = accessToken,
             )
 
             result.fold(
@@ -107,7 +107,7 @@ class DeviceManagementViewModel @Inject constructor(
                     } else {
                         DeviceUiState.Success(
                             devices = devices,
-                            currentDeviceId = currentDeviceId
+                            currentDeviceId = currentDeviceId,
                         )
                     }
                 },
@@ -115,9 +115,9 @@ class DeviceManagementViewModel @Inject constructor(
                     Timber.e(error, "Failed to load devices")
                     _uiState.value = DeviceUiState.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
     }
@@ -133,7 +133,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (user == null) {
             _operationResult.value = DeviceOperationResult.Error(
                 message = "You must be signed in to link a device",
-                errorCode = "not_authenticated"
+                errorCode = "not_authenticated",
             )
             return
         }
@@ -142,7 +142,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (accessToken == null) {
             _operationResult.value = DeviceOperationResult.Error(
                 message = "Authentication required",
-                errorCode = "no_token"
+                errorCode = "no_token",
             )
             return
         }
@@ -155,14 +155,14 @@ class DeviceManagementViewModel @Inject constructor(
                 deviceId = currentDeviceId,
                 displayName = displayName,
                 isPrimary = isPrimary,
-                accessToken = accessToken
+                accessToken = accessToken,
             )
 
             result.fold(
                 onSuccess = {
                     Timber.i("Device linked successfully: $currentDeviceId")
                     _operationResult.value = DeviceOperationResult.Success(
-                        message = "Device linked to your account"
+                        message = "Device linked to your account",
                     )
                     // Refresh the device list
                     refreshDevices()
@@ -171,9 +171,9 @@ class DeviceManagementViewModel @Inject constructor(
                     Timber.e(error, "Failed to link device")
                     _operationResult.value = DeviceOperationResult.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
     }
@@ -189,7 +189,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (user == null) {
             _operationResult.value = DeviceOperationResult.Error(
                 message = "You must be signed in to unlink a device",
-                errorCode = "not_authenticated"
+                errorCode = "not_authenticated",
             )
             return false
         }
@@ -198,7 +198,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (accessToken == null) {
             _operationResult.value = DeviceOperationResult.Error(
                 message = "Authentication required",
-                errorCode = "no_token"
+                errorCode = "no_token",
             )
             return false
         }
@@ -211,7 +211,7 @@ class DeviceManagementViewModel @Inject constructor(
             val result = deviceApiService.unlinkDevice(
                 userId = user.userId,
                 deviceId = deviceUuid,
-                accessToken = accessToken
+                accessToken = accessToken,
             )
 
             result.fold(
@@ -222,11 +222,11 @@ class DeviceManagementViewModel @Inject constructor(
                         // Clear authentication state when unlinking current device
                         authRepository.logout()
                         _operationResult.value = DeviceOperationResult.Success(
-                            message = "Device unlinked. You have been signed out."
+                            message = "Device unlinked. You have been signed out.",
                         )
                     } else {
                         _operationResult.value = DeviceOperationResult.Success(
-                            message = "Device unlinked from your account"
+                            message = "Device unlinked from your account",
                         )
                         // Refresh the device list
                         refreshDevices()
@@ -236,9 +236,9 @@ class DeviceManagementViewModel @Inject constructor(
                     Timber.e(error, "Failed to unlink device")
                     _operationResult.value = DeviceOperationResult.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
 
@@ -256,7 +256,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (user == null) {
             _operationResult.value = DeviceOperationResult.Error(
                 message = "You must be signed in to transfer a device",
-                errorCode = "not_authenticated"
+                errorCode = "not_authenticated",
             )
             return
         }
@@ -265,7 +265,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (accessToken == null) {
             _operationResult.value = DeviceOperationResult.Error(
                 message = "Authentication required",
-                errorCode = "no_token"
+                errorCode = "no_token",
             )
             return
         }
@@ -277,14 +277,14 @@ class DeviceManagementViewModel @Inject constructor(
                 userId = user.userId,
                 deviceId = deviceUuid,
                 newOwnerId = newOwnerId,
-                accessToken = accessToken
+                accessToken = accessToken,
             )
 
             result.fold(
                 onSuccess = { response ->
                     Timber.i("Device transferred successfully: $deviceUuid to ${response.newOwnerId}")
                     _operationResult.value = DeviceOperationResult.Success(
-                        message = "Device ownership transferred"
+                        message = "Device ownership transferred",
                     )
                     // Refresh the device list
                     refreshDevices()
@@ -293,9 +293,9 @@ class DeviceManagementViewModel @Inject constructor(
                     Timber.e(error, "Failed to transfer device")
                     _operationResult.value = DeviceOperationResult.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
     }
@@ -310,7 +310,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (user == null) {
             _detailUiState.value = DeviceDetailUiState.Error(
                 message = "You must be signed in to view device details",
-                errorCode = "not_authenticated"
+                errorCode = "not_authenticated",
             )
             return
         }
@@ -319,7 +319,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (accessToken == null) {
             _detailUiState.value = DeviceDetailUiState.Error(
                 message = "Authentication required",
-                errorCode = "no_token"
+                errorCode = "no_token",
             )
             return
         }
@@ -330,7 +330,7 @@ class DeviceManagementViewModel @Inject constructor(
             val result = deviceApiService.getUserDevices(
                 userId = user.userId,
                 includeInactive = true, // Include inactive to find the device
-                accessToken = accessToken
+                accessToken = accessToken,
             )
 
             result.fold(
@@ -342,13 +342,13 @@ class DeviceManagementViewModel @Inject constructor(
                         _detailUiState.value = DeviceDetailUiState.Success(
                             device = device,
                             isCurrentDevice = device.deviceUuid == currentDeviceId,
-                            isOwner = true
+                            isOwner = true,
                         )
                     } else {
                         Timber.w("Device not found: $deviceId")
                         _detailUiState.value = DeviceDetailUiState.Error(
                             message = "Device not found",
-                            errorCode = "not_found"
+                            errorCode = "not_found",
                         )
                     }
                 },
@@ -356,9 +356,9 @@ class DeviceManagementViewModel @Inject constructor(
                     Timber.e(error, "Failed to load device details")
                     _detailUiState.value = DeviceDetailUiState.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
     }
@@ -373,7 +373,7 @@ class DeviceManagementViewModel @Inject constructor(
         _detailUiState.value = DeviceDetailUiState.Success(
             device = device,
             isCurrentDevice = device.deviceUuid == currentDeviceId,
-            isOwner = true // Current user always owns devices in their list
+            isOwner = true, // Current user always owns devices in their list
         )
     }
 
@@ -418,7 +418,7 @@ class DeviceManagementViewModel @Inject constructor(
         if (newDisplayName.isBlank()) {
             _operationResult.value = DeviceOperationResult.Error(
                 message = "Display name cannot be empty",
-                errorCode = "invalid_name"
+                errorCode = "invalid_name",
             )
             return
         }
@@ -431,7 +431,7 @@ class DeviceManagementViewModel @Inject constructor(
             if (groupId == null) {
                 _operationResult.value = DeviceOperationResult.Error(
                     message = "Device not properly configured - missing group ID",
-                    errorCode = "missing_group_id"
+                    errorCode = "missing_group_id",
                 )
                 return@launch
             }
@@ -440,7 +440,7 @@ class DeviceManagementViewModel @Inject constructor(
                 deviceId = deviceUuid,
                 displayName = newDisplayName.trim(),
                 groupId = groupId,
-                platform = "android"
+                platform = "android",
             )
 
             val result = deviceApiService.registerDevice(request)
@@ -449,7 +449,7 @@ class DeviceManagementViewModel @Inject constructor(
                 onSuccess = {
                     Timber.i("Device name updated successfully: $deviceUuid -> $newDisplayName")
                     _operationResult.value = DeviceOperationResult.Success(
-                        message = "Device name updated"
+                        message = "Device name updated",
                     )
                     // Refresh devices and update selected device
                     refreshDevices()
@@ -460,7 +460,7 @@ class DeviceManagementViewModel @Inject constructor(
                         _detailUiState.value = DeviceDetailUiState.Success(
                             device = updatedDevice,
                             isCurrentDevice = updatedDevice.deviceUuid == currentDeviceId,
-                            isOwner = true
+                            isOwner = true,
                         )
                     }
                 },
@@ -468,9 +468,9 @@ class DeviceManagementViewModel @Inject constructor(
                     Timber.e(error, "Failed to update device name")
                     _operationResult.value = DeviceOperationResult.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
     }

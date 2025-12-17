@@ -49,10 +49,7 @@ enum class TripTriggerDto {
  * Location coordinate for trip start/end
  */
 @Serializable
-data class TripLocationDto(
-    val latitude: Double,
-    val longitude: Double,
-)
+data class TripLocationDto(val latitude: Double, val longitude: Double)
 
 /**
  * Trip statistics
@@ -69,19 +66,13 @@ data class TripStatisticsDto(
  * Transportation mode breakdown
  */
 @Serializable
-data class TripModesDto(
-    val dominant: String? = null,
-    val breakdown: Map<String, Long>? = null,
-)
+data class TripModesDto(val dominant: String? = null, val breakdown: Map<String, Long>? = null)
 
 /**
  * Trip triggers (start/end)
  */
 @Serializable
-data class TripTriggersDto(
-    val start: String? = null,
-    val end: String? = null,
-)
+data class TripTriggersDto(val start: String? = null, val end: String? = null)
 
 /**
  * Create trip request
@@ -137,21 +128,14 @@ data class TripDto(
  * POST /api/v1/trips response
  */
 @Serializable
-data class CreateTripResponse(
-    val tripId: String,
-    val localTripId: String,
-    val createdAt: String,
-)
+data class CreateTripResponse(val tripId: String, val localTripId: String, val createdAt: String)
 
 /**
  * List trips response
  * GET /api/v1/devices/{deviceId}/trips response
  */
 @Serializable
-data class TripsListResponse(
-    val trips: List<TripDto>,
-    val total: Int,
-)
+data class TripsListResponse(val trips: List<TripDto>, val total: Int)
 
 /**
  * Trip location point for path/locations endpoints
@@ -171,11 +155,7 @@ data class TripLocationPointDto(
  * GET /api/v1/trips/{tripId}/locations response
  */
 @Serializable
-data class TripLocationsResponse(
-    val tripId: String,
-    val locations: List<TripLocationPointDto>,
-    val count: Int,
-)
+data class TripLocationsResponse(val tripId: String, val locations: List<TripLocationPointDto>, val count: Int)
 
 /**
  * Trip path response (corrected coordinates)
@@ -196,9 +176,7 @@ data class TripPathResponse(
  * POST /api/v1/trips/{tripId}/correct-path
  */
 @Serializable
-data class PathCorrectionRequest(
-    val algorithm: String? = null,
-)
+data class PathCorrectionRequest(val algorithm: String? = null)
 
 /**
  * Path correction response
@@ -219,8 +197,4 @@ data class PathCorrectionResponse(
  * GET /api/v1/trips/{tripId}/movement-events response
  */
 @Serializable
-data class TripMovementEventsResponse(
-    val tripId: String,
-    val events: List<MovementEventDto>,
-    val total: Int,
-)
+data class TripMovementEventsResponse(val tripId: String, val events: List<MovementEventDto>, val total: Int)

@@ -60,7 +60,7 @@ class GroupDetailViewModel @Inject constructor(
         } else {
             _uiState.value = GroupDetailUiState.Error(
                 message = "No group ID provided",
-                errorCode = "invalid_group_id"
+                errorCode = "invalid_group_id",
             )
         }
     }
@@ -83,7 +83,7 @@ class GroupDetailViewModel @Inject constructor(
                         group = group,
                         canManageMembers = group.canManageMembers(),
                         canDelete = group.canDelete(),
-                        canLeave = group.canLeave()
+                        canLeave = group.canLeave(),
                     )
                     // Also load members
                     loadMembers()
@@ -92,9 +92,9 @@ class GroupDetailViewModel @Inject constructor(
                     Timber.e(error, "Failed to load group details")
                     _uiState.value = GroupDetailUiState.Error(
                         message = getErrorMessage(error),
-                        errorCode = getErrorCode(error)
+                        errorCode = getErrorCode(error),
                     )
-                }
+                },
             )
         }
     }
@@ -114,7 +114,7 @@ class GroupDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to load members")
                     // Don't change UI state, just log the error
-                }
+                },
             )
         }
     }
@@ -127,7 +127,7 @@ class GroupDetailViewModel @Inject constructor(
     fun updateGroupName(name: String) {
         if (name.isBlank()) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "Group name cannot be empty"
+                message = "Group name cannot be empty",
             )
             return
         }
@@ -138,23 +138,23 @@ class GroupDetailViewModel @Inject constructor(
             val result = groupRepository.updateGroup(
                 groupId = groupId,
                 name = name.trim(),
-                description = null
+                description = null,
             )
 
             result.fold(
                 onSuccess = {
                     Timber.i("Group name updated")
                     _operationResult.value = GroupOperationResult.Success(
-                        message = "Group name updated"
+                        message = "Group name updated",
                     )
                     loadGroupDetails() // Refresh
                 },
                 onFailure = { error ->
                     Timber.e(error, "Failed to update group name")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
     }
@@ -171,23 +171,23 @@ class GroupDetailViewModel @Inject constructor(
             val result = groupRepository.updateGroup(
                 groupId = groupId,
                 name = null,
-                description = description?.trim()
+                description = description?.trim(),
             )
 
             result.fold(
                 onSuccess = {
                     Timber.i("Group description updated")
                     _operationResult.value = GroupOperationResult.Success(
-                        message = "Group description updated"
+                        message = "Group description updated",
                     )
                     loadGroupDetails() // Refresh
                 },
                 onFailure = { error ->
                     Timber.e(error, "Failed to update group description")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
     }
@@ -201,7 +201,7 @@ class GroupDetailViewModel @Inject constructor(
         val state = _uiState.value
         if (state !is GroupDetailUiState.Success || !state.canDelete) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "You don't have permission to delete this group"
+                message = "You don't have permission to delete this group",
             )
             return false
         }
@@ -219,9 +219,9 @@ class GroupDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to delete group")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
 
@@ -237,7 +237,7 @@ class GroupDetailViewModel @Inject constructor(
         val state = _uiState.value
         if (state !is GroupDetailUiState.Success || !state.canLeave) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "You cannot leave this group. Transfer ownership first."
+                message = "You cannot leave this group. Transfer ownership first.",
             )
             return false
         }
@@ -255,9 +255,9 @@ class GroupDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to leave group")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
 
@@ -274,7 +274,7 @@ class GroupDetailViewModel @Inject constructor(
         // Cannot change own role
         if (userId == currentUserId) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "You cannot change your own role"
+                message = "You cannot change your own role",
             )
             return
         }
@@ -282,7 +282,7 @@ class GroupDetailViewModel @Inject constructor(
         // Cannot set someone as owner via this method
         if (newRole == GroupRole.OWNER) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "Use transfer ownership to make someone an owner"
+                message = "Use transfer ownership to make someone an owner",
             )
             return
         }
@@ -298,23 +298,23 @@ class GroupDetailViewModel @Inject constructor(
             val result = groupRepository.updateMemberRole(
                 groupId = groupId,
                 userId = userId,
-                role = roleString
+                role = roleString,
             )
 
             result.fold(
                 onSuccess = {
                     Timber.i("Member role updated: $userId to $roleString")
                     _operationResult.value = GroupOperationResult.Success(
-                        message = "Member role updated"
+                        message = "Member role updated",
                     )
                     loadMembers() // Refresh member list
                 },
                 onFailure = { error ->
                     Timber.e(error, "Failed to update member role")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
     }
@@ -328,7 +328,7 @@ class GroupDetailViewModel @Inject constructor(
         // Cannot remove self
         if (userId == currentUserId) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "Use 'Leave Group' to remove yourself"
+                message = "Use 'Leave Group' to remove yourself",
             )
             return
         }
@@ -338,14 +338,14 @@ class GroupDetailViewModel @Inject constructor(
 
             val result = groupRepository.removeMember(
                 groupId = groupId,
-                userId = userId
+                userId = userId,
             )
 
             result.fold(
                 onSuccess = {
                     Timber.i("Member removed: $userId")
                     _operationResult.value = GroupOperationResult.Success(
-                        message = "Member removed from group"
+                        message = "Member removed from group",
                     )
                     loadMembers() // Refresh member list
                     loadGroupDetails() // Refresh member count
@@ -353,9 +353,9 @@ class GroupDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to remove member")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
     }
@@ -369,14 +369,14 @@ class GroupDetailViewModel @Inject constructor(
         val state = _uiState.value
         if (state !is GroupDetailUiState.Success || !state.group.isOwner()) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "Only the owner can transfer ownership"
+                message = "Only the owner can transfer ownership",
             )
             return
         }
 
         if (newOwnerId == currentUserId) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "You are already the owner"
+                message = "You are already the owner",
             )
             return
         }
@@ -386,14 +386,14 @@ class GroupDetailViewModel @Inject constructor(
 
             val result = groupRepository.transferOwnership(
                 groupId = groupId,
-                newOwnerId = newOwnerId
+                newOwnerId = newOwnerId,
             )
 
             result.fold(
                 onSuccess = {
                     Timber.i("Ownership transferred to: $newOwnerId")
                     _operationResult.value = GroupOperationResult.Success(
-                        message = "Ownership transferred successfully"
+                        message = "Ownership transferred successfully",
                     )
                     loadGroupDetails() // Refresh to show new role
                     loadMembers() // Refresh member roles
@@ -401,9 +401,9 @@ class GroupDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to transfer ownership")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
     }
@@ -425,7 +425,7 @@ class GroupDetailViewModel @Inject constructor(
         val state = _uiState.value
         if (state !is GroupDetailUiState.Success || !state.canManageMembers) {
             _operationResult.value = GroupOperationResult.Error(
-                message = "You don't have permission to add devices to this group"
+                message = "You don't have permission to add devices to this group",
             )
             return
         }
@@ -445,9 +445,9 @@ class GroupDetailViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Failed to add device to group")
                     _operationResult.value = GroupOperationResult.Error(
-                        message = getErrorMessage(error)
+                        message = getErrorMessage(error),
                     )
-                }
+                },
             )
         }
     }
@@ -534,10 +534,7 @@ sealed interface GroupDetailUiState {
     /**
      * Error loading group details
      */
-    data class Error(
-        val message: String,
-        val errorCode: String? = null,
-    ) : GroupDetailUiState
+    data class Error(val message: String, val errorCode: String? = null) : GroupDetailUiState
 }
 
 /**

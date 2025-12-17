@@ -55,17 +55,17 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.Clock
-import kotlin.time.Duration.Companion.days
-import kotlin.time.Duration.Companion.hours
-import kotlin.time.Duration.Companion.minutes
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.Group
 import three.two.bit.phonemanager.domain.model.GroupRole
+import kotlin.time.Clock
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 /**
  * Story E9.3: Admin Users Screen
@@ -210,10 +210,7 @@ fun AdminUsersScreen(
  * Content showing list of admin groups
  */
 @Composable
-private fun AdminGroupsContent(
-    groups: List<Group>,
-    onGroupClick: (Group) -> Unit,
-) {
+private fun AdminGroupsContent(groups: List<Group>, onGroupClick: (Group) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -245,10 +242,7 @@ private fun AdminGroupsContent(
  * Admin group card
  */
 @Composable
-private fun AdminGroupCard(
-    group: Group,
-    onClick: () -> Unit,
-) {
+private fun AdminGroupCard(group: Group, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -376,11 +370,7 @@ private fun GroupMembersContent(
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SwipeToDeleteDeviceCard(
-    device: Device,
-    onClick: () -> Unit,
-    onDelete: () -> Unit,
-) {
+private fun SwipeToDeleteDeviceCard(device: Device, onClick: () -> Unit, onDelete: () -> Unit) {
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = { dismissValue ->
             if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
@@ -428,11 +418,7 @@ private fun SwipeToDeleteDeviceCard(
  * AC E9.6.6: Shows indicator if this is the current user's device
  */
 @Composable
-private fun DeviceMemberCard(
-    device: Device,
-    onClick: () -> Unit,
-    isOwnDevice: Boolean = false,
-) {
+private fun DeviceMemberCard(device: Device, onClick: () -> Unit, isOwnDevice: Boolean = false) {
     val hasLocation = device.lastLocation != null
 
     Card(
@@ -626,10 +612,7 @@ private fun EmptyMembersState() {
  * Error state with retry button
  */
 @Composable
-private fun ErrorState(
-    message: String,
-    onRetry: (() -> Unit)?,
-) {
+private fun ErrorState(message: String, onRetry: (() -> Unit)?) {
     Box(
         modifier = Modifier
             .fillMaxSize()

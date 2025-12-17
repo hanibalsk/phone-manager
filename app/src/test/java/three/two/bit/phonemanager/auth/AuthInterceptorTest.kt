@@ -79,7 +79,10 @@ class AuthInterceptorTest {
 
         // Then - Bearer token should be added; server will return 401 triggering refresh
         val authHeader = request.headers["Authorization"]
-        assertTrue(authHeader == "Bearer $expiredToken", "Expired token should still be sent to trigger 401 refresh flow")
+        assertTrue(
+            authHeader == "Bearer $expiredToken",
+            "Expired token should still be sent to trigger 401 refresh flow",
+        )
     }
 
     @Test

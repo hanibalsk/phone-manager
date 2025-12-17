@@ -1,10 +1,10 @@
 package three.two.bit.phonemanager.network.models
 
-import kotlin.time.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.DeviceLocation
+import kotlin.time.Instant
 
 /**
  * Story E1.1: Device registration request payload
@@ -161,10 +161,7 @@ data class LinkedDeviceInfo(
  * GET /api/v1/users/{userId}/devices
  */
 @Serializable
-data class ListUserDevicesResponse(
-    val devices: List<UserDeviceDto>,
-    val count: Int,
-)
+data class ListUserDevicesResponse(val devices: List<UserDeviceDto>, val count: Int)
 
 /**
  * Story E10.6 Task 2: Device DTO in user's device list
@@ -186,19 +183,14 @@ data class UserDeviceDto(
  * DELETE /api/v1/users/{userId}/devices/{deviceId}/unlink
  */
 @Serializable
-data class UnlinkDeviceResponse(
-    @SerialName("device_uuid") val deviceUuid: String,
-    val unlinked: Boolean,
-)
+data class UnlinkDeviceResponse(@SerialName("device_uuid") val deviceUuid: String, val unlinked: Boolean)
 
 /**
  * Story E10.6 Task 2: Request body for transferring device ownership
  * POST /api/v1/users/{userId}/devices/{deviceId}/transfer
  */
 @Serializable
-data class TransferDeviceRequest(
-    @SerialName("new_owner_id") val newOwnerId: String,
-)
+data class TransferDeviceRequest(@SerialName("new_owner_id") val newOwnerId: String)
 
 /**
  * Story E10.6 Task 2: Response for transfer device operation

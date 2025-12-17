@@ -12,7 +12,6 @@ import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Clock
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -27,6 +26,7 @@ import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.DeviceLocation
 import three.two.bit.phonemanager.domain.model.Geofence
 import three.two.bit.phonemanager.domain.model.TransitionType
+import kotlin.time.Clock
 
 /**
  * Unit tests for AdminGeofenceViewModel
@@ -523,10 +523,7 @@ class AdminGeofenceViewModelTest {
     // Helper Functions
     // =============================================================================
 
-    private fun createTestDevice(
-        deviceId: String = testDeviceId,
-        displayName: String = "Test Device",
-    ): Device {
+    private fun createTestDevice(deviceId: String = testDeviceId, displayName: String = "Test Device"): Device {
         val now = Clock.System.now()
         return Device(
             deviceId = deviceId,

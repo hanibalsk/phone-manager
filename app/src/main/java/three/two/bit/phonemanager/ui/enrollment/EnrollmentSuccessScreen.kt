@@ -52,10 +52,7 @@ import three.two.bit.phonemanager.R
  * - "Get Started" button
  */
 @Composable
-fun EnrollmentSuccessScreen(
-    onGetStarted: () -> Unit,
-    viewModel: EnrollmentViewModel = hiltViewModel(),
-) {
+fun EnrollmentSuccessScreen(onGetStarted: () -> Unit, viewModel: EnrollmentViewModel = hiltViewModel()) {
     val organizationInfo by viewModel.organizationInfo.collectAsState()
     val devicePolicy by viewModel.devicePolicy.collectAsState()
 
@@ -144,11 +141,7 @@ fun EnrollmentSuccessScreen(
  * AC E13.10.6: Display organization name and IT contact info.
  */
 @Composable
-private fun OrganizationCard(
-    organizationName: String,
-    contactEmail: String?,
-    supportPhone: String?,
-) {
+private fun OrganizationCard(organizationName: String, contactEmail: String?, supportPhone: String?) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -220,10 +213,7 @@ private fun OrganizationCard(
  * Contact information row.
  */
 @Composable
-private fun ContactInfoRow(
-    icon: ImageVector,
-    text: String,
-) {
+private fun ContactInfoRow(icon: ImageVector, text: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.fillMaxWidth(),

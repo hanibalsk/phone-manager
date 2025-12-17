@@ -44,11 +44,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -75,7 +75,7 @@ import three.two.bit.phonemanager.R
 fun RegisterScreen(
     onNavigateToLogin: () -> Unit,
     onRegisterSuccess: () -> Unit,
-    viewModel: AuthViewModel = hiltViewModel()
+    viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val emailError by viewModel.emailError.collectAsState()
@@ -136,7 +136,7 @@ fun RegisterScreen(
 
     Scaffold(
         modifier = Modifier.testTag("register_screen"),
-        snackbarHost = { SnackbarHost(snackbarHostState) }
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { paddingValues ->
         Column(
             modifier = Modifier
@@ -145,13 +145,13 @@ fun RegisterScreen(
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.Center,
         ) {
             // Title
             Text(
                 text = stringResource(R.string.auth_create_account),
                 style = MaterialTheme.typography.headlineLarge,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -159,7 +159,7 @@ fun RegisterScreen(
             Text(
                 text = stringResource(R.string.auth_join_today),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             Spacer(modifier = Modifier.height(32.dp))
@@ -174,15 +174,15 @@ fun RegisterScreen(
                     .testTag("display_name_input"),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Next,
                 ),
                 keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) },
                 ),
                 singleLine = true,
                 isError = displayNameError != null,
                 supportingText = displayNameError?.let { { Text(it) } },
-                enabled = uiState !is AuthUiState.Loading
+                enabled = uiState !is AuthUiState.Loading,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -197,15 +197,15 @@ fun RegisterScreen(
                     .testTag("register_email_input"),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email,
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Next,
                 ),
                 keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) },
                 ),
                 singleLine = true,
                 isError = emailError != null,
                 supportingText = emailError?.let { { Text(it) } },
-                enabled = uiState !is AuthUiState.Loading
+                enabled = uiState !is AuthUiState.Loading,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -225,10 +225,10 @@ fun RegisterScreen(
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Next
+                    imeAction = ImeAction.Next,
                 ),
                 keyboardActions = KeyboardActions(
-                    onNext = { focusManager.moveFocus(FocusDirection.Down) }
+                    onNext = { focusManager.moveFocus(FocusDirection.Down) },
                 ),
                 trailingIcon = {
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
@@ -242,7 +242,7 @@ fun RegisterScreen(
                                 "Hide password"
                             } else {
                                 "Show password"
-                            }
+                            },
                         )
                     }
                 },
@@ -255,12 +255,12 @@ fun RegisterScreen(
                             Text(
                                 text = stringResource(R.string.auth_password_strength, passwordStrength.label),
                                 color = passwordStrength.color,
-                                style = MaterialTheme.typography.bodySmall
+                                style = MaterialTheme.typography.bodySmall,
                             )
                         }
                     }
                 },
-                enabled = uiState !is AuthUiState.Loading
+                enabled = uiState !is AuthUiState.Loading,
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -280,10 +280,10 @@ fun RegisterScreen(
                 },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password,
-                    imeAction = ImeAction.Done
+                    imeAction = ImeAction.Done,
                 ),
                 keyboardActions = KeyboardActions(
-                    onDone = { focusManager.clearFocus() }
+                    onDone = { focusManager.clearFocus() },
                 ),
                 trailingIcon = {
                     Row {
@@ -299,7 +299,7 @@ fun RegisterScreen(
                                     MaterialTheme.colorScheme.primary
                                 } else {
                                     MaterialTheme.colorScheme.error
-                                }
+                                },
                             )
                         }
                         IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
@@ -313,7 +313,7 @@ fun RegisterScreen(
                                     "Hide password"
                                 } else {
                                     "Show password"
-                                }
+                                },
                             )
                         }
                     }
@@ -325,7 +325,7 @@ fun RegisterScreen(
                         Text(stringResource(R.string.auth_passwords_mismatch))
                     }
                 },
-                enabled = uiState !is AuthUiState.Loading
+                enabled = uiState !is AuthUiState.Loading,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -333,17 +333,17 @@ fun RegisterScreen(
             // Terms of Service Checkbox (AC E9.11.4)
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Checkbox(
                     checked = acceptedTerms,
                     onCheckedChange = { acceptedTerms = it },
-                    enabled = uiState !is AuthUiState.Loading
+                    enabled = uiState !is AuthUiState.Loading,
                 )
                 Text(
                     text = stringResource(R.string.auth_agree_terms),
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.padding(start = 8.dp)
+                    modifier = Modifier.padding(start = 8.dp),
                 )
             }
 
@@ -365,12 +365,12 @@ fun RegisterScreen(
                     acceptedTerms &&
                     displayName.isNotBlank() &&
                     email.isNotBlank() &&
-                    password.isNotBlank()
+                    password.isNotBlank(),
             ) {
                 if (uiState is AuthUiState.Loading) {
                     CircularProgressIndicator(
                         modifier = Modifier.size(24.dp),
-                        color = MaterialTheme.colorScheme.onPrimary
+                        color = MaterialTheme.colorScheme.onPrimary,
                     )
                 } else {
                     Text(stringResource(R.string.auth_create_account))
@@ -382,15 +382,15 @@ fun RegisterScreen(
             // Sign In Link
             Row(
                 horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = stringResource(R.string.auth_already_have_account_question),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
                 TextButton(
                     onClick = onNavigateToLogin,
-                    enabled = uiState !is AuthUiState.Loading
+                    enabled = uiState !is AuthUiState.Loading,
                 ) {
                     Text(stringResource(R.string.auth_sign_in))
                 }
@@ -402,40 +402,38 @@ fun RegisterScreen(
 /**
  * Password strength indicator
  */
-data class PasswordStrength(
-    val label: String,
-    val color: androidx.compose.ui.graphics.Color
-)
+data class PasswordStrength(val label: String, val color: androidx.compose.ui.graphics.Color)
 
 /**
  * Password strength levels (non-composable)
  */
 enum class PasswordStrengthLevel {
-    WEAK, MEDIUM, STRONG
+    WEAK,
+    MEDIUM,
+    STRONG,
 }
 
 /**
  * Calculate password strength level based on security requirements
  */
-fun calculatePasswordStrengthLevel(password: String): PasswordStrengthLevel {
-    return when {
-        password.length < 8 -> PasswordStrengthLevel.WEAK
-        password.length < 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } -> PasswordStrengthLevel.MEDIUM
-        password.length >= 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } && password.any { !it.isLetterOrDigit() } -> PasswordStrengthLevel.STRONG
-        else -> PasswordStrengthLevel.WEAK
-    }
+fun calculatePasswordStrengthLevel(password: String): PasswordStrengthLevel = when {
+    password.length < 8 -> PasswordStrengthLevel.WEAK
+    password.length < 12 && password.any {
+        it.isUpperCase()
+    } && password.any { it.isDigit() } -> PasswordStrengthLevel.MEDIUM
+    password.length >= 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } &&
+        password.any { !it.isLetterOrDigit() } -> PasswordStrengthLevel.STRONG
+    else -> PasswordStrengthLevel.WEAK
 }
 
 /**
  * Convert strength level to display model with colors (composable)
  */
 @Composable
-fun PasswordStrengthLevel.toPasswordStrength(): PasswordStrength {
-    return when (this) {
-        PasswordStrengthLevel.WEAK -> PasswordStrength("Weak", MaterialTheme.colorScheme.error)
-        PasswordStrengthLevel.MEDIUM -> PasswordStrength("Medium", MaterialTheme.colorScheme.tertiary)
-        PasswordStrengthLevel.STRONG -> PasswordStrength("Strong", MaterialTheme.colorScheme.primary)
-    }
+fun PasswordStrengthLevel.toPasswordStrength(): PasswordStrength = when (this) {
+    PasswordStrengthLevel.WEAK -> PasswordStrength("Weak", MaterialTheme.colorScheme.error)
+    PasswordStrengthLevel.MEDIUM -> PasswordStrength("Medium", MaterialTheme.colorScheme.tertiary)
+    PasswordStrengthLevel.STRONG -> PasswordStrength("Strong", MaterialTheme.colorScheme.primary)
 }
 
 @Preview(showBackground = true)
@@ -444,7 +442,7 @@ fun RegisterScreenPreview() {
     MaterialTheme {
         RegisterScreen(
             onNavigateToLogin = {},
-            onRegisterSuccess = {}
+            onRegisterSuccess = {},
         )
     }
 }

@@ -2,9 +2,9 @@ package three.two.bit.phonemanager.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlin.time.Instant
 import three.two.bit.phonemanager.domain.model.Geofence
 import three.two.bit.phonemanager.domain.model.TransitionType
+import kotlin.time.Instant
 
 /**
  * Story E6.1: GeofenceEntity - Room database entity for geofences

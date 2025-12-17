@@ -35,7 +35,8 @@ data class CreateGeofenceRequest(
     val latitude: Double,
     val longitude: Double,
     @SerialName("radius_meters") val radiusMeters: Double,
-    @SerialName("event_types") val eventTypes: List<GeofenceEventType> = listOf(GeofenceEventType.ENTER, GeofenceEventType.EXIT),
+    @SerialName("event_types") val eventTypes: List<GeofenceEventType> =
+        listOf(GeofenceEventType.ENTER, GeofenceEventType.EXIT),
     val active: Boolean = true,
     val metadata: Map<String, String>? = null,
 )

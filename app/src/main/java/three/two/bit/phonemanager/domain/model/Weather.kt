@@ -1,10 +1,10 @@
 package three.two.bit.phonemanager.domain.model
 
 import androidx.annotation.StringRes
-import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.Serializable
 import three.two.bit.phonemanager.R
+import kotlin.time.Instant
 
 /**
  * Story E7.1: Weather domain models

@@ -23,6 +23,9 @@ import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import three.two.bit.phonemanager.BuildConfig
+import three.two.bit.phonemanager.auth.AuthInterceptor
+import three.two.bit.phonemanager.auth.AuthPlugin
+import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.network.ApiConfiguration
 import three.two.bit.phonemanager.network.ConfigApiService
 import three.two.bit.phonemanager.network.ConfigApiServiceImpl
@@ -46,9 +49,6 @@ import three.two.bit.phonemanager.network.TripApiService
 import three.two.bit.phonemanager.network.TripApiServiceImpl
 import three.two.bit.phonemanager.network.WebhookApiService
 import three.two.bit.phonemanager.network.WebhookApiServiceImpl
-import three.two.bit.phonemanager.auth.AuthInterceptor
-import three.two.bit.phonemanager.auth.AuthPlugin
-import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import java.util.UUID
@@ -75,15 +75,12 @@ object NetworkModule {
     @Singleton
     fun provideAuthInterceptor(
         secureStorage: SecureStorage,
-        authRepositoryProvider: Provider<AuthRepository>
+        authRepositoryProvider: Provider<AuthRepository>,
     ): AuthInterceptor = AuthInterceptor(secureStorage, authRepositoryProvider)
 
     @Provides
     @Singleton
-    fun provideHttpClient(
-        json: Json,
-        authInterceptor: AuthInterceptor
-    ): HttpClient = HttpClient(Android) {
+    fun provideHttpClient(json: Json, authInterceptor: AuthInterceptor): HttpClient = HttpClient(Android) {
         // JSON serialization
         install(ContentNegotiation) {
             json(json)

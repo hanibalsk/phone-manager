@@ -1,6 +1,5 @@
 package three.two.bit.phonemanager.network.models
 
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -9,6 +8,7 @@ import three.two.bit.phonemanager.domain.model.DailyForecast
 import three.two.bit.phonemanager.domain.model.LocationCoordinates
 import three.two.bit.phonemanager.domain.model.Weather
 import three.two.bit.phonemanager.domain.model.WeatherCode
+import kotlin.time.Clock
 
 /**
  * Story E7.1: Open-Meteo API response models

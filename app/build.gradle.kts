@@ -37,15 +37,17 @@ fun getLocalProperty(
 
 // Read version from VERSION file (single source of truth)
 val versionFile = rootProject.file("VERSION")
-val appVersion = if (versionFile.exists()) {
-    versionFile.readText().trim()
-} else {
-    "0.9.0" // Fallback version
-}
+val appVersion =
+    if (versionFile.exists()) {
+        versionFile.readText().trim()
+    } else {
+        "0.9.0" // Fallback version
+    }
 val versionParts = appVersion.split(".")
-val calculatedVersionCode = versionParts[0].toInt() * 10000 +
-                           versionParts[1].toInt() * 100 +
-                           versionParts[2].toInt()
+val calculatedVersionCode =
+    versionParts[0].toInt() * 10000 +
+        versionParts[1].toInt() * 100 +
+        versionParts[2].toInt()
 
 android {
     namespace = "three.two.bit.phonemanager"

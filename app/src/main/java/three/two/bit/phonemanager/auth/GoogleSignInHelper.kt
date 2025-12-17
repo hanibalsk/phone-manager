@@ -49,12 +49,10 @@ class GoogleSignInHelper @Inject constructor() {
      * @param activity Activity context for launching intent
      * @return Result with ID token on success, error on failure
      */
-    suspend fun signIn(activity: Activity): Result<String> {
-        return if (BuildConfig.USE_MOCK_AUTH) {
-            mockSignIn()
-        } else {
-            realSignIn(activity)
-        }
+    suspend fun signIn(activity: Activity): Result<String> = if (BuildConfig.USE_MOCK_AUTH) {
+        mockSignIn()
+    } else {
+        realSignIn(activity)
     }
 
     /**

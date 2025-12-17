@@ -63,11 +63,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import java.text.NumberFormat
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.SettingCategory
 import three.two.bit.phonemanager.domain.model.SettingType
 import three.two.bit.phonemanager.domain.model.SettingValidation
+import java.text.NumberFormat
 
 /**
  * Story E12.7: Device Settings Screen
@@ -229,11 +229,7 @@ fun DeviceSettingsScreen(
 }
 
 @Composable
-private fun DeviceStatusHeader(
-    isOnline: Boolean,
-    lockedCount: Int,
-    modifier: Modifier = Modifier,
-) {
+private fun DeviceStatusHeader(isOnline: Boolean, lockedCount: Int, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -262,7 +258,13 @@ private fun DeviceStatusHeader(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = if (isOnline) stringResource(R.string.admin_online) else stringResource(R.string.admin_offline),
+                    text = if (isOnline) {
+                        stringResource(
+                            R.string.admin_online,
+                        )
+                    } else {
+                        stringResource(R.string.admin_offline)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                 )
             }
@@ -403,7 +405,13 @@ private fun SettingItem(
                     } else {
                         Icons.Default.LockOpen
                     },
-                    contentDescription = if (setting.isLocked) stringResource(R.string.admin_unlock) else stringResource(R.string.admin_lock),
+                    contentDescription = if (setting.isLocked) {
+                        stringResource(
+                            R.string.admin_unlock,
+                        )
+                    } else {
+                        stringResource(R.string.admin_lock)
+                    },
                     tint = if (setting.isLocked) {
                         MaterialTheme.colorScheme.primary
                     } else {

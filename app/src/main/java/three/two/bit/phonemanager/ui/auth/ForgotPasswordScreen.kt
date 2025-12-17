@@ -62,10 +62,7 @@ import three.two.bit.phonemanager.R
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ForgotPasswordScreen(
-    viewModel: ForgotPasswordViewModel = hiltViewModel(),
-    onNavigateBack: () -> Unit,
-) {
+fun ForgotPasswordScreen(viewModel: ForgotPasswordViewModel = hiltViewModel(), onNavigateBack: () -> Unit) {
     val uiState by viewModel.uiState.collectAsState()
     var email by rememberSaveable { mutableStateOf("") }
 
@@ -133,10 +130,7 @@ fun ForgotPasswordScreen(
 }
 
 @Composable
-private fun SuccessContent(
-    email: String,
-    onNavigateBack: () -> Unit,
-) {
+private fun SuccessContent(email: String, onNavigateBack: () -> Unit) {
     Icon(
         imageVector = Icons.Default.CheckCircle,
         contentDescription = stringResource(R.string.content_desc_success),

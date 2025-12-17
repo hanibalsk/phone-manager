@@ -13,8 +13,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlin.time.Instant
 import three.two.bit.phonemanager.data.preferences.PreferencesRepository
 import three.two.bit.phonemanager.data.preferences.PreferencesRepositoryImpl
 import three.two.bit.phonemanager.data.repository.TripRepository
@@ -29,6 +27,8 @@ import timber.log.Timber
 import java.util.UUID
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Story E8.4: TripManagerImpl - Implementation of TripManager with state machine

@@ -12,11 +12,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlin.time.Instant
 import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.domain.model.Device
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Instant
 
 /**
  * Story E9.3: User Location Map ViewModel

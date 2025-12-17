@@ -126,9 +126,8 @@ class DebugAnalytics : Analytics {
  *
  * Story 1.2, AC 1.2.12: Analytics tracking with Firebase
  */
-class FirebaseAnalyticsImpl(
-    private val firebaseAnalytics: com.google.firebase.analytics.FirebaseAnalytics,
-) : Analytics {
+class FirebaseAnalyticsImpl(private val firebaseAnalytics: com.google.firebase.analytics.FirebaseAnalytics) :
+    Analytics {
     override fun logEvent(eventName: String, params: Map<String, Any>) {
         val bundle = android.os.Bundle().apply {
             params.forEach { (key, value) ->

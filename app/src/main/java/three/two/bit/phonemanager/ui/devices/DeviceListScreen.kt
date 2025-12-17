@@ -45,14 +45,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import three.two.bit.phonemanager.R
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlin.time.Clock
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.UserDevice
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 /**
  * Story E10.6 Task 4: Device List Screen
@@ -180,11 +180,7 @@ fun DeviceListScreen(
  * Device list with cards
  */
 @Composable
-private fun DeviceList(
-    devices: List<UserDevice>,
-    currentDeviceId: String,
-    onDeviceClick: (UserDevice) -> Unit,
-) {
+private fun DeviceList(devices: List<UserDevice>, currentDeviceId: String, onDeviceClick: (UserDevice) -> Unit) {
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -209,11 +205,7 @@ private fun DeviceList(
  * AC E10.6.1: Device card showing name, partial ID, last seen, and current device indicator
  */
 @Composable
-private fun DeviceCard(
-    device: UserDevice,
-    isCurrentDevice: Boolean,
-    onClick: () -> Unit,
-) {
+private fun DeviceCard(device: UserDevice, isCurrentDevice: Boolean, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -363,10 +355,7 @@ private fun EmptyState(onLinkDevice: () -> Unit) {
  * Error state with retry option
  */
 @Composable
-private fun ErrorState(
-    message: String,
-    onRetry: () -> Unit,
-) {
+private fun ErrorState(message: String, onRetry: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -393,12 +382,10 @@ private fun ErrorState(
 /**
  * Format device UUID to show partial ID (e.g., "abc123...xyz789")
  */
-private fun formatPartialDeviceId(deviceId: String): String {
-    return if (deviceId.length > 12) {
-        "${deviceId.take(6)}...${deviceId.takeLast(6)}"
-    } else {
-        deviceId
-    }
+private fun formatPartialDeviceId(deviceId: String): String = if (deviceId.length > 12) {
+    "${deviceId.take(6)}...${deviceId.takeLast(6)}"
+} else {
+    deviceId
 }
 
 /**
@@ -415,7 +402,7 @@ private fun formatTimestamp(instant: Instant): String {
             String.format(
                 "%02d:%02d",
                 localDateTime.hour,
-                localDateTime.minute
+                localDateTime.minute,
             )
         }
         localDateTime.date.dayOfYear == now.date.dayOfYear - 1 &&
@@ -429,7 +416,7 @@ private fun formatTimestamp(instant: Instant): String {
                 "%d/%d/%d",
                 localDateTime.month.ordinal + 1,
                 localDateTime.day,
-                localDateTime.year
+                localDateTime.year,
             )
         }
     }

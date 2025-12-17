@@ -48,13 +48,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.SettingChange
 import three.two.bit.phonemanager.domain.model.SettingChangeType
 import three.two.bit.phonemanager.domain.model.SettingDefinition
+import kotlin.time.Instant
 
 /**
  * Story E12.7: Settings History Screen
@@ -65,10 +65,7 @@ import three.two.bit.phonemanager.domain.model.SettingDefinition
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsHistoryScreen(
-    onNavigateBack: () -> Unit,
-    viewModel: DeviceSettingsViewModel = hiltViewModel(),
-) {
+fun SettingsHistoryScreen(onNavigateBack: () -> Unit, viewModel: DeviceSettingsViewModel = hiltViewModel()) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -171,10 +168,7 @@ fun SettingsHistoryScreen(
 }
 
 @Composable
-private fun HistoryCard(
-    change: SettingChange,
-    modifier: Modifier = Modifier,
-) {
+private fun HistoryCard(change: SettingChange, modifier: Modifier = Modifier) {
     val definition = SettingDefinition.forKey(change.settingKey)
     val (icon, color) = getChangeTypeIcon(change.changeType)
 
@@ -267,22 +261,19 @@ private fun HistoryCard(
 }
 
 @Composable
-private fun getChangeTypeIcon(changeType: SettingChangeType): Pair<ImageVector, androidx.compose.ui.graphics.Color> {
-    return when (changeType) {
+private fun getChangeTypeIcon(changeType: SettingChangeType): Pair<ImageVector, androidx.compose.ui.graphics.Color> =
+    when (changeType) {
         SettingChangeType.VALUE_CHANGED -> Icons.Default.ArrowUpward to MaterialTheme.colorScheme.primary
         SettingChangeType.LOCKED -> Icons.Default.Lock to MaterialTheme.colorScheme.error
         SettingChangeType.UNLOCKED -> Icons.Default.LockOpen to MaterialTheme.colorScheme.primary
         SettingChangeType.RESET -> Icons.Default.RestartAlt to MaterialTheme.colorScheme.tertiary
     }
-}
 
-private fun formatValue(value: Any?): String {
-    return when (value) {
-        null -> "null"
-        is Boolean -> if (value) "On" else "Off"
-        is Number -> value.toString()
-        else -> value.toString()
-    }
+private fun formatValue(value: Any?): String = when (value) {
+    null -> "null"
+    is Boolean -> if (value) "On" else "Off"
+    is Number -> value.toString()
+    else -> value.toString()
 }
 
 private fun formatDateTime(instant: Instant): String {

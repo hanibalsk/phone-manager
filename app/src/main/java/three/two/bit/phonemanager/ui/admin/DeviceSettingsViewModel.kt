@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.AdminSettingsRepository
 import three.two.bit.phonemanager.domain.model.MemberDeviceSettings
-import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.domain.model.SettingCategory
 import three.two.bit.phonemanager.domain.model.SettingChange
 import three.two.bit.phonemanager.domain.model.SettingDefinition
 import three.two.bit.phonemanager.domain.model.validateSettingValue
+import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -63,7 +63,9 @@ class DeviceSettingsViewModel @Inject constructor(
             // Debug: Log device ID comparison
             val localDeviceId = secureStorage.getDeviceId()
             val localDisplayName = secureStorage.getDisplayName()
-            Timber.d("Device ID comparison - local: $localDeviceId, requested: $deviceId, isCurrentDevice: $isCurrentDevice")
+            Timber.d(
+                "Device ID comparison - local: $localDeviceId, requested: $deviceId, isCurrentDevice: $isCurrentDevice",
+            )
             Timber.d("Local display name: $localDisplayName")
 
             adminSettingsRepository.getDeviceSettings(deviceId).fold(
@@ -80,7 +82,9 @@ class DeviceSettingsViewModel @Inject constructor(
                     } else {
                         settings
                     }
-                    Timber.d("Final - deviceName: '${enhancedSettings.deviceName}', isOnline: ${enhancedSettings.isOnline}")
+                    Timber.d(
+                        "Final - deviceName: '${enhancedSettings.deviceName}', isOnline: ${enhancedSettings.isOnline}",
+                    )
 
                     _uiState.update {
                         it.copy(
@@ -454,10 +458,8 @@ class DeviceSettingsViewModel @Inject constructor(
     /**
      * Group settings by category with their current values.
      */
-    private fun groupSettingsByCategory(
-        settings: MemberDeviceSettings,
-    ): Map<SettingCategory, List<SettingWithValue>> {
-        return SettingDefinition.ALL_SETTINGS.map { definition ->
+    private fun groupSettingsByCategory(settings: MemberDeviceSettings): Map<SettingCategory, List<SettingWithValue>> =
+        SettingDefinition.ALL_SETTINGS.map { definition ->
             val value = settings.getValue(definition.key, definition.defaultValue)
             val lock = settings.getLock(definition.key)
             SettingWithValue(
@@ -467,7 +469,6 @@ class DeviceSettingsViewModel @Inject constructor(
                 lockedBy = lock?.lockedBy,
             )
         }.groupBy { it.definition.category }
-    }
 }
 
 /**

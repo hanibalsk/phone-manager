@@ -38,10 +38,7 @@ import three.two.bit.phonemanager.R
  * @param onConfirm Callback with display name and isPrimary when user confirms
  */
 @Composable
-fun LinkDeviceDialog(
-    onDismiss: () -> Unit,
-    onConfirm: (displayName: String?, isPrimary: Boolean) -> Unit,
-) {
+fun LinkDeviceDialog(onDismiss: () -> Unit, onConfirm: (displayName: String?, isPrimary: Boolean) -> Unit) {
     var displayName by remember { mutableStateOf("") }
     var isPrimary by remember { mutableStateOf(false) }
 

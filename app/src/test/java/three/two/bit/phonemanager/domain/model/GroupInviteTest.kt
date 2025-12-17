@@ -1,14 +1,14 @@
 package three.two.bit.phonemanager.domain.model
 
-import kotlin.time.Clock
-import kotlin.time.Instant
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 /**
  * Story E11.9 Task 14: Unit tests for GroupInvite model

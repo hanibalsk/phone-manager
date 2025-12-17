@@ -13,9 +13,7 @@ import androidx.compose.ui.test.junit4.ComposeTestRule
  *     .clickOnMemberMarker("Alice")
  * ```
  */
-class MapScreenRobot(
-    composeTestRule: ComposeTestRule
-) : BaseRobot(composeTestRule) {
+class MapScreenRobot(composeTestRule: ComposeTestRule) : BaseRobot(composeTestRule) {
 
     companion object {
         const val TAG_MAP_SCREEN = "map_screen"

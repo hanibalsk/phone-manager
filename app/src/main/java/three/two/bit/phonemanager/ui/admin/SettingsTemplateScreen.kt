@@ -61,12 +61,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import java.text.NumberFormat
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.SettingDefinition
 import three.two.bit.phonemanager.domain.model.SettingType
 import three.two.bit.phonemanager.domain.model.SettingValidation
 import three.two.bit.phonemanager.domain.model.SettingsTemplate
+import java.text.NumberFormat
 
 /**
  * Story E12.7: Settings Template Screen

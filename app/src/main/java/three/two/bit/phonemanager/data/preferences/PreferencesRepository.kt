@@ -587,6 +587,7 @@ class PreferencesRepositoryImpl @Inject constructor(@param:ApplicationContext pr
         const val DEFAULT_DEFAULT_INTERVAL_MULTIPLIER = 1.0f
 
         // Story E8.8: Trip detection defaults
+
         /** Default stationary threshold in minutes before ending trip */
         const val DEFAULT_TRIP_STATIONARY_THRESHOLD_MINUTES = 5
 

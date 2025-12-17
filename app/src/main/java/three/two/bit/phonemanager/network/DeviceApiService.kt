@@ -12,8 +12,13 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import three.two.bit.phonemanager.domain.model.Device
-import three.two.bit.phonemanager.domain.model.UserDevice
 import three.two.bit.phonemanager.domain.model.DeviceSettings
+import three.two.bit.phonemanager.domain.model.UserDevice
+import three.two.bit.phonemanager.network.models.AdminDeviceSettingsResponse
+import three.two.bit.phonemanager.network.models.BulkUpdateResponse
+import three.two.bit.phonemanager.network.models.BulkUpdateSettingsRequest
+import three.two.bit.phonemanager.network.models.CreateUnlockRequestBody
+import three.two.bit.phonemanager.network.models.CreateUnlockRequestResponse
 import three.two.bit.phonemanager.network.models.DataExportResponse
 import three.two.bit.phonemanager.network.models.DeviceRegistrationRequest
 import three.two.bit.phonemanager.network.models.DeviceRegistrationResponse
@@ -23,12 +28,6 @@ import three.two.bit.phonemanager.network.models.LinkDeviceRequest
 import three.two.bit.phonemanager.network.models.LinkedDeviceResponse
 import three.two.bit.phonemanager.network.models.ListUserDevicesResponse
 import three.two.bit.phonemanager.network.models.LocationHistoryResponse
-import three.two.bit.phonemanager.network.models.TransferDeviceRequest
-import three.two.bit.phonemanager.network.models.TransferDeviceResponse
-import three.two.bit.phonemanager.network.models.UnlinkDeviceResponse
-import three.two.bit.phonemanager.network.models.AdminDeviceSettingsResponse
-import three.two.bit.phonemanager.network.models.BulkUpdateResponse
-import three.two.bit.phonemanager.network.models.BulkUpdateSettingsRequest
 import three.two.bit.phonemanager.network.models.LockSettingsRequest
 import three.two.bit.phonemanager.network.models.LockSettingsResponse
 import three.two.bit.phonemanager.network.models.MemberDevicesResponse
@@ -36,13 +35,14 @@ import three.two.bit.phonemanager.network.models.SaveTemplateRequest
 import three.two.bit.phonemanager.network.models.SaveTemplateResponse
 import three.two.bit.phonemanager.network.models.SettingsHistoryResponse
 import three.two.bit.phonemanager.network.models.TemplatesResponse
+import three.two.bit.phonemanager.network.models.TransferDeviceRequest
+import three.two.bit.phonemanager.network.models.TransferDeviceResponse
+import three.two.bit.phonemanager.network.models.UnlinkDeviceResponse
+import three.two.bit.phonemanager.network.models.UnlockRequestListResponse
 import three.two.bit.phonemanager.network.models.UpdateDeviceSettingsRequest
 import three.two.bit.phonemanager.network.models.UpdateSettingRequest
 import three.two.bit.phonemanager.network.models.UpdateSettingResponse
 import three.two.bit.phonemanager.network.models.UpdateSettingsResponse
-import three.two.bit.phonemanager.network.models.CreateUnlockRequestBody
-import three.two.bit.phonemanager.network.models.CreateUnlockRequestResponse
-import three.two.bit.phonemanager.network.models.UnlockRequestListResponse
 import three.two.bit.phonemanager.network.models.WithdrawUnlockRequestResponse
 import three.two.bit.phonemanager.network.models.toDomain
 import timber.log.Timber
@@ -131,11 +131,7 @@ interface DeviceApiService {
      * @param accessToken JWT access token for authentication
      * @return Result with unlink confirmation
      */
-    suspend fun unlinkDevice(
-        userId: String,
-        deviceId: String,
-        accessToken: String,
-    ): Result<UnlinkDeviceResponse>
+    suspend fun unlinkDevice(userId: String, deviceId: String, accessToken: String): Result<UnlinkDeviceResponse>
 
     /**
      * Story E10.6 Task 2: Transfer device ownership to another user
@@ -187,10 +183,7 @@ interface DeviceApiService {
      * @param accessToken JWT access token for authentication
      * @return Result with device settings and locks
      */
-    suspend fun getDeviceSettings(
-        deviceId: String,
-        accessToken: String,
-    ): Result<DeviceSettings>
+    suspend fun getDeviceSettings(deviceId: String, accessToken: String): Result<DeviceSettings>
 
     /**
      * Story E12.6 Task 2: Update a device setting
@@ -225,10 +218,7 @@ interface DeviceApiService {
      * @param accessToken JWT access token for authentication
      * @return Result with list of member devices
      */
-    suspend fun getGroupMemberDevices(
-        groupId: String,
-        accessToken: String,
-    ): Result<MemberDevicesResponse>
+    suspend fun getGroupMemberDevices(groupId: String, accessToken: String): Result<MemberDevicesResponse>
 
     /**
      * Story E12.7 Task 2: Get device settings for admin
@@ -240,10 +230,7 @@ interface DeviceApiService {
      * @param accessToken JWT access token for authentication
      * @return Result with admin-level device settings
      */
-    suspend fun getAdminDeviceSettings(
-        deviceId: String,
-        accessToken: String,
-    ): Result<AdminDeviceSettingsResponse>
+    suspend fun getAdminDeviceSettings(deviceId: String, accessToken: String): Result<AdminDeviceSettingsResponse>
 
     /**
      * Story E12.7 Task 2: Update device settings (admin)
@@ -332,9 +319,7 @@ interface DeviceApiService {
      * @param accessToken JWT access token for authentication
      * @return Result with list of templates
      */
-    suspend fun getSettingsTemplates(
-        accessToken: String,
-    ): Result<TemplatesResponse>
+    suspend fun getSettingsTemplates(accessToken: String): Result<TemplatesResponse>
 
     /**
      * Story E12.7 Task 2: Save settings template
@@ -369,10 +354,7 @@ interface DeviceApiService {
      * @param accessToken JWT access token for authentication
      * @return Result with success/failure
      */
-    suspend fun deleteSettingsTemplate(
-        templateId: String,
-        accessToken: String,
-    ): Result<Unit>
+    suspend fun deleteSettingsTemplate(templateId: String, accessToken: String): Result<Unit>
 
     // ============================================================================
     // Story E12.8: Unlock Request API (AC E12.8.1-E12.8.8)
@@ -424,10 +406,7 @@ interface DeviceApiService {
      * @param accessToken JWT access token for authentication
      * @return Result with withdrawal confirmation
      */
-    suspend fun withdrawUnlockRequest(
-        requestId: String,
-        accessToken: String,
-    ): Result<WithdrawUnlockRequestResponse>
+    suspend fun withdrawUnlockRequest(requestId: String, accessToken: String): Result<WithdrawUnlockRequestResponse>
 }
 
 @Singleton
@@ -692,10 +671,7 @@ class DeviceApiServiceImpl @Inject constructor(
      * Story E12.6 Task 2: Get device settings and lock states
      * GET /api/v1/devices/{deviceId}/settings
      */
-    override suspend fun getDeviceSettings(
-        deviceId: String,
-        accessToken: String,
-    ): Result<DeviceSettings> = try {
+    override suspend fun getDeviceSettings(deviceId: String, accessToken: String): Result<DeviceSettings> = try {
         Timber.d("Fetching settings for device $deviceId")
 
         val response: DeviceSettingsResponse = httpClient.get(
@@ -758,14 +734,12 @@ class DeviceApiServiceImpl @Inject constructor(
     /**
      * Parse string value to appropriate type for settings update.
      */
-    private fun parseSettingValue(value: String): Any {
-        return when {
-            value.equals("true", ignoreCase = true) -> true
-            value.equals("false", ignoreCase = true) -> false
-            value.toIntOrNull() != null -> value.toInt()
-            value.toDoubleOrNull() != null -> value.toDouble()
-            else -> value
-        }
+    private fun parseSettingValue(value: String): Any = when {
+        value.equals("true", ignoreCase = true) -> true
+        value.equals("false", ignoreCase = true) -> false
+        value.toIntOrNull() != null -> value.toInt()
+        value.toDoubleOrNull() != null -> value.toDouble()
+        else -> value
     }
 
     // ============================================================================
@@ -776,24 +750,22 @@ class DeviceApiServiceImpl @Inject constructor(
      * Story E12.7 Task 2: Get member devices for a group
      * GET /api/v1/groups/{groupId}/devices
      */
-    override suspend fun getGroupMemberDevices(
-        groupId: String,
-        accessToken: String,
-    ): Result<MemberDevicesResponse> = try {
-        Timber.d("Fetching member devices for group $groupId")
+    override suspend fun getGroupMemberDevices(groupId: String, accessToken: String): Result<MemberDevicesResponse> =
+        try {
+            Timber.d("Fetching member devices for group $groupId")
 
-        val response: MemberDevicesResponse = httpClient.get(
-            "${apiConfig.baseUrl}/api/v1/groups/$groupId/devices",
-        ) {
-            header("Authorization", "Bearer $accessToken")
-        }.body()
+            val response: MemberDevicesResponse = httpClient.get(
+                "${apiConfig.baseUrl}/api/v1/groups/$groupId/devices",
+            ) {
+                header("Authorization", "Bearer $accessToken")
+            }.body()
 
-        Timber.i("Fetched ${response.totalCount} member devices for group $groupId")
-        Result.success(response)
-    } catch (e: Exception) {
-        Timber.e(e, "Failed to fetch member devices for group $groupId")
-        Result.failure(e)
-    }
+            Timber.i("Fetched ${response.totalCount} member devices for group $groupId")
+            Result.success(response)
+        } catch (e: Exception) {
+            Timber.e(e, "Failed to fetch member devices for group $groupId")
+            Result.failure(e)
+        }
 
     /**
      * Story E12.7 Task 2: Get device settings for admin
@@ -949,9 +921,7 @@ class DeviceApiServiceImpl @Inject constructor(
      * Story E12.7 Task 2: Get settings templates
      * GET /api/v1/settings/templates
      */
-    override suspend fun getSettingsTemplates(
-        accessToken: String,
-    ): Result<TemplatesResponse> = try {
+    override suspend fun getSettingsTemplates(accessToken: String): Result<TemplatesResponse> = try {
         Timber.d("Fetching settings templates")
 
         val response: TemplatesResponse = httpClient.get(
@@ -1012,10 +982,7 @@ class DeviceApiServiceImpl @Inject constructor(
      * Story E12.7 Task 2: Delete settings template
      * DELETE /api/v1/settings/templates/{templateId}
      */
-    override suspend fun deleteSettingsTemplate(
-        templateId: String,
-        accessToken: String,
-    ): Result<Unit> = try {
+    override suspend fun deleteSettingsTemplate(templateId: String, accessToken: String): Result<Unit> = try {
         Timber.d("Deleting settings template: $templateId")
 
         httpClient.delete("${apiConfig.baseUrl}/api/v1/settings/templates/$templateId") {

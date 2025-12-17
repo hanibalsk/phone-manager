@@ -50,18 +50,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import java.text.NumberFormat
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.BulkSettingsResult
 import three.two.bit.phonemanager.domain.model.SettingCategory
 import three.two.bit.phonemanager.domain.model.SettingDefinition
 import three.two.bit.phonemanager.domain.model.SettingType
 import three.two.bit.phonemanager.domain.model.SettingValidation
+import java.text.NumberFormat
 
 /**
  * Story E12.7: Bulk Settings Screen
@@ -414,11 +414,7 @@ private fun BulkSettingItem(
 }
 
 @Composable
-private fun BulkResultsView(
-    result: BulkSettingsResult,
-    onDone: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun BulkResultsView(result: BulkSettingsResult, onDone: () -> Unit, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,

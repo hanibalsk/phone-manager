@@ -11,7 +11,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
-import kotlin.time.Instant
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -27,6 +26,7 @@ import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
+import kotlin.time.Instant
 
 /**
  * Story E9.3, E9.6: Unit tests for AdminUsersViewModel
@@ -116,7 +116,7 @@ class AdminUsersViewModelTest {
     fun `loadAdminGroups shows error on failure`() = runTest {
         // Given
         coEvery { groupRepository.getUserGroups() } returns Result.failure(
-            Exception("Network error")
+            Exception("Network error"),
         )
 
         // When
@@ -169,7 +169,7 @@ class AdminUsersViewModelTest {
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
         coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.failure(
-            Exception("Failed to load members")
+            Exception("Failed to load members"),
         )
 
         viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
@@ -366,7 +366,7 @@ class AdminUsersViewModelTest {
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
         coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(listOf(device))
         coEvery { groupRepository.removeMember("group-1", "user-1") } returns Result.failure(
-            Exception("Permission denied")
+            Exception("Permission denied"),
         )
 
         viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
@@ -505,7 +505,7 @@ class AdminUsersViewModelTest {
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
         coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(listOf(device))
         coEvery { groupRepository.removeMember("group-1", "user-1") } returns Result.failure(
-            Exception("Error")
+            Exception("Error"),
         )
 
         viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
@@ -575,11 +575,7 @@ class AdminUsersViewModelTest {
     // Helper functions
     // =============================================================================
 
-    private fun createTestGroup(
-        id: String,
-        name: String,
-        userRole: GroupRole,
-    ) = Group(
+    private fun createTestGroup(id: String, name: String, userRole: GroupRole) = Group(
         id = id,
         name = name,
         description = null,
@@ -590,11 +586,7 @@ class AdminUsersViewModelTest {
         updatedAt = Instant.parse("2025-01-01T00:00:00Z"),
     )
 
-    private fun createTestDevice(
-        deviceId: String,
-        displayName: String,
-        ownerId: String?,
-    ) = Device(
+    private fun createTestDevice(deviceId: String, displayName: String, ownerId: String?) = Device(
         deviceId = deviceId,
         displayName = displayName,
         ownerId = ownerId,

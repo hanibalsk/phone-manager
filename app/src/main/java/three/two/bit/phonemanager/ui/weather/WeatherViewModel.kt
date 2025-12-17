@@ -8,14 +8,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
-import kotlin.time.Instant
 import three.two.bit.phonemanager.data.repository.LocationRepository
 import three.two.bit.phonemanager.data.repository.WeatherRepository
 import three.two.bit.phonemanager.domain.model.Weather
 import three.two.bit.phonemanager.network.NetworkManager
 import javax.inject.Inject
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Instant
 
 /**
  * Story E7.3: WeatherViewModel

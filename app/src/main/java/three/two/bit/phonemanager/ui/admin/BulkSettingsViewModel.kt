@@ -22,9 +22,8 @@ import javax.inject.Inject
  * AC E12.7.6: Bulk Settings Application
  */
 @HiltViewModel
-class BulkSettingsViewModel @Inject constructor(
-    private val adminSettingsRepository: AdminSettingsRepository,
-) : ViewModel() {
+class BulkSettingsViewModel @Inject constructor(private val adminSettingsRepository: AdminSettingsRepository) :
+    ViewModel() {
 
     private val _uiState = MutableStateFlow(BulkSettingsUiState())
     val uiState: StateFlow<BulkSettingsUiState> = _uiState.asStateFlow()
