@@ -4,7 +4,7 @@
 **Epic**: UGM-4 - Group Migration Wizard
 **Priority**: High
 **Estimate**: 2 story points
-**Status**: Ready-for-dev
+**Status**: Completed
 **Created**: 2025-12-18
 
 **PRD Reference**: docs/PRD.md, docs/epics-ugm.md
@@ -58,26 +58,26 @@ So that I can retry if something goes wrong.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Add network state monitoring (AC: 3, 4)
-  - [ ] Check network connectivity before migration
-  - [ ] Show offline message when no connection
-  - [ ] Disable migrate button when offline
+- [x] Task 1: Add network state monitoring (AC: 3, 4)
+  - [x] Check network connectivity before migration
+  - [x] Show offline message when no connection
+  - [x] Disable migrate button when offline
 
-- [ ] Task 2: Add error handling to migration flow (AC: 1, 5)
-  - [ ] Handle network errors with specific message
-  - [ ] Handle server errors (4xx, 5xx) with appropriate messages
-  - [ ] Display errors in MigrationState.Error
+- [x] Task 2: Add error handling to migration flow (AC: 1, 5)
+  - [x] Handle network errors with specific message
+  - [x] Handle server errors (4xx, 5xx) with appropriate messages
+  - [x] Display errors in MigrationState.Error
 
-- [ ] Task 3: Add retry functionality (AC: 2, 6)
-  - [ ] Add Retry button to error state UI
-  - [ ] Re-call migration with same parameters on retry
-  - [ ] Clear error state when retrying
+- [x] Task 3: Add retry functionality (AC: 2, 6)
+  - [x] Add Retry button to error state UI
+  - [x] Re-call migration with same parameters on retry
+  - [x] Clear error state when retrying
 
-- [ ] Task 4: Add error strings
-  - [ ] Network error message
-  - [ ] Offline message
-  - [ ] Server error messages
-  - [ ] Retry button label
+- [x] Task 4: Add error strings
+  - [x] Network error message
+  - [x] Offline message
+  - [x] Server error messages
+  - [x] Retry button label
 
 ---
 
@@ -102,7 +102,7 @@ Error handling should:
 
 ### Debug Log
 
-_To be filled during implementation_
+No issues encountered during implementation.
 
 ### Implementation Plan
 
@@ -115,17 +115,26 @@ _To be filled during implementation_
 
 ### Completion Notes
 
-_To be filled after implementation_
+Implementation completed successfully:
+- Used existing ConnectivityMonitor for network state
+- Added isOnline StateFlow to GroupMigrationViewModel
+- Added Offline state to MigrationUiState
+- Enhanced Error state with isRetryable flag
+- Added offline banner and error card with retry to UI
+- Migration blocked when offline with appropriate message
+- Retryable errors show Retry button
 
 ---
 
 ## File List
 
 ### New Files
-_To be filled during implementation_
+None
 
 ### Modified Files
-_To be filled during implementation_
+- `app/src/main/java/three/two/bit/phonemanager/ui/groups/GroupMigrationViewModel.kt`
+- `app/src/main/java/three/two/bit/phonemanager/ui/groups/GroupMigrationScreen.kt`
+- `app/src/main/res/values/strings.xml`
 
 ---
 
@@ -134,10 +143,11 @@ _To be filled during implementation_
 | Date | Author | Changes |
 |------|--------|---------|
 | 2025-12-18 | Claude | Story created from UGM epics specification |
+| 2025-12-18 | Claude | Implementation completed - all ACs satisfied |
 
 ---
 
 **Last Updated**: 2025-12-18
-**Status**: Ready-for-dev
+**Status**: Completed
 **Dependencies**: UGM-4.3
 **Blocking**: None

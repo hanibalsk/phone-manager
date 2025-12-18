@@ -645,6 +645,7 @@
     <string name="migration_benefit_management">Full group management controls</string>
     <string name="migration_button">Upgrade Group</string>
     <string name="migration_cancel_button">Cancel</string>
+    <string name="migration_retry_button">Retry</string>
     <string name="common_back">Back</string>
 
     <!-- Group Management - Group Detail Screen -->

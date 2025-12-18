@@ -5,16 +5,20 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.GroupRepository
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.network.ConnectivityMonitor
 import timber.log.Timber
 import javax.inject.Inject
 
 /**
  * Story UGM-4.3: Group Migration ViewModel
+ * Story UGM-4.4: Handle Migration Errors and Offline
  *
  * Handles group migration operations:
  * - AC 1: Pre-fill group name with registration group info
@@ -24,12 +28,22 @@ import javax.inject.Inject
  * - AC 5: Delete registration group after migration
  * - AC 6: Show progress indicator
  *
+ * Error handling (UGM-4.4):
+ * - AC 1: Network error handling with specific message
+ * - AC 2: Retry option for failed migrations
+ * - AC 3: Offline detection before migration
+ * - AC 4: No offline queue (requires connection)
+ * - AC 5: Server error handling
+ * - AC 6: Retry functionality
+ *
  * Dependencies:
  * - GroupRepository for migration API calls
+ * - ConnectivityMonitor for network state
  */
 @HiltViewModel
 class GroupMigrationViewModel @Inject constructor(
     private val groupRepository: GroupRepository,
+    private val connectivityMonitor: ConnectivityMonitor,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
@@ -50,6 +64,14 @@ class GroupMigrationViewModel @Inject constructor(
     // Device count for display
     private val _deviceCount = MutableStateFlow(0)
     val deviceCount: StateFlow<Int> = _deviceCount.asStateFlow()
+
+    // Story UGM-4.4: Network connectivity state (AC 3, 4)
+    val isOnline: StateFlow<Boolean> = connectivityMonitor.observeConnectivity()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = connectivityMonitor.isNetworkAvailable(),
+        )
 
     init {
         Timber.d("GroupMigrationViewModel init with groupId=$registrationGroupId")
@@ -117,18 +139,29 @@ class GroupMigrationViewModel @Inject constructor(
 
     /**
      * Check if migration can proceed
+     * Story UGM-4.4 AC 3, 4: Requires network connection
      */
     fun canMigrate(): Boolean {
-        return validateGroupName(_groupName.value) && _uiState.value !is MigrationUiState.Loading
+        return validateGroupName(_groupName.value) &&
+            _uiState.value !is MigrationUiState.Loading &&
+            isOnline.value
     }
 
     /**
      * Execute migration (AC 3, 4, 5, 6)
+     * Story UGM-4.4 AC 1, 3, 5: Handle offline and errors
      */
     fun migrate() {
         val name = _groupName.value.trim()
 
         if (!validateGroupName(name)) {
+            return
+        }
+
+        // Story UGM-4.4 AC 3, 4: Check connectivity before migration
+        if (!isOnline.value) {
+            Timber.w("Migration attempted while offline")
+            _uiState.value = MigrationUiState.Offline
             return
         }
 
@@ -151,6 +184,7 @@ class GroupMigrationViewModel @Inject constructor(
                     Timber.e(error, "Migration failed")
                     _uiState.value = MigrationUiState.Error(
                         message = getErrorMessage(error),
+                        isRetryable = isRetryableError(error),
                     )
                 },
             )
@@ -158,16 +192,25 @@ class GroupMigrationViewModel @Inject constructor(
     }
 
     /**
+     * Story UGM-4.4 AC 2, 6: Retry migration after failure
+     */
+    fun retry() {
+        Timber.d("Retrying migration")
+        clearError()
+        migrate()
+    }
+
+    /**
      * Clear error state to retry
      */
     fun clearError() {
-        if (_uiState.value is MigrationUiState.Error) {
+        if (_uiState.value is MigrationUiState.Error || _uiState.value is MigrationUiState.Offline) {
             _uiState.value = MigrationUiState.Idle
         }
     }
 
     /**
-     * Convert exception to user-friendly error message
+     * Story UGM-4.4 AC 1, 5: Convert exception to user-friendly error message
      */
     private fun getErrorMessage(exception: Throwable): String {
         val message = exception.message ?: ""
@@ -181,15 +224,35 @@ class GroupMigrationViewModel @Inject constructor(
             message.contains("409") || message.contains("conflict", ignoreCase = true) ->
                 "A group with this name already exists."
             message.contains("network", ignoreCase = true) ||
-                message.contains("connection", ignoreCase = true) ->
-                "Network error. Please check your connection and try again."
+                message.contains("connection", ignoreCase = true) ||
+                message.contains("timeout", ignoreCase = true) ||
+                message.contains("unable to resolve", ignoreCase = true) ->
+                "Migration failed. Check your connection and try again."
+            message.contains("5") && message.contains("00") ->
+                "Server error. Please try again later."
             else -> "Migration failed. Please try again."
+        }
+    }
+
+    /**
+     * Story UGM-4.4: Determine if error is retryable
+     */
+    private fun isRetryableError(exception: Throwable): Boolean {
+        val message = exception.message ?: ""
+        // Not retryable: auth errors, not found, conflict
+        return when {
+            message.contains("401") -> false
+            message.contains("403") -> false
+            message.contains("404") -> false
+            message.contains("409") -> false
+            else -> true // Network errors, server errors, etc. are retryable
         }
     }
 }
 
 /**
  * Story UGM-4.3: UI State for Migration Screen
+ * Story UGM-4.4: Enhanced error states
  */
 sealed interface MigrationUiState {
     /**
@@ -210,9 +273,16 @@ sealed interface MigrationUiState {
     data class Success(val newGroup: Group) : MigrationUiState
 
     /**
+     * Story UGM-4.4 AC 3: Device is offline
+     */
+    data object Offline : MigrationUiState
+
+    /**
      * Migration failed
+     * Story UGM-4.4 AC 1, 2, 5: Error with retry option
      *
      * @property message Error message to display
+     * @property isRetryable Whether retry button should be shown
      */
-    data class Error(val message: String) : MigrationUiState
+    data class Error(val message: String, val isRetryable: Boolean = true) : MigrationUiState
 }

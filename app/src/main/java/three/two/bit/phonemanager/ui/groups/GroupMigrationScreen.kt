@@ -18,6 +18,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.GroupWork
+import androidx.compose.material.icons.filled.WifiOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -52,15 +53,25 @@ import three.two.bit.phonemanager.R
 
 /**
  * Story UGM-4.3: Group Migration Screen
+ * Story UGM-4.4: Handle Migration Errors and Offline
  *
  * Allows users to migrate their registration group to an authenticated group.
  *
+ * UGM-4.3 ACs:
  * AC 1: Pre-fill group name with registration group info
  * AC 2: Validate group name (3-50 chars)
  * AC 3: Call migration API on submit
  * AC 4: Show success when user becomes OWNER
  * AC 5: Registration group deleted automatically
  * AC 6: Show progress indicator during migration
+ *
+ * UGM-4.4 ACs:
+ * AC 1: Network error handling
+ * AC 2: Retry option
+ * AC 3: Offline detection
+ * AC 4: No offline queue
+ * AC 5: Server error handling
+ * AC 6: Retry functionality
  *
  * @param onNavigateBack Callback to navigate back
  * @param onMigrationSuccess Callback when migration succeeds with new group ID
@@ -77,6 +88,7 @@ fun GroupMigrationScreen(
     val groupName by viewModel.groupName.collectAsState()
     val nameError by viewModel.nameError.collectAsState()
     val deviceCount by viewModel.deviceCount.collectAsState()
+    val isOnline by viewModel.isOnline.collectAsState()
 
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -89,10 +101,10 @@ fun GroupMigrationScreen(
         }
     }
 
-    // Show error messages
+    // Story UGM-4.4 AC 3: Show offline message via snackbar when in offline state
     LaunchedEffect(uiState) {
-        if (uiState is MigrationUiState.Error) {
-            snackbarHostState.showSnackbar((uiState as MigrationUiState.Error).message)
+        if (uiState is MigrationUiState.Offline) {
+            snackbarHostState.showSnackbar("Migration requires an internet connection.")
             viewModel.clearError()
         }
     }
@@ -122,6 +134,69 @@ fun GroupMigrationScreen(
                 .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // Story UGM-4.4 AC 3: Offline banner
+            if (!isOnline) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.WifiOff,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        Spacer(modifier = Modifier.size(8.dp))
+                        Text(
+                            text = stringResource(R.string.migration_error_offline),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Story UGM-4.4 AC 1, 2, 5: Error banner with retry
+            val errorState = uiState as? MigrationUiState.Error
+            if (errorState != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                    ),
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp),
+                    ) {
+                        Text(
+                            text = errorState.message,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                        )
+                        if (errorState.isRetryable && isOnline) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            TextButton(
+                                onClick = { viewModel.retry() },
+                                modifier = Modifier.align(Alignment.End),
+                            ) {
+                                Text(stringResource(R.string.migration_retry_button))
+                            }
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             // Header icon
             Icon(
                 imageVector = Icons.Default.GroupWork,
