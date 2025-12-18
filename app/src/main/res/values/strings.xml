@@ -688,6 +688,13 @@
     <string name="device_link_info_linked_at">Linked On</string>
     <string name="device_link_info_unnamed">Unnamed Device</string>
 
+    <!-- Story UGM-1.4: Device Link Retry Notifications -->
+    <string name="device_link_notification_channel_name">Device Linking</string>
+    <string name="device_link_notification_channel_description">Notifications about device linking status</string>
+    <string name="device_link_retry_failed_title">Device Link Failed</string>
+    <string name="device_link_retry_failed_message">Unable to link device after multiple attempts. Try again from Settings.</string>
+    <string name="device_link_queued_message">Device link will retry when online</string>
+
     <!-- Admin Screens -->
     <string name="admin_selected_count">%1$d selected</string>
     <string name="admin_member_devices">Member Devices</string>

@@ -13,6 +13,7 @@ import three.two.bit.phonemanager.data.database.GeofenceEventDao
 import three.two.bit.phonemanager.data.database.LocationDao
 import three.two.bit.phonemanager.data.database.LocationQueueDao
 import three.two.bit.phonemanager.data.database.MovementEventDao
+import three.two.bit.phonemanager.data.database.PendingDeviceLinkDao
 import three.two.bit.phonemanager.data.database.ProximityAlertDao
 import three.two.bit.phonemanager.data.database.TripDao
 import three.two.bit.phonemanager.data.database.WebhookDao
@@ -27,6 +28,7 @@ import javax.inject.Singleton
  * Story E6.2: Add GeofenceEvent table and DAO
  * Story E6.3: Add Webhook table and DAO
  * Story E8.1: Add Trip and MovementEvent tables and DAOs
+ * Story UGM-1.4: Add PendingDeviceLink table and DAO
  */
 @Module
 @InstallIn(SingletonComponent::class)
@@ -46,6 +48,7 @@ object DatabaseModule {
             AppDatabase.MIGRATION_5_6,
             AppDatabase.MIGRATION_6_7,
             AppDatabase.MIGRATION_7_8,
+            AppDatabase.MIGRATION_8_9,
         )
         .fallbackToDestructiveMigration(dropAllTables = true)
         .build()
@@ -90,4 +93,11 @@ object DatabaseModule {
     @Provides
     @Singleton
     fun provideMovementEventDao(database: AppDatabase): MovementEventDao = database.movementEventDao()
+
+    /**
+     * Story UGM-1.4: PendingDeviceLink DAO
+     */
+    @Provides
+    @Singleton
+    fun providePendingDeviceLinkDao(database: AppDatabase): PendingDeviceLinkDao = database.pendingDeviceLinkDao()
 }

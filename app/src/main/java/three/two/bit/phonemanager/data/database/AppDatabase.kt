@@ -9,6 +9,7 @@ import three.two.bit.phonemanager.data.model.GeofenceEventEntity
 import three.two.bit.phonemanager.data.model.LocationEntity
 import three.two.bit.phonemanager.data.model.LocationQueueEntity
 import three.two.bit.phonemanager.data.model.MovementEventEntity
+import three.two.bit.phonemanager.data.model.PendingDeviceLinkEntity
 import three.two.bit.phonemanager.data.model.ProximityAlertEntity
 import three.two.bit.phonemanager.data.model.TripEntity
 import three.two.bit.phonemanager.data.model.WebhookEntity
@@ -23,6 +24,7 @@ import three.two.bit.phonemanager.data.model.WebhookEntity
  * Version 6: Added GeofenceEventEntity table (Story E6.2)
  * Version 7: Added WebhookEntity table (Story E6.3)
  * Version 8: Added TripEntity and MovementEventEntity tables, extended LocationEntity (Story E8.1)
+ * Version 9: Added PendingDeviceLinkEntity table (Story UGM-1.4)
  */
 @Database(
     entities = [
@@ -34,8 +36,9 @@ import three.two.bit.phonemanager.data.model.WebhookEntity
         WebhookEntity::class,
         TripEntity::class,
         MovementEventEntity::class,
+        PendingDeviceLinkEntity::class,
     ],
-    version = 8,
+    version = 9,
     exportSchema = false,
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -47,6 +50,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun webhookDao(): WebhookDao
     abstract fun tripDao(): TripDao
     abstract fun movementEventDao(): MovementEventDao
+    abstract fun pendingDeviceLinkDao(): PendingDeviceLinkDao
 
     companion object {
         const val DATABASE_NAME = "phone_manager_db"
@@ -255,6 +259,25 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("CREATE INDEX IF NOT EXISTS index_locations_tripId ON locations(tripId)")
                 db.execSQL(
                     "CREATE INDEX IF NOT EXISTS index_locations_transportationMode ON locations(transportationMode)",
+                )
+            }
+        }
+
+        /**
+         * Story UGM-1.4: Migration from version 8 to 9
+         * Creates pending_device_links table for offline queue
+         */
+        val MIGRATION_8_9 = object : Migration(8, 9) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL(
+                    """
+                    CREATE TABLE IF NOT EXISTS pending_device_links (
+                        deviceId TEXT PRIMARY KEY NOT NULL,
+                        userId TEXT NOT NULL,
+                        timestamp INTEGER NOT NULL,
+                        retryCount INTEGER NOT NULL DEFAULT 0
+                    )
+                    """,
                 )
             }
         }

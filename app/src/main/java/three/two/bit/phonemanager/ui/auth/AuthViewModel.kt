@@ -12,11 +12,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import three.two.bit.phonemanager.data.database.PendingDeviceLinkDao
+import three.two.bit.phonemanager.data.model.PendingDeviceLinkEntity
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.ConfigRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.security.SecureStorage
+import three.two.bit.phonemanager.worker.DeviceLinkWorker
 import three.two.bit.phonemanager.worker.SettingsSyncWorker
 import timber.log.Timber
 import javax.inject.Inject
@@ -40,6 +43,7 @@ class AuthViewModel @Inject constructor(
     private val deviceApiService: DeviceApiService,
     private val secureStorage: SecureStorage,
     private val settingsSyncRepository: SettingsSyncRepository,
+    private val pendingDeviceLinkDao: PendingDeviceLinkDao,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
@@ -373,11 +377,16 @@ class AuthViewModel @Inject constructor(
 
     /**
      * Story E10.6 Task 8: Auto-link device after successful authentication
+     * Story UGM-1.4: Queue for offline retry on network errors
      *
      * AC E10.6.6: Registration flow integration
      * - Auto-link current device if not linked
      * - Show link prompt if auto-link fails
      * - Allow user to skip linking
+     *
+     * AC UGM-1.4: Offline queue
+     * - Queue operation on network error
+     * - Auto-retry when online via WorkManager
      *
      * @param userId The authenticated user's ID
      */
@@ -411,6 +420,12 @@ class AuthViewModel @Inject constructor(
                             Timber.i("Device already linked: $deviceId")
                             DeviceLinkState.AlreadyLinked
                         }
+                        isNetworkError(exception) -> {
+                            // UGM-1.4: Queue for offline retry
+                            Timber.w("Network error during device link, queuing for retry")
+                            queueDeviceLinkForRetry(deviceId, userId)
+                            DeviceLinkState.Queued
+                        }
                         else -> {
                             Timber.e(exception, "Failed to auto-link device")
                             DeviceLinkState.Failed(
@@ -421,6 +436,39 @@ class AuthViewModel @Inject constructor(
                 },
             )
         }
+    }
+
+    /**
+     * Story UGM-1.4: Check if exception is a network-related error
+     */
+    private fun isNetworkError(exception: Throwable): Boolean {
+        val message = exception.message?.lowercase() ?: ""
+        return exception is java.net.UnknownHostException ||
+            exception is java.net.SocketTimeoutException ||
+            exception is java.net.ConnectException ||
+            exception is java.io.IOException ||
+            message.contains("network") ||
+            message.contains("timeout") ||
+            message.contains("connection") ||
+            message.contains("unable to resolve host")
+    }
+
+    /**
+     * Story UGM-1.4: Queue device link operation for retry when online
+     *
+     * AC 1: Persist pending link operation
+     * AC 2: Schedule WorkManager job for retry
+     */
+    private suspend fun queueDeviceLinkForRetry(deviceId: String, userId: String) {
+        val pendingLink = PendingDeviceLinkEntity(
+            deviceId = deviceId,
+            userId = userId,
+            timestamp = System.currentTimeMillis(),
+            retryCount = 0,
+        )
+        pendingDeviceLinkDao.insert(pendingLink)
+        DeviceLinkWorker.schedule(context)
+        Timber.i("Device link queued for retry: $deviceId")
     }
 
     /**
@@ -450,17 +498,11 @@ class AuthViewModel @Inject constructor(
     fun dismissDeviceLinkPrompt() {
         _deviceLinkState.value = DeviceLinkState.Skipped
     }
-
-    /**
-     * Clear device link state
-     */
-    fun clearDeviceLinkState() {
-        _deviceLinkState.value = DeviceLinkState.Idle
-    }
 }
 
 /**
  * Story E10.6: Device linking state for post-authentication flow
+ * Story UGM-1.4: Added Queued state for offline retry
  */
 sealed interface DeviceLinkState {
     /** No linking operation in progress */
@@ -477,6 +519,9 @@ sealed interface DeviceLinkState {
 
     /** User chose to skip linking */
     data object Skipped : DeviceLinkState
+
+    /** UGM-1.4: Link operation queued for retry when online */
+    data object Queued : DeviceLinkState
 
     /** Failed to link device */
     data class Failed(val message: String) : DeviceLinkState
