@@ -29,6 +29,7 @@ import three.two.bit.phonemanager.domain.model.ManagedDeviceStatus
 import three.two.bit.phonemanager.domain.model.OrganizationInfo
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
 import three.two.bit.phonemanager.permission.PermissionManager
+import three.two.bit.phonemanager.security.SecureStorage
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNull
@@ -43,6 +44,7 @@ class SettingsViewModelTest {
     private lateinit var settingsSyncRepository: SettingsSyncRepository
     private lateinit var unlockRequestRepository: UnlockRequestRepository
     private lateinit var enrollmentRepository: EnrollmentRepository
+    private lateinit var secureStorage: SecureStorage
     private lateinit var viewModel: SettingsViewModel
 
     private val testDispatcher = StandardTestDispatcher()
@@ -69,6 +71,7 @@ class SettingsViewModelTest {
         settingsSyncRepository = mockk(relaxed = true)
         unlockRequestRepository = mockk(relaxed = true)
         enrollmentRepository = mockk(relaxed = true)
+        secureStorage = mockk(relaxed = true)
 
         // Device repository stubs
         coEvery { deviceRepository.getDeviceId() } returns "test-device-id"
@@ -108,6 +111,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -135,6 +139,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -163,6 +168,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -191,6 +197,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -223,6 +230,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -262,6 +270,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -307,6 +316,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -339,6 +349,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -367,6 +378,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -396,6 +408,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -425,6 +438,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -454,6 +468,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -483,6 +498,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -512,6 +528,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -543,6 +560,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -578,6 +596,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -618,6 +637,7 @@ class SettingsViewModelTest {
                 settingsSyncRepository,
                 unlockRequestRepository,
                 enrollmentRepository,
+                secureStorage,
             )
         testDispatcher.scheduler.advanceUntilIdle()
 

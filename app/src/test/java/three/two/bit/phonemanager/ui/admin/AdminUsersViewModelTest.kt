@@ -14,16 +14,13 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.data.repository.GroupRepository
-import three.two.bit.phonemanager.domain.model.Device
-import three.two.bit.phonemanager.domain.model.DeviceLocation
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.GroupRole
 import three.two.bit.phonemanager.security.SecureStorage
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Instant
@@ -44,7 +41,6 @@ import kotlin.time.Instant
 class AdminUsersViewModelTest {
 
     private lateinit var groupRepository: GroupRepository
-    private lateinit var deviceRepository: DeviceRepository
     private lateinit var secureStorage: SecureStorage
     private lateinit var viewModel: AdminUsersViewModel
 
@@ -54,7 +50,6 @@ class AdminUsersViewModelTest {
     fun setup() {
         Dispatchers.setMain(testDispatcher)
         groupRepository = mockk(relaxed = true)
-        deviceRepository = mockk(relaxed = true)
         secureStorage = mockk(relaxed = true)
     }
 
@@ -78,7 +73,7 @@ class AdminUsersViewModelTest {
         coEvery { groupRepository.getUserGroups() } returns Result.success(groups)
 
         // When
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -100,7 +95,7 @@ class AdminUsersViewModelTest {
         coEvery { groupRepository.getUserGroups() } returns Result.success(groups)
 
         // When
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -120,7 +115,7 @@ class AdminUsersViewModelTest {
         )
 
         // When
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
@@ -139,14 +134,14 @@ class AdminUsersViewModelTest {
     fun `selectGroup loads group members`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val devices = listOf(
-            createTestDevice("device-1", "John's Phone", "user-1"),
-            createTestDevice("device-2", "Jane's Phone", "user-2"),
+        val members = listOf(
+            createTestMember("user-1", "group-1", "john@example.com", "John"),
+            createTestMember("user-2", "group-1", "jane@example.com", "Jane"),
         )
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(devices)
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(members)
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -168,11 +163,11 @@ class AdminUsersViewModelTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.failure(
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.failure(
             Exception("Failed to load members"),
         )
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -192,11 +187,11 @@ class AdminUsersViewModelTest {
     fun `clearSelectedGroup resets to group list view`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val devices = listOf(createTestDevice("device-1", "Phone", "user-1"))
+        val members = listOf(createTestMember("user-1", "group-1", "test@example.com", "Test"))
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(devices)
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(members)
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
         viewModel.selectGroup(group)
         testDispatcher.scheduler.advanceUntilIdle()
@@ -217,54 +212,36 @@ class AdminUsersViewModelTest {
     // =============================================================================
 
     @Test
-    fun `isCurrentUserDevice returns true for own device`() = runTest {
+    fun `isCurrentUser returns true for own user`() = runTest {
         // Given
         every { secureStorage.getUserId() } returns "current-user-id"
         coEvery { groupRepository.getUserGroups() } returns Result.success(emptyList())
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val ownDevice = createTestDevice("device-1", "My Phone", "current-user-id")
+        val ownMember = createTestMember("current-user-id", "group-1", "me@example.com", "Me")
 
         // When
-        val result = viewModel.isCurrentUserDevice(ownDevice)
+        val result = viewModel.isCurrentUser(ownMember)
 
         // Then
         assertTrue(result)
     }
 
     @Test
-    fun `isCurrentUserDevice returns false for other user's device`() = runTest {
+    fun `isCurrentUser returns false for other user`() = runTest {
         // Given
         every { secureStorage.getUserId() } returns "current-user-id"
         coEvery { groupRepository.getUserGroups() } returns Result.success(emptyList())
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val otherDevice = createTestDevice("device-1", "Other Phone", "other-user-id")
+        val otherMember = createTestMember("other-user-id", "group-1", "other@example.com", "Other")
 
         // When
-        val result = viewModel.isCurrentUserDevice(otherDevice)
-
-        // Then
-        assertFalse(result)
-    }
-
-    @Test
-    fun `isCurrentUserDevice returns false for device with no owner`() = runTest {
-        // Given
-        every { secureStorage.getUserId() } returns "current-user-id"
-        coEvery { groupRepository.getUserGroups() } returns Result.success(emptyList())
-
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        val unlinkedDevice = createTestDevice("device-1", "Unlinked Phone", null)
-
-        // When
-        val result = viewModel.isCurrentUserDevice(unlinkedDevice)
+        val result = viewModel.isCurrentUser(otherMember)
 
         // Then
         assertFalse(result)
@@ -275,35 +252,35 @@ class AdminUsersViewModelTest {
     // =============================================================================
 
     @Test
-    fun `showRemoveConfirmation sets deviceToRemove`() = runTest {
+    fun `showRemoveConfirmation sets memberToRemove`() = runTest {
         // Given
         coEvery { groupRepository.getUserGroups() } returns Result.success(emptyList())
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val device = createTestDevice("device-1", "Phone", "user-1")
+        val member = createTestMember("user-1", "group-1", "test@example.com", "Test User")
 
         // When
-        viewModel.showRemoveConfirmation(device)
+        viewModel.showRemoveConfirmation(member)
 
         // Then
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals(device, state.deviceToRemove)
+            assertEquals(member, state.memberToRemove)
         }
     }
 
     @Test
-    fun `cancelRemoveConfirmation clears deviceToRemove`() = runTest {
+    fun `cancelRemoveConfirmation clears memberToRemove`() = runTest {
         // Given
         coEvery { groupRepository.getUserGroups() } returns Result.success(emptyList())
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val device = createTestDevice("device-1", "Phone", "user-1")
-        viewModel.showRemoveConfirmation(device)
+        val member = createTestMember("user-1", "group-1", "test@example.com", "Test User")
+        viewModel.showRemoveConfirmation(member)
 
         // When
         viewModel.cancelRemoveConfirmation()
@@ -311,7 +288,7 @@ class AdminUsersViewModelTest {
         // Then
         viewModel.uiState.test {
             val state = awaitItem()
-            assertNull(state.deviceToRemove)
+            assertNull(state.memberToRemove)
         }
     }
 
@@ -323,21 +300,21 @@ class AdminUsersViewModelTest {
     fun `removeUser succeeds and removes user from list`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val device1 = createTestDevice("device-1", "John's Phone", "user-1")
-        val device2 = createTestDevice("device-2", "Jane's Phone", "user-2")
-        val devices = listOf(device1, device2)
+        val member1 = createTestMember("user-1", "group-1", "john@example.com", "John")
+        val member2 = createTestMember("user-2", "group-1", "jane@example.com", "Jane")
+        val members = listOf(member1, member2)
 
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(devices)
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(members)
         coEvery { groupRepository.removeMember("group-1", "user-1") } returns Result.success(Unit)
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.selectGroup(group)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.showRemoveConfirmation(device1)
+        viewModel.showRemoveConfirmation(member1)
 
         // When
         viewModel.removeUser()
@@ -349,10 +326,10 @@ class AdminUsersViewModelTest {
         viewModel.uiState.test {
             val state = awaitItem()
             assertFalse(state.isRemoving)
-            assertNull(state.deviceToRemove)
+            assertNull(state.memberToRemove)
             assertEquals(1, state.groupMembers.size)
-            assertEquals("Jane's Phone", state.groupMembers[0].displayName)
-            assertEquals("John's Phone", state.removeSuccess)
+            assertEquals("Jane", state.groupMembers[0].displayName)
+            assertEquals("John", state.removeSuccess)
             assertNull(state.removeError)
         }
     }
@@ -361,21 +338,21 @@ class AdminUsersViewModelTest {
     fun `removeUser shows error on failure`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val device = createTestDevice("device-1", "John's Phone", "user-1")
+        val member = createTestMember("user-1", "group-1", "john@example.com", "John")
 
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(listOf(device))
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(listOf(member))
         coEvery { groupRepository.removeMember("group-1", "user-1") } returns Result.failure(
             Exception("Permission denied"),
         )
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.selectGroup(group)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.showRemoveConfirmation(device)
+        viewModel.showRemoveConfirmation(member)
 
         // When
         viewModel.removeUser()
@@ -385,58 +362,28 @@ class AdminUsersViewModelTest {
         viewModel.uiState.test {
             val state = awaitItem()
             assertFalse(state.isRemoving)
-            assertNull(state.deviceToRemove)
+            assertNull(state.memberToRemove)
             assertEquals("Permission denied", state.removeError)
             assertNull(state.removeSuccess)
-            // Device should still be in the list
+            // Member should still be in the list
             assertEquals(1, state.groupMembers.size)
         }
     }
 
     @Test
-    fun `removeUser fails gracefully for device without ownerId`() = runTest {
+    fun `removeUser does nothing without memberToRemove`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val device = createTestDevice("device-1", "Unlinked Phone", null)
-
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(listOf(device))
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(emptyList())
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.selectGroup(group)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        viewModel.showRemoveConfirmation(device)
-
-        // When
-        viewModel.removeUser()
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // Then
-        viewModel.uiState.test {
-            val state = awaitItem()
-            assertNull(state.deviceToRemove)
-            assertNotNull(state.removeError)
-            assertTrue(state.removeError!!.contains("not linked to a user account"))
-        }
-    }
-
-    @Test
-    fun `removeUser does nothing without deviceToRemove`() = runTest {
-        // Given
-        val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(emptyList())
-
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        viewModel.selectGroup(group)
-        testDispatcher.scheduler.advanceUntilIdle()
-
-        // When - no device selected for removal
+        // When - no member selected for removal
         viewModel.removeUser()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -449,11 +396,11 @@ class AdminUsersViewModelTest {
         // Given
         coEvery { groupRepository.getUserGroups() } returns Result.success(emptyList())
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
-        val device = createTestDevice("device-1", "Phone", "user-1")
-        viewModel.showRemoveConfirmation(device)
+        val member = createTestMember("user-1", "group-1", "test@example.com", "Test")
+        viewModel.showRemoveConfirmation(member)
 
         // When - no group selected
         viewModel.removeUser()
@@ -471,18 +418,18 @@ class AdminUsersViewModelTest {
     fun `clearRemoveSuccess clears success message`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val device = createTestDevice("device-1", "Phone", "user-1")
+        val member = createTestMember("user-1", "group-1", "test@example.com", "Test")
 
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(listOf(device))
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(listOf(member))
         coEvery { groupRepository.removeMember("group-1", "user-1") } returns Result.success(Unit)
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.selectGroup(group)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.showRemoveConfirmation(device)
+        viewModel.showRemoveConfirmation(member)
         viewModel.removeUser()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -500,20 +447,20 @@ class AdminUsersViewModelTest {
     fun `clearRemoveError clears error message`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val device = createTestDevice("device-1", "Phone", "user-1")
+        val member = createTestMember("user-1", "group-1", "test@example.com", "Test")
 
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(listOf(device))
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(listOf(member))
         coEvery { groupRepository.removeMember("group-1", "user-1") } returns Result.failure(
             Exception("Error"),
         )
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.selectGroup(group)
         testDispatcher.scheduler.advanceUntilIdle()
-        viewModel.showRemoveConfirmation(device)
+        viewModel.showRemoveConfirmation(member)
         viewModel.removeUser()
         testDispatcher.scheduler.advanceUntilIdle()
 
@@ -537,7 +484,7 @@ class AdminUsersViewModelTest {
         val groups = listOf(createTestGroup("group-1", "Family", GroupRole.OWNER))
         coEvery { groupRepository.getUserGroups() } returns Result.success(groups)
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -552,12 +499,12 @@ class AdminUsersViewModelTest {
     fun `refresh reloads members when group is selected`() = runTest {
         // Given
         val group = createTestGroup("group-1", "Family", GroupRole.OWNER)
-        val devices = listOf(createTestDevice("device-1", "Phone", "user-1"))
+        val members = listOf(createTestMember("user-1", "group-1", "test@example.com", "Test"))
 
         coEvery { groupRepository.getUserGroups() } returns Result.success(listOf(group))
-        coEvery { deviceRepository.getGroupDevices("group-1") } returns Result.success(devices)
+        coEvery { groupRepository.getGroupMembers("group-1") } returns Result.success(members)
 
-        viewModel = AdminUsersViewModel(groupRepository, deviceRepository, secureStorage)
+        viewModel = AdminUsersViewModel(groupRepository, secureStorage)
         testDispatcher.scheduler.advanceUntilIdle()
 
         viewModel.selectGroup(group)
@@ -568,7 +515,7 @@ class AdminUsersViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        coVerify(exactly = 2) { deviceRepository.getGroupDevices("group-1") } // Once in select, once in refresh
+        coVerify(exactly = 2) { groupRepository.getGroupMembers("group-1") } // Once in select, once in refresh
     }
 
     // =============================================================================
@@ -586,15 +533,20 @@ class AdminUsersViewModelTest {
         updatedAt = Instant.parse("2025-01-01T00:00:00Z"),
     )
 
-    private fun createTestDevice(deviceId: String, displayName: String, ownerId: String?) = Device(
-        deviceId = deviceId,
+    private fun createTestMember(
+        userId: String,
+        groupId: String,
+        email: String,
+        displayName: String,
+        role: GroupRole = GroupRole.MEMBER,
+    ) = GroupMembership(
+        userId = userId,
+        groupId = groupId,
+        email = email,
         displayName = displayName,
-        ownerId = ownerId,
-        lastLocation = DeviceLocation(
-            latitude = 48.1486,
-            longitude = 17.1077,
-            timestamp = Instant.parse("2025-01-01T12:00:00Z"),
-        ),
-        lastSeenAt = Instant.parse("2025-01-01T12:00:00Z"),
+        role = role,
+        deviceCount = 1,
+        joinedAt = Instant.parse("2025-01-01T00:00:00Z"),
+        lastActiveAt = Instant.parse("2025-01-01T12:00:00Z"),
     )
 }
