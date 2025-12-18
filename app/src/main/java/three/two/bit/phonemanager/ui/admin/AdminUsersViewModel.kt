@@ -8,10 +8,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import three.two.bit.phonemanager.data.repository.DeviceRepository
 import three.two.bit.phonemanager.data.repository.GroupRepository
-import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import javax.inject.Inject
@@ -28,7 +27,6 @@ import javax.inject.Inject
 @HiltViewModel
 class AdminUsersViewModel @Inject constructor(
     private val groupRepository: GroupRepository,
-    private val deviceRepository: DeviceRepository,
     private val secureStorage: SecureStorage,
 ) : ViewModel() {
 
@@ -99,18 +97,18 @@ class AdminUsersViewModel @Inject constructor(
     }
 
     /**
-     * Load members/devices for a specific group
+     * Load members for a specific group
      *
      * AC E9.3.3: Select user from list navigates to device detail screen
      */
     private fun loadGroupMembers(groupId: String) {
         viewModelScope.launch {
-            deviceRepository.getGroupDevices(groupId)
-                .onSuccess { devices ->
-                    Timber.d("Loaded ${devices.size} devices for group $groupId")
+            groupRepository.getGroupMembers(groupId)
+                .onSuccess { members ->
+                    Timber.d("Loaded ${members.size} members for group $groupId")
                     _uiState.update {
                         it.copy(
-                            groupMembers = devices,
+                            groupMembers = members,
                             isMembersLoading = false,
                             membersError = null,
                         )
@@ -142,16 +140,16 @@ class AdminUsersViewModel @Inject constructor(
     }
 
     /**
-     * Story E9.6: Check if a device belongs to the current user
+     * Story E9.6: Check if a member is the current user
      *
      * AC E9.6.6: Cannot remove self from list (validation)
      *
-     * @param device The device to check
-     * @return true if the device belongs to the current user
+     * @param member The member to check
+     * @return true if the member is the current user
      */
-    fun isCurrentUserDevice(device: Device): Boolean {
+    fun isCurrentUser(member: GroupMembership): Boolean {
         val currentUserId = secureStorage.getUserId()
-        return device.ownerId != null && device.ownerId == currentUserId
+        return member.userId == currentUserId
     }
 
     /**
@@ -159,17 +157,17 @@ class AdminUsersViewModel @Inject constructor(
      *
      * AC E9.6.2: Confirmation dialog before removal
      *
-     * @param device The device/user to remove
+     * @param member The member to remove
      */
-    fun showRemoveConfirmation(device: Device) {
-        _uiState.update { it.copy(deviceToRemove = device) }
+    fun showRemoveConfirmation(member: GroupMembership) {
+        _uiState.update { it.copy(memberToRemove = member) }
     }
 
     /**
      * Story E9.6: Cancel the remove confirmation dialog
      */
     fun cancelRemoveConfirmation() {
-        _uiState.update { it.copy(deviceToRemove = null) }
+        _uiState.update { it.copy(memberToRemove = null) }
     }
 
     /**
@@ -181,43 +179,31 @@ class AdminUsersViewModel @Inject constructor(
      * AC E9.6.5: Removed user's device continues to function independently
      */
     fun removeUser() {
-        val device = _uiState.value.deviceToRemove ?: return
+        val member = _uiState.value.memberToRemove ?: return
         val groupId = _uiState.value.selectedGroup?.id ?: return
-        val userId = device.ownerId
-
-        if (userId == null) {
-            Timber.w("Cannot remove device ${device.deviceId} - no owner ID")
-            _uiState.update {
-                it.copy(
-                    deviceToRemove = null,
-                    removeError = "Cannot remove device: not linked to a user account",
-                )
-            }
-            return
-        }
 
         viewModelScope.launch {
             _uiState.update { it.copy(isRemoving = true) }
 
-            groupRepository.removeMember(groupId, userId)
+            groupRepository.removeMember(groupId, member.userId)
                 .onSuccess {
-                    Timber.i("Successfully removed user $userId from group $groupId")
+                    Timber.i("Successfully removed user ${member.userId} from group $groupId")
                     // AC E9.6.4: User removed from list immediately after successful API call
                     _uiState.update {
                         it.copy(
                             isRemoving = false,
-                            deviceToRemove = null,
-                            groupMembers = it.groupMembers.filter { member -> member.ownerId != userId },
-                            removeSuccess = device.displayName,
+                            memberToRemove = null,
+                            groupMembers = it.groupMembers.filter { m -> m.userId != member.userId },
+                            removeSuccess = member.displayName,
                         )
                     }
                 }
                 .onFailure { error ->
-                    Timber.e(error, "Failed to remove user $userId from group $groupId")
+                    Timber.e(error, "Failed to remove user ${member.userId} from group $groupId")
                     _uiState.update {
                         it.copy(
                             isRemoving = false,
-                            deviceToRemove = null,
+                            memberToRemove = null,
                             removeError = error.message ?: "Failed to remove user",
                         )
                     }
@@ -245,13 +231,13 @@ class AdminUsersViewModel @Inject constructor(
  *
  * @property adminGroups Groups where user is admin/owner
  * @property selectedGroup Currently selected group (null = showing group list)
- * @property groupMembers Devices/users in the selected group
+ * @property groupMembers Members in the selected group
  * @property isLoading True when loading groups
  * @property isMembersLoading True when loading group members
  * @property error Error message for group loading
  * @property membersError Error message for members loading
  * @property isEmpty True when no admin groups exist
- * @property deviceToRemove Device pending removal confirmation (Story E9.6)
+ * @property memberToRemove Member pending removal confirmation (Story E9.6)
  * @property isRemoving True when removal is in progress (Story E9.6)
  * @property removeSuccess Display name of successfully removed user (Story E9.6)
  * @property removeError Error message for failed removal (Story E9.6)
@@ -259,13 +245,13 @@ class AdminUsersViewModel @Inject constructor(
 data class AdminUsersUiState(
     val adminGroups: List<Group> = emptyList(),
     val selectedGroup: Group? = null,
-    val groupMembers: List<Device> = emptyList(),
+    val groupMembers: List<GroupMembership> = emptyList(),
     val isLoading: Boolean = false,
     val isMembersLoading: Boolean = false,
     val error: String? = null,
     val membersError: String? = null,
     val isEmpty: Boolean = false,
-    val deviceToRemove: Device? = null,
+    val memberToRemove: GroupMembership? = null,
     val isRemoving: Boolean = false,
     val removeSuccess: String? = null,
     val removeError: String? = null,

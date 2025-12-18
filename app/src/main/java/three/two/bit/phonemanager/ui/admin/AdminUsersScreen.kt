@@ -60,6 +60,7 @@ import kotlinx.datetime.toLocalDateTime
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.domain.model.Device
 import three.two.bit.phonemanager.domain.model.Group
+import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.GroupRole
 import kotlin.time.Clock
 import kotlin.time.Duration.Companion.days
@@ -110,9 +111,9 @@ fun AdminUsersScreen(
     }
 
     // Story E9.6: Confirmation dialog
-    if (uiState.deviceToRemove != null) {
+    if (uiState.memberToRemove != null) {
         RemoveUserConfirmationDialog(
-            deviceName = uiState.deviceToRemove!!.displayName,
+            deviceName = uiState.memberToRemove!!.displayName,
             isRemoving = uiState.isRemoving,
             onConfirm = { viewModel.removeUser() },
             onDismiss = { viewModel.cancelRemoveConfirmation() },
@@ -183,14 +184,16 @@ fun AdminUsersScreen(
                         members = uiState.groupMembers,
                         isLoading = uiState.isMembersLoading,
                         error = uiState.membersError,
-                        onMemberClick = { device ->
-                            onNavigateToUserLocation(uiState.selectedGroup!!.id, device.deviceId)
+                        onMemberClick = { member ->
+                            // Navigate to user location map
+                            // Note: Using userId as deviceId - backend should support this
+                            onNavigateToUserLocation(uiState.selectedGroup!!.id, member.userId)
                         },
-                        onRemoveMember = { device ->
-                            viewModel.showRemoveConfirmation(device)
+                        onRemoveMember = { member ->
+                            viewModel.showRemoveConfirmation(member)
                         },
-                        isCurrentUserDevice = { device ->
-                            viewModel.isCurrentUserDevice(device)
+                        isCurrentUser = { member ->
+                            viewModel.isCurrentUser(member)
                         },
                     )
                 }
@@ -302,12 +305,12 @@ private fun AdminGroupCard(group: Group, onClick: () -> Unit) {
 @Composable
 private fun GroupMembersContent(
     group: Group,
-    members: List<Device>,
+    members: List<GroupMembership>,
     isLoading: Boolean,
     error: String?,
-    onMemberClick: (Device) -> Unit,
-    onRemoveMember: (Device) -> Unit,
-    isCurrentUserDevice: (Device) -> Boolean,
+    onMemberClick: (GroupMembership) -> Unit,
+    onRemoveMember: (GroupMembership) -> Unit,
+    isCurrentUser: (GroupMembership) -> Boolean,
 ) {
     when {
         isLoading && members.isEmpty() -> {
@@ -336,23 +339,23 @@ private fun GroupMembersContent(
             ) {
                 item { Spacer(modifier = Modifier.height(8.dp)) }
 
-                items(members, key = { it.deviceId }) { device ->
-                    val isOwnDevice = isCurrentUserDevice(device)
+                items(members, key = { it.userId }) { member ->
+                    val isOwnMember = isCurrentUser(member)
 
-                    // Story E9.6: Swipe-to-delete for non-self devices
+                    // Story E9.6: Swipe-to-delete for non-self members
                     // AC E9.6.6: Cannot remove self from list
-                    if (!isOwnDevice) {
-                        SwipeToDeleteDeviceCard(
-                            device = device,
-                            onClick = { onMemberClick(device) },
-                            onDelete = { onRemoveMember(device) },
+                    if (!isOwnMember) {
+                        SwipeToDeleteMemberCard(
+                            member = member,
+                            onClick = { onMemberClick(member) },
+                            onDelete = { onRemoveMember(member) },
                         )
                     } else {
-                        // Own device - no swipe-to-delete
-                        DeviceMemberCard(
-                            device = device,
-                            onClick = { onMemberClick(device) },
-                            isOwnDevice = true,
+                        // Own member - no swipe-to-delete
+                        MemberCard(
+                            member = member,
+                            onClick = { onMemberClick(member) },
+                            isCurrentUser = true,
                         )
                     }
                 }
@@ -407,6 +410,120 @@ private fun SwipeToDeleteDeviceCard(device: Device, onClick: () -> Unit, onDelet
             onClick = onClick,
             isOwnDevice = false,
         )
+    }
+}
+
+/**
+ * Story E9.6: Swipe-to-delete wrapper for member cards
+ *
+ * AC E9.6.1: Remove action accessible from users list (swipe gesture)
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeToDeleteMemberCard(member: GroupMembership, onClick: () -> Unit, onDelete: () -> Unit) {
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { dismissValue ->
+            if (dismissValue == SwipeToDismissBoxValue.EndToStart) {
+                onDelete()
+                false // Don't actually dismiss - let the dialog handle it
+            } else {
+                false
+            }
+        },
+    )
+
+    SwipeToDismissBox(
+        state = dismissState,
+        backgroundContent = {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.error)
+                    .padding(horizontal = 20.dp),
+                contentAlignment = Alignment.CenterEnd,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(R.string.admin_remove_user),
+                    tint = MaterialTheme.colorScheme.onError,
+                )
+            }
+        },
+        enableDismissFromStartToEnd = false,
+        enableDismissFromEndToStart = true,
+    ) {
+        MemberCard(
+            member = member,
+            onClick = onClick,
+            isCurrentUser = false,
+        )
+    }
+}
+
+/**
+ * Member card showing user info and role
+ */
+@Composable
+private fun MemberCard(member: GroupMembership, onClick: () -> Unit, isCurrentUser: Boolean = false) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            // User icon
+            Icon(
+                imageVector = Icons.Default.Group,
+                contentDescription = null,
+                modifier = Modifier.size(40.dp),
+                tint = if (isCurrentUser) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = member.displayName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+
+                    // Show "You" badge for current user
+                    if (isCurrentUser) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Surface(
+                            shape = MaterialTheme.shapes.small,
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                        ) {
+                            Text(
+                                text = stringResource(R.string.admin_you),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            )
+                        }
+                    }
+                }
+
+                // Role badge
+                Spacer(modifier = Modifier.height(4.dp))
+                RoleBadge(role = member.role)
+            }
+        }
     }
 }
 

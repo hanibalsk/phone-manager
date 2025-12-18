@@ -19,6 +19,7 @@ import three.two.bit.phonemanager.ui.admin.DeviceSettingsScreen
 import three.two.bit.phonemanager.ui.admin.MemberDevicesScreen
 import three.two.bit.phonemanager.ui.admin.SettingsHistoryScreen
 import three.two.bit.phonemanager.ui.admin.SettingsTemplateScreen
+import three.two.bit.phonemanager.ui.admin.UserHomeScreen
 import three.two.bit.phonemanager.ui.admin.UserLocationMapScreen
 import three.two.bit.phonemanager.ui.alerts.AlertsScreen
 import three.two.bit.phonemanager.ui.alerts.CreateAlertScreen
@@ -132,6 +133,9 @@ sealed class Screen(val route: String) {
 
     // Story E9.3: Admin Users Management screens
     object AdminUsers : Screen("admin_users")
+    object UserHome : Screen("user_home/{groupId}/{userId}") {
+        fun createRoute(groupId: String, userId: String) = "user_home/$groupId/$userId"
+    }
     object UserLocationMap : Screen("user_location/{groupId}/{deviceId}") {
         fun createRoute(groupId: String, deviceId: String) = "user_location/$groupId/$deviceId"
     }
@@ -663,8 +667,34 @@ fun PhoneManagerNavHost(
             SecretModeProtectedRoute(isSecretMode, navController) {
                 AdminUsersScreen(
                     onNavigateBack = { navController.popBackStack() },
-                    onNavigateToUserLocation = { groupId, deviceId ->
-                        navController.navigate(Screen.UserLocationMap.createRoute(groupId, deviceId))
+                    onNavigateToUserLocation = { groupId, userId ->
+                        navController.navigate(Screen.UserHome.createRoute(groupId, userId))
+                    },
+                )
+            }
+        }
+
+        // Story E9.3: User Home Screen (view another user's home data)
+        composable(
+            route = Screen.UserHome.route,
+            arguments = listOf(
+                navArgument("groupId") { type = NavType.StringType },
+                navArgument("userId") { type = NavType.StringType },
+            ),
+        ) { backStackEntry ->
+            val groupId = backStackEntry.arguments?.getString("groupId") ?: ""
+            val userId = backStackEntry.arguments?.getString("userId") ?: ""
+            SecretModeProtectedRoute(isSecretMode, navController) {
+                UserHomeScreen(
+                    onNavigateBack = { navController.popBackStack() },
+                    onNavigateToMap = { latitude, longitude ->
+                        // Navigate to map with the user's location
+                        navController.navigate(Screen.Map.route)
+                    },
+                    onNavigateToGeofences = {
+                        // Get deviceId from the current state if available
+                        // For now, just navigate back since we need deviceId for geofences
+                        navController.popBackStack()
                     },
                 )
             }

@@ -1007,4 +1007,18 @@
     <string name="admin_remove_user_message">Are you sure you want to remove %1$s from your managed list? They will no longer be tracked.</string>
     <string name="admin_remove">Remove</string>
     <string name="admin_you">You</string>
+
+    <!-- Story E9.3: User Home Screen -->
+    <string name="user_home_title">User Details</string>
+    <string name="user_home_location_available">Location Available</string>
+    <string name="user_home_location_unavailable">Location Unavailable</string>
+    <string name="user_home_tracking_control">Tracking Control</string>
+    <string name="user_home_tracking_enabled">Location tracking is active</string>
+    <string name="user_home_tracking_disabled">Location tracking is disabled</string>
+    <string name="user_home_tracking_unknown">Tracking status unknown</string>
+    <string name="user_home_quick_actions">Quick Actions</string>
+    <string name="user_home_view_map">View Map</string>
+    <string name="user_home_geofences">Geofences</string>
+    <string name="user_home_no_devices">%1$s has no devices registered</string>
+    <string name="user_home_no_devices_description">The user needs to install the app and register a device to be tracked.</string>
 </resources>
