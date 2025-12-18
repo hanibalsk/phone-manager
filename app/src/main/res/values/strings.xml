@@ -617,6 +617,25 @@
     <string name="device_assignment_success">Device added to group!</string>
     <string name="device_assignment_error">Failed to add device. You can try again from group settings.</string>
 
+    <!-- Story UGM-4: Group Migration -->
+    <string name="migration_prompt_title">Upgrade Your Group?</string>
+    <string name="migration_prompt_message">Your device is part of \"%1$s\" with %2$d device(s). Upgrade to unlock member roles, invites, and full group management.</string>
+    <string name="migration_prompt_hint">This is optional. You can always do this later from Settings.</string>
+    <string name="migration_prompt_migrate_button">Upgrade Group</string>
+    <string name="migration_prompt_skip_button">Not Now</string>
+    <string name="migration_screen_title">Upgrade Group</string>
+    <string name="migration_group_name_label">New Group Name</string>
+    <string name="migration_group_name_placeholder">e.g., Smith Family</string>
+    <string name="migration_current_group_label">Current Group</string>
+    <string name="migration_device_count">%1$d device(s)</string>
+    <string name="migration_migrate_button">Upgrade</string>
+    <string name="migration_migrating">Upgrading…</string>
+    <string name="migration_success">Group upgraded successfully!</string>
+    <string name="migration_error_network">Upgrade failed. Check your connection and try again.</string>
+    <string name="migration_error_offline">Upgrade requires an internet connection.</string>
+    <string name="migration_error_server">Server error. Please try again later.</string>
+    <string name="migration_name_error">Name must be 3-50 characters</string>
+
     <!-- Group Management - Group Detail Screen -->
     <string name="group_detail_title">Group Details</string>
     <string name="group_detail_manage_members">Manage Members</string>

@@ -58,6 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import three.two.bit.phonemanager.R
 import three.two.bit.phonemanager.ui.auth.components.DeviceLinkConflictDialog
+import three.two.bit.phonemanager.ui.groups.MigrationPromptDialog
 
 /**
  * Story E9.11, Task 5: Login Screen UI
@@ -85,6 +86,7 @@ fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onGoogleSignIn: () -> Unit = {},
     onAppleSignIn: () -> Unit = {},
+    onNavigateToMigration: (groupId: String) -> Unit = {},
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
@@ -95,6 +97,9 @@ fun LoginScreen(
     // Story UGM-1.2: Device link state for conflict detection
     val deviceLinkState by viewModel.deviceLinkState.collectAsState()
     var showConflictDialog by rememberSaveable { mutableStateOf(false) }
+
+    // Story UGM-4.2: Migration state for registration group migration
+    val migrationState by viewModel.migrationState.collectAsState()
 
     // Feature flag states
     val isGoogleSignInEnabled by viewModel.isGoogleSignInEnabled.collectAsState()
@@ -124,10 +129,23 @@ fun LoginScreen(
         }
     }
 
-    // Handle successful login
-    LaunchedEffect(uiState) {
+    // Handle successful login - only navigate if no migration prompt pending
+    LaunchedEffect(uiState, migrationState) {
         if (uiState is AuthUiState.Success) {
-            onLoginSuccess()
+            // Wait for migration check to complete
+            when (migrationState) {
+                is MigrationState.NoMigration, is MigrationState.Dismissed -> {
+                    // No migration needed or dismissed, proceed with login
+                    onLoginSuccess()
+                }
+                is MigrationState.HasRegistrationGroup -> {
+                    // Migration prompt will be shown via dialog
+                    // Don't navigate yet
+                }
+                is MigrationState.Checking -> {
+                    // Still checking, wait
+                }
+            }
         }
     }
 
@@ -403,6 +421,24 @@ fun LoginScreen(
                 // AC 4: Log out option
                 showConflictDialog = false
                 viewModel.logout()
+            },
+        )
+    }
+
+    // Story UGM-4.2: Migration prompt dialog (AC 1, 2, 3, 4, 5)
+    val migrationGroupInfo = (migrationState as? MigrationState.HasRegistrationGroup)?.groupInfo
+    if (migrationGroupInfo != null && uiState is AuthUiState.Success) {
+        MigrationPromptDialog(
+            groupInfo = migrationGroupInfo,
+            onMigrate = {
+                // AC 5: Navigate to migration screen
+                viewModel.clearMigrationState()
+                onNavigateToMigration(migrationGroupInfo.groupId)
+            },
+            onDismiss = {
+                // AC 4: Dismiss and proceed without migration
+                viewModel.dismissMigrationPrompt()
+                onLoginSuccess()
             },
         )
     }
