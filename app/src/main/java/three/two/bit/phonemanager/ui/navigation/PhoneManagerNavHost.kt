@@ -515,6 +515,10 @@ fun PhoneManagerNavHost(
                 onInviteMember = {
                     navController.navigate(Screen.InviteMembers.createRoute(groupId))
                 },
+                // Story UGM-2.2: Navigate to member's device details
+                onNavigateToMemberDetails = { navGroupId, userId ->
+                    navController.navigate(Screen.UserHome.createRoute(navGroupId, userId))
+                },
             )
         }
 

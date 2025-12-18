@@ -56,6 +56,7 @@ import three.two.bit.phonemanager.domain.model.GroupRole
 
 /**
  * Story E11.8 Task 9: Manage Members Screen
+ * Story UGM-2.2: Navigate to Member Device Details
  *
  * AC E11.8.4: View Members
  * - List of all group members
@@ -67,9 +68,13 @@ import three.two.bit.phonemanager.domain.model.GroupRole
  * - Remove member option
  * - Transfer ownership option (owners only)
  *
+ * AC UGM-2.2: Navigate to member details
+ * - Tap member card to view their device details
+ *
  * @param viewModel The GroupDetailViewModel (shared with GroupDetailScreen)
  * @param onNavigateBack Callback to navigate back
  * @param onInviteMember Callback to navigate to invite screen (Story E11.9)
+ * @param onNavigateToMemberDetails Callback to navigate to member's device details (Story UGM-2.2)
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +82,7 @@ fun ManageMembersScreen(
     viewModel: GroupDetailViewModel = hiltViewModel(),
     onNavigateBack: () -> Unit,
     onInviteMember: () -> Unit = {},
+    onNavigateToMemberDetails: (groupId: String, userId: String) -> Unit = { _, _ -> },
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val members by viewModel.members.collectAsStateWithLifecycle()
@@ -171,7 +177,8 @@ fun ManageMembersScreen(
                             isOwner = isOwner,
                             canManageMember = { viewModel.canManageMember(it) },
                             onMemberClick = { member ->
-                                selectedMember = member
+                                // Story UGM-2.2: Navigate to member's device details
+                                onNavigateToMemberDetails(state.group.id, member.userId)
                             },
                             onChangeRole = { member ->
                                 selectedMember = member
