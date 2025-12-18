@@ -47,6 +47,9 @@ class GroupDetailViewModel @Inject constructor(
     private val _members = MutableStateFlow<List<GroupMembership>>(emptyList())
     val members: StateFlow<List<GroupMembership>> = _members.asStateFlow()
 
+    private val _isMembersLoading = MutableStateFlow(false)
+    val isMembersLoading: StateFlow<Boolean> = _isMembersLoading.asStateFlow()
+
     private val _operationResult = MutableStateFlow<GroupOperationResult>(GroupOperationResult.Idle)
     val operationResult: StateFlow<GroupOperationResult> = _operationResult.asStateFlow()
 
@@ -55,9 +58,11 @@ class GroupDetailViewModel @Inject constructor(
         get() = authRepository.getCurrentUser()?.userId
 
     init {
+        Timber.d("GroupDetailViewModel init with groupId=$groupId")
         if (groupId.isNotBlank()) {
             loadGroupDetails()
         } else {
+            Timber.w("GroupDetailViewModel: No groupId provided")
             _uiState.value = GroupDetailUiState.Error(
                 message = "No group ID provided",
                 errorCode = "invalid_group_id",
@@ -103,19 +108,22 @@ class GroupDetailViewModel @Inject constructor(
      * AC E11.8.4: Load group members
      */
     fun loadMembers() {
+        Timber.d("loadMembers called for groupId=$groupId")
         viewModelScope.launch {
+            _isMembersLoading.value = true
             val result = groupRepository.getGroupMembers(groupId)
 
             result.fold(
                 onSuccess = { memberList ->
-                    Timber.i("Loaded ${memberList.size} members")
+                    Timber.i("Loaded ${memberList.size} members for groupId=$groupId")
                     _members.value = memberList
                 },
                 onFailure = { error ->
-                    Timber.e(error, "Failed to load members")
+                    Timber.e(error, "Failed to load members for groupId=$groupId")
                     // Don't change UI state, just log the error
                 },
             )
+            _isMembersLoading.value = false
         }
     }
 

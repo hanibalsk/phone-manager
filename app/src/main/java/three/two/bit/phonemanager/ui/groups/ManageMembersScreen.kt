@@ -80,6 +80,7 @@ fun ManageMembersScreen(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val members by viewModel.members.collectAsStateWithLifecycle()
+    val isMembersLoading by viewModel.isMembersLoading.collectAsStateWithLifecycle()
     val operationResult by viewModel.operationResult.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
     var isRefreshing by remember { mutableStateOf(false) }
@@ -153,7 +154,15 @@ fun ManageMembersScreen(
                     }
                 }
                 is GroupDetailUiState.Success -> {
-                    if (members.isEmpty()) {
+                    if (isMembersLoading && members.isEmpty()) {
+                        // Show loading while members are being loaded initially
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    } else if (members.isEmpty()) {
                         EmptyMembersState()
                     } else {
                         MembersList(

@@ -316,7 +316,7 @@ class GroupApiServiceImpl @Inject constructor(
      * GET /groups/{groupId}/members
      */
     override suspend fun getGroupMembers(groupId: String, accessToken: String): Result<List<GroupMembership>> = try {
-        Timber.d("Fetching group members: groupId=$groupId")
+        Timber.d("Fetching group members: groupId=$groupId, url=${apiConfig.baseUrl}/api/v1/groups/$groupId/members")
 
         val response: ListMembersResponse = httpClient.get(
             "${apiConfig.baseUrl}/api/v1/groups/$groupId/members",
@@ -324,6 +324,7 @@ class GroupApiServiceImpl @Inject constructor(
             header("Authorization", "Bearer $accessToken")
         }.body()
 
+        Timber.d("Members API response: ${response.members.size} members, pagination=${response.pagination}")
         val members = response.members.map { it.toDomain(groupId) }
         Timber.i("Fetched ${members.size} members for group: $groupId")
         Result.success(members)
