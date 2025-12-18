@@ -106,6 +106,7 @@ This story was already fully implemented in `UserHomeScreen.kt`:
 ### Debug Log
 
 - No issues encountered - implementation already exists
+- Code review note: No unit tests for UserHomeScreen or formatRelativeTime() - recommend adding test coverage
 
 ### Implementation Plan
 

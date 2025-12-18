@@ -890,6 +890,7 @@
     <string name="group_invite_people_hint">Invite people to join this group.</string>
 
     <plurals name="group_member_device_count">
+        <item quantity="zero">No devices</item>
         <item quantity="one">%1$d device</item>
         <item quantity="other">%1$d devices</item>
     </plurals>

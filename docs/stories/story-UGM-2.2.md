@@ -82,6 +82,7 @@ Current state:
 ### Debug Log
 
 - No issues encountered
+- Code review note: No unit/UI tests for navigation callback - recommend adding ManageMembersScreenTest
 
 ### Implementation Plan
 
