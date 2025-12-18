@@ -64,9 +64,11 @@ import three.two.bit.phonemanager.util.InviteCodeUtils
 
 /**
  * Story E11.9 Task 8: JoinGroupScreen
+ * Story UGM-3.5: Device Assignment Prompt After Joining
  *
  * AC E11.9.4: Join with Invite Code
  * AC E11.9.5: QR Code Scanning
+ * AC UGM-3.5: Device assignment prompt after join
  *
  * Screen for joining a group using an invite code.
  *
@@ -90,6 +92,9 @@ fun JoinGroupScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isAuthenticated by viewModel.isAuthenticated.collectAsStateWithLifecycle()
     val joinResult by viewModel.joinResult.collectAsStateWithLifecycle()
+    // Story UGM-3.5: Device assignment prompt state
+    val showDeviceAssignmentPrompt by viewModel.showDeviceAssignmentPrompt.collectAsStateWithLifecycle()
+    val deviceAssignmentState by viewModel.deviceAssignmentState.collectAsStateWithLifecycle()
     val snackbarHostState = remember { SnackbarHostState() }
 
     var showJoinConfirmation by remember { mutableStateOf(false) }
@@ -97,14 +102,15 @@ fun JoinGroupScreen(
     // Pre-load strings for use in LaunchedEffect
     val joinSuccessMessage = stringResource(R.string.join_group_success)
     val signInRequiredMessage = stringResource(R.string.join_group_sign_in_required)
+    val deviceAddedMessage = stringResource(R.string.device_assignment_success)
+    val deviceErrorMessage = stringResource(R.string.device_assignment_error)
 
-    // Handle join result
+    // Handle join result - but don't navigate yet if showing device assignment prompt
     LaunchedEffect(joinResult) {
         when (val result = joinResult) {
             is JoinResult.Success -> {
                 snackbarHostState.showSnackbar(joinSuccessMessage)
-                viewModel.clearJoinResult()
-                onJoinSuccess(result.groupId)
+                // Don't navigate yet - wait for device assignment prompt to complete
             }
             is JoinResult.Error -> {
                 snackbarHostState.showSnackbar(result.message)
@@ -114,6 +120,33 @@ fun JoinGroupScreen(
                 snackbarHostState.showSnackbar(signInRequiredMessage)
                 viewModel.clearJoinResult()
                 onNavigateToLogin()
+            }
+            else -> {}
+        }
+    }
+
+    // Story UGM-3.5: Handle device assignment result
+    LaunchedEffect(deviceAssignmentState) {
+        when (val state = deviceAssignmentState) {
+            is DeviceAssignmentState.Success -> {
+                snackbarHostState.showSnackbar(deviceAddedMessage)
+                viewModel.clearDeviceAssignmentState()
+                viewModel.clearJoinResult()
+                // Navigate to group detail after device added
+                (joinResult as? JoinResult.Success)?.let { onJoinSuccess(it.groupId) }
+            }
+            is DeviceAssignmentState.Skipped -> {
+                viewModel.clearDeviceAssignmentState()
+                viewModel.clearJoinResult()
+                // Navigate to group detail after skipping
+                (joinResult as? JoinResult.Success)?.let { onJoinSuccess(it.groupId) }
+            }
+            is DeviceAssignmentState.Error -> {
+                snackbarHostState.showSnackbar(deviceErrorMessage)
+                viewModel.clearDeviceAssignmentState()
+                viewModel.clearJoinResult()
+                // Still navigate even on error
+                (joinResult as? JoinResult.Success)?.let { onJoinSuccess(it.groupId) }
             }
             else -> {}
         }
@@ -158,6 +191,16 @@ fun JoinGroupScreen(
                 showJoinConfirmation = false
                 viewModel.joinGroup()
             },
+        )
+    }
+
+    // Story UGM-3.5: Device assignment prompt after joining
+    if (showDeviceAssignmentPrompt) {
+        DeviceAssignmentDialog(
+            groupName = viewModel.getJoinedGroupName(),
+            isAdding = deviceAssignmentState is DeviceAssignmentState.Adding,
+            onAddDevice = { viewModel.addDeviceToGroup() },
+            onSkip = { viewModel.skipDeviceAssignment() },
         )
     }
 }

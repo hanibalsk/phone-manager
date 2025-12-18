@@ -608,6 +608,15 @@
     <string name="join_group_confirm_hint">As a member, you\'ll be able to share your location with other group members.</string>
     <string name="join_group_confirm_button">Join</string>
 
+    <!-- Story UGM-3.5: Device Assignment Dialog -->
+    <string name="device_assignment_title">Add Your Device?</string>
+    <string name="device_assignment_message">Would you like to add this device to %1$s? This allows group members to see your location.</string>
+    <string name="device_assignment_hint">You can change this later in group settings.</string>
+    <string name="device_assignment_add_button">Add My Device</string>
+    <string name="device_assignment_skip_button">Not Now</string>
+    <string name="device_assignment_success">Device added to group!</string>
+    <string name="device_assignment_error">Failed to add device. You can try again from group settings.</string>
+
     <!-- Group Management - Group Detail Screen -->
     <string name="group_detail_title">Group Details</string>
     <string name="group_detail_manage_members">Manage Members</string>

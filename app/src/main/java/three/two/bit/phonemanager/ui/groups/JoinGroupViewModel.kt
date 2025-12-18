@@ -18,6 +18,7 @@ import javax.inject.Inject
 
 /**
  * Story E11.9: JoinGroupViewModel
+ * Story UGM-3.5: Device Assignment Prompt After Joining
  *
  * Handles joining a group using an invite code, including validation,
  * QR code parsing, and deep link handling.
@@ -25,6 +26,7 @@ import javax.inject.Inject
  * AC E11.9.4: Join with invite code
  * AC E11.9.5: QR code scanning
  * AC E11.9.8: Deep link handling
+ * AC UGM-3.5: Device assignment prompt after join
  */
 @HiltViewModel
 class JoinGroupViewModel @Inject constructor(
@@ -50,6 +52,16 @@ class JoinGroupViewModel @Inject constructor(
 
     private val _joinResult = MutableStateFlow<JoinResult>(JoinResult.Idle)
     val joinResult: StateFlow<JoinResult> = _joinResult.asStateFlow()
+
+    // Story UGM-3.5: Device assignment prompt state
+    private val _showDeviceAssignmentPrompt = MutableStateFlow(false)
+    val showDeviceAssignmentPrompt: StateFlow<Boolean> = _showDeviceAssignmentPrompt.asStateFlow()
+
+    private val _deviceAssignmentState = MutableStateFlow<DeviceAssignmentState>(DeviceAssignmentState.Idle)
+    val deviceAssignmentState: StateFlow<DeviceAssignmentState> = _deviceAssignmentState.asStateFlow()
+
+    private var joinedGroupId: String? = null
+    private var joinedGroupName: String? = null
 
     init {
         // Check authentication status
@@ -143,7 +155,12 @@ class JoinGroupViewModel @Inject constructor(
 
             groupRepository.joinWithInvite(code).fold(
                 onSuccess = { result ->
+                    // Store joined group info for device assignment prompt
+                    joinedGroupId = result.groupId
+                    joinedGroupName = _groupPreview.value?.name ?: "the group"
                     _joinResult.value = JoinResult.Success(result.groupId, result.role)
+                    // UGM-3.5: Show device assignment prompt
+                    _showDeviceAssignmentPrompt.value = true
                     Timber.i("Joined group: ${result.groupId}")
                 },
                 onFailure = { error ->
@@ -218,6 +235,56 @@ class JoinGroupViewModel @Inject constructor(
     fun refreshAuthStatus() {
         _isAuthenticated.value = authRepository.isLoggedIn()
     }
+
+    /**
+     * Story UGM-3.5: Get the name of the group just joined for device assignment dialog
+     */
+    fun getJoinedGroupName(): String = joinedGroupName ?: "the group"
+
+    /**
+     * Story UGM-3.5: Add current device to the group just joined
+     *
+     * AC 2: "Add My Device" calls API to add device to group
+     * AC 4: Success confirmation within 1 second (NFR-P5)
+     */
+    fun addDeviceToGroup() {
+        val groupId = joinedGroupId ?: return
+
+        viewModelScope.launch {
+            _deviceAssignmentState.value = DeviceAssignmentState.Adding
+
+            groupRepository.addCurrentDeviceToGroup(groupId).fold(
+                onSuccess = {
+                    Timber.i("Device added to group: $groupId")
+                    _deviceAssignmentState.value = DeviceAssignmentState.Success
+                    _showDeviceAssignmentPrompt.value = false
+                },
+                onFailure = { error ->
+                    Timber.e(error, "Failed to add device to group")
+                    _deviceAssignmentState.value = DeviceAssignmentState.Error(
+                        error.message ?: "Failed to add device",
+                    )
+                },
+            )
+        }
+    }
+
+    /**
+     * Story UGM-3.5: Skip device assignment
+     *
+     * AC 3: "Not Now" dismisses prompt and proceeds
+     */
+    fun skipDeviceAssignment() {
+        _showDeviceAssignmentPrompt.value = false
+        _deviceAssignmentState.value = DeviceAssignmentState.Skipped
+    }
+
+    /**
+     * Story UGM-3.5: Clear device assignment state
+     */
+    fun clearDeviceAssignmentState() {
+        _deviceAssignmentState.value = DeviceAssignmentState.Idle
+    }
 }
 
 /**
@@ -239,4 +306,15 @@ sealed interface JoinResult {
     object AuthenticationRequired : JoinResult
     data class Success(val groupId: String, val role: GroupRole) : JoinResult
     data class Error(val message: String) : JoinResult
+}
+
+/**
+ * Story UGM-3.5: Device assignment state
+ */
+sealed interface DeviceAssignmentState {
+    object Idle : DeviceAssignmentState
+    object Adding : DeviceAssignmentState
+    object Success : DeviceAssignmentState
+    object Skipped : DeviceAssignmentState
+    data class Error(val message: String) : DeviceAssignmentState
 }
