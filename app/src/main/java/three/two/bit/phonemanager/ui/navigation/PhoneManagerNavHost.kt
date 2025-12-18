@@ -37,6 +37,7 @@ import three.two.bit.phonemanager.ui.geofences.GeofencesScreen
 import three.two.bit.phonemanager.ui.group.GroupMembersScreen
 import three.two.bit.phonemanager.ui.groups.GroupDetailScreen
 import three.two.bit.phonemanager.ui.groups.GroupListScreen
+import three.two.bit.phonemanager.ui.groups.GroupMigrationScreen
 import three.two.bit.phonemanager.ui.groups.InviteMembersScreen
 import three.two.bit.phonemanager.ui.groups.JoinGroupScreen
 import three.two.bit.phonemanager.ui.groups.ManageMembersScreen
@@ -110,6 +111,11 @@ sealed class Screen(val route: String) {
         fun createRoute(code: String? = null) = if (code != null) "join_group?code=$code" else "join_group"
     }
     object QRScanner : Screen("qr_scanner")
+
+    // Story UGM-4.3: Group Migration screen
+    object GroupMigration : Screen("group_migration/{groupId}") {
+        fun createRoute(groupId: String) = "group_migration/$groupId"
+    }
 
     // Story E12.7: Admin Settings Management screens
     object MemberDevices : Screen("member_devices/{groupId}") {
@@ -257,6 +263,12 @@ fun PhoneManagerNavHost(
                         popUpTo(Screen.Login.route) { inclusive = true }
                     }
                 },
+                // Story UGM-4.2: Navigate to migration screen
+                onNavigateToMigration = { groupId ->
+                    navController.navigate(Screen.GroupMigration.createRoute(groupId)) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
+                    }
+                },
             )
         }
 
@@ -267,6 +279,12 @@ fun PhoneManagerNavHost(
                 },
                 onRegisterSuccess = {
                     navController.navigate(Screen.Home.route) {
+                        popUpTo(Screen.Register.route) { inclusive = true }
+                    }
+                },
+                // Story UGM-4.2: Navigate to migration screen
+                onNavigateToMigration = { groupId ->
+                    navController.navigate(Screen.GroupMigration.createRoute(groupId)) {
                         popUpTo(Screen.Register.route) { inclusive = true }
                     }
                 },
@@ -579,6 +597,24 @@ fun PhoneManagerNavHost(
                     // Navigate to JoinGroup with the code
                     navController.navigate(Screen.JoinGroup.createRoute(scannedCode)) {
                         launchSingleTop = true
+                    }
+                },
+            )
+        }
+
+        // Story UGM-4.3: Group Migration screen
+        composable(
+            route = Screen.GroupMigration.route,
+            arguments = listOf(
+                navArgument("groupId") { type = NavType.StringType },
+            ),
+        ) {
+            GroupMigrationScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onMigrationSuccess = { newGroupId ->
+                    // Navigate to new group detail after migration
+                    navController.navigate(Screen.GroupDetail.createRoute(newGroupId)) {
+                        popUpTo(Screen.GroupMigration.route) { inclusive = true }
                     }
                 },
             )

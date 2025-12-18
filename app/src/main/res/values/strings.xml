@@ -635,6 +635,17 @@
     <string name="migration_error_offline">Upgrade requires an internet connection.</string>
     <string name="migration_error_server">Server error. Please try again later.</string>
     <string name="migration_name_error">Name must be 3-50 characters</string>
+    <string name="migration_screen_header">Upgrade to a Full Group</string>
+    <string name="migration_screen_description">Convert your device group to unlock all group features.</string>
+    <string name="migration_current_devices">Devices to migrate</string>
+    <string name="migration_group_name_hint">3-50 characters, letters, numbers, and spaces</string>
+    <string name="migration_benefits_title">What you\'ll unlock:</string>
+    <string name="migration_benefit_roles">Assign admin and member roles</string>
+    <string name="migration_benefit_invites">Invite others with shareable links</string>
+    <string name="migration_benefit_management">Full group management controls</string>
+    <string name="migration_button">Upgrade Group</string>
+    <string name="migration_cancel_button">Cancel</string>
+    <string name="common_back">Back</string>
 
     <!-- Group Management - Group Detail Screen -->
     <string name="group_detail_title">Group Details</string>
