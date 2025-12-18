@@ -668,6 +668,14 @@
     <string name="auth_sign_out_confirm_title">Sign Out</string>
     <string name="auth_sign_out_confirm_message">Are you sure you want to sign out?</string>
 
+    <!-- Story UGM-1.2: Device Link Conflict Dialog -->
+    <string name="device_link_conflict_title">Device Already Linked</string>
+    <string name="device_link_conflict_message">This device is linked to another account.</string>
+    <string name="device_link_conflict_explanation">You can still use the app, but this device will remain linked to the other account. Contact support if you believe this is an error.</string>
+    <string name="device_link_conflict_continue">Continue Without Linking</string>
+    <string name="device_link_conflict_contact_support">Contact Support</string>
+    <string name="device_link_conflict_logout">Log Out Instead</string>
+
     <!-- Admin Screens -->
     <string name="admin_selected_count">%1$d selected</string>
     <string name="admin_member_devices">Member Devices</string>

@@ -51,8 +51,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import three.two.bit.phonemanager.R
+import three.two.bit.phonemanager.ui.auth.components.DeviceLinkConflictDialog
 
 /**
  * Story E9.11, Task 6: Register Screen UI
@@ -70,6 +74,7 @@ import three.two.bit.phonemanager.R
  * - Sign In link
  * - Loading indicator
  * - Error messages via Snackbar
+ * - Story UGM-1.2: Device link conflict dialog
  */
 @Composable
 fun RegisterScreen(
@@ -77,10 +82,15 @@ fun RegisterScreen(
     onRegisterSuccess: () -> Unit,
     viewModel: AuthViewModel = hiltViewModel(),
 ) {
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
     val emailError by viewModel.emailError.collectAsState()
     val passwordError by viewModel.passwordError.collectAsState()
     val displayNameError by viewModel.displayNameError.collectAsState()
+
+    // Story UGM-1.2: Device link state for conflict detection
+    val deviceLinkState by viewModel.deviceLinkState.collectAsState()
+    var showConflictDialog by rememberSaveable { mutableStateOf(false) }
 
     // Feature flag state - registration must be enabled
     val isRegistrationEnabled by viewModel.isRegistrationEnabled.collectAsState()
@@ -89,6 +99,13 @@ fun RegisterScreen(
     LaunchedEffect(isRegistrationEnabled) {
         if (!isRegistrationEnabled) {
             onNavigateToLogin()
+        }
+    }
+
+    // Story UGM-1.2: Show conflict dialog when device is already linked (AC 2)
+    LaunchedEffect(deviceLinkState) {
+        if (deviceLinkState is DeviceLinkState.AlreadyLinked) {
+            showConflictDialog = true
         }
     }
 
@@ -396,6 +413,31 @@ fun RegisterScreen(
                 }
             }
         }
+    }
+
+    // Story UGM-1.2: Device link conflict dialog (AC 2, 3, 4)
+    if (showConflictDialog) {
+        DeviceLinkConflictDialog(
+            onContinue = {
+                // AC 3: User can proceed without device linking
+                showConflictDialog = false
+                viewModel.clearDeviceLinkState()
+                onRegisterSuccess()
+            },
+            onContactSupport = {
+                // AC 4: Open support email
+                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                    data = Uri.parse("mailto:support@phonemanager.app")
+                    putExtra(Intent.EXTRA_SUBJECT, "Device Link Conflict")
+                }
+                context.startActivity(intent)
+            },
+            onLogout = {
+                // AC 4: Log out option
+                showConflictDialog = false
+                viewModel.logout()
+            },
+        )
     }
 }
 

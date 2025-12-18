@@ -266,6 +266,13 @@ class AuthViewModel @Inject constructor(
     }
 
     /**
+     * Story UGM-1.2: Clear device link state after user acknowledges conflict
+     */
+    fun clearDeviceLinkState() {
+        _deviceLinkState.value = DeviceLinkState.Idle
+    }
+
+    /**
      * AC E9.11.7: Validate login input
      *
      * @return true if input is valid
