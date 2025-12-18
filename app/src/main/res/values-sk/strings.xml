@@ -481,6 +481,34 @@
     <string name="auth_sign_out_confirm_title">Odhlásiť sa</string>
     <string name="auth_sign_out_confirm_message">Naozaj sa chcete odhlásiť?</string>
 
+    <!-- Story UGM-1.2: Device Link Conflict Dialog -->
+    <string name="device_link_conflict_title">Zariadenie už je prepojené</string>
+    <string name="device_link_conflict_message">Toto zariadenie je prepojené s iným účtom.</string>
+    <string name="device_link_conflict_explanation">Aplikáciu môžete naďalej používať, ale toto zariadenie zostane prepojené s druhým účtom. Ak si myslíte, že ide o chybu, kontaktujte podporu.</string>
+    <string name="device_link_conflict_continue">Pokračovať bez prepojenia</string>
+    <string name="device_link_conflict_contact_support">Kontaktovať podporu</string>
+    <string name="device_link_conflict_logout">Radšej sa odhlásiť</string>
+
+    <!-- Story UGM-1.3: Device Link Info -->
+    <string name="device_link_status_linked">Zariadenie prepojené</string>
+    <string name="device_link_status_not_linked">Zariadenie nie je prepojené</string>
+    <string name="device_link_tap_for_details">Kliknite pre detaily</string>
+    <string name="device_link_info_title">Informácie o zariadení</string>
+    <string name="device_link_info_device_name">Názov zariadenia</string>
+    <string name="device_link_info_device_id">ID zariadenia</string>
+    <string name="device_link_info_status">Stav prepojenia</string>
+    <string name="device_link_info_linked_to">Prepojené s</string>
+    <string name="device_link_info_linked_at">Prepojené dňa</string>
+    <string name="device_link_info_unnamed">Nepomenované zariadenie</string>
+
+    <!-- Story UGM-1.4: Device Link Retry Notifications -->
+    <string name="device_link_notification_channel_name">Prepojenie zariadenia</string>
+    <string name="device_link_notification_channel_description">Notifikácie o stave prepojenia zariadenia</string>
+    <string name="device_link_retry_failed_title">Prepojenie zariadenia zlyhalo</string>
+    <string name="device_link_retry_failed_message">Nepodarilo sa prepojiť zariadenie po viacerých pokusoch. Kliknite pre opakovanie.</string>
+    <string name="device_link_retry_button">Skúsiť znova</string>
+    <string name="device_link_queued_message">Prepojenie zariadenia sa zopakuje po pripojení k internetu</string>
+
     <!-- Admin Screens -->
     <string name="admin_selected_count">%1$d vybraných</string>
     <string name="admin_member_devices">Zariadenia členov</string>
@@ -640,6 +668,7 @@
     <string name="group_invite_people_hint">Pozvite ľudí do tejto skupiny.</string>
 
     <plurals name="group_member_device_count">
+        <item quantity="zero">Žiadne zariadenia</item>
         <item quantity="one">%1$d zariadenie</item>
         <item quantity="few">%1$d zariadenia</item>
         <item quantity="other">%1$d zariadení</item>
@@ -718,6 +747,10 @@
     <string name="device_status_inactive">Neaktívne</string>
     <string name="device_transfer_description">Previesť \"%1$s\" na iného používateľa. Stratíte vlastníctvo tohto zariadenia.</string>
     <string name="device_transfer_help">Nový vlastník musí mať účet. Jeho ID používateľa nájdete v jeho profile.</string>
+    <string name="device_edit_name_title">Upraviť názov zariadenia</string>
+    <string name="device_edit_name_description">Zadajte nový zobrazovaný názov pre toto zariadenie.</string>
+    <string name="device_display_name_label">Zobrazovaný názov</string>
+    <string name="device_name_required">Názov zariadenia je povinný</string>
 
     <!-- Device Management - Link Device Dialog -->
     <string name="link_device_title">Prepojiť toto zariadenie</string>
@@ -783,6 +816,8 @@
     <string name="groups_role_owner">Vlastník</string>
     <string name="groups_role_admin">Admin</string>
     <string name="groups_role_member">Člen</string>
+    <string name="groups_my_device">Moje zariadenie</string>
+    <string name="groups_device_in_group">Vaše zariadenie je v tejto skupine</string>
 
     <!-- Group Management - Create Group Dialog -->
     <string name="create_group_title">Vytvoriť skupinu</string>
@@ -815,6 +850,54 @@
     <string name="join_group_confirm_message">Chystáte sa pripojiť k tejto skupine s %1$d členmi.</string>
     <string name="join_group_confirm_hint">Ako člen budete môcť zdieľať svoju polohu s ostatnými členmi skupiny.</string>
     <string name="join_group_confirm_button">Pripojiť sa</string>
+
+    <!-- Story UGM-3.5: Device Assignment Dialog -->
+    <string name="device_assignment_title">Pridať vaše zariadenie?</string>
+    <string name="device_assignment_message">Chcete pridať toto zariadenie do %1$s? To umožní členom skupiny vidieť vašu polohu.</string>
+    <string name="device_assignment_hint">Môžete to zmeniť neskôr v nastaveniach skupiny.</string>
+    <string name="device_assignment_add_button">Pridať moje zariadenie</string>
+    <string name="device_assignment_skip_button">Teraz nie</string>
+    <string name="device_assignment_success">Zariadenie pridané do skupiny!</string>
+    <string name="device_assignment_error">Nepodarilo sa pridať zariadenie. Môžete to skúsiť znova v nastaveniach skupiny.</string>
+
+    <!-- Story UGM-4: Group Migration -->
+    <string name="migration_prompt_title">Aktualizovať skupinu?</string>
+    <string name="migration_prompt_message">Vaše zariadenie je súčasťou \"%1$s\" s %2$d zariadením/zariadeniami. Aktualizujte pre odomknutie rolí členov, pozvánok a plnej správy skupiny.</string>
+    <string name="migration_prompt_hint">Toto je voliteľné. Môžete to urobiť kedykoľvek neskôr v Nastaveniach.</string>
+    <string name="migration_prompt_migrate_button">Aktualizovať skupinu</string>
+    <string name="migration_prompt_skip_button">Teraz nie</string>
+    <string name="migration_screen_title">Aktualizovať skupinu</string>
+    <string name="migration_group_name_label">Nový názov skupiny</string>
+    <string name="migration_group_name_placeholder">napr. Rodina Smithovcov</string>
+    <string name="migration_current_group_label">Aktuálna skupina</string>
+    <string name="migration_device_count">%1$d zariadenie/zariadení</string>
+    <string name="migration_migrate_button">Aktualizovať</string>
+    <string name="migration_migrating">Aktualizujem…</string>
+    <string name="migration_success">Skupina úspešne aktualizovaná!</string>
+    <string name="migration_error_network">Aktualizácia zlyhala. Skontrolujte pripojenie a skúste znova.</string>
+    <string name="migration_error_offline">Aktualizácia vyžaduje internetové pripojenie.</string>
+    <string name="migration_error_server">Chyba servera. Skúste to prosím neskôr.</string>
+    <string name="migration_error_unauthorized">Relácia vypršala. Prihláste sa znova.</string>
+    <string name="migration_error_forbidden">Nemáte povolenie na túto akciu.</string>
+    <string name="migration_error_not_found">Registračná skupina nebola nájdená.</string>
+    <string name="migration_error_conflict">Skupina s týmto názvom už existuje.</string>
+    <string name="migration_error_generic">Aktualizácia zlyhala. Skúste to prosím znova.</string>
+    <string name="migration_name_error">Názov musí mať 3-50 znakov</string>
+    <string name="migration_name_error_min">Názov skupiny musí mať aspoň 3 znaky</string>
+    <string name="migration_name_error_max">Názov skupiny musí mať najviac 50 znakov</string>
+    <string name="migration_name_error_chars">Názov skupiny môže obsahovať len písmená, čísla a medzery</string>
+    <string name="migration_screen_header">Aktualizovať na plnú skupinu</string>
+    <string name="migration_screen_description">Konvertujte svoju skupinu zariadení pre odomknutie všetkých funkcií skupiny.</string>
+    <string name="migration_current_devices">Zariadenia na migráciu</string>
+    <string name="migration_group_name_hint">3-50 znakov, písmená, čísla a medzery</string>
+    <string name="migration_benefits_title">Čo odomknete:</string>
+    <string name="migration_benefit_roles">Priraďovanie rolí admin a člen</string>
+    <string name="migration_benefit_invites">Pozývanie ostatných zdieľateľnými odkazmi</string>
+    <string name="migration_benefit_management">Plná správa skupiny</string>
+    <string name="migration_button">Aktualizovať skupinu</string>
+    <string name="migration_cancel_button">Zrušiť</string>
+    <string name="migration_retry_button">Skúsiť znova</string>
+    <string name="common_back">Späť</string>
 
     <!-- Group Management - Group Detail Screen -->
     <string name="group_detail_title">Detaily skupiny</string>
@@ -1010,4 +1093,18 @@
     <string name="admin_remove_user_message">Naozaj chcete odstrániť %1$s z vášho spravovaného zoznamu? Už nebude sledovaný.</string>
     <string name="admin_remove">Odstrániť</string>
     <string name="admin_you">Vy</string>
+
+    <!-- Story E9.3: User Home Screen -->
+    <string name="user_home_title">Detaily používateľa</string>
+    <string name="user_home_location_available">Poloha dostupná</string>
+    <string name="user_home_location_unavailable">Poloha nedostupná</string>
+    <string name="user_home_tracking_control">Ovládanie sledovania</string>
+    <string name="user_home_tracking_enabled">Sledovanie polohy je aktívne</string>
+    <string name="user_home_tracking_disabled">Sledovanie polohy je vypnuté</string>
+    <string name="user_home_tracking_unknown">Stav sledovania neznámy</string>
+    <string name="user_home_quick_actions">Rýchle akcie</string>
+    <string name="user_home_view_map">Zobraziť mapu</string>
+    <string name="user_home_geofences">Geofence</string>
+    <string name="user_home_no_devices">%1$s nemá zaregistrované žiadne zariadenia</string>
+    <string name="user_home_no_devices_description">Používateľ musí nainštalovať aplikáciu a zaregistrovať zariadenie pre sledovanie.</string>
 </resources>
