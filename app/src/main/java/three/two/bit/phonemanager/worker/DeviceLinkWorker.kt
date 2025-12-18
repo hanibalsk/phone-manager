@@ -2,9 +2,12 @@ package three.two.bit.phonemanager.worker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import three.two.bit.phonemanager.receiver.DeviceLinkRetryReceiver
 import androidx.hilt.work.HiltWorker
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -154,6 +157,7 @@ class DeviceLinkWorker @AssistedInject constructor(
 
     /**
      * AC 4: Show notification when retry exhaustion occurs
+     * - Notification provides manual retry action
      */
     private fun showRetryExhaustedNotification() {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -170,12 +174,28 @@ class DeviceLinkWorker @AssistedInject constructor(
             notificationManager.createNotificationChannel(channel)
         }
 
+        // Create retry action PendingIntent
+        val retryIntent = Intent(context, DeviceLinkRetryReceiver::class.java).apply {
+            action = DeviceLinkRetryReceiver.ACTION_RETRY_DEVICE_LINK
+        }
+        val retryPendingIntent = PendingIntent.getBroadcast(
+            context,
+            0,
+            retryIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+
         val notification = NotificationCompat.Builder(context, NOTIFICATION_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_foreground_service)
             .setContentTitle(context.getString(R.string.device_link_retry_failed_title))
             .setContentText(context.getString(R.string.device_link_retry_failed_message))
             .setPriority(NotificationCompat.PRIORITY_DEFAULT)
             .setAutoCancel(true)
+            .addAction(
+                R.drawable.ic_foreground_service,
+                context.getString(R.string.device_link_retry_button),
+                retryPendingIntent,
+            )
             .build()
 
         notificationManager.notify(NOTIFICATION_ID, notification)

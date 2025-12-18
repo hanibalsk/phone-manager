@@ -117,6 +117,16 @@
             </intent-filter>
         </receiver>
 
+        <!-- Device link retry receiver (Story UGM-1.4) -->
+        <receiver
+            android:name=".receiver.DeviceLinkRetryReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="three.two.bit.phonemanager.action.RETRY_DEVICE_LINK" />
+            </intent-filter>
+        </receiver>
+
         <!-- Geofence broadcast receiver (Story E6.1) -->
         <receiver
             android:name=".geofence.GeofenceBroadcastReceiver"

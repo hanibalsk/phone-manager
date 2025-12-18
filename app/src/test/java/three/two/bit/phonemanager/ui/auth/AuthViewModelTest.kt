@@ -20,8 +20,10 @@ import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import three.two.bit.phonemanager.data.database.PendingDeviceLinkDao
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.ConfigRepository
+import three.two.bit.phonemanager.data.repository.GroupRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
 import three.two.bit.phonemanager.domain.auth.User
 import three.two.bit.phonemanager.network.DeviceApiService
@@ -52,6 +54,8 @@ class AuthViewModelTest {
     private lateinit var deviceApiService: DeviceApiService
     private lateinit var secureStorage: SecureStorage
     private lateinit var settingsSyncRepository: SettingsSyncRepository
+    private lateinit var pendingDeviceLinkDao: PendingDeviceLinkDao
+    private lateinit var groupRepository: GroupRepository
     private lateinit var viewModel: AuthViewModel
     private val testDispatcher = StandardTestDispatcher()
 
@@ -83,6 +87,8 @@ class AuthViewModelTest {
         deviceApiService = mockk(relaxed = true)
         secureStorage = mockk(relaxed = true)
         settingsSyncRepository = mockk(relaxed = true)
+        pendingDeviceLinkDao = mockk(relaxed = true)
+        groupRepository = mockk(relaxed = true)
 
         // Mock SettingsSyncWorker companion object to avoid WorkManager initialization
         mockkObject(SettingsSyncWorker.Companion)
@@ -113,6 +119,8 @@ class AuthViewModelTest {
                 deviceApiService,
                 secureStorage,
                 settingsSyncRepository,
+                pendingDeviceLinkDao,
+                groupRepository,
             )
     }
 

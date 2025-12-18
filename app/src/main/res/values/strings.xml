@@ -732,7 +732,8 @@
     <string name="device_link_notification_channel_name">Device Linking</string>
     <string name="device_link_notification_channel_description">Notifications about device linking status</string>
     <string name="device_link_retry_failed_title">Device Link Failed</string>
-    <string name="device_link_retry_failed_message">Unable to link device after multiple attempts. Try again from Settings.</string>
+    <string name="device_link_retry_failed_message">Unable to link device after multiple attempts. Tap to retry.</string>
+    <string name="device_link_retry_button">Retry</string>
     <string name="device_link_queued_message">Device link will retry when online</string>
 
     <!-- Admin Screens -->

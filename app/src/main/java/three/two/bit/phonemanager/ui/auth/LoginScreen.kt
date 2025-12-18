@@ -123,9 +123,18 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
 
     // Story UGM-1.2: Show conflict dialog when device is already linked (AC 2)
+    // Story UGM-1.4: Show snackbar when device link is queued for retry
     LaunchedEffect(deviceLinkState) {
-        if (deviceLinkState is DeviceLinkState.AlreadyLinked) {
-            showConflictDialog = true
+        when (deviceLinkState) {
+            is DeviceLinkState.AlreadyLinked -> {
+                showConflictDialog = true
+            }
+            is DeviceLinkState.Queued -> {
+                snackbarHostState.showSnackbar(
+                    context.getString(R.string.device_link_queued_message),
+                )
+            }
+            else -> { /* No action for other states */ }
         }
     }
 
