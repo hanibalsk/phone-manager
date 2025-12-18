@@ -87,7 +87,7 @@ This story was already fully implemented:
 - `GroupDetailViewModel.kt` has leaveGroup() and deleteGroup() methods
 - Navigation callbacks onLeftGroup and onGroupDeleted handle success
 
-Note: AC 5 (owner leave restriction) enforced by backend
+**Note:** AC 5 (owner leave restriction) enforced by backend. Client should handle backend error gracefully with user-friendly message if owner attempts to leave without transferring ownership.
 
 ---
 

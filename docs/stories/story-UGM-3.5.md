@@ -96,6 +96,8 @@ Implementation approach:
 
 No issues encountered during implementation.
 
+**Code Review Note:** JoinGroupViewModelTest has no tests for device assignment methods (addDeviceToGroup, skipDeviceAssignment, DeviceAssignmentState). Recommend adding test coverage.
+
 ### Implementation Plan
 
 1. Create DeviceAssignmentDialog composable with icon, text, and two buttons
