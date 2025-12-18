@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.PersonAdd
+import androidx.compose.material.icons.filled.Smartphone
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -247,7 +248,7 @@ private fun GroupCard(group: Group, onClick: () -> Unit) {
                     RoleBadge(role = group.userRole)
                 }
 
-                // Member count
+                // Member count and device indicator row
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -267,6 +268,23 @@ private fun GroupCard(group: Group, onClick: () -> Unit) {
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+
+                    // Story UGM-3.7 AC 3: Device assignment indicator
+                    if (group.hasCurrentDevice) {
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Icon(
+                            imageVector = Icons.Default.Smartphone,
+                            contentDescription = stringResource(R.string.groups_device_in_group),
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.primary,
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = stringResource(R.string.groups_my_device),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.primary,
+                        )
+                    }
                 }
 
                 // Description (if present)

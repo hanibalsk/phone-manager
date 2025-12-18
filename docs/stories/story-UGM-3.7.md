@@ -4,7 +4,7 @@
 **Epic**: UGM-3 - Device-to-Group Assignment
 **Priority**: High
 **Estimate**: 2 story points
-**Status**: In Progress
+**Status**: Completed
 **Created**: 2025-12-18
 
 **PRD Reference**: docs/PRD.md, docs/epics-ugm.md
@@ -68,9 +68,9 @@ So that I can manage different family/team contexts.
 - [x] Task 4: Empty state (AC: 1)
   - [x] "Create Your First Group" CTA when no groups
 
-- [ ] Task 5: Device assignment indicator (AC: 3) [DEFERRED]
-  - [ ] Add icon/badge to GroupCard showing if user's device is in group
-  - [ ] Requires API to return device membership per group
+- [x] Task 5: Device assignment indicator (AC: 3)
+  - [x] Add icon/badge to GroupCard showing if user's device is in group
+  - [x] Backend returns has_current_device in groups API response
 
 ---
 
@@ -89,7 +89,7 @@ This story was already fully implemented:
 - Empty state with create group CTA
 - Navigation to GroupDetailScreen on tap
 
-**Deferred:** Device assignment indicator (AC 3) requires API enhancement to return device membership per group. Task 5 added to track this.
+**Implemented:** Device assignment indicator (AC 3) now shows smartphone icon with "My device" text when user's device is assigned to the group. Backend returns `has_current_device` in groups API response.
 
 ---
 
@@ -107,10 +107,11 @@ This story was already fully implemented:
 |------|--------|---------|
 | 2025-12-18 | Claude | Story created - verified existing implementation complete |
 | 2025-12-18 | Claude | Code review: AC 3 deferred, status changed to In Progress |
+| 2025-12-18 | Claude | Implemented AC 3 device indicator after backend API enhancement |
 
 ---
 
 **Last Updated**: 2025-12-18
-**Status**: In Progress
+**Status**: Completed
 **Dependencies**: UGM-3.6
 **Blocking**: UGM-3.8

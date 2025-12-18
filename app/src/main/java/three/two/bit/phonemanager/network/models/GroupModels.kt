@@ -62,6 +62,7 @@ data class ListGroupsResponse(@SerialName("data") val groups: List<GroupDto>, va
 
 /**
  * Story E11.8 Task 2: Group DTO in API responses
+ * Story UGM-3.7: Added has_current_device field for device assignment indicator
  *
  * Backend GroupSummary uses snake_case field names.
  */
@@ -76,6 +77,7 @@ data class GroupDto(
     @SerialName("member_count") val memberCount: Int = 0,
     @SerialName("device_count") val deviceCount: Int = 0,
     @SerialName("your_role") val userRole: String = "member", // "owner", "admin", "member"
+    @SerialName("has_current_device") val hasCurrentDevice: Boolean = false, // UGM-3.7 AC 3
     @SerialName("joined_at") val joinedAt: String? = null,
     @SerialName("created_at") val createdAt: String? = null,
     @SerialName("updated_at") val updatedAt: String? = null,
@@ -184,6 +186,7 @@ data class TransferOwnershipRequest(val newOwnerId: String)
 
 /**
  * Maps GroupDto from API response to Group domain model
+ * Story UGM-3.7: Includes hasCurrentDevice for device assignment indicator
  */
 fun GroupDto.toDomain(): Group = Group(
     id = id,
@@ -192,6 +195,7 @@ fun GroupDto.toDomain(): Group = Group(
     ownerId = ownerId ?: "",
     memberCount = memberCount,
     userRole = GroupRole.fromString(userRole),
+    hasCurrentDevice = hasCurrentDevice,
     createdAt = (createdAt ?: joinedAt)?.let { Instant.parse(it) },
     updatedAt = updatedAt?.let { Instant.parse(it) },
 )

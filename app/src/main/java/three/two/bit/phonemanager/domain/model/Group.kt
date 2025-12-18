@@ -4,6 +4,7 @@ import kotlin.time.Instant
 
 /**
  * Story E11.8: Represents a group for location sharing between users.
+ * Story UGM-3.7: Added hasCurrentDevice for device assignment indicator.
  *
  * Groups allow users to share device locations with family, friends, or colleagues.
  *
@@ -13,6 +14,7 @@ import kotlin.time.Instant
  * @property ownerId User ID of the group owner
  * @property memberCount Number of members in the group
  * @property userRole Current user's role in the group
+ * @property hasCurrentDevice Whether user's current device is assigned to this group (UGM-3.7 AC 3)
  * @property createdAt When the group was created
  * @property updatedAt When the group was last updated
  */
@@ -23,6 +25,7 @@ data class Group(
     val ownerId: String,
     val memberCount: Int = 1,
     val userRole: GroupRole = GroupRole.MEMBER,
+    val hasCurrentDevice: Boolean = false,
     val createdAt: Instant? = null,
     val updatedAt: Instant? = null,
 ) {

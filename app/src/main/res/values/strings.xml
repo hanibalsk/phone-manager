@@ -575,6 +575,8 @@
     <string name="groups_role_owner">Owner</string>
     <string name="groups_role_admin">Admin</string>
     <string name="groups_role_member">Member</string>
+    <string name="groups_my_device">My device</string>
+    <string name="groups_device_in_group">Your device is in this group</string>
 
     <!-- Group Management - Create Group Dialog -->
     <string name="create_group_title">Create Group</string>
