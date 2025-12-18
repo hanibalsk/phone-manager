@@ -36,7 +36,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -84,11 +84,11 @@ fun GroupMigrationScreen(
     onMigrationSuccess: (groupId: String) -> Unit,
     viewModel: GroupMigrationViewModel = hiltViewModel(),
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val groupName by viewModel.groupName.collectAsState()
-    val nameError by viewModel.nameError.collectAsState()
-    val deviceCount by viewModel.deviceCount.collectAsState()
-    val isOnline by viewModel.isOnline.collectAsState()
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val groupName by viewModel.groupName.collectAsStateWithLifecycle()
+    val nameError by viewModel.nameError.collectAsStateWithLifecycle()
+    val deviceCount by viewModel.deviceCount.collectAsStateWithLifecycle()
+    val isOnline by viewModel.isOnline.collectAsStateWithLifecycle()
 
     val focusManager = LocalFocusManager.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -167,6 +167,15 @@ fun GroupMigrationScreen(
             // Story UGM-4.4 AC 1, 2, 5: Error banner with retry
             val errorState = uiState as? MigrationUiState.Error
             if (errorState != null) {
+                val errorMessage = when (errorState.errorType) {
+                    MigrationErrorType.Network -> stringResource(R.string.migration_error_network)
+                    MigrationErrorType.Server -> stringResource(R.string.migration_error_server)
+                    MigrationErrorType.Unauthorized -> stringResource(R.string.migration_error_unauthorized)
+                    MigrationErrorType.Forbidden -> stringResource(R.string.migration_error_forbidden)
+                    MigrationErrorType.NotFound -> stringResource(R.string.migration_error_not_found)
+                    MigrationErrorType.Conflict -> stringResource(R.string.migration_error_conflict)
+                    MigrationErrorType.Generic -> stringResource(R.string.migration_error_generic)
+                }
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
@@ -179,7 +188,7 @@ fun GroupMigrationScreen(
                             .padding(12.dp),
                     ) {
                         Text(
-                            text = errorState.message,
+                            text = errorMessage,
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onErrorContainer,
                         )
@@ -285,11 +294,13 @@ fun GroupMigrationScreen(
                 singleLine = true,
                 isError = nameError != null,
                 supportingText = {
-                    if (nameError != null) {
-                        Text(nameError!!)
-                    } else {
-                        Text(stringResource(R.string.migration_group_name_hint))
+                    val errorText = when (nameError) {
+                        NameValidationError.TooShort -> stringResource(R.string.migration_name_error_min)
+                        NameValidationError.TooLong -> stringResource(R.string.migration_name_error_max)
+                        NameValidationError.InvalidCharacters -> stringResource(R.string.migration_name_error_chars)
+                        null -> stringResource(R.string.migration_group_name_hint)
                     }
+                    Text(errorText)
                 },
                 enabled = uiState !is MigrationUiState.Loading,
             )

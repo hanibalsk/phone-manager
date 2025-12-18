@@ -636,7 +636,15 @@
     <string name="migration_error_network">Upgrade failed. Check your connection and try again.</string>
     <string name="migration_error_offline">Upgrade requires an internet connection.</string>
     <string name="migration_error_server">Server error. Please try again later.</string>
+    <string name="migration_error_unauthorized">Session expired. Please sign in again.</string>
+    <string name="migration_error_forbidden">You don\'t have permission for this action.</string>
+    <string name="migration_error_not_found">Registration group not found.</string>
+    <string name="migration_error_conflict">A group with this name already exists.</string>
+    <string name="migration_error_generic">Upgrade failed. Please try again.</string>
     <string name="migration_name_error">Name must be 3-50 characters</string>
+    <string name="migration_name_error_min">Group name must be at least 3 characters</string>
+    <string name="migration_name_error_max">Group name must be 50 characters or less</string>
+    <string name="migration_name_error_chars">Group name can only contain letters, numbers, and spaces</string>
     <string name="migration_screen_header">Upgrade to a Full Group</string>
     <string name="migration_screen_description">Convert your device group to unlock all group features.</string>
     <string name="migration_current_devices">Devices to migrate</string>

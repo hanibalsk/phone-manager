@@ -58,8 +58,8 @@ class GroupMigrationViewModel @Inject constructor(
     val groupName: StateFlow<String> = _groupName.asStateFlow()
 
     // Validation error for group name
-    private val _nameError = MutableStateFlow<String?>(null)
-    val nameError: StateFlow<String?> = _nameError.asStateFlow()
+    private val _nameError = MutableStateFlow<NameValidationError?>(null)
+    val nameError: StateFlow<NameValidationError?> = _nameError.asStateFlow()
 
     // Device count for display
     private val _deviceCount = MutableStateFlow(0)
@@ -80,7 +80,7 @@ class GroupMigrationViewModel @Inject constructor(
         } else {
             Timber.w("GroupMigrationViewModel: No groupId provided")
             _uiState.value = MigrationUiState.Error(
-                message = "No group ID provided",
+                errorType = MigrationErrorType.NotFound,
             )
         }
     }
@@ -127,10 +127,9 @@ class GroupMigrationViewModel @Inject constructor(
         val trimmedName = name.trim()
 
         _nameError.value = when {
-            trimmedName.length < 3 -> "Group name must be at least 3 characters"
-            trimmedName.length > 50 -> "Group name must be 50 characters or less"
-            !trimmedName.matches(Regex("^[a-zA-Z0-9 ]+$")) ->
-                "Group name can only contain letters, numbers, and spaces"
+            trimmedName.length < 3 -> NameValidationError.TooShort
+            trimmedName.length > 50 -> NameValidationError.TooLong
+            !trimmedName.matches(Regex("^[a-zA-Z0-9 ]+$")) -> NameValidationError.InvalidCharacters
             else -> null
         }
 
@@ -183,7 +182,7 @@ class GroupMigrationViewModel @Inject constructor(
                 onFailure = { error ->
                     Timber.e(error, "Migration failed")
                     _uiState.value = MigrationUiState.Error(
-                        message = getErrorMessage(error),
+                        errorType = getErrorType(error),
                         isRetryable = isRetryableError(error),
                     )
                 },
@@ -210,27 +209,27 @@ class GroupMigrationViewModel @Inject constructor(
     }
 
     /**
-     * Story UGM-4.4 AC 1, 5: Convert exception to user-friendly error message
+     * Story UGM-4.4 AC 1, 5: Convert exception to error type for UI string resolution
      */
-    private fun getErrorMessage(exception: Throwable): String {
+    private fun getErrorType(exception: Throwable): MigrationErrorType {
         val message = exception.message ?: ""
         return when {
             message.contains("401") || message.contains("unauthorized", ignoreCase = true) ->
-                "Session expired. Please sign in again."
+                MigrationErrorType.Unauthorized
             message.contains("403") || message.contains("forbidden", ignoreCase = true) ->
-                "You don't have permission for this action."
+                MigrationErrorType.Forbidden
             message.contains("404") || message.contains("not found", ignoreCase = true) ->
-                "Registration group not found."
+                MigrationErrorType.NotFound
             message.contains("409") || message.contains("conflict", ignoreCase = true) ->
-                "A group with this name already exists."
+                MigrationErrorType.Conflict
             message.contains("network", ignoreCase = true) ||
                 message.contains("connection", ignoreCase = true) ||
                 message.contains("timeout", ignoreCase = true) ||
                 message.contains("unable to resolve", ignoreCase = true) ->
-                "Migration failed. Check your connection and try again."
+                MigrationErrorType.Network
             message.contains("5") && message.contains("00") ->
-                "Server error. Please try again later."
-            else -> "Migration failed. Please try again."
+                MigrationErrorType.Server
+            else -> MigrationErrorType.Generic
         }
     }
 
@@ -281,8 +280,52 @@ sealed interface MigrationUiState {
      * Migration failed
      * Story UGM-4.4 AC 1, 2, 5: Error with retry option
      *
-     * @property message Error message to display
+     * @property errorType The type of error for UI string resolution
      * @property isRetryable Whether retry button should be shown
      */
-    data class Error(val message: String, val isRetryable: Boolean = true) : MigrationUiState
+    data class Error(val errorType: MigrationErrorType, val isRetryable: Boolean = true) : MigrationUiState
+}
+
+/**
+ * Story UGM-4.3 AC 2: Group name validation errors
+ *
+ * Sealed interface for validation errors that can be resolved to string resources in the UI.
+ */
+sealed interface NameValidationError {
+    /** Group name is less than 3 characters */
+    data object TooShort : NameValidationError
+
+    /** Group name is more than 50 characters */
+    data object TooLong : NameValidationError
+
+    /** Group name contains invalid characters (only letters, numbers, spaces allowed) */
+    data object InvalidCharacters : NameValidationError
+}
+
+/**
+ * Story UGM-4.4: Migration API error types
+ *
+ * Sealed interface for API errors that can be resolved to string resources in the UI.
+ */
+sealed interface MigrationErrorType {
+    /** Network/connection error */
+    data object Network : MigrationErrorType
+
+    /** Server error (5xx) */
+    data object Server : MigrationErrorType
+
+    /** Session expired (401) */
+    data object Unauthorized : MigrationErrorType
+
+    /** Permission denied (403) */
+    data object Forbidden : MigrationErrorType
+
+    /** Registration group not found (404) */
+    data object NotFound : MigrationErrorType
+
+    /** Group name conflict (409) */
+    data object Conflict : MigrationErrorType
+
+    /** Generic/unknown error */
+    data object Generic : MigrationErrorType
 }
