@@ -45,6 +45,45 @@ jobs:
           distribution: 'temurin'
           cache: 'gradle'
 
+      - name: Create dummy google-services.json for CI
+        run: |
+          mkdir -p app/src/debug app/src/release
+          cat > app/src/debug/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "dummy-project-for-ci",
+              "storage_bucket": "dummy-project-for-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000001",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager.dev"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          cp app/src/debug/google-services.json app/src/release/google-services.json
+
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --no-daemon
 
@@ -79,6 +118,45 @@ jobs:
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
+
+      - name: Create dummy google-services.json for CI
+        run: |
+          mkdir -p app/src/debug app/src/release
+          cat > app/src/debug/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "dummy-project-for-ci",
+              "storage_bucket": "dummy-project-for-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000001",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager.dev"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          cp app/src/debug/google-services.json app/src/release/google-services.json
 
       - name: Gradle cache
         uses: gradle/actions/setup-gradle@v3
@@ -151,6 +229,45 @@ jobs:
         run: |
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Create dummy google-services.json for CI
+        run: |
+          mkdir -p app/src/debug app/src/release
+          cat > app/src/debug/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "dummy-project-for-ci",
+              "storage_bucket": "dummy-project-for-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000001",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager.dev"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          cp app/src/debug/google-services.json app/src/release/google-services.json
 
       - name: Configure test API settings
         run: |
@@ -304,6 +421,45 @@ jobs:
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y jq bc
 
+      - name: Create dummy google-services.json for CI
+        run: |
+          mkdir -p app/src/debug app/src/release
+          cat > app/src/debug/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "dummy-project-for-ci",
+              "storage_bucket": "dummy-project-for-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000001",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager.dev"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          cp app/src/debug/google-services.json app/src/release/google-services.json
+
       - name: Build APK
         run: ./gradlew assembleDebug --no-daemon
 
@@ -362,6 +518,45 @@ jobs:
 
       - name: Install dependencies
         run: sudo apt-get update && sudo apt-get install -y jq bc
+
+      - name: Create dummy google-services.json for CI
+        run: |
+          mkdir -p app/src/debug app/src/release
+          cat > app/src/debug/google-services.json << 'EOF'
+          {
+            "project_info": {
+              "project_number": "000000000000",
+              "project_id": "dummy-project-for-ci",
+              "storage_bucket": "dummy-project-for-ci.appspot.com"
+            },
+            "client": [
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000000",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              },
+              {
+                "client_info": {
+                  "mobilesdk_app_id": "1:000000000000:android:0000000000000001",
+                  "android_client_info": {
+                    "package_name": "three.two.bit.phonemanager.dev"
+                  }
+                },
+                "oauth_client": [],
+                "api_key": [{"current_key": "dummy-api-key-for-ci-builds"}],
+                "services": {"appinvite_service": {"other_platform_oauth_client": []}}
+              }
+            ],
+            "configuration_version": "1"
+          }
+          EOF
+          cp app/src/debug/google-services.json app/src/release/google-services.json
 
       - name: Build APK
         run: ./gradlew assembleDebug --no-daemon
