@@ -26,6 +26,7 @@ import three.two.bit.phonemanager.domain.model.OrganizationInfo
 import three.two.bit.phonemanager.domain.model.SettingLock
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
 import three.two.bit.phonemanager.permission.PermissionManager
+import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -51,6 +52,7 @@ constructor(
     private val settingsSyncRepository: SettingsSyncRepository,
     private val unlockRequestRepository: UnlockRequestRepository,
     private val enrollmentRepository: EnrollmentRepository,
+    private val secureStorage: SecureStorage,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
@@ -191,6 +193,32 @@ constructor(
 
     val isLoggedIn: Boolean
         get() = authRepository.isLoggedIn()
+
+    // Story UGM-1.3: Device link info for ownership display
+    private val _deviceLinkInfo = MutableStateFlow(loadDeviceLinkInfo())
+    val deviceLinkInfo: StateFlow<DeviceLinkInfo> = _deviceLinkInfo.asStateFlow()
+
+    private fun loadDeviceLinkInfo(): DeviceLinkInfo {
+        val isLinked = secureStorage.isDeviceLinked()
+        val linkedEmail = secureStorage.getUserEmail()
+        val linkedAt = secureStorage.getDeviceLinkTimestamp()
+        val deviceName = secureStorage.getDisplayName()
+
+        return DeviceLinkInfo(
+            isLinked = isLinked,
+            linkedEmail = linkedEmail,
+            linkedAt = linkedAt,
+            deviceName = deviceName,
+            deviceId = deviceId,
+        )
+    }
+
+    /**
+     * UGM-1.3: Refresh device link info (e.g., after linking)
+     */
+    fun refreshDeviceLinkInfo() {
+        _deviceLinkInfo.value = loadDeviceLinkInfo()
+    }
 
     // Movement detection permission states
     private val _movementPermissionState = MutableStateFlow(MovementPermissionState())
@@ -756,3 +784,14 @@ data class MovementPermissionState(
     val hasBothPermissions: Boolean
         get() = hasActivityRecognitionPermission && hasBluetoothConnectPermission
 }
+
+/**
+ * Story UGM-1.3: Device link information for ownership display
+ */
+data class DeviceLinkInfo(
+    val isLinked: Boolean,
+    val linkedEmail: String?,
+    val linkedAt: Long?,
+    val deviceName: String?,
+    val deviceId: String,
+)

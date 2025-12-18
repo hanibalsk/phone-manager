@@ -67,6 +67,9 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
         private const val KEY_USER_DISPLAY_NAME = "user_display_name"
         private const val KEY_USER_CREATED_AT = "user_created_at"
 
+        // UGM-1.3: Device Link Timestamp
+        private const val KEY_DEVICE_LINKED_AT = "device_linked_at"
+
         // E13.10: Enrollment Storage Keys
         private const val KEY_ENROLLMENT_STATUS = "enrollment_status"
         private const val KEY_ORG_ID = "org_id"
@@ -324,6 +327,44 @@ class SecureStorage @Inject constructor(@ApplicationContext private val context:
             .remove(KEY_USER_CREATED_AT)
             .apply()
         Timber.d("User info cleared")
+    }
+
+    // ========================================================================
+    // UGM-1.3: Device Link Timestamp
+    // ========================================================================
+
+    /**
+     * Save device link timestamp (Unix timestamp in milliseconds)
+     */
+    fun saveDeviceLinkTimestamp(timestampMs: Long = System.currentTimeMillis()) {
+        encryptedPrefs.edit()
+            .putLong(KEY_DEVICE_LINKED_AT, timestampMs)
+            .apply()
+        Timber.d("Device link timestamp stored: $timestampMs")
+    }
+
+    /**
+     * Get device link timestamp (Unix timestamp in milliseconds)
+     * Returns null if device has never been linked
+     */
+    fun getDeviceLinkTimestamp(): Long? {
+        val timestamp = encryptedPrefs.getLong(KEY_DEVICE_LINKED_AT, -1L)
+        return if (timestamp == -1L) null else timestamp
+    }
+
+    /**
+     * Check if device is linked to a user account
+     */
+    fun isDeviceLinked(): Boolean = getDeviceLinkTimestamp() != null && hasUserInfo()
+
+    /**
+     * Clear device link timestamp
+     */
+    fun clearDeviceLinkTimestamp() {
+        encryptedPrefs.edit()
+            .remove(KEY_DEVICE_LINKED_AT)
+            .apply()
+        Timber.d("Device link timestamp cleared")
     }
 
     /**

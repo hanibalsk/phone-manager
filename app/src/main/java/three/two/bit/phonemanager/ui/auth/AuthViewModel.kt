@@ -399,6 +399,8 @@ class AuthViewModel @Inject constructor(
             _deviceLinkState.value = result.fold(
                 onSuccess = {
                     Timber.i("Device auto-linked successfully: $deviceId")
+                    // UGM-1.3: Save link timestamp
+                    secureStorage.saveDeviceLinkTimestamp()
                     DeviceLinkState.Linked
                 },
                 onFailure = { exception ->

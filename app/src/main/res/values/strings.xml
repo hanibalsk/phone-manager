@@ -676,6 +676,18 @@
     <string name="device_link_conflict_contact_support">Contact Support</string>
     <string name="device_link_conflict_logout">Log Out Instead</string>
 
+    <!-- Story UGM-1.3: Device Link Info -->
+    <string name="device_link_status_linked">Device Linked</string>
+    <string name="device_link_status_not_linked">Device Not Linked</string>
+    <string name="device_link_tap_for_details">Tap for details</string>
+    <string name="device_link_info_title">Device Information</string>
+    <string name="device_link_info_device_name">Device Name</string>
+    <string name="device_link_info_device_id">Device ID</string>
+    <string name="device_link_info_status">Link Status</string>
+    <string name="device_link_info_linked_to">Linked To</string>
+    <string name="device_link_info_linked_at">Linked On</string>
+    <string name="device_link_info_unnamed">Unnamed Device</string>
+
     <!-- Admin Screens -->
     <string name="admin_selected_count">%1$d selected</string>
     <string name="admin_member_devices">Member Devices</string>

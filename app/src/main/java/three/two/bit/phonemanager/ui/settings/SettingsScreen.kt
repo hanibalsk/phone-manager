@@ -59,6 +59,7 @@ import three.two.bit.phonemanager.domain.model.DeviceSettings
 import three.two.bit.phonemanager.domain.model.EnrollmentStatus
 import three.two.bit.phonemanager.domain.model.SettingDefinition
 import three.two.bit.phonemanager.domain.model.SettingsSyncStatus
+import three.two.bit.phonemanager.ui.settings.components.DeviceLinkInfoCard
 import three.two.bit.phonemanager.ui.unlock.RequestUnlockDialog
 import kotlin.math.roundToInt
 
@@ -91,6 +92,9 @@ fun SettingsScreen(
     // Story E9.11: Authentication state (AC E9.11.6, E9.11.8)
     val currentUser by viewModel.currentUser.collectAsStateWithLifecycle()
     var showLogoutDialog by remember { mutableStateOf(false) }
+
+    // Story UGM-1.3: Device link info for ownership display
+    val deviceLinkInfo by viewModel.deviceLinkInfo.collectAsStateWithLifecycle()
 
     // Movement detection states
     val isMovementDetectionEnabled by viewModel.isMovementDetectionEnabled.collectAsStateWithLifecycle()
@@ -249,6 +253,12 @@ fun SettingsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
                         supportingText = { Text(stringResource(R.string.auth_signed_in_as, user.displayName)) },
+                    )
+
+                    // Story UGM-1.3: Device ownership info card (AC 1, 2, 3, 4)
+                    DeviceLinkInfoCard(
+                        deviceLinkInfo = deviceLinkInfo,
+                        modifier = Modifier.fillMaxWidth(),
                     )
 
                     Row(
