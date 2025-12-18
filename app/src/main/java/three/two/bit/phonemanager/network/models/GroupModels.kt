@@ -488,3 +488,48 @@ fun JoinGroupResponse.toDomain(): JoinGroupResult = JoinGroupResult(
     role = GroupRole.fromString(membership.role),
     joinedAt = Instant.parse(membership.joinedAt),
 )
+
+// ============================================================================
+// Story UGM-4: Group Migration API Models
+// ============================================================================
+
+/**
+ * Story UGM-4.1: Response for checking registration group
+ * GET /devices/me/registration-group
+ *
+ * Returns information about a registration group this device belongs to,
+ * if any. Used to determine if migration prompt should be shown.
+ */
+@Serializable
+data class RegistrationGroupResponse(
+    @SerialName("has_registration_group")
+    val hasRegistrationGroup: Boolean = false,
+    @SerialName("group_id")
+    val groupId: String? = null,
+    @SerialName("group_name")
+    val groupName: String? = null,
+    @SerialName("device_count")
+    val deviceCount: Int = 0,
+)
+
+/**
+ * Story UGM-4.3: Request body for migrating a registration group
+ * POST /groups/{groupId}/migrate
+ */
+@Serializable
+data class MigrateGroupRequest(
+    @SerialName("new_name")
+    val newName: String,
+)
+
+/**
+ * Story UGM-4.3: Response for group migration
+ * POST /groups/{groupId}/migrate
+ */
+@Serializable
+data class MigrateGroupResponse(
+    val success: Boolean,
+    @SerialName("new_group")
+    val newGroup: GroupDto? = null,
+    val message: String? = null,
+)

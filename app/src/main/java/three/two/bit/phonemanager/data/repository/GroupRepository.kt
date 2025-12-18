@@ -10,6 +10,7 @@ import three.two.bit.phonemanager.domain.model.GroupMembership
 import three.two.bit.phonemanager.domain.model.GroupRole
 import three.two.bit.phonemanager.domain.model.InviteValidationResult
 import three.two.bit.phonemanager.domain.model.JoinGroupResult
+import three.two.bit.phonemanager.domain.model.RegistrationGroupInfo
 import three.two.bit.phonemanager.network.GroupApiService
 import three.two.bit.phonemanager.security.SecureStorage
 import timber.log.Timber
@@ -509,5 +510,48 @@ class GroupRepository @Inject constructor(
         }
 
         return joinResult
+    }
+
+    // ==========================================================================
+    // Story UGM-4: Group Migration
+    // ==========================================================================
+
+    /**
+     * Story UGM-4.1: Check if the current device belongs to a registration group
+     *
+     * Called after login to determine if migration prompt should be shown.
+     *
+     * @return Result with RegistrationGroupInfo if device is in a registration group, null otherwise
+     */
+    suspend fun checkRegistrationGroup(): Result<RegistrationGroupInfo?> {
+        val accessToken = secureStorage.getAccessToken()
+            ?: return Result.failure(IllegalStateException("Authentication required"))
+
+        return groupApiService.checkRegistrationGroup(accessToken)
+    }
+
+    /**
+     * Story UGM-4.3: Migrate a registration group to an authenticated group
+     *
+     * Atomically creates a new authenticated group, transfers all devices,
+     * assigns OWNER role to current user, and deletes the registration group.
+     *
+     * @param groupId The registration group's ID
+     * @param newName The name for the new authenticated group
+     * @return Result with the new Group on success
+     */
+    suspend fun migrateRegistrationGroup(groupId: String, newName: String): Result<Group> {
+        val accessToken = secureStorage.getAccessToken()
+            ?: return Result.failure(IllegalStateException("Authentication required"))
+
+        return groupApiService.migrateGroup(groupId, newName, accessToken).also { result ->
+            result.onSuccess { group ->
+                Timber.i("Registration group migrated: $groupId -> ${group.id}")
+                // Update cache with new group
+                _cachedGroups.value = _cachedGroups.value + group
+                // Sync settings after migration
+                settingsSyncRepository.syncAllSettings()
+            }
+        }
     }
 }

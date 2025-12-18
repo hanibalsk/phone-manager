@@ -31,6 +31,10 @@ import three.two.bit.phonemanager.network.models.UpdateGroupRequest
 import three.two.bit.phonemanager.network.models.UpdateMemberRoleRequest
 import three.two.bit.phonemanager.network.models.ValidateInviteResponse
 import three.two.bit.phonemanager.network.models.toDomain
+import three.two.bit.phonemanager.domain.model.RegistrationGroupInfo
+import three.two.bit.phonemanager.network.models.MigrateGroupRequest
+import three.two.bit.phonemanager.network.models.MigrateGroupResponse
+import three.two.bit.phonemanager.network.models.RegistrationGroupResponse
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -203,6 +207,30 @@ interface GroupApiService {
      * @return Result with join result including role assigned
      */
     suspend fun joinWithInvite(code: String, accessToken: String): Result<JoinGroupResult>
+
+    // ==========================================================================
+    // Story UGM-4: Group Migration Endpoints
+    // ==========================================================================
+
+    /**
+     * Story UGM-4.1: Check if device belongs to a registration group
+     * GET /devices/me/registration-group
+     *
+     * @param accessToken JWT access token
+     * @return Result with registration group info if exists
+     */
+    suspend fun checkRegistrationGroup(accessToken: String): Result<three.two.bit.phonemanager.domain.model.RegistrationGroupInfo?>
+
+    /**
+     * Story UGM-4.3: Migrate a registration group to an authenticated group
+     * POST /groups/{groupId}/migrate
+     *
+     * @param groupId The registration group's ID
+     * @param newName The name for the new authenticated group
+     * @param accessToken JWT access token
+     * @return Result with the new authenticated group on success
+     */
+    suspend fun migrateGroup(groupId: String, newName: String, accessToken: String): Result<Group>
 }
 
 @Singleton
@@ -536,6 +564,69 @@ class GroupApiServiceImpl @Inject constructor(
         Result.success(response.toDomain())
     } catch (e: Exception) {
         Timber.e(e, "Failed to join group with invite code: $code")
+        Result.failure(e)
+    }
+
+    // ==========================================================================
+    // Story UGM-4: Group Migration Endpoints Implementation
+    // ==========================================================================
+
+    /**
+     * Story UGM-4.1: Check if device belongs to a registration group
+     * GET /devices/me/registration-group
+     */
+    override suspend fun checkRegistrationGroup(accessToken: String): Result<RegistrationGroupInfo?> = try {
+        Timber.d("Checking for registration group")
+
+        val response: RegistrationGroupResponse = httpClient.get(
+            "${apiConfig.baseUrl}/api/v1/devices/me/registration-group",
+        ) {
+            header("Authorization", "Bearer $accessToken")
+        }.body()
+
+        if (response.hasRegistrationGroup && response.groupId != null) {
+            Timber.i("Registration group found: ${response.groupId} with ${response.deviceCount} devices")
+            Result.success(
+                RegistrationGroupInfo(
+                    groupId = response.groupId,
+                    groupName = response.groupName ?: response.groupId,
+                    deviceCount = response.deviceCount,
+                ),
+            )
+        } else {
+            Timber.i("No registration group found")
+            Result.success(null)
+        }
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to check registration group")
+        Result.failure(e)
+    }
+
+    /**
+     * Story UGM-4.3: Migrate a registration group to an authenticated group
+     * POST /groups/{groupId}/migrate
+     */
+    override suspend fun migrateGroup(groupId: String, newName: String, accessToken: String): Result<Group> = try {
+        Timber.d("Migrating registration group: $groupId to $newName")
+
+        val response: MigrateGroupResponse = httpClient.post(
+            "${apiConfig.baseUrl}/api/v1/groups/$groupId/migrate",
+        ) {
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $accessToken")
+            setBody(MigrateGroupRequest(newName = newName))
+        }.body()
+
+        if (response.success && response.newGroup != null) {
+            Timber.i("Group migrated successfully: ${response.newGroup.id}")
+            Result.success(response.newGroup.toDomain())
+        } else {
+            val error = response.message ?: "Migration failed"
+            Timber.e("Migration failed: $error")
+            Result.failure(Exception(error))
+        }
+    } catch (e: Exception) {
+        Timber.e(e, "Failed to migrate group: $groupId")
         Result.failure(e)
     }
 }

@@ -16,7 +16,9 @@ import three.two.bit.phonemanager.data.database.PendingDeviceLinkDao
 import three.two.bit.phonemanager.data.model.PendingDeviceLinkEntity
 import three.two.bit.phonemanager.data.repository.AuthRepository
 import three.two.bit.phonemanager.data.repository.ConfigRepository
+import three.two.bit.phonemanager.data.repository.GroupRepository
 import three.two.bit.phonemanager.data.repository.SettingsSyncRepository
+import three.two.bit.phonemanager.domain.model.RegistrationGroupInfo
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.worker.DeviceLinkWorker
@@ -44,6 +46,7 @@ class AuthViewModel @Inject constructor(
     private val secureStorage: SecureStorage,
     private val settingsSyncRepository: SettingsSyncRepository,
     private val pendingDeviceLinkDao: PendingDeviceLinkDao,
+    private val groupRepository: GroupRepository,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<AuthUiState>(AuthUiState.Idle)
@@ -131,6 +134,10 @@ class AuthViewModel @Inject constructor(
     private val _deviceLinkState = MutableStateFlow<DeviceLinkState>(DeviceLinkState.Idle)
     val deviceLinkState: StateFlow<DeviceLinkState> = _deviceLinkState.asStateFlow()
 
+    // Story UGM-4.1: Migration state for registration group migration prompt
+    private val _migrationState = MutableStateFlow<MigrationState>(MigrationState.NoMigration)
+    val migrationState: StateFlow<MigrationState> = _migrationState.asStateFlow()
+
     /**
      * AC E9.11.3: Login with email and password
      *
@@ -161,6 +168,9 @@ class AuthViewModel @Inject constructor(
 
                 // Sync settings from server to apply admin/group-managed settings
                 syncSettingsAfterAuth()
+
+                // Story UGM-4.1: Check for registration group migration
+                checkAndPromptGroupMigration()
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "Login failed")
@@ -203,6 +213,9 @@ class AuthViewModel @Inject constructor(
 
                 // Sync settings from server to apply admin/group-managed settings
                 syncSettingsAfterAuth()
+
+                // Story UGM-4.1: Check for registration group migration
+                checkAndPromptGroupMigration()
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "Registration failed")
@@ -236,6 +249,9 @@ class AuthViewModel @Inject constructor(
 
                 // Sync settings from server to apply admin/group-managed settings
                 syncSettingsAfterAuth()
+
+                // Story UGM-4.1: Check for registration group migration
+                checkAndPromptGroupMigration()
             } else {
                 val exception = result.exceptionOrNull()
                 Timber.e(exception, "OAuth sign-in failed: $provider")
@@ -498,6 +514,57 @@ class AuthViewModel @Inject constructor(
     fun dismissDeviceLinkPrompt() {
         _deviceLinkState.value = DeviceLinkState.Skipped
     }
+
+    /**
+     * Story UGM-4.1: Check for registration group and prompt migration
+     *
+     * Called after successful authentication to detect if the device
+     * belongs to a registration group that can be migrated.
+     *
+     * AC UGM-4.1.1: Check for registration group after login
+     * AC UGM-4.1.2: Store group info locally
+     * AC UGM-4.1.3: Trigger migration prompt
+     * AC UGM-4.1.4: No registration group continues normally
+     */
+    private fun checkAndPromptGroupMigration() {
+        viewModelScope.launch {
+            _migrationState.value = MigrationState.Checking
+
+            groupRepository.checkRegistrationGroup().fold(
+                onSuccess = { registrationGroup ->
+                    if (registrationGroup != null) {
+                        Timber.i("Registration group found: ${registrationGroup.groupId}")
+                        _migrationState.value = MigrationState.HasRegistrationGroup(registrationGroup)
+                    } else {
+                        Timber.i("No registration group found")
+                        _migrationState.value = MigrationState.NoMigration
+                    }
+                },
+                onFailure = { error ->
+                    Timber.w(error, "Failed to check registration group, continuing without migration")
+                    // Non-blocking error - continue without migration prompt
+                    _migrationState.value = MigrationState.NoMigration
+                },
+            )
+        }
+    }
+
+    /**
+     * Story UGM-4.2: Dismiss migration prompt
+     *
+     * Called when user taps "Not Now" on migration prompt.
+     * Stores dismissal in session only (will show again next login).
+     */
+    fun dismissMigrationPrompt() {
+        _migrationState.value = MigrationState.Dismissed
+    }
+
+    /**
+     * Story UGM-4.1: Clear migration state after navigation
+     */
+    fun clearMigrationState() {
+        _migrationState.value = MigrationState.NoMigration
+    }
 }
 
 /**
@@ -525,4 +592,23 @@ sealed interface DeviceLinkState {
 
     /** Failed to link device */
     data class Failed(val message: String) : DeviceLinkState
+}
+
+/**
+ * Story UGM-4.1: Migration state for registration group migration
+ *
+ * Tracks the state of the migration prompt flow after authentication.
+ */
+sealed interface MigrationState {
+    /** No migration available or not yet checked */
+    data object NoMigration : MigrationState
+
+    /** Currently checking for registration groups */
+    data object Checking : MigrationState
+
+    /** Registration group found - show migration prompt */
+    data class HasRegistrationGroup(val groupInfo: RegistrationGroupInfo) : MigrationState
+
+    /** User dismissed migration prompt for this session */
+    data object Dismissed : MigrationState
 }
