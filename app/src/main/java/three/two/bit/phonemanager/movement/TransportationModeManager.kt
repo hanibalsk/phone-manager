@@ -74,6 +74,36 @@ enum class DetectionSource {
 }
 
 /**
+ * Debug state containing all detection source information for diagnostics.
+ */
+data class DebugDetectionState(
+    // Overall state
+    val transportationState: TransportationState,
+    val timestamp: Long = System.currentTimeMillis(),
+
+    // Activity Recognition details
+    val activityMode: TransportationMode,
+    val activityConfidence: Int,
+    val activityDebugInfo: ActivityDebugInfo?,
+
+    // Bluetooth detection details
+    val isBluetoothCarConnected: Boolean,
+    val connectedCarDeviceName: String?,
+    val connectedAudioDevices: List<BluetoothDeviceInfo>,
+    val potentialCarDevices: List<BluetoothDeviceInfo>,
+
+    // Android Auto detection details
+    val isAndroidAutoActive: Boolean,
+    val androidAutoSource: String,
+    val androidAutoLastCheck: Long,
+
+    // Monitoring status
+    val isActivityRecognitionMonitoring: Boolean,
+    val isBluetoothMonitoring: Boolean,
+    val isAndroidAutoMonitoring: Boolean,
+)
+
+/**
  * Aggregates all transportation detection sources and provides a unified
  * transportation mode for the location tracking service.
  *
@@ -107,6 +137,60 @@ class TransportationModeManager @Inject constructor(
 
     private val _isMonitoring = MutableStateFlow(false)
     val isMonitoring: StateFlow<Boolean> = _isMonitoring.asStateFlow()
+
+    /**
+     * Debug state flow for diagnostics UI.
+     * Combines all detection source information in one place.
+     */
+    val debugState: StateFlow<DebugDetectionState> = combine(
+        activityRecognitionManager.currentActivity,
+        activityRecognitionManager.lastConfidence,
+        activityRecognitionManager.lastDebugInfo,
+        bluetoothCarDetector.isConnectedToCar,
+        bluetoothCarDetector.connectedCarDevice,
+        bluetoothCarDetector.connectedAudioDevices,
+        bluetoothCarDetector.potentialCarDevices,
+        androidAutoDetector.isInCarMode,
+        androidAutoDetector.detectionSource,
+        androidAutoDetector.lastCheckTimestamp,
+    ) { values ->
+        @Suppress("UNCHECKED_CAST")
+        DebugDetectionState(
+            transportationState = transportationState.value,
+            activityMode = values[0] as TransportationMode,
+            activityConfidence = values[1] as Int,
+            activityDebugInfo = values[2] as ActivityDebugInfo?,
+            isBluetoothCarConnected = values[3] as Boolean,
+            connectedCarDeviceName = values[4] as String?,
+            connectedAudioDevices = values[5] as List<BluetoothDeviceInfo>,
+            potentialCarDevices = values[6] as List<BluetoothDeviceInfo>,
+            isAndroidAutoActive = values[7] as Boolean,
+            androidAutoSource = values[8] as String,
+            androidAutoLastCheck = values[9] as Long,
+            isActivityRecognitionMonitoring = activityRecognitionManager.isMonitoring.value,
+            isBluetoothMonitoring = bluetoothCarDetector.isMonitoring.value,
+            isAndroidAutoMonitoring = androidAutoDetector.isMonitoring.value,
+        )
+    }.stateIn(
+        scope = managerScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = DebugDetectionState(
+            transportationState = TransportationState(),
+            activityMode = TransportationMode.UNKNOWN,
+            activityConfidence = 0,
+            activityDebugInfo = null,
+            isBluetoothCarConnected = false,
+            connectedCarDeviceName = null,
+            connectedAudioDevices = emptyList(),
+            potentialCarDevices = emptyList(),
+            isAndroidAutoActive = false,
+            androidAutoSource = "none",
+            androidAutoLastCheck = 0L,
+            isActivityRecognitionMonitoring = false,
+            isBluetoothMonitoring = false,
+            isAndroidAutoMonitoring = false,
+        ),
+    )
 
     /**
      * Combined transportation state from all detection sources.
@@ -169,6 +253,8 @@ class TransportationModeManager @Inject constructor(
 
         if (enableActivityRecognition) {
             activityRecognitionManager.startMonitoring()
+            // Request immediate detection to get current state right away
+            activityRecognitionManager.requestImmediateDetection()
         }
 
         if (enableBluetoothDetection) {

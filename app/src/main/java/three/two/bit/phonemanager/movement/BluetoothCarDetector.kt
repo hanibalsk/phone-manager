@@ -31,6 +31,18 @@ import javax.inject.Singleton
  * - Car hands-free systems (Headset profile)
  * - Device class hints indicating car audio/hands-free
  */
+/**
+ * Data class for debug information about connected Bluetooth devices.
+ */
+data class BluetoothDeviceInfo(
+    val name: String?,
+    val address: String,
+    val deviceClass: Int,
+    val majorClass: Int,
+    val isRecognizedAsCar: Boolean,
+    val profile: String,
+)
+
 @Singleton
 class BluetoothCarDetector @Inject constructor(@param:ApplicationContext private val context: Context) {
     private val bluetoothManager: BluetoothManager? =
@@ -46,6 +58,14 @@ class BluetoothCarDetector @Inject constructor(@param:ApplicationContext private
 
     private val _isMonitoring = MutableStateFlow(false)
     val isMonitoring: StateFlow<Boolean> = _isMonitoring.asStateFlow()
+
+    // Debug information: all connected audio devices (recognized as car or not)
+    private val _connectedAudioDevices = MutableStateFlow<List<BluetoothDeviceInfo>>(emptyList())
+    val connectedAudioDevices: StateFlow<List<BluetoothDeviceInfo>> = _connectedAudioDevices.asStateFlow()
+
+    // Debug information: potential car devices that weren't recognized
+    private val _potentialCarDevices = MutableStateFlow<List<BluetoothDeviceInfo>>(emptyList())
+    val potentialCarDevices: StateFlow<List<BluetoothDeviceInfo>> = _potentialCarDevices.asStateFlow()
 
     private var bluetoothReceiver: BluetoothConnectionReceiver? = null
     private var a2dpProxy: BluetoothA2dp? = null
@@ -169,11 +189,12 @@ class BluetoothCarDetector @Inject constructor(@param:ApplicationContext private
                 addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
             }
 
+            // Use RECEIVER_EXPORTED to receive system Bluetooth broadcasts on Android 13+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.registerReceiver(
                     bluetoothReceiver,
                     intentFilter,
-                    Context.RECEIVER_NOT_EXPORTED,
+                    Context.RECEIVER_EXPORTED,
                 )
             } else {
                 @Suppress("UnspecifiedRegisterReceiverFlag")
@@ -209,6 +230,8 @@ class BluetoothCarDetector @Inject constructor(@param:ApplicationContext private
             _isMonitoring.value = false
             _isConnectedToCar.value = false
             _connectedCarDevice.value = null
+            _connectedAudioDevices.value = emptyList()
+            _potentialCarDevices.value = emptyList()
 
             Timber.i("Bluetooth car detection monitoring stopped")
         } catch (e: Exception) {
@@ -298,12 +321,20 @@ class BluetoothCarDetector @Inject constructor(@param:ApplicationContext private
 
         try {
             val connectedDevices = a2dpProxy?.connectedDevices ?: return
+            val deviceInfoList = mutableListOf<BluetoothDeviceInfo>()
+
             for (device in connectedDevices) {
-                if (isLikelyCarDevice(device)) {
+                val isCar = isLikelyCarDevice(device)
+                val info = createDeviceInfo(device, "A2DP", isCar)
+                deviceInfoList.add(info)
+
+                if (isCar) {
                     updateCarConnectionState(true, device)
-                    return
                 }
             }
+
+            // Update debug info
+            updateConnectedDevices(deviceInfoList)
         } catch (e: SecurityException) {
             Timber.w(e, "Security exception checking A2DP connections")
         }
@@ -314,14 +345,56 @@ class BluetoothCarDetector @Inject constructor(@param:ApplicationContext private
 
         try {
             val connectedDevices = headsetProxy?.connectedDevices ?: return
+            val deviceInfoList = mutableListOf<BluetoothDeviceInfo>()
+
             for (device in connectedDevices) {
-                if (isLikelyCarDevice(device)) {
+                val isCar = isLikelyCarDevice(device)
+                val info = createDeviceInfo(device, "Headset", isCar)
+                deviceInfoList.add(info)
+
+                if (isCar) {
                     updateCarConnectionState(true, device)
-                    return
                 }
             }
+
+            // Update debug info
+            updateConnectedDevices(deviceInfoList)
         } catch (e: SecurityException) {
             Timber.w(e, "Security exception checking headset connections")
+        }
+    }
+
+    private fun createDeviceInfo(device: BluetoothDevice, profile: String, isRecognizedAsCar: Boolean): BluetoothDeviceInfo {
+        return try {
+            BluetoothDeviceInfo(
+                name = if (hasPermission()) device.name else null,
+                address = device.address,
+                deviceClass = device.bluetoothClass?.deviceClass ?: 0,
+                majorClass = device.bluetoothClass?.majorDeviceClass ?: 0,
+                isRecognizedAsCar = isRecognizedAsCar,
+                profile = profile,
+            )
+        } catch (e: SecurityException) {
+            BluetoothDeviceInfo(
+                name = null,
+                address = device.address,
+                deviceClass = 0,
+                majorClass = 0,
+                isRecognizedAsCar = isRecognizedAsCar,
+                profile = profile,
+            )
+        }
+    }
+
+    private fun updateConnectedDevices(newDevices: List<BluetoothDeviceInfo>) {
+        // Merge with existing devices (avoid duplicates by address)
+        val allDevices = (_connectedAudioDevices.value + newDevices)
+            .distinctBy { it.address }
+        _connectedAudioDevices.value = allDevices
+
+        // Update potential car devices (devices that are audio but not recognized as car)
+        _potentialCarDevices.value = allDevices.filter {
+            !it.isRecognizedAsCar && (it.majorClass == DEVICE_CLASS_AUDIO_VIDEO || it.name != null)
         }
     }
 

@@ -49,6 +49,7 @@ import three.two.bit.phonemanager.ui.history.HistoryScreen
 import three.two.bit.phonemanager.ui.home.HomeScreen
 import three.two.bit.phonemanager.ui.home.HomeViewModel
 import three.two.bit.phonemanager.ui.map.MapScreen
+import three.two.bit.phonemanager.ui.debug.MovementDebugScreen
 import three.two.bit.phonemanager.ui.movementevents.MovementEventsScreen
 import three.two.bit.phonemanager.ui.permissions.PermissionViewModel
 import three.two.bit.phonemanager.ui.registration.RegistrationScreen
@@ -86,6 +87,7 @@ sealed class Screen(val route: String) {
         fun createRoute(tripId: String) = "trip_detail/$tripId"
     }
     object MovementEvents : Screen("movement_events")
+    object MovementDebug : Screen("movement_debug")
 
     // Story E10.6: Device Management screens
     object DeviceList : Screen("device_list")
@@ -365,6 +367,9 @@ fun PhoneManagerNavHost(
                 onNavigateToMovementEvents = {
                     navController.navigate(Screen.MovementEvents.route)
                 },
+                onNavigateToMovementDebug = {
+                    navController.navigate(Screen.MovementDebug.route)
+                },
                 onNavigateToLogin = {
                     navController.navigate(Screen.Login.route)
                 },
@@ -461,6 +466,13 @@ fun PhoneManagerNavHost(
                     onNavigateBack = { navController.popBackStack() },
                 )
             }
+        }
+
+        // Movement Debug screen for diagnostics
+        composable(Screen.MovementDebug.route) {
+            MovementDebugScreen(
+                onNavigateBack = { navController.popBackStack() },
+            )
         }
 
         // Story E10.6: Device Management screens (AC E10.6.1, E10.6.3)

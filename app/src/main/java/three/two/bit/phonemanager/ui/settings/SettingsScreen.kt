@@ -81,6 +81,7 @@ fun SettingsScreen(
     onNavigateBack: () -> Unit,
     onNavigateToTripHistory: () -> Unit = {},
     onNavigateToMovementEvents: () -> Unit = {},
+    onNavigateToMovementDebug: () -> Unit = {},
     onNavigateToLogin: () -> Unit = {},
     onNavigateToGroups: () -> Unit = {},
     onNavigateToMyDevices: () -> Unit = {},
@@ -592,6 +593,12 @@ fun SettingsScreen(
             SettingsNavigationRow(
                 title = stringResource(R.string.settings_view_movement_events),
                 onClick = onNavigateToMovementEvents,
+            )
+
+            // Movement Debug screen for diagnostics
+            SettingsNavigationRow(
+                title = stringResource(R.string.settings_movement_debug),
+                onClick = onNavigateToMovementDebug,
             )
 
             // Story E12.8: Navigation to unlock requests (AC E12.8.3)

@@ -396,6 +396,7 @@
     <string name="settings_trip_auto_merge_summary">Combine trips separated by short stops</string>
     <string name="settings_view_trip_history">View Trip History</string>
     <string name="settings_view_movement_events">View Movement Events</string>
+    <string name="settings_movement_debug">Movement Debug</string>
     <string name="settings_trip_decrease">Decrease</string>
     <string name="settings_trip_increase">Increase</string>
 
@@ -419,6 +420,22 @@
     <string name="load_more">Load More</string>
     <string name="collapse">Collapse</string>
     <string name="expand">Expand</string>
+
+    <!-- Movement Debug Screen -->
+    <string name="movement_debug_title">Movement Debug</string>
+    <string name="movement_debug_pause">Pause Updates</string>
+    <string name="movement_debug_resume">Resume Updates</string>
+    <string name="movement_debug_restart">Restart Monitoring</string>
+    <string name="movement_debug_clear">Clear History</string>
+    <string name="movement_debug_monitoring_active">Monitoring Active</string>
+    <string name="movement_debug_monitoring_inactive">Monitoring Inactive</string>
+    <string name="movement_debug_live_updates">Live updates enabled</string>
+    <string name="movement_debug_updates_paused">Updates paused</string>
+    <string name="movement_debug_current_state">Current State</string>
+    <string name="movement_debug_activity_recognition">Activity Recognition</string>
+    <string name="movement_debug_bluetooth_car">Bluetooth Car</string>
+    <string name="movement_debug_android_auto">Android Auto</string>
+    <string name="movement_debug_event_history">Event History</string>
 
     <!-- Active Trip Card (Story E8.13) -->
     <string name="active_trip_title">Active Trip</string>
