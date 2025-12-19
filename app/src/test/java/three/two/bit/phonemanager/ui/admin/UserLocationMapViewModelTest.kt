@@ -518,6 +518,10 @@ class UserLocationMapViewModelTest {
         // Then - startPolling should not throw and polling should be active
         // Note: We can't easily verify polling state directly as it's private
         // But we can verify it doesn't throw
+
+        // Clean up - stop polling and advance time to allow the coroutine to exit
+        viewModel.stopPolling()
+        testScheduler.advanceTimeBy(35_000)
     }
 
     @Test
@@ -536,6 +540,8 @@ class UserLocationMapViewModelTest {
 
         // When
         viewModel.stopPolling()
+        // Advance time past the polling delay to allow the coroutine to check isPolling and exit
+        testScheduler.advanceTimeBy(35_000)
 
         // Then - stopPolling should not throw
         // Polling is now stopped
@@ -560,6 +566,8 @@ class UserLocationMapViewModelTest {
 
         // Then - should handle gracefully without issues
         viewModel.stopPolling()
+        // Advance time past the polling delay to allow the coroutine to check isPolling and exit
+        testScheduler.advanceTimeBy(35_000)
     }
 
     // =============================================================================

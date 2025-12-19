@@ -111,6 +111,9 @@ class AuthViewModelTest {
             deviceApiService.linkDevice(any(), any(), any(), any(), any())
         } returns Result.success(testLinkedDeviceResponse)
 
+        // Mock groupRepository.checkRegistrationGroup to return proper Result (fixes ClassCastException)
+        coEvery { groupRepository.checkRegistrationGroup() } returns Result.success(null)
+
         viewModel =
             AuthViewModel(
                 context,

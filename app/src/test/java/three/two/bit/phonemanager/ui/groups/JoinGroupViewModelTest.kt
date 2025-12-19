@@ -111,13 +111,14 @@ class JoinGroupViewModelTest {
 
     @Test
     fun `validateCode calls repository with valid code`() = runTest {
-        // Given
+        // Given - use XXX-XXX-XXX format as required by isValidCodeFormat
+        val inviteCode = "ABC-DEF-123"
         val preview = GroupPreview("group-1", "Family", 5)
         val result = InviteValidationResult(true, preview, null)
-        coEvery { groupRepository.validateInviteCode("ABCD1234") } returns Result.success(result)
+        coEvery { groupRepository.validateInviteCode(inviteCode) } returns Result.success(result)
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
-        viewModel.setInviteCode("ABCD1234")
+        viewModel.setInviteCode(inviteCode)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -125,7 +126,7 @@ class JoinGroupViewModelTest {
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        coVerify { groupRepository.validateInviteCode("ABCD1234") }
+        coVerify { groupRepository.validateInviteCode(inviteCode) }
         viewModel.uiState.test {
             val state = awaitItem()
             assertTrue(state is JoinGroupUiState.PreviewReady)
@@ -135,12 +136,13 @@ class JoinGroupViewModelTest {
 
     @Test
     fun `validateCode shows error for invalid code`() = runTest {
-        // Given
+        // Given - use XXX-XXX-XXX format as required by isValidCodeFormat
+        val inviteCode = "ABC-DEF-123"
         val result = InviteValidationResult(false, null, "Invite code expired")
-        coEvery { groupRepository.validateInviteCode("ABCD1234") } returns Result.success(result)
+        coEvery { groupRepository.validateInviteCode(inviteCode) } returns Result.success(result)
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
-        viewModel.setInviteCode("ABCD1234")
+        viewModel.setInviteCode(inviteCode)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -174,17 +176,18 @@ class JoinGroupViewModelTest {
 
     @Test
     fun `joinGroup succeeds when authenticated`() = runTest {
-        // Given
+        // Given - use 11-character format XXX-XXX-XXX as required by ViewModel
+        val inviteCode = "ABC-DEF-123"
         val joinResult = JoinGroupResult(
             groupId = "group-1",
             role = GroupRole.MEMBER,
             joinedAt = Instant.parse("2025-01-01T00:00:00Z"),
         )
         every { authRepository.isLoggedIn() } returns true
-        coEvery { groupRepository.joinWithInvite("ABCD1234") } returns Result.success(joinResult)
+        coEvery { groupRepository.joinWithInvite(inviteCode) } returns Result.success(joinResult)
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
-        viewModel.setInviteCode("ABCD1234")
+        viewModel.setInviteCode(inviteCode)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -201,14 +204,15 @@ class JoinGroupViewModelTest {
 
     @Test
     fun `joinGroup shows error on failure`() = runTest {
-        // Given
+        // Given - use 11-character format XXX-XXX-XXX as required by ViewModel
+        val inviteCode = "ABC-DEF-123"
         every { authRepository.isLoggedIn() } returns true
-        coEvery { groupRepository.joinWithInvite("ABCD1234") } returns Result.failure(
+        coEvery { groupRepository.joinWithInvite(inviteCode) } returns Result.failure(
             Exception("already_member"),
         )
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
-        viewModel.setInviteCode("ABCD1234")
+        viewModel.setInviteCode(inviteCode)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // When
@@ -227,59 +231,62 @@ class JoinGroupViewModelTest {
 
     @Test
     fun `handleQrCodeScan extracts code from deep link`() = runTest {
-        // Given
+        // Given - use XXX-XXX-XXX format as required by isValidCodeFormat
+        val inviteCode = "ABC-DEF-123"
         val preview = GroupPreview("group-1", "Family", 5)
         val result = InviteValidationResult(true, preview, null)
-        coEvery { groupRepository.validateInviteCode("ABCD1234") } returns Result.success(result)
+        coEvery { groupRepository.validateInviteCode(inviteCode) } returns Result.success(result)
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
 
         // When
-        viewModel.handleQrCodeScan("phonemanager://join/ABCD1234")
+        viewModel.handleQrCodeScan("phonemanager://join/$inviteCode")
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         viewModel.inviteCode.test {
-            assertEquals("ABCD1234", awaitItem())
+            assertEquals(inviteCode, awaitItem())
         }
-        coVerify { groupRepository.validateInviteCode("ABCD1234") }
+        coVerify { groupRepository.validateInviteCode(inviteCode) }
     }
 
     @Test
     fun `handleQrCodeScan accepts plain code`() = runTest {
-        // Given
+        // Given - use XXX-XXX-XXX format as required by isValidCodeFormat (lowercase input, uppercase result)
+        val inviteCode = "ABC-DEF-123"
         val preview = GroupPreview("group-1", "Family", 5)
         val result = InviteValidationResult(true, preview, null)
-        coEvery { groupRepository.validateInviteCode("ABCD1234") } returns Result.success(result)
+        coEvery { groupRepository.validateInviteCode(inviteCode) } returns Result.success(result)
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
 
-        // When
-        viewModel.handleQrCodeScan("abcd1234")
+        // When - input lowercase, should be normalized to uppercase
+        viewModel.handleQrCodeScan("abc-def-123")
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         viewModel.inviteCode.test {
-            assertEquals("ABCD1234", awaitItem())
+            assertEquals(inviteCode, awaitItem())
         }
     }
 
     @Test
     fun `handleQrCodeScan extracts code from HTTPS URL`() = runTest {
-        // Given
+        // Given - use XXX-XXX-XXX format as required by isValidCodeFormat
+        val inviteCode = "ABC-DEF-123"
         val preview = GroupPreview("group-1", "Family", 5)
         val result = InviteValidationResult(true, preview, null)
-        coEvery { groupRepository.validateInviteCode("ABCD1234") } returns Result.success(result)
+        coEvery { groupRepository.validateInviteCode(inviteCode) } returns Result.success(result)
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
 
         // When
-        viewModel.handleQrCodeScan("https://phonemanager.app/join/ABCD1234")
+        viewModel.handleQrCodeScan("https://phonemanager.app/join/$inviteCode")
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         viewModel.inviteCode.test {
-            assertEquals("ABCD1234", awaitItem())
+            assertEquals(inviteCode, awaitItem())
         }
     }
 
@@ -303,41 +310,43 @@ class JoinGroupViewModelTest {
 
     @Test
     fun `handleDeepLink extracts and validates code`() = runTest {
-        // Given
+        // Given - use XXX-XXX-XXX format as required by isValidCodeFormat
+        val inviteCode = "WXY-Z56-789"
         val preview = GroupPreview("group-1", "Family", 5)
         val result = InviteValidationResult(true, preview, null)
-        coEvery { groupRepository.validateInviteCode("WXYZ5678") } returns Result.success(result)
+        coEvery { groupRepository.validateInviteCode(inviteCode) } returns Result.success(result)
 
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
 
         // When
-        viewModel.handleDeepLink("phonemanager://join/WXYZ5678")
+        viewModel.handleDeepLink("phonemanager://join/$inviteCode")
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
         viewModel.inviteCode.test {
-            assertEquals("WXYZ5678", awaitItem())
+            assertEquals(inviteCode, awaitItem())
         }
-        coVerify { groupRepository.validateInviteCode("WXYZ5678") }
+        coVerify { groupRepository.validateInviteCode(inviteCode) }
     }
 
     @Test
     fun `init validates code from SavedStateHandle`() = runTest {
-        // Given
+        // Given - use XXX-XXX-XXX format as required by isValidCodeFormat
+        val inviteCode = "INI-T12-345"
         val preview = GroupPreview("group-1", "Family", 5)
         val result = InviteValidationResult(true, preview, null)
-        coEvery { groupRepository.validateInviteCode("INIT1234") } returns Result.success(result)
-        savedStateHandle = SavedStateHandle(mapOf("code" to "INIT1234"))
+        coEvery { groupRepository.validateInviteCode(inviteCode) } returns Result.success(result)
+        savedStateHandle = SavedStateHandle(mapOf("code" to inviteCode))
 
         // When
         viewModel = JoinGroupViewModel(groupRepository, authRepository, savedStateHandle)
         testDispatcher.scheduler.advanceUntilIdle()
 
         // Then
-        coVerify { groupRepository.validateInviteCode("INIT1234") }
+        coVerify { groupRepository.validateInviteCode(inviteCode) }
         viewModel.groupPreview.test {
-            val preview = awaitItem()
-            assertEquals("Family", preview?.name)
+            val groupPreview = awaitItem()
+            assertEquals("Family", groupPreview?.name)
         }
     }
 
