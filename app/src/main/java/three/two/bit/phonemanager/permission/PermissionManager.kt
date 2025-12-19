@@ -41,7 +41,7 @@ interface PermissionManager {
 }
 
 @Singleton
-class PermissionManagerImpl @Inject constructor(@ApplicationContext private val context: Context) : PermissionManager {
+class PermissionManagerImpl @Inject constructor(@param:ApplicationContext private val context: Context) : PermissionManager {
 
     private val permissionStateFlow = MutableStateFlow<PermissionState>(PermissionState.Checking)
 

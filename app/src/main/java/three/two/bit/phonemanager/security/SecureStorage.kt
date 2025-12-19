@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // EncryptedSharedPreferences and MasterKey are deprecated but no replacement yet
+
 package three.two.bit.phonemanager.security
 
 import android.content.Context
@@ -18,7 +20,7 @@ import javax.inject.Singleton
  * - API base URLs
  */
 @Singleton
-class SecureStorage @Inject constructor(@ApplicationContext private val context: Context) {
+class SecureStorage @Inject constructor(@param:ApplicationContext private val context: Context) {
 
     private val masterKey: MasterKey by lazy {
         MasterKey.Builder(context)

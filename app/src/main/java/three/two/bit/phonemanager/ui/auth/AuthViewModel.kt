@@ -39,7 +39,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class AuthViewModel @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val authRepository: AuthRepository,
     private val configRepository: ConfigRepository,
     private val deviceApiService: DeviceApiService,

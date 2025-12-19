@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // hiltViewModel() deprecation - using stable API
+
 package three.two.bit.phonemanager.ui.geofences
 
 import androidx.compose.animation.animateColorAsState

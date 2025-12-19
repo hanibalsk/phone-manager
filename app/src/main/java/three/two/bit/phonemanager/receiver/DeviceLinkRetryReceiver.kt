@@ -56,7 +56,7 @@ class DeviceLinkRetryReceiver : BroadcastReceiver() {
                 val deviceId = secureStorage.getDeviceId()
                 val userId = secureStorage.getUserId()
 
-                if (deviceId != null && userId != null) {
+                if (userId != null) {
                     // Re-queue the device link with reset retry count
                     val pendingLink = PendingDeviceLinkEntity(
                         deviceId = deviceId,
@@ -70,7 +70,7 @@ class DeviceLinkRetryReceiver : BroadcastReceiver() {
                     // Schedule the worker
                     DeviceLinkWorker.schedule(context)
                 } else {
-                    Timber.w("Cannot retry device link: missing deviceId or userId")
+                    Timber.w("Cannot retry device link: missing userId")
                 }
             } catch (e: Exception) {
                 Timber.e(e, "Error in DeviceLinkRetryReceiver")

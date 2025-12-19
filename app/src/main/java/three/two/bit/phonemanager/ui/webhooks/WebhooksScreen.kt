@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // hiltViewModel() deprecation - using stable API
+
 package three.two.bit.phonemanager.ui.webhooks
 
 import androidx.compose.animation.animateContentSize
@@ -188,6 +190,7 @@ private fun WebhooksList(webhooks: List<Webhook>, onToggle: (Webhook) -> Unit, o
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("DEPRECATION") // confirmValueChange deprecation - TODO: migrate to new API
 @Composable
 private fun WebhookItem(webhook: Webhook, onToggle: () -> Unit, onDelete: () -> Unit) {
     val dismissState = rememberSwipeToDismissBoxState(

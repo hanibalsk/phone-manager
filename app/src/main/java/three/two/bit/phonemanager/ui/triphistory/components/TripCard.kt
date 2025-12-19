@@ -60,6 +60,7 @@ import java.util.Date
  * @param modifier Modifier for styling
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("DEPRECATION") // confirmValueChange deprecation - TODO: migrate to new API
 @Composable
 fun TripCard(
     trip: Trip,

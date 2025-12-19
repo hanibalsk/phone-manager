@@ -32,7 +32,7 @@ import kotlin.math.sqrt
  * AC E8.5.1: Injectable singleton with collect() function
  */
 @Singleton
-class SensorTelemetryCollector @Inject constructor(@ApplicationContext private val context: Context) {
+class SensorTelemetryCollector @Inject constructor(@param:ApplicationContext private val context: Context) {
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
     private val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
     private val batteryManager = context.getSystemService(Context.BATTERY_SERVICE) as? BatteryManager

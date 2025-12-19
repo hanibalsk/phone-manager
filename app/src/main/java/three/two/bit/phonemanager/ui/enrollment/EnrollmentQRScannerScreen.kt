@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // LocalLifecycleOwner and setTargetResolution - using stable CameraX APIs
+
 package three.two.bit.phonemanager.ui.enrollment
 
 import android.Manifest

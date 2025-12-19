@@ -29,7 +29,7 @@ import javax.inject.Singleton
  * - Notification is actionable (tap to open map)
  */
 @Singleton
-class ProximityNotificationManager @Inject constructor(@ApplicationContext private val context: Context) {
+class ProximityNotificationManager @Inject constructor(@param:ApplicationContext private val context: Context) {
     companion object {
         private const val CHANNEL_ID = "proximity_alerts_channel"
         private const val CHANNEL_NAME = "Proximity Alerts"

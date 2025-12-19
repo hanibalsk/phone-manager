@@ -13,10 +13,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.rounded.DirectionsBike
+import androidx.compose.material.icons.automirrored.rounded.DirectionsBike
+import androidx.compose.material.icons.automirrored.rounded.DirectionsRun
+import androidx.compose.material.icons.automirrored.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.DirectionsCar
-import androidx.compose.material.icons.rounded.DirectionsRun
-import androidx.compose.material.icons.rounded.DirectionsWalk
 import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.QuestionMark
 import androidx.compose.material.icons.rounded.Route
@@ -161,9 +161,9 @@ private fun SummaryStatItem(label: String, value: String, modifier: Modifier = M
 }
 
 private fun getDominantModeIcon(mode: TransportationMode): ImageVector = when (mode) {
-    TransportationMode.WALKING -> Icons.Rounded.DirectionsWalk
-    TransportationMode.RUNNING -> Icons.Rounded.DirectionsRun
-    TransportationMode.CYCLING -> Icons.Rounded.DirectionsBike
+    TransportationMode.WALKING -> Icons.AutoMirrored.Rounded.DirectionsWalk
+    TransportationMode.RUNNING -> Icons.AutoMirrored.Rounded.DirectionsRun
+    TransportationMode.CYCLING -> Icons.AutoMirrored.Rounded.DirectionsBike
     TransportationMode.IN_VEHICLE -> Icons.Rounded.DirectionsCar
     TransportationMode.STATIONARY -> Icons.Rounded.LocationOn
     TransportationMode.UNKNOWN -> Icons.Rounded.QuestionMark

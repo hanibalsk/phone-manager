@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // hiltViewModel() deprecation - using stable API
+
 package three.two.bit.phonemanager.ui.admin
 
 import androidx.activity.compose.BackHandler
@@ -372,6 +374,7 @@ private fun GroupMembersContent(
  * AC E9.6.1: Remove action accessible from users list (swipe gesture)
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("DEPRECATION") // confirmValueChange deprecation - TODO: migrate to new API
 @Composable
 private fun SwipeToDeleteDeviceCard(device: Device, onClick: () -> Unit, onDelete: () -> Unit) {
     val dismissState = rememberSwipeToDismissBoxState(
@@ -419,6 +422,7 @@ private fun SwipeToDeleteDeviceCard(device: Device, onClick: () -> Unit, onDelet
  * AC E9.6.1: Remove action accessible from users list (swipe gesture)
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("DEPRECATION") // confirmValueChange deprecation - TODO: migrate to new API
 @Composable
 private fun SwipeToDeleteMemberCard(member: GroupMembership, onClick: () -> Unit, onDelete: () -> Unit) {
     val dismissState = rememberSwipeToDismissBoxState(

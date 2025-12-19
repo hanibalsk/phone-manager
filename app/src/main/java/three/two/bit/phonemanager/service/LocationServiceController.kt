@@ -31,7 +31,7 @@ interface LocationServiceController {
 
 @Singleton
 class LocationServiceControllerImpl @Inject constructor(
-    @ApplicationContext private val context: Context,
+    @param:ApplicationContext private val context: Context,
     private val locationRepository: LocationRepository,
     private val preferencesRepository: PreferencesRepository,
 ) : LocationServiceController {

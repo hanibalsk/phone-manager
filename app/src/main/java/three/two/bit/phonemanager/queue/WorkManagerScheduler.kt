@@ -18,7 +18,7 @@ import javax.inject.Singleton
  * Schedules periodic work to process the upload queue
  */
 @Singleton
-class WorkManagerScheduler @Inject constructor(@ApplicationContext private val context: Context) {
+class WorkManagerScheduler @Inject constructor(@param:ApplicationContext private val context: Context) {
 
     private val workManager = WorkManager.getInstance(context)
 

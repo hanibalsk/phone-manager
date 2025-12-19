@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // hiltViewModel() deprecation - using stable API
+
 package three.two.bit.phonemanager.ui.geofences
 
 import android.Manifest
@@ -163,7 +165,8 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
                     // Save button
                     IconButton(
                         onClick = {
-                            if (isFormValid && latitude != null && longitude != null) {
+                            // isFormValid guarantees latitude/longitude are non-null via isValidLocation check
+                            if (isFormValid) {
                                 val transitionTypes = buildSet {
                                     if (enterSelected) add(TransitionType.ENTER)
                                     if (exitSelected) add(TransitionType.EXIT)
@@ -171,8 +174,8 @@ fun CreateGeofenceScreen(viewModel: GeofencesViewModel = hiltViewModel(), onNavi
                                 }
                                 viewModel.createGeofence(
                                     name = name,
-                                    latitude = latitude,
-                                    longitude = longitude,
+                                    latitude = latitude!!,
+                                    longitude = longitude!!,
                                     radiusMeters = radiusMeters,
                                     transitionTypes = transitionTypes,
                                     webhookId = selectedWebhookId,

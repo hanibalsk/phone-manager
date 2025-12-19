@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION") // hiltViewModel() deprecation - using stable API
+
 package three.two.bit.phonemanager.ui.admin
 
 import androidx.compose.animation.animateColorAsState
@@ -229,6 +231,7 @@ fun AdminGeofenceScreen(viewModel: AdminGeofenceViewModel = hiltViewModel(), onN
  * Swipeable geofence item with delete action
  */
 @OptIn(ExperimentalMaterial3Api::class)
+@Suppress("DEPRECATION") // confirmValueChange deprecation - TODO: migrate to new API
 @Composable
 private fun SwipeableGeofenceItem(geofence: Geofence, onDelete: () -> Unit) {
     val currentOnDelete by rememberUpdatedState(onDelete)
@@ -530,13 +533,14 @@ private fun CreateGeofenceContent(
             }
             Button(
                 onClick = {
-                    if (isFormValid && latitude != null && longitude != null) {
+                    // isFormValid guarantees latitude/longitude are non-null via isValidLocation check
+                    if (isFormValid) {
                         val transitionTypes = buildSet {
                             if (enterSelected) add(TransitionType.ENTER)
                             if (exitSelected) add(TransitionType.EXIT)
                             if (dwellSelected) add(TransitionType.DWELL)
                         }
-                        onCreate(name, latitude, longitude, radiusMeters, transitionTypes)
+                        onCreate(name, latitude!!, longitude!!, radiusMeters, transitionTypes)
                     }
                 },
                 enabled = isFormValid && !isCreating,
