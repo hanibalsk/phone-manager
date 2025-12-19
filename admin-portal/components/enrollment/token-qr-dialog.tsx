@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { EnrollmentToken } from "@/types";
 import { Button } from "@/components/ui/button";
 import { X, Copy, Download, Check, QrCode, AlertTriangle, RefreshCw } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 interface TokenQrDialogProps {
   token: EnrollmentToken;
@@ -27,7 +28,7 @@ export function TokenQrDialog({ token, onClose }: TokenQrDialogProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy:", err);
+      logger.error("Failed to copy enrollment URL to clipboard", err);
     }
   };
 

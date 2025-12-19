@@ -43,12 +43,24 @@ android {
     namespace = "three.two.bit.phonemanager"
     compileSdk = 36
 
-    signingConfigs {
-        create("release") {
-            storeFile = rootProject.file("release-keystore.jks")
-            storePassword = getLocalProperty("RELEASE_STORE_PASSWORD", "phonemanager123")
-            keyAlias = getLocalProperty("RELEASE_KEY_ALIAS", "phonemanager")
-            keyPassword = getLocalProperty("RELEASE_KEY_PASSWORD", "phonemanager123")
+    // Security: Release signing config requires proper credentials
+    // For debug builds, Android Studio uses the default debug keystore
+    // For release builds, credentials must be set in local.properties or CI environment
+    val releaseStorePassword = getLocalProperty("RELEASE_STORE_PASSWORD")
+    val releaseKeyAlias = getLocalProperty("RELEASE_KEY_ALIAS")
+    val releaseKeyPassword = getLocalProperty("RELEASE_KEY_PASSWORD")
+    val hasReleaseConfig = releaseStorePassword.isNotBlank() &&
+        releaseKeyAlias.isNotBlank() &&
+        releaseKeyPassword.isNotBlank()
+
+    if (hasReleaseConfig) {
+        signingConfigs {
+            create("release") {
+                storeFile = rootProject.file("release-keystore.jks")
+                storePassword = releaseStorePassword
+                keyAlias = releaseKeyAlias
+                keyPassword = releaseKeyPassword
+            }
         }
     }
 
@@ -110,7 +122,10 @@ android {
         }
         release {
             isMinifyEnabled = true
-            signingConfig = signingConfigs.getByName("release")
+            // Only apply release signing config if credentials are configured
+            if (hasReleaseConfig) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",

@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import Link from "next/link";
+import { logger } from "@/lib/logger";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -20,8 +21,8 @@ interface ErrorProps {
 
 export default function Error({ error, reset }: ErrorProps) {
   useEffect(() => {
-    // Log error to monitoring service (e.g., Sentry)
-    console.error("Application error:", error);
+    // Log error to monitoring service
+    logger.error("Application error", error, { digest: error.digest });
   }, [error]);
 
   return (

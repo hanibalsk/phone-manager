@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import three.two.bit.phonemanager.BuildConfig
 import three.two.bit.phonemanager.data.database.AppDatabase
 import three.two.bit.phonemanager.data.database.GeofenceDao
 import three.two.bit.phonemanager.data.database.GeofenceEventDao
@@ -36,22 +37,31 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase = Room.databaseBuilder(
-        context,
-        AppDatabase::class.java,
-        AppDatabase.DATABASE_NAME,
-    )
-        .addMigrations(
-            AppDatabase.MIGRATION_2_3,
-            AppDatabase.MIGRATION_3_4,
-            AppDatabase.MIGRATION_4_5,
-            AppDatabase.MIGRATION_5_6,
-            AppDatabase.MIGRATION_6_7,
-            AppDatabase.MIGRATION_7_8,
-            AppDatabase.MIGRATION_8_9,
+    fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
+        val builder = Room.databaseBuilder(
+            context,
+            AppDatabase::class.java,
+            AppDatabase.DATABASE_NAME,
         )
-        .fallbackToDestructiveMigration(dropAllTables = true)
-        .build()
+            .addMigrations(
+                AppDatabase.MIGRATION_2_3,
+                AppDatabase.MIGRATION_3_4,
+                AppDatabase.MIGRATION_4_5,
+                AppDatabase.MIGRATION_5_6,
+                AppDatabase.MIGRATION_6_7,
+                AppDatabase.MIGRATION_7_8,
+                AppDatabase.MIGRATION_8_9,
+            )
+
+        // Only allow destructive migration fallback in debug builds
+        // In production, migration failures should be handled gracefully
+        // to prevent user data loss
+        if (BuildConfig.DEBUG) {
+            builder.fallbackToDestructiveMigration(dropAllTables = true)
+        }
+
+        return builder.build()
+    }
 
     @Provides
     @Singleton

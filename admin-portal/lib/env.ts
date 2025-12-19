@@ -13,6 +13,9 @@ function validateEnv() {
       .map((issue) => `  - ${issue.path.map(String).join(".")}: ${issue.message}`)
       .join("\n");
 
+    // Note: We use console.error here intentionally because logger depends on env
+    // and this runs during module initialization before logger can be used
+    // eslint-disable-next-line no-console
     console.error("Environment validation failed:\n" + formattedErrors);
     throw new Error("Invalid environment configuration");
   }
