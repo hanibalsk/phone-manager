@@ -13,6 +13,7 @@ import kotlinx.coroutines.launch
 import three.two.bit.phonemanager.data.repository.GroupRepository
 import three.two.bit.phonemanager.domain.model.Group
 import three.two.bit.phonemanager.network.ConnectivityMonitor
+import three.two.bit.phonemanager.util.ValidationConstants
 import timber.log.Timber
 import javax.inject.Inject
 
@@ -121,15 +122,19 @@ class GroupMigrationViewModel @Inject constructor(
     }
 
     /**
-     * Validate group name (AC 2: 3-50 chars, alphanumeric and spaces)
+     * Validate group name (AC 2: 3-50 chars, letters, numbers and spaces)
+     *
+     * Supports Unicode letters for international names (e.g., "Семья Иванова", "田中家族").
+     * Uses \\p{L} for Unicode letters and \\p{N} for Unicode numbers.
      */
     private fun validateGroupName(name: String): Boolean {
         val trimmedName = name.trim()
 
         _nameError.value = when {
-            trimmedName.length < 3 -> NameValidationError.TooShort
-            trimmedName.length > 50 -> NameValidationError.TooLong
-            !trimmedName.matches(Regex("^[a-zA-Z0-9 ]+$")) -> NameValidationError.InvalidCharacters
+            trimmedName.length < ValidationConstants.MIN_GROUP_NAME_LENGTH -> NameValidationError.TooShort
+            trimmedName.length > ValidationConstants.MAX_GROUP_NAME_LENGTH -> NameValidationError.TooLong
+            // Allow Unicode letters (\p{L}), Unicode numbers (\p{N}), and spaces
+            !trimmedName.matches(Regex("^[\\p{L}\\p{N} ]+$")) -> NameValidationError.InvalidCharacters
             else -> null
         }
 
@@ -210,25 +215,52 @@ class GroupMigrationViewModel @Inject constructor(
 
     /**
      * Story UGM-4.4 AC 1, 5: Convert exception to error type for UI string resolution
+     *
+     * Parses HTTP status codes and error messages to determine the appropriate error type.
+     * Uses regex patterns for reliable status code extraction.
      */
     private fun getErrorType(exception: Throwable): MigrationErrorType {
         val message = exception.message ?: ""
+
+        // Try to extract HTTP status code using regex pattern (e.g., "HTTP 401", "status: 404", "code 500")
+        val statusCodePattern = Regex("""(?:HTTP|status|code)[:\s]*(\d{3})""", RegexOption.IGNORE_CASE)
+        val statusCodeMatch = statusCodePattern.find(message)
+        val statusCode = statusCodeMatch?.groupValues?.getOrNull(1)?.toIntOrNull()
+
+        // Also check for standalone 3-digit codes that look like HTTP status codes
+        val standaloneCodePattern = Regex("""\b([45]\d{2})\b""")
+        val standaloneCode = if (statusCode == null) {
+            standaloneCodePattern.find(message)?.groupValues?.getOrNull(1)?.toIntOrNull()
+        } else null
+
+        val httpCode = statusCode ?: standaloneCode
+
         return when {
-            message.contains("401") || message.contains("unauthorized", ignoreCase = true) ->
-                MigrationErrorType.Unauthorized
-            message.contains("403") || message.contains("forbidden", ignoreCase = true) ->
-                MigrationErrorType.Forbidden
-            message.contains("404") || message.contains("not found", ignoreCase = true) ->
-                MigrationErrorType.NotFound
-            message.contains("409") || message.contains("conflict", ignoreCase = true) ->
-                MigrationErrorType.Conflict
+            // Check HTTP status codes first (most reliable)
+            httpCode == 401 -> MigrationErrorType.Unauthorized
+            httpCode == 403 -> MigrationErrorType.Forbidden
+            httpCode == 404 -> MigrationErrorType.NotFound
+            httpCode == 409 -> MigrationErrorType.Conflict
+            httpCode != null && httpCode in 500..599 -> MigrationErrorType.Server
+
+            // Fall back to keyword matching for non-HTTP errors
+            message.contains("unauthorized", ignoreCase = true) -> MigrationErrorType.Unauthorized
+            message.contains("forbidden", ignoreCase = true) -> MigrationErrorType.Forbidden
+            message.contains("not found", ignoreCase = true) -> MigrationErrorType.NotFound
+            message.contains("conflict", ignoreCase = true) ||
+                message.contains("already exists", ignoreCase = true) -> MigrationErrorType.Conflict
+
+            // Network-related errors
             message.contains("network", ignoreCase = true) ||
                 message.contains("connection", ignoreCase = true) ||
                 message.contains("timeout", ignoreCase = true) ||
-                message.contains("unable to resolve", ignoreCase = true) ->
+                message.contains("unable to resolve", ignoreCase = true) ||
+                message.contains("no internet", ignoreCase = true) ||
+                message.contains("ConnectException", ignoreCase = true) ||
+                message.contains("SocketException", ignoreCase = true) ||
+                message.contains("UnknownHostException", ignoreCase = true) ->
                 MigrationErrorType.Network
-            message.contains("5") && message.contains("00") ->
-                MigrationErrorType.Server
+
             else -> MigrationErrorType.Generic
         }
     }

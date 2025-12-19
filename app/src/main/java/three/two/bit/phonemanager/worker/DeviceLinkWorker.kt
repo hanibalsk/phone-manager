@@ -24,6 +24,7 @@ import three.two.bit.phonemanager.data.database.PendingDeviceLinkDao
 import three.two.bit.phonemanager.data.model.PendingDeviceLinkEntity
 import three.two.bit.phonemanager.network.DeviceApiService
 import three.two.bit.phonemanager.security.SecureStorage
+import three.two.bit.phonemanager.util.ValidationConstants
 import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
@@ -49,7 +50,6 @@ class DeviceLinkWorker @AssistedInject constructor(
 
     companion object {
         const val WORK_NAME = "device_link_work"
-        private const val MAX_RETRIES = 3
         private const val NOTIFICATION_CHANNEL_ID = "device_link_channel"
         private const val NOTIFICATION_ID = 1002
 
@@ -101,7 +101,7 @@ class DeviceLinkWorker @AssistedInject constructor(
         }
 
         // Check if we've exceeded max retries (AC 4: NFR-R2)
-        if (pendingLink.retryCount >= MAX_RETRIES) {
+        if (pendingLink.retryCount >= ValidationConstants.MAX_DEVICE_LINK_RETRIES) {
             Timber.w("Device link exceeded max retries: ${pendingLink.deviceId}")
             showRetryExhaustedNotification()
             pendingDeviceLinkDao.delete(pendingLink.deviceId)

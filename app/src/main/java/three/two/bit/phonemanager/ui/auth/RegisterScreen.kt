@@ -454,9 +454,11 @@ fun RegisterScreen(
             },
             onContactSupport = {
                 // AC 4: Open support email
+                val supportEmail = context.getString(R.string.support_email)
+                val emailSubject = context.getString(R.string.support_email_subject_device_conflict)
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:support@phonemanager.app")
-                    putExtra(Intent.EXTRA_SUBJECT, "Device Link Conflict")
+                    data = Uri.parse("mailto:$supportEmail")
+                    putExtra(Intent.EXTRA_SUBJECT, emailSubject)
                 }
                 context.startActivity(intent)
             },
@@ -502,16 +504,38 @@ enum class PasswordStrengthLevel {
 }
 
 /**
- * Calculate password strength level based on security requirements
+ * Calculate password strength level based on security requirements.
+ *
+ * Strength levels:
+ * - WEAK: Less than 8 characters, or missing basic requirements
+ * - MEDIUM: 8-11 characters with uppercase and digit, OR 12+ chars with some requirements
+ * - STRONG: 12+ characters with uppercase, digit, and special character
  */
-fun calculatePasswordStrengthLevel(password: String): PasswordStrengthLevel = when {
-    password.length < 8 -> PasswordStrengthLevel.WEAK
-    password.length < 12 && password.any {
-        it.isUpperCase()
-    } && password.any { it.isDigit() } -> PasswordStrengthLevel.MEDIUM
-    password.length >= 12 && password.any { it.isUpperCase() } && password.any { it.isDigit() } &&
-        password.any { !it.isLetterOrDigit() } -> PasswordStrengthLevel.STRONG
-    else -> PasswordStrengthLevel.WEAK
+fun calculatePasswordStrengthLevel(password: String): PasswordStrengthLevel {
+    val hasUpperCase = password.any { it.isUpperCase() }
+    val hasDigit = password.any { it.isDigit() }
+    val hasSpecialChar = password.any { !it.isLetterOrDigit() }
+    val length = password.length
+
+    return when {
+        // Too short - always weak
+        length < 8 -> PasswordStrengthLevel.WEAK
+
+        // Strong: 12+ chars with all requirements
+        length >= 12 && hasUpperCase && hasDigit && hasSpecialChar -> PasswordStrengthLevel.STRONG
+
+        // Medium: 8-11 chars with uppercase and digit
+        length in 8..11 && hasUpperCase && hasDigit -> PasswordStrengthLevel.MEDIUM
+
+        // Medium: 12+ chars with at least uppercase and digit (missing special char)
+        length >= 12 && hasUpperCase && hasDigit -> PasswordStrengthLevel.MEDIUM
+
+        // Medium: 12+ chars with at least uppercase and special char (missing digit)
+        length >= 12 && hasUpperCase && hasSpecialChar -> PasswordStrengthLevel.MEDIUM
+
+        // Anything else is weak
+        else -> PasswordStrengthLevel.WEAK
+    }
 }
 
 /**

@@ -420,9 +420,11 @@ fun LoginScreen(
             },
             onContactSupport = {
                 // AC 4: Open support email
+                val supportEmail = context.getString(R.string.support_email)
+                val emailSubject = context.getString(R.string.support_email_subject_device_conflict)
                 val intent = Intent(Intent.ACTION_SENDTO).apply {
-                    data = Uri.parse("mailto:support@phonemanager.app")
-                    putExtra(Intent.EXTRA_SUBJECT, "Device Link Conflict")
+                    data = Uri.parse("mailto:$supportEmail")
+                    putExtra(Intent.EXTRA_SUBJECT, emailSubject)
                 }
                 context.startActivity(intent)
             },

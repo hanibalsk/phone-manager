@@ -726,6 +726,10 @@
     <string name="device_link_conflict_contact_support">Contact Support</string>
     <string name="device_link_conflict_logout">Log Out Instead</string>
 
+    <!-- Support -->
+    <string name="support_email">support@phonemanager.app</string>
+    <string name="support_email_subject_device_conflict">Device Link Conflict</string>
+
     <!-- Story UGM-1.3: Device Link Info -->
     <string name="device_link_status_linked">Device Linked</string>
     <string name="device_link_status_not_linked">Device Not Linked</string>

@@ -209,7 +209,7 @@ fun GroupMigrationScreen(
             // Header icon
             Icon(
                 imageVector = Icons.Default.GroupWork,
-                contentDescription = null,
+                contentDescription = stringResource(R.string.migration_screen_header),
                 modifier = Modifier.size(64.dp),
                 tint = MaterialTheme.colorScheme.primary,
             )
@@ -250,7 +250,7 @@ fun GroupMigrationScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Devices,
-                        contentDescription = null,
+                        contentDescription = stringResource(R.string.migration_current_devices),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Spacer(modifier = Modifier.size(12.dp))

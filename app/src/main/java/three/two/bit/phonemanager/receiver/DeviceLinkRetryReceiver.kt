@@ -10,7 +10,7 @@ import three.two.bit.phonemanager.security.SecureStorage
 import three.two.bit.phonemanager.worker.DeviceLinkWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -34,8 +34,6 @@ class DeviceLinkRetryReceiver : BroadcastReceiver() {
     @Inject
     lateinit var secureStorage: SecureStorage
 
-    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
     companion object {
         const val ACTION_RETRY_DEVICE_LINK = "three.two.bit.phonemanager.action.RETRY_DEVICE_LINK"
     }
@@ -48,6 +46,9 @@ class DeviceLinkRetryReceiver : BroadcastReceiver() {
         Timber.i("DeviceLinkRetryReceiver: Manual retry requested")
 
         val pendingResult = goAsync()
+
+        // Create a scoped coroutine that will be cancelled when work is done
+        val scope = CoroutineScope(Dispatchers.IO)
 
         scope.launch {
             try {
@@ -75,6 +76,7 @@ class DeviceLinkRetryReceiver : BroadcastReceiver() {
                 Timber.e(e, "Error in DeviceLinkRetryReceiver")
             } finally {
                 pendingResult.finish()
+                scope.cancel() // Clean up the scope to prevent memory leaks
             }
         }
     }
